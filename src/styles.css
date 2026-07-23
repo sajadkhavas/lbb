@@ -15,8 +15,9 @@
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --font-display: "Bebas Neue", "Arial Black", sans-serif;
-  --font-body: "Inter", "Helvetica Neue", sans-serif;
+  --font-display: "Space Grotesk", "Bebas Neue", "Arial Black", sans-serif;
+  --font-body: "Vazirmatn", "Inter", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -27,23 +28,24 @@
   --lbb-black: #0A0A0A;
   --lbb-white: #FFFFFF;
   --lbb-glass: rgba(10, 10, 10, 0.7);
-  --background: #0A0A0A;
-  --foreground: #FFFFFF;
-  --border: rgba(255, 255, 255, 0.08);
-  --muted: rgba(255, 255, 255, 0.04);
-  --muted-foreground: rgba(255, 255, 255, 0.5);
+  --background: #FFFFFF;
+  --foreground: #0A0A0A;
+  --border: rgba(0, 0, 0, 0.08);
+  --muted: rgba(0, 0, 0, 0.04);
+  --muted-foreground: rgba(0, 0, 0, 0.5);
   --transition: 200ms ease;
 }
 
 @layer base {
-  * {
-    border-color: var(--border);
-  }
   html, body {
-    background-color: var(--lbb-black);
-    color: var(--lbb-white);
+    background-color: #FFFFFF;
+    color: #0A0A0A;
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+  }
+  body[data-theme="dark"] {
+    background-color: var(--lbb-black);
+    color: var(--lbb-white);
   }
   h1, h2, h3, .font-display {
     font-family: var(--font-display);
