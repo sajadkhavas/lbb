@@ -124,7 +124,7 @@ function CategoryPage() {
             <div className="py-16 text-center text-gray-500">فعلاً محصولی در این دسته موجود نیست.</div>
           ) : (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
-              {items.map((p) => <ProductCard key={p.id} p={p} />)}
+              {items.map((p: import("@/lib/products").Product) => <ProductCard key={p.id} p={p} />)}
             </div>
           )}
         </section>

@@ -65,7 +65,7 @@ function ProductCard({ p }: { p: Product }) {
             {p.category}
           </span>
         </div>
-        <span className="shrink-0 text-xs font-medium text-[var(--lbb-red)]">{p.price}</span>
+        <span className="shrink-0 text-xs font-medium text-[var(--lbb-red)]">{p.price.toLocaleString("fa-IR")} تومان</span>
       </div>
     </div>
   );

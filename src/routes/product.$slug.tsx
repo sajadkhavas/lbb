@@ -85,7 +85,7 @@ export const Route = createFileRoute("/product/$slug")({
 
 function ProductPage() {
   const { product: p, related } = Route.useLoaderData();
-  const cat = CATEGORIES[p.category];
+    const cat = CATEGORIES[p.category as keyof typeof CATEGORIES];
   const [color, setColor] = useState(p.colors[0]);
   const [size, setSize] = useState(p.sizes[0]);
   const [qty, setQty] = useState(1);
@@ -197,7 +197,7 @@ function ProductPage() {
                 رنگ: <span className="font-normal text-gray-600">{color}</span>
               </p>
               <div className="flex gap-2">
-                {p.colors.map((c) => (
+                {p.colors.map((c: string) => (
                   <button
                     key={c}
                     aria-label={c}
@@ -223,7 +223,7 @@ function ProductPage() {
                 </a>
               </div>
               <div className="flex flex-wrap gap-2">
-                {p.sizes.map((s) => (
+                {p.sizes.map((s: string) => (
                   <button
                     key={s}
                     onClick={() => setSize(s)}
@@ -325,7 +325,7 @@ function ProductPage() {
             <div className="mx-auto max-w-[1280px] px-4 md:px-8">
               <h3 className="mb-4 text-lg font-semibold">محصولات مشابه</h3>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-                {related.map((r) => <ProductCard key={r.id} p={r} />)}
+                {related.map((r: import("@/lib/products").Product) => <ProductCard key={r.id} p={r} />)}
               </div>
             </div>
           </section>
