@@ -15,17 +15,40 @@ import { CartProvider } from "@/lib/cart";
 
 function NotFoundComponent() {
   return (
-    <div dir="rtl" className="flex min-h-screen items-center justify-center bg-white px-4 text-black" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
-      <div className="max-w-md text-center">
-        <h1 className="font-display text-7xl text-[var(--lbb-red)]">۴۰۴</h1>
-        <p className="mt-2 text-sm text-black/60">صفحه‌ای که دنبالش هستی وجود نداره.</p>
-        <Link to="/" className="mt-6 inline-block rounded-md bg-[var(--lbb-red)] px-6 py-2 text-xs font-bold text-white">
+    <div
+      dir="rtl"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0A0A0A] px-4 text-white"
+      style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 grid place-items-center font-black"
+        style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: "30vw",
+          color: "rgba(255,255,255,0.04)",
+        }}
+      >
+        404
+      </span>
+      <div className="relative z-10 max-w-md text-center">
+        <h1 className="text-[24px] font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          این صفحه وجود ندارد
+        </h1>
+        <p className="mt-2 text-[13px] text-white/50">شاید دنبال یکی از این‌ها بودید:</p>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <Link to="/shop" className="rounded-full border border-white/25 px-4 py-2 text-[12px]">فروشگاه</Link>
+          <Link to="/$category" params={{ category: "hoodies" }} className="rounded-full border border-white/25 px-4 py-2 text-[12px]">هودی</Link>
+          <Link to="/contact" className="rounded-full border border-white/25 px-4 py-2 text-[12px]">تماس</Link>
+        </div>
+        <Link to="/" className="mt-6 inline-block rounded-md bg-[var(--lbb-red)] px-6 py-3 text-xs font-bold text-white">
           بازگشت به خانه
         </Link>
       </div>
     </div>
   );
 }
+
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
