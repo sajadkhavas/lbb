@@ -2,6 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /cart
 Disallow: /checkout
+Disallow: /order-confirmation
+Disallow: /search
+Disallow: /wishlist
 Disallow: /admin
 
 Sitemap: /sitemap.xml

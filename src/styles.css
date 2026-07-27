@@ -78,3 +78,21 @@
 @utility scroll-line {
   animation: lbb-pulse 1.5s ease-in-out infinite;
 }
+
+@keyframes lbb-check-draw {
+  from { stroke-dashoffset: 60; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.check-draw {
+  stroke-dasharray: 60;
+  animation: lbb-check-draw 0.8s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
