@@ -12,6 +12,10 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart";
+import { WishlistProvider } from "@/lib/wishlist";
+import { CartDrawer } from "@/components/lbb/CartDrawer";
+import { Toaster } from "@/components/ui/sonner";
+
 
 function NotFoundComponent() {
   return (
@@ -120,9 +124,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <Outlet />
-      </CartProvider>
+      <WishlistProvider>
+        <CartProvider>
+          <Outlet />
+          <CartDrawer />
+          <Toaster position="bottom-left" dir="rtl" richColors closeButton />
+        </CartProvider>
+      </WishlistProvider>
     </QueryClientProvider>
   );
 }
+
