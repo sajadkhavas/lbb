@@ -66,10 +66,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const subtotal = lines.reduce((a, b) => a + b.price * b.qty, 0);
 
   return (
-    <Ctx.Provider value={{ lines, count, add, remove, setQty, clear, subtotal }}>
+    <Ctx.Provider
+      value={{
+        lines,
+        count,
+        add,
+        remove,
+        setQty,
+        clear,
+        subtotal,
+        drawerOpen,
+        openDrawer: () => setDrawerOpen(true),
+        closeDrawer: () => setDrawerOpen(false),
+      }}
+    >
       {children}
     </Ctx.Provider>
   );
+
 }
 
 export function useCart() {
