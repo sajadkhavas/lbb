@@ -17,6 +17,9 @@ type CartCtx = {
   setQty: (idx: number, qty: number) => void;
   clear: () => void;
   subtotal: number;
+  drawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
 };
 
 const Ctx = createContext<CartCtx | null>(null);
@@ -25,6 +28,8 @@ const KEY = "lbb-cart-v1";
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
 
   useEffect(() => {
     try {
