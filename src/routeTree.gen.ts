@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as OrderConfirmationRouteImport } from './routes/order-confirmation'
+import { Route as LookbookRouteImport } from './routes/lookbook'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -52,6 +53,11 @@ const SearchRoute = SearchRouteImport.update({
 const OrderConfirmationRoute = OrderConfirmationRouteImport.update({
   id: '/order-confirmation',
   path: '/order-confirmation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LookbookRoute = LookbookRouteImport.update({
+  id: '/lookbook',
+  path: '/lookbook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/lookbook': typeof LookbookRoute
   '/order-confirmation': typeof OrderConfirmationRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/lookbook': typeof LookbookRoute
   '/order-confirmation': typeof OrderConfirmationRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/lookbook': typeof LookbookRoute
   '/order-confirmation': typeof OrderConfirmationRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/faq'
+    | '/lookbook'
     | '/order-confirmation'
     | '/search'
     | '/shop'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/faq'
+    | '/lookbook'
     | '/order-confirmation'
     | '/search'
     | '/shop'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/faq'
+    | '/lookbook'
     | '/order-confirmation'
     | '/search'
     | '/shop'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
+  LookbookRoute: typeof LookbookRoute
   OrderConfirmationRoute: typeof OrderConfirmationRoute
   SearchRoute: typeof SearchRoute
   ShopRoute: typeof ShopRoute
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/order-confirmation'
       fullPath: '/order-confirmation'
       preLoaderRoute: typeof OrderConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lookbook': {
+      id: '/lookbook'
+      path: '/lookbook'
+      fullPath: '/lookbook'
+      preLoaderRoute: typeof LookbookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
+  LookbookRoute: LookbookRoute,
   OrderConfirmationRoute: OrderConfirmationRoute,
   SearchRoute: SearchRoute,
   ShopRoute: ShopRoute,
@@ -334,13 +355,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
