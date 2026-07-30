@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Search as SearchIcon, X } from "lucide-react";
+import { Search as SearchIcon, X, Clock } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { products } from "@/lib/products";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
+import { addRecentSearch, clearRecentSearches, getRecentSearches, removeRecentSearch } from "@/lib/recent-searches";
 
 type Search = { q?: string };
 
@@ -20,6 +21,22 @@ const match = (q: string) => {
       .includes(t),
   );
 };
+
+function highlight(text: string, query: string) {
+  const q = query.trim();
+  if (!q) return text;
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="rounded bg-[var(--lbb-red)]/15 text-[var(--lbb-red)]">
+        {text.slice(idx, idx + q.length)}
+      </mark>
+      {text.slice(idx + q.length)}
+    </>
+  );
+}
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -48,8 +65,10 @@ function SearchPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate();
   const [value, setValue] = useState(q ?? "");
+  const [recent, setRecent] = useState<string[]>([]);
 
   useEffect(() => setValue(q ?? ""), [q]);
+  useEffect(() => setRecent(getRecentSearches()), []);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -59,6 +78,13 @@ function SearchPage() {
     }, 300);
     return () => clearTimeout(id);
   }, [value, q, navigate]);
+
+  useEffect(() => {
+    if (q && q.trim()) {
+      addRecentSearch(q);
+      setRecent(getRecentSearches());
+    }
+  }, [q]);
 
   const results = useMemo(() => match(q ?? ""), [q]);
 
@@ -92,6 +118,65 @@ function SearchPage() {
             )}
           </div>
 
+          {!q && recent.length > 0 && (
+            <div className="mt-6">
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-[13px] font-semibold text-[#666]">
+                  <Clock size={14} /> جستجوهای اخیر
+                </p>
+                <button
+                  onClick={() => {
+                    clearRecentSearches();
+                    setRecent([]);
+                  }}
+                  className="text-[12px] text-[var(--lbb-red)] hover:underline"
+                >
+                  پاک کردن همه
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {recent.map((r) => (
+                  <span
+                    key={r}
+                    className="flex items-center gap-1.5 rounded-full border border-black/15 bg-gray-50 px-3 py-1.5 text-[12px] text-gray-700"
+                  >
+                    <button onClick={() => setValue(r)} className="hover:text-[var(--lbb-red)]">
+                      {r}
+                    </button>
+                    <button
+                      aria-label={`حذف ${r}`}
+                      onClick={() => {
+                        removeRecentSearch(r);
+                        setRecent(getRecentSearches());
+                      }}
+                      className="text-black/30 hover:text-black/60"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!q && (
+            <div className="mt-8">
+              <p className="text-[13px] font-semibold text-[#666]">دسته‌بندی‌های پرطرفدار</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {CATEGORY_SLUGS.map((c) => (
+                  <Link
+                    key={c}
+                    to="/$category"
+                    params={{ category: c }}
+                    className="rounded-full border border-black/15 px-4 py-2 text-[12px] hover:border-[var(--lbb-red)] hover:text-[var(--lbb-red)]"
+                  >
+                    {CATEGORIES[c].nameFa}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {q && (
             <p className="mt-5 text-[13px] text-[#666]">
               نتایج برای «{q}»: {results.length.toLocaleString("fa-IR")} محصول
@@ -115,13 +200,18 @@ function SearchPage() {
                 ))}
               </div>
             </div>
-          ) : (
+          ) : q && results.length > 0 ? (
             <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
               {results.map((p) => (
-                <ProductCard key={p.id} p={p} />
+                <div key={p.id}>
+                  <ProductCard p={p} />
+                  <p className="mt-2 line-clamp-1 px-1 text-[11px] text-gray-500">
+                    {highlight(p.name, q)}
+                  </p>
+                </div>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       </main>
       <Footer theme="light" />

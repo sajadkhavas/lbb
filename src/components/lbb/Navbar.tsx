@@ -38,7 +38,7 @@ function NavItem({ l, className, onClick }: { l: NavLink; className?: string; on
   );
 }
 
-export function Navbar({ theme = "dark" }: { theme?: "dark" | "light" }) {
+export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "light"; offsetTop?: number }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -101,7 +101,8 @@ export function Navbar({ theme = "dark" }: { theme?: "dark" | "light" }) {
         role="navigation"
         aria-label="ناوبری اصلی"
         dir="rtl"
-        className={`fixed inset-x-0 top-0 z-[100] transition-all duration-300 ${barBg}`}
+        className={`fixed inset-x-0 z-[100] transition-all duration-300 ${barBg}`}
+        style={{ top: offsetTop }}
       >
         <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 md:px-8">
           <Link to="/" className="flex shrink-0 items-center gap-1.5" aria-label="LBB خانه">
