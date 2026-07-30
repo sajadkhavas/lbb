@@ -5,6 +5,7 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
+import { colorName } from "@/lib/color-names";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { Gallery } from "@/components/lbb/product/Gallery";
 import { StickyBuyBar } from "@/components/lbb/product/StickyBuyBar";
