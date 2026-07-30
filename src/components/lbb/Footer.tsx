@@ -12,6 +12,12 @@ const info = [
   { l: "تماس", h: "/contact" },
   { l: "راهنمای سایز", h: "/size-guide" },
   { l: "سوالات متداول", h: "/faq" },
+  { l: "کالکشن‌ها", h: "/collections" },
+  { l: "ژورنال", h: "/journal" },
+  { l: "پیگیری سفارش", h: "/track-order" },
+  { l: "ارسال و مرجوعی", h: "/shipping-returns" },
+  { l: "قوانین و مقررات", h: "/terms" },
+  { l: "حریم خصوصی", h: "/privacy" },
 ];
 
 export function Footer({ theme = "dark" }: { theme?: "dark" | "light" }) {
