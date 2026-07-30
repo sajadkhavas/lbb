@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Navbar } from "@/components/lbb/Navbar";
+import { AnnouncementBar, ANNOUNCEMENT_HEIGHT } from "@/components/lbb/AnnouncementBar";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { HeroSplit } from "@/components/lbb/home/HeroSplit";
+import { NewDropCountdown } from "@/components/lbb/home/NewDropCountdown";
+import { ShopTheLook } from "@/components/lbb/home/ShopTheLook";
+import { EditorialSplit } from "@/components/lbb/home/EditorialSplit";
+import { Testimonials } from "@/components/lbb/home/Testimonials";
+import { Newsletter } from "@/components/lbb/home/Newsletter";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { CategoryTakeover } from "@/components/lbb/home/CategoryTakeover";
 import { FeaturedPinned } from "@/components/lbb/home/FeaturedPinned";
@@ -82,6 +89,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const [barVisible, setBarVisible] = useState(true);
+  const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
+
   return (
     <SmoothScroll>
       <a
@@ -91,15 +101,25 @@ function Home() {
         رفتن به محتوای اصلی
       </a>
       <CustomCursor />
-      <Navbar theme="dark" />
-      <main id="main" className="bg-black text-white" style={{ paddingBottom: "80px" }}>
+      <AnnouncementBar onDismiss={() => setBarVisible(false)} />
+      <Navbar theme="dark" offsetTop={offsetTop} />
+      <main
+        id="main"
+        className="bg-black text-white transition-[padding] duration-300"
+        style={{ paddingBottom: "80px", paddingTop: offsetTop }}
+      >
         <HeroSplit />
         <TickerStrip />
         <CategoryTakeover />
+        <NewDropCountdown />
         <FeaturedPinned />
+        <ShopTheLook />
         <BrandStatement />
+        <EditorialSplit />
         <BestSellers />
+        <Testimonials />
         <TrustStrip />
+        <Newsletter />
         <InstagramStrip />
       </main>
       <Footer theme="dark" />

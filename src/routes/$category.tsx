@@ -1,23 +1,40 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
+import { PackageSearch } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
+import { ProductFilters } from "@/components/lbb/ProductFilters";
+import { ProductGridControls } from "@/components/lbb/ProductGridControls";
+import { Button } from "@/components/ui/button";
 import { CATEGORIES, CATEGORY_SLUGS, isValidCategory } from "@/lib/categories";
-import { productsByCategory } from "@/lib/products";
+import { productsByCategory, type Product } from "@/lib/products";
+import {
+  activeCount,
+  applyFilters,
+  parseFilters,
+  serializeFilters,
+  type Filters,
+} from "@/lib/product-filter";
+
+const PAGE_SIZE = 12;
 
 export const Route = createFileRoute("/$category")({
   beforeLoad: ({ params }) => {
     if (!isValidCategory(params.category)) throw notFound();
   },
+  validateSearch: (s: Record<string, unknown>): Filters => parseFilters(s),
   loader: ({ params }) => {
     const cat = CATEGORIES[params.category as keyof typeof CATEGORIES];
     return { cat, items: productsByCategory(cat.slug) };
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, match: m }) => {
     if (!loaderData) return { meta: [{ title: "پیدا نشد" }, { name: "robots", content: "noindex" }] };
     const { cat, items } = loaderData;
+    const filters = m.search as Filters;
+    const filtered = activeCount(filters) > 0;
     const breadcrumbLd = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -50,7 +67,7 @@ export const Route = createFileRoute("/$category")({
       meta: [
         { title: cat.metaTitle },
         { name: "description", content: cat.metaDesc },
-        { name: "robots", content: "index, follow" },
+        { name: "robots", content: filtered ? "noindex, follow" : "index, follow" },
         { property: "og:title", content: cat.metaTitle },
         { property: "og:description", content: cat.metaDesc },
         { property: "og:type", content: "website" },
@@ -69,6 +86,32 @@ export const Route = createFileRoute("/$category")({
 
 function CategoryPage() {
   const { cat, items } = Route.useLoaderData();
+  const filters = Route.useSearch();
+  const navigate = useNavigate({ from: "/$category" });
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
+  const setFilters = (f: Filters) => {
+    setVisible(PAGE_SIZE);
+    navigate({ search: serializeFilters(f), replace: true });
+  };
+
+  const colors = useMemo(() => Array.from(new Set<string>(items.flatMap((p: Product) => p.colors))), [items]);
+  const sizes = useMemo(() => Array.from(new Set<string>(items.flatMap((p: Product) => p.sizes))), [items]);
+  const priceCeil = useMemo(() => Math.max(1, ...items.map((p: Product) => p.price)), [items]);
+
+  const filtered = useMemo(() => applyFilters(items, filters), [items, filters]);
+  const shown = filtered.slice(0, visible);
+
+  const filterUi = (
+    <ProductFilters
+      filters={filters}
+      onChange={setFilters}
+      colors={colors}
+      sizes={sizes}
+      priceCeil={priceCeil}
+    />
+  );
+
   return (
     <>
       <Navbar theme="light" />
@@ -120,13 +163,52 @@ function CategoryPage() {
 
         {/* Grid */}
         <section className="mx-auto max-w-[1280px] px-4 pb-16 md:px-8">
-          {items.length === 0 ? (
-            <div className="py-16 text-center text-gray-500">فعلاً محصولی در این دسته موجود نیست.</div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
-              {items.map((p: import("@/lib/products").Product) => <ProductCard key={p.id} p={p} />)}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
+            <aside className="hidden lg:block">
+              <div className="sticky top-24">{filterUi}</div>
+            </aside>
+
+            <div>
+              <ProductGridControls
+                filters={filters}
+                onChange={setFilters}
+                resultCount={filtered.length}
+                filterSlot={filterUi}
+                lockedCategory
+              />
+
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 py-24 text-center">
+                  <PackageSearch size={48} className="text-black/15" />
+                  <p className="text-base font-semibold text-black">محصولی با این فیلترها پیدا نشد</p>
+                  <p className="text-sm text-gray-500">فیلترها را تغییر بده یا همه را پاک کن.</p>
+                  <Button
+                    onClick={() => setFilters({ ...filters, colors: [], sizes: [], max: 0, instock: false, sale: false })}
+                    className="mt-2 bg-[var(--lbb-red)] text-white hover:bg-[var(--lbb-red)]/90"
+                  >
+                    پاک کردن فیلترها
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+                    {shown.map((p) => <ProductCard key={p.id} p={p} />)}
+                  </div>
+                  {visible < filtered.length && (
+                    <div className="mt-8 flex justify-center">
+                      <Button
+                        variant="outline"
+                        onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                        className="h-11 rounded-lg border-black/15 px-8 text-sm font-semibold"
+                      >
+                        نمایش بیشتر
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-          )}
+          </div>
         </section>
 
         {/* Related categories */}
@@ -135,13 +217,14 @@ function CategoryPage() {
             <h3 className="mb-4 text-sm font-semibold">دسته‌بندی‌های مرتبط</h3>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {CATEGORY_SLUGS.filter((s) => s !== cat.slug).slice(0, 4).map((s) => (
-                <a
+                <Link
                   key={s}
-                  href={`/${s}`}
+                  to="/$category"
+                  params={{ category: s }}
                   className="grid h-24 place-items-center rounded-xl bg-gray-50 text-sm font-semibold hover:bg-gray-100"
                 >
                   {CATEGORIES[s].nameFa}
-                </a>
+                </Link>
               ))}
             </div>
           </div>

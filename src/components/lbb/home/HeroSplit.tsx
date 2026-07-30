@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
+import { heroMain } from "@/lib/product-images";
+import { MagneticButton } from "@/components/lbb/MagneticButton";
 
 const HERO_LINES = [
   { text: "استایل", size: "clamp(56px, 11vw, 150px)", weight: 900, color: "#FFFFFF", ls: "-0.04em" },
@@ -68,25 +70,13 @@ export function HeroSplit() {
         {/* Media panel (left in RTL flow = second) */}
         <div className="relative order-1 h-[50svh] w-full overflow-hidden bg-[#111111] md:order-2 md:h-auto md:min-h-[100svh] md:w-[45%]">
           <div className="hero-media absolute inset-0 overflow-hidden">
-            <div
-              className="hero-media-inner absolute grid place-items-center"
-              style={{
-                inset: "-10%",
-                background:
-                  "linear-gradient(160deg, #1a0a0a 0%, #2d0a0a 40%, #E8001D 100%)",
-              }}
-              aria-hidden="true"
-            >
-              <span
-                className="font-black"
-                style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: "clamp(72px, 12vw, 160px)",
-                  color: "rgba(255,255,255,0.07)",
-                }}
-              >
-                LBB
-              </span>
+            <div className="hero-media-inner absolute" style={{ inset: "-10%" }}>
+              <img
+                src={heroMain}
+                alt="مدل LBB با کالکشن جدید"
+                className="h-full w-full object-cover"
+                fetchPriority="high"
+              />
             </div>
           </div>
           <div
@@ -143,20 +133,18 @@ export function HeroSplit() {
           </p>
 
           <div className="hero-ctas mt-8 flex flex-wrap items-center gap-3">
-            <motion.a
+            <MagneticButton
               href="/shop"
-              whileHover={{ scale: 1.03, boxShadow: "0 8px 32px rgba(232,0,29,0.4)" }}
-              transition={{ type: "spring", stiffness: 320, damping: 22 }}
-              className="inline-flex h-[52px] items-center justify-center rounded-lg bg-[var(--lbb-red)] px-7 text-[13px] font-bold text-white"
+              className="inline-flex h-[52px] items-center justify-center rounded-lg bg-[var(--lbb-red)] px-7 text-[13px] font-bold text-white hover:brightness-110"
             >
-              خرید کنید
-            </motion.a>
-            <a
-              href="/about"
+              خرید کالکشن جدید
+            </MagneticButton>
+            <MagneticButton
+              href="/shop"
               className="inline-flex h-[52px] items-center justify-center rounded-lg border border-white/20 px-7 text-[13px] font-bold text-white transition-colors duration-200 hover:border-[var(--lbb-red)] hover:text-[var(--lbb-red)]"
             >
-              لوک‌بوک
-            </a>
+              مشاهده فروشگاه
+            </MagneticButton>
           </div>
 
           <div className="absolute bottom-8 left-8 hidden flex-col items-center gap-3 md:flex" aria-hidden="true">
