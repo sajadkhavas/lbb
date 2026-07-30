@@ -173,7 +173,7 @@ function ProductPage() {
                 <span className="text-gray-300">{"★".repeat(5 - Math.round(p.avgRating ?? avg))}</span>
               </span>
               <span>
-                {p.avgRating ?? avg} از ۵ — {p.reviewCount ?? count} نظر
+                {fa(p.avgRating ?? avg)} از ۵ — {fa(p.reviewCount ?? count)} نظر
               </span>
             </div>
 
@@ -196,7 +196,7 @@ function ProductPage() {
             {/* Colors */}
             <div>
               <p className="mb-2 text-sm font-semibold">
-                رنگ: <span className="font-normal text-gray-600">{color}</span>
+                رنگ: <span className="font-normal text-gray-600">{colorName(color)}</span>
               </p>
               <div className="flex gap-2">
                 {p.colors.map((c: string) => (
@@ -292,7 +292,7 @@ function ProductPage() {
                   ["desc", "توضیحات"],
                   ["care", "جنس و مراقبت"],
                   ["shipping", "ارسال و مرجوعی"],
-                  ["reviews", `نظرات (${p.reviewCount ?? count})`],
+                  ["reviews", `نظرات (${fa(p.reviewCount ?? count)})`],
                 ] as const
               ).map(([id, label]) => (
                 <button
@@ -360,3 +360,5 @@ function ProductPage() {
     </>
   );
 }
+
+const fa = (n: number | string) => String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);

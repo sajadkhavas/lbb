@@ -149,7 +149,7 @@ function CategoryPage() {
               </h1>
               <p className="text-base text-gray-600">{cat.heroTagline}</p>
               <p className="text-sm font-semibold text-[var(--lbb-red)]">
-                {items.length} محصول موجود
+                {items.length.toLocaleString("fa-IR")} محصول موجود
               </p>
             </div>
           </div>

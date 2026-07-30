@@ -114,7 +114,7 @@ function ShopPage() {
             <h1 className="text-3xl font-bold text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               فروشگاه
             </h1>
-            <p className="mt-2 text-sm text-gray-500">{products.length} محصول موجود</p>
+            <p className="mt-2 text-sm text-gray-500">{products.length.toLocaleString("fa-IR")} محصول موجود</p>
           </div>
           <div className="mx-auto flex max-w-[1280px] gap-1 overflow-x-auto px-4 md:px-8">
             <Link
