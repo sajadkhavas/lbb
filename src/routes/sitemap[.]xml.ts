@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { products } from "@/lib/products";
 import { CATEGORY_SLUGS } from "@/lib/categories";
+import { COLLECTIONS } from "@/lib/collections";
+import { JOURNAL_ARTICLES } from "@/lib/journal";
 
 const BASE_URL = "";
 
@@ -20,6 +22,14 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/contact", priority: "0.5" },
           { path: "/size-guide", priority: "0.5" },
           { path: "/faq", priority: "0.5" },
+          { path: "/collections", priority: "0.7", changefreq: "weekly" },
+          ...COLLECTIONS.map((c) => ({ path: `/collections/${c.slug}`, priority: "0.7" })),
+          { path: "/journal", priority: "0.6", changefreq: "weekly" },
+          ...JOURNAL_ARTICLES.map((a) => ({ path: `/journal/${a.slug}`, priority: "0.6" })),
+          { path: "/track-order", priority: "0.4" },
+          { path: "/shipping-returns", priority: "0.4" },
+          { path: "/terms", priority: "0.3" },
+          { path: "/privacy", priority: "0.3" },
         ];
         const urls = entries
           .map((e) => `  <url>\n    <loc>${BASE_URL}${e.path}</loc>${e.changefreq ? `\n    <changefreq>${e.changefreq}</changefreq>` : ""}\n    <priority>${e.priority}</priority>\n  </url>`)
