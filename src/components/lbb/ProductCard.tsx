@@ -6,11 +6,13 @@ import { CATEGORIES } from "@/lib/categories";
 import { productImage, productHoverImage } from "@/lib/product-images";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
+import { useQuickView } from "@/lib/quickview";
 
 export function ProductCard({ p, priority = false }: { p: Product; priority?: boolean }) {
   const cat = CATEGORIES[p.category];
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
+  const { open: openQuickView } = useQuickView();
   const liked = has(p.slug);
   const discount =
     p.originalPrice && p.originalPrice > p.price
@@ -62,7 +64,12 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
         <Link
           to="/product/$slug"
           params={{ slug: p.slug }}
-          aria-label={p.name}
+          aria-label={`نمایش سریع ${p.name}`}
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+            e.preventDefault();
+            openQuickView(p);
+          }}
           className="absolute inset-0 z-10"
         />
 
@@ -107,7 +114,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
           <button
             type="button"
             onClick={quickAdd}
-            className="absolute inset-x-3 bottom-3 z-20 flex h-11 translate-y-3 items-center justify-center gap-1.5 rounded-lg bg-white/95 text-xs font-bold text-black opacity-0 shadow-sm backdrop-blur transition-all duration-300 hover:bg-[var(--lbb-red)] hover:text-white group-hover:translate-y-0 group-hover:opacity-100 focus-visible:translate-y-0 focus-visible:opacity-100"
+            className="absolute inset-x-3 bottom-3 z-20 flex h-11 items-center justify-center gap-1.5 rounded-lg bg-white/95 text-xs font-bold text-black opacity-100 shadow-sm backdrop-blur transition-all duration-300 hover:bg-[var(--lbb-red)] hover:text-white md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100"
           >
             <Plus size={15} /> افزودن سریع
           </button>

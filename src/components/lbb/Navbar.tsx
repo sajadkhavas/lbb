@@ -4,6 +4,7 @@ import { Menu, X, ShoppingBag, Search, Heart } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
+import { categoryImage } from "@/lib/category-images";
 import { products } from "@/lib/products";
 import { productImage } from "@/lib/product-images";
 import { fmtToman } from "@/lib/products";
@@ -240,54 +241,124 @@ export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "li
       {open && (
         <div
           dir="rtl"
-          className="fixed inset-0 z-[200] flex flex-col bg-[#0A0A0A] lg:hidden"
-          style={{ animation: "lbb-slide-down 0.4s cubic-bezier(0.76,0,0.24,1)" }}
+          className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-[#0A0A0A] lg:hidden"
+          style={{
+            animation: "lbb-slide-down 0.4s cubic-bezier(0.76,0,0.24,1)",
+            fontFamily: "'Vazirmatn', sans-serif",
+          }}
         >
-          <div className="flex h-16 items-center justify-between px-4">
+          <div className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-white/[0.07] bg-[#0A0A0A]/95 px-4 backdrop-blur">
             <span
               className="text-[22px] font-black text-[var(--lbb-red)]"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               LBB
             </span>
-            <button aria-label="بستن" onClick={() => setOpen(false)}>
-              <X size={26} className="text-white" />
+            <button
+              aria-label="بستن منو"
+              onClick={() => setOpen(false)}
+              className="grid h-10 w-10 place-items-center rounded-full border border-white/15 text-white transition active:scale-90"
+            >
+              <X size={20} />
             </button>
           </div>
-          <ul
-            className="flex flex-1 flex-col items-center justify-center gap-5"
-            style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+
+          {/* search */}
+          <form
+            onSubmit={(e) => {
+              submit(e);
+              if (term) setOpen(false);
+            }}
+            className="px-4 pt-4"
+            style={{ animation: "lbb-fade-up 0.4s both ease-out" }}
           >
-            {links.map((l, i) => (
-              <li
-                key={l.to === "/$category" ? l.category : l.to}
-                style={{ animation: `lbb-fade-up 0.5s ${i * 0.05}s both ease-out` }}
-              >
-                <NavItem
-                  l={l}
-                  onClick={() => setOpen(false)}
-                  className="text-3xl font-semibold text-white"
-                />
-              </li>
-            ))}
-          </ul>
-          <div className="flex justify-center gap-2 pb-4">
-            {CATEGORY_SLUGS.map((s) => (
+            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3">
+              <Search size={17} className="text-white/40" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                type="search"
+                placeholder="دنبال چی می‌گردی؟"
+                aria-label="جستجوی محصولات"
+                className="h-12 w-full bg-transparent text-[13px] text-white outline-none placeholder:text-white/35"
+              />
+            </div>
+          </form>
+
+          {/* category cards */}
+          <div className="grid grid-cols-2 gap-3 px-4 pt-5">
+            {CATEGORY_SLUGS.map((s, i) => (
               <Link
                 key={s}
                 to="/$category"
                 params={{ category: s }}
                 onClick={() => setOpen(false)}
-                className="rounded-full border border-white/20 px-3 py-1.5 text-[11px] text-white/70"
+                className="relative overflow-hidden rounded-2xl"
+                style={{ animation: `lbb-fade-up 0.45s ${0.05 + i * 0.05}s both ease-out` }}
               >
-                {CATEGORIES[s].nameFa}
+                <div className="relative aspect-[4/3] w-full">
+                  <img
+                    src={categoryImage(s)}
+                    alt={CATEGORIES[s].nameFa}
+                    width={900}
+                    height={1200}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute inset-0"
+                    style={{
+                      background: "linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.1))",
+                    }}
+                  />
+                  <span
+                    className="absolute bottom-2.5 right-3 text-[16px] font-bold text-white"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {CATEGORIES[s].nameFa}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
-          <div
-            className="border-t border-white/10 py-6 text-center text-xs text-white/40"
-            style={{ fontFamily: "'Vazirmatn', sans-serif" }}
-          >
+
+          {/* links */}
+          <ul className="mt-5 flex flex-col px-4">
+            {links.map((l, i) => (
+              <li
+                key={l.to === "/$category" ? l.category : l.to}
+                style={{ animation: `lbb-fade-up 0.45s ${0.15 + i * 0.04}s both ease-out` }}
+              >
+                <NavItem
+                  l={l}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between border-b border-white/[0.06] py-3.5 text-[17px] font-semibold text-white/90"
+                />
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6 flex gap-2 px-4">
+            <Link
+              to="/shop"
+              onClick={() => setOpen(false)}
+              className="flex h-12 flex-1 items-center justify-center rounded-xl bg-[var(--lbb-red)] text-[13px] font-bold text-white"
+            >
+              شروع خرید
+            </Link>
+            <Link
+              to="/wishlist"
+              onClick={() => setOpen(false)}
+              className="grid h-12 w-12 place-items-center rounded-xl border border-white/15 text-white"
+              aria-label="علاقه‌مندی‌ها"
+            >
+              <Heart size={18} />
+            </Link>
+          </div>
+
+          <div className="mt-8 border-t border-white/10 px-4 py-6 text-center text-xs text-white/40">
             اینستاگرام:{" "}
             <a href="https://www.instagram.com/lbbclo" className="text-white/70">
               @lbbclo

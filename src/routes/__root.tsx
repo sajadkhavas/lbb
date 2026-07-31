@@ -14,6 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
 import { CartDrawer } from "@/components/lbb/CartDrawer";
+import { QuickViewProvider } from "@/lib/quickview";
+import { ProductQuickView } from "@/components/lbb/ProductQuickView";
 import { Toaster } from "@/components/ui/sonner";
 
 
@@ -126,9 +128,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <WishlistProvider>
         <CartProvider>
-          <Outlet />
-          <CartDrawer />
-          <Toaster position="bottom-left" dir="rtl" richColors closeButton />
+          <QuickViewProvider>
+            <Outlet />
+            <CartDrawer />
+            <ProductQuickView />
+            <Toaster position="bottom-left" dir="rtl" richColors closeButton />
+          </QuickViewProvider>
         </CartProvider>
       </WishlistProvider>
     </QueryClientProvider>
