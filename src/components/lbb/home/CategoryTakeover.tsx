@@ -53,13 +53,11 @@ export function CategoryTakeover() {
         </header>
 
         {/* editorial image grid */}
-        <ul className="mt-8 grid grid-cols-2 gap-3 md:mt-12 md:grid-cols-4 md:gap-4">
+        <ul className="mt-8 grid grid-cols-2 gap-3 md:mt-12 md:grid-cols-3 md:gap-4">
           {cats.map((c, i) => (
             <li
               key={c.slug}
-              className={`cat-item ${
-                i === 0 ? "col-span-2 md:col-span-2" : ""
-              }`}
+              className="cat-item"
             >
               <Link
                 to="/$category"
@@ -69,9 +67,7 @@ export function CategoryTakeover() {
                 className="group relative block h-full overflow-hidden rounded-2xl bg-[#141414]"
               >
                 <div
-                  className={`relative w-full overflow-hidden ${
-                    i === 0 ? "aspect-[16/10] md:aspect-[16/10]" : "aspect-[4/5]"
-                  }`}
+                  className="relative aspect-[4/5] w-full overflow-hidden"
                 >
                   <img
                     src={categoryImage(c.slug)}
