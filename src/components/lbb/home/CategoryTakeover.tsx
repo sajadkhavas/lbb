@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import { productsByCategory } from "@/lib/products";
@@ -9,35 +9,6 @@ const fa = (n: number) => n.toLocaleString("fa-IR");
 export function CategoryTakeover() {
   const rootRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let cleanup = () => {};
-    let cancelled = false;
-    (async () => {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-      if (cancelled) return;
-      const ctx = gsap.context(() => {
-        gsap.from(".cat-item", {
-          x: 40,
-          opacity: 0,
-          stagger: 0.1,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: root, start: "top 70%" },
-        });
-      }, root);
-      cleanup = () => ctx.revert();
-    })();
-    return () => {
-      cancelled = true;
-      cleanup();
-    };
-  }, []);
 
   const cats = CATEGORY_SLUGS.map((s) => ({
     ...CATEGORIES[s],
@@ -82,13 +53,13 @@ export function CategoryTakeover() {
         </header>
 
         {/* editorial image grid */}
-        <ul className="mt-8 grid grid-cols-2 gap-3 md:mt-12 md:grid-cols-6 md:gap-4">
+        <ul className="mt-8 grid grid-cols-2 gap-3 md:mt-12 md:grid-cols-4 md:gap-4">
           {cats.map((c, i) => (
             <li
               key={c.slug}
               className={`cat-item ${
-                i === 0 ? "col-span-2 md:col-span-3 md:row-span-2" : "md:col-span-3"
-              } ${i === 4 ? "col-span-2 md:col-span-6" : ""}`}
+                i === 0 ? "col-span-2 md:col-span-2" : ""
+              }`}
             >
               <Link
                 to="/$category"
@@ -99,11 +70,7 @@ export function CategoryTakeover() {
               >
                 <div
                   className={`relative w-full overflow-hidden ${
-                    i === 0
-                      ? "aspect-[4/3] md:aspect-auto md:h-full md:min-h-[420px]"
-                      : i === 4
-                        ? "aspect-[16/9] md:aspect-[21/6]"
-                        : "aspect-[4/5] md:aspect-[16/9]"
+                    i === 0 ? "aspect-[16/10] md:aspect-[16/10]" : "aspect-[4/5]"
                   }`}
                 >
                   <img
