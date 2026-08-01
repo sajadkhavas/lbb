@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
+/**
+ * Compact technical announcement strip. Honest content only — shipping
+ * threshold and the current drop; no fabricated discount-code delivery.
+ */
 const MESSAGES = [
-  "ارسال رایگان برای خریدهای بالای ۲٬۰۰۰٬۰۰۰ تومان 🚚",
-  "کد تخفیف ۱۰٪ برای اولین خرید: LBB10",
-  "کالکشن جدید ۱۴۰۵ رسید — همین حالا ببین ✦",
+  "ارسال رایگان برای سفارش‌های بالای ۲٬۰۰۰٬۰۰۰ تومان",
+  "DROP 001 — موجود است",
+  "مرجوعی و تعویض تا ۷ روز پس از دریافت",
 ];
 
 const STORAGE_KEY = "lbb-announcement-dismissed";
+
+export const ANNOUNCEMENT_HEIGHT = 28;
 
 export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
   const [visible, setVisible] = useState(false);
@@ -26,7 +32,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
   useEffect(() => {
     if (!visible) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % MESSAGES.length), 4000);
+    const id = setInterval(() => setIndex((i) => (i + 1) % MESSAGES.length), 5000);
     return () => clearInterval(id);
   }, [visible]);
 
@@ -35,7 +41,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {
-      /* ignore */
+      /* storage can be unavailable in private mode — dismissal is per-session then */
     }
     onDismiss?.();
   };
@@ -45,34 +51,45 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
   return (
     <div
       dir="rtl"
-      className="fixed inset-x-0 top-0 z-[110] flex h-9 items-center justify-center bg-[var(--lbb-red)] px-4 text-white"
       role="status"
+      className="fixed inset-x-0 top-0 z-[110] flex items-center bg-signal text-bone"
+      style={{ height: ANNOUNCEMENT_HEIGHT }}
     >
-      <div className="relative flex-1 overflow-hidden text-center">
+      <span aria-hidden="true" className="tech shrink-0 ps-3 opacity-70">
+        LBB
+      </span>
+      <div className="relative min-w-0 flex-1 overflow-hidden text-center">
         {MESSAGES.map((m, i) => (
           <span
             key={m}
-            className="absolute inset-x-0 text-[11px] font-semibold transition-all duration-500 md:text-xs"
+            className="tech absolute inset-x-0 truncate px-2 transition-all duration-500"
             style={{
+              direction: "rtl",
+              letterSpacing: "0.04em",
+              textTransform: "none",
               opacity: i === index ? 1 : 0,
-              transform: i === index ? "translateY(0)" : "translateY(8px)",
+              transform: i === index ? "translateY(0)" : "translateY(6px)",
             }}
             aria-hidden={i !== index}
           >
             {m}
           </span>
         ))}
-        <span className="invisible text-[11px] font-semibold md:text-xs">{MESSAGES[0]}</span>
+        <span
+          className="tech invisible block px-2"
+          style={{ textTransform: "none", letterSpacing: "0.04em" }}
+        >
+          {MESSAGES[0]}
+        </span>
       </div>
       <button
-        aria-label="بستن پیام"
+        type="button"
+        aria-label="بستن نوار اطلاعیه"
         onClick={dismiss}
-        className="absolute left-2 rounded p-1 text-white/80 hover:text-white"
+        className="grid h-7 w-9 shrink-0 place-items-center text-bone/80 transition-colors hover:text-bone"
       >
-        <X size={14} />
+        <X size={13} />
       </button>
     </div>
   );
 }
-
-export const ANNOUNCEMENT_HEIGHT = 36;
