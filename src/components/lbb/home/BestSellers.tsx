@@ -53,10 +53,13 @@ export function BestSellers() {
             مشاهده همه →
           </Link>
         </div>
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {bestsellers.map((p) => (
-            <div key={p.id} className="bs-card">
-              <ProductCard p={p} />
+        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:grid-rows-2">
+          {bestsellers.map((p, i) => (
+            <div
+              key={p.id}
+              className={`bs-card ${i === 0 ? "col-span-2 lg:col-span-2 lg:row-span-2" : ""}`}
+            >
+              <ProductCard p={p} priority={i === 0} />
             </div>
           ))}
         </div>

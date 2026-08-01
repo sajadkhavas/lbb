@@ -101,8 +101,10 @@ export function FeaturedPinned() {
       <section dir="rtl" className="bg-[#0A0A0A] px-5 py-14 md:hidden" aria-label="محصولات جدید">
         {header}
         <div className="mt-8 grid grid-cols-2 gap-3">
-          {featured.map((p) => (
-            <BigProductCard key={p.id} p={p} />
+          {featured.map((p, i) => (
+            <div key={p.id} className={i === 0 ? "col-span-2" : ""}>
+              <BigProductCard p={p} tall={i === 0} />
+            </div>
           ))}
         </div>
       </section>

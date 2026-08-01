@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { fmtToman, type Product } from "@/lib/products";
 import { CATEGORIES } from "@/lib/categories";
 
-export function BigProductCard({ p, wide = false }: { p: Product; wide?: boolean }) {
+export function BigProductCard({ p, wide = false, tall = false }: { p: Product; wide?: boolean; tall?: boolean }) {
   const cat = CATEGORIES[p.category];
   return (
     <Link
@@ -12,7 +12,7 @@ export function BigProductCard({ p, wide = false }: { p: Product; wide?: boolean
       className="group flex shrink-0 flex-col overflow-hidden rounded-2xl bg-white"
       style={{ width: wide ? 400 : undefined, height: wide ? 560 : undefined }}
     >
-      <div className="relative flex-1 overflow-hidden bg-white" style={{ minHeight: wide ? 0 : 220 }}>
+      <div className="relative flex-1 overflow-hidden bg-white" style={{ minHeight: wide ? 0 : tall ? 320 : 220 }}>
         <div
           aria-hidden="true"
           className="absolute inset-0 grid place-items-center transition-transform duration-400 group-hover:scale-105"

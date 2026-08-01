@@ -30,6 +30,17 @@ export function ProductQuickView() {
     setImg(0);
   }, [product]);
 
+  useEffect(() => {
+    if (!product) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [product, close]);
+
   if (!product) return null;
   const p = product;
   const gallery = productGallery(p.slug).slice(0, 4);
