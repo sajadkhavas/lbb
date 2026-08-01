@@ -14,10 +14,13 @@ export const Route = createFileRoute("/order-confirmation")({
     meta: [
       { title: "تایید سفارش | LBB" },
       { name: "description", content: "سفارش شما در فروشگاه LBB با موفقیت ثبت شد." },
-      { name: "robots", content: "noindex, nofollow" },
+      { name: "robots", content: "noindex, follow" },
       { property: "og:title", content: "تایید سفارش | LBB" },
       { property: "og:description", content: "سفارش شما در فروشگاه LBB با موفقیت ثبت شد." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/order-confirmation" },
     ],
+    links: [{ rel: "canonical", href: "/order-confirmation" }],
   }),
   component: OrderConfirmation,
 });

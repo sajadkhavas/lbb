@@ -51,12 +51,12 @@ export function FeaturedPinned() {
   const header = (
     <div className="flex flex-col justify-center" dir="rtl">
       <span
-        className="text-[11px] uppercase text-[var(--lbb-red)]"
-        style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.3em" }}
+        className="text-[11px] uppercase text-[var(--lbb-red)] font-mono"
+        style={{ letterSpacing: "0.3em" }}
       >
         محصولات جدید
       </span>
-      <h2 className="mt-4 leading-[0.95]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+      <h2 className="mt-4 leading-[0.95] font-display">
         <span className="block text-[clamp(34px,4vw,52px)] font-black text-white">آخرین</span>
         <span className="block text-[clamp(34px,4vw,52px)] font-black text-[var(--lbb-red)]">ورودی‌ها</span>
       </h2>
@@ -101,8 +101,10 @@ export function FeaturedPinned() {
       <section dir="rtl" className="bg-[#0A0A0A] px-5 py-14 md:hidden" aria-label="محصولات جدید">
         {header}
         <div className="mt-8 grid grid-cols-2 gap-3">
-          {featured.map((p) => (
-            <BigProductCard key={p.id} p={p} />
+          {featured.map((p, i) => (
+            <div key={p.id} className={i === 0 ? "col-span-2" : ""}>
+              <BigProductCard p={p} tall={i === 0} />
+            </div>
           ))}
         </div>
       </section>

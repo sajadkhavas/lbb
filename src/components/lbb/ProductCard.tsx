@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -13,33 +14,45 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const { open: openQuickView } = useQuickView();
+  const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  // The image can finish loading (or be cached) before React attaches onLoad
+  // during hydration — check completeness once mounted so it never stays hidden.
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true);
+  }, []);
   const liked = has(p.slug);
   const discount =
     p.originalPrice && p.originalPrice > p.price
       ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
       : 0;
 
-  const quickAdd = () => {
+  const addWithSize = (size: string) => {
     add({
       slug: p.slug,
       name: p.name,
       price: p.price,
       color: p.colors[0],
-      size: p.sizes[0],
+      size,
       qty: 1,
     });
-    toast.success("به سبد خرید اضافه شد", { description: p.name });
+    toast.success("به سبد خرید اضافه شد", { description: `${p.name} — سایز ${size}` });
     openDrawer();
   };
+
+  const quickAdd = () => addWithSize(p.sizes[0]);
 
   return (
     <article
       dir="rtl"
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-black/[0.06] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-12px_rgba(0,0,0,0.25)]"
-      style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+      className="group relative flex flex-col overflow-hidden rounded-xl border border-black/[0.06] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-12px_rgba(0,0,0,0.25)] font-body"
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#f2f2f2]">
+        {!loaded && (
+          <div className="absolute inset-0 skeleton-shimmer" aria-hidden="true" />
+        )}
         <img
+          ref={imgRef}
           src={productImage(p.slug)}
           alt={p.name}
           width={1024}
@@ -47,7 +60,11 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-[1.04] group-hover:opacity-0"
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
+          className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.03] group-hover:opacity-0 ${
+            loaded ? "opacity-100" : "opacity-0"
+          }`}
         />
         <img
           src={productHoverImage(p.slug)}
@@ -57,7 +74,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
           height={1200}
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 h-full w-full scale-[1.04] object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          className="absolute inset-0 h-full w-full scale-[1.03] object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
         />
 
         {/* whole-card link overlay */}
@@ -111,10 +128,41 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
         </button>
 
         {p.inStock && (
+          <div className="absolute inset-x-3 bottom-3 z-20 hidden md:block">
+            {/* quick size chips — desktop hover only */}
+            {p.sizes.length > 0 && (
+              <div className="mb-1.5 flex flex-wrap-reverse justify-center gap-1.5 opacity-0 transition-all duration-300 translate-y-2 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                {p.sizes.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      addWithSize(s);
+                    }}
+                    aria-label={`افزودن سایز ${s} به سبد`}
+                    className="size-chip hover:bg-[var(--lbb-red)] hover:text-white"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={quickAdd}
+              className="flex h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-white/95 text-xs font-bold text-black opacity-100 shadow-sm backdrop-blur transition-all duration-300 hover:bg-[var(--lbb-red)] hover:text-white md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100"
+            >
+              <Plus size={15} /> افزودن سریع
+            </button>
+          </div>
+        )}
+
+        {p.inStock && (
           <button
             type="button"
             onClick={quickAdd}
-            className="absolute inset-x-3 bottom-3 z-20 flex h-11 items-center justify-center gap-1.5 rounded-lg bg-white/95 text-xs font-bold text-black opacity-100 shadow-sm backdrop-blur transition-all duration-300 hover:bg-[var(--lbb-red)] hover:text-white md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100"
+            className="absolute inset-x-3 bottom-3 z-20 flex h-11 items-center justify-center gap-1.5 rounded-lg bg-white/95 text-xs font-bold text-black shadow-sm backdrop-blur md:hidden"
           >
             <Plus size={15} /> افزودن سریع
           </button>
@@ -122,10 +170,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
       </div>
 
       <div className="flex flex-col gap-1.5 p-3">
-        <span
-          className="text-[10px] uppercase tracking-wider text-[var(--lbb-red)]"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
-        >
+        <span className="text-[10px] uppercase tracking-wider text-[var(--lbb-red)] font-mono">
           {cat.nameFa}
         </span>
         <h3 className="line-clamp-2 text-sm font-semibold text-black">
@@ -134,16 +179,9 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
           </Link>
         </h3>
         <div className="mt-1 flex items-baseline gap-2">
-          <span
-            className="text-base font-bold text-black"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            {fmtToman(p.price)}
-          </span>
+          <span className="text-base font-bold text-black font-display">{fmtToman(p.price)}</span>
           {p.originalPrice && (
-            <span className="text-xs text-gray-400 line-through">
-              {fmtToman(p.originalPrice)}
-            </span>
+            <span className="text-xs text-gray-400 line-through">{fmtToman(p.originalPrice)}</span>
           )}
         </div>
         <div className="mt-1 flex gap-1.5">

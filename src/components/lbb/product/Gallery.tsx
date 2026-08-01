@@ -23,7 +23,7 @@ export function Gallery({ slug, name }: { slug: string; name: string }) {
   };
 
   return (
-    <div dir="rtl" className="flex flex-col-reverse gap-3 md:flex-row">
+    <div dir="rtl" className="flex flex-col-reverse gap-3 md:flex-row md:sticky md:top-24 md:self-start">
       {/* Vertical thumbnails - desktop only */}
       <div className="hidden md:flex md:w-20 md:flex-col md:gap-3">
         {images.map((src, i) => (

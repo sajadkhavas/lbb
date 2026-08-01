@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { fmtToman, type Product } from "@/lib/products";
 import { CATEGORIES } from "@/lib/categories";
 
-export function BigProductCard({ p, wide = false }: { p: Product; wide?: boolean }) {
+export function BigProductCard({ p, wide = false, tall = false }: { p: Product; wide?: boolean; tall?: boolean }) {
   const cat = CATEGORIES[p.category];
   return (
     <Link
@@ -12,15 +12,15 @@ export function BigProductCard({ p, wide = false }: { p: Product; wide?: boolean
       className="group flex shrink-0 flex-col overflow-hidden rounded-2xl bg-white"
       style={{ width: wide ? 400 : undefined, height: wide ? 560 : undefined }}
     >
-      <div className="relative flex-1 overflow-hidden bg-white" style={{ minHeight: wide ? 0 : 220 }}>
+      <div className="relative flex-1 overflow-hidden bg-white" style={{ minHeight: wide ? 0 : tall ? 320 : 220 }}>
         <div
           aria-hidden="true"
           className="absolute inset-0 grid place-items-center transition-transform duration-400 group-hover:scale-105"
           style={{ background: `radial-gradient(circle at 50% 40%, ${p.colors[0]}25 0%, #ffffff 70%)` }}
         >
           <span
-            className="font-black text-black/[0.07]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: wide ? 96 : 64 }}
+            className="font-black text-black/[0.07] font-display"
+            style={{ fontSize: wide ? 96 : 64 }}
           >
             LBB
           </span>
@@ -33,19 +33,17 @@ export function BigProductCard({ p, wide = false }: { p: Product; wide?: boolean
       </div>
       <div className="p-4">
         <span
-          className="text-[9px] uppercase text-[var(--lbb-red)]"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          className="text-[9px] uppercase text-[var(--lbb-red)] font-mono"
         >
           {cat.nameFa}
         </span>
         <h3
-          className="truncate text-[15px] font-semibold text-[#0A0A0A]"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          className="truncate text-[15px] font-semibold text-[#0A0A0A] font-display"
         >
           {p.name}
         </h3>
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-[17px] font-bold text-[#0A0A0A]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <span className="text-[17px] font-bold text-[#0A0A0A] font-display">
             {fmtToman(p.price)}
           </span>
           {p.originalPrice && (

@@ -37,15 +37,14 @@ export function Testimonials() {
     <section dir="rtl" className="bg-[#0A0A0A] px-5 py-20 md:px-10" aria-labelledby="testi-title">
       <div className="mx-auto max-w-[900px] text-center">
         <span
-          className="text-[11px] uppercase text-[var(--lbb-red)]"
-          style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.35em" }}
+          className="text-[11px] uppercase text-[var(--lbb-red)] font-mono"
+          style={{ letterSpacing: "0.35em" }}
         >
           نظرات مشتریان
         </span>
         <h2
           id="testi-title"
-          className="mt-4 text-[26px] font-bold text-white md:text-[36px]"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          className="mt-4 text-[26px] font-bold text-white md:text-[36px] font-display"
         >
           حرف مشتری‌های واقعی
         </h2>

@@ -27,15 +27,15 @@ export function CategoryTakeover() {
         <header className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
           <div className="min-w-0">
             <span
-              className="text-[10px] uppercase text-[var(--lbb-red)] md:text-[11px]"
-              style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.3em" }}
+              className="text-[10px] uppercase text-[var(--lbb-red)] md:text-[11px] font-mono"
+              style={{ letterSpacing: "0.3em" }}
             >
               CATEGORIES
             </span>
             <h2
               id="cats-title"
-              className="mt-2 text-[30px] font-bold leading-none text-white md:text-[54px]"
-              style={{ fontFamily: "'Space Grotesk', sans-serif", letterSpacing: "-0.02em" }}
+              className="mt-2 text-[30px] font-bold leading-none text-white md:text-[54px] font-display"
+              style={{ letterSpacing: "-0.02em" }}
             >
               دسته‌بندی‌ها
             </h2>
@@ -92,8 +92,7 @@ export function CategoryTakeover() {
                   <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
                     <div className="min-w-0">
                       <p
-                        className="truncate text-[20px] font-bold text-white md:text-[30px]"
-                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                        className="truncate text-[20px] font-bold text-white md:text-[30px] font-display"
                       >
                         {c.nameFa}
                       </p>

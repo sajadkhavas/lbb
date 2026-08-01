@@ -54,9 +54,9 @@ export function SizeGuideDialog({ trigger }: { trigger: React.ReactNode }) {
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent dir="rtl" className="max-h-[85vh] max-w-[520px] overflow-y-auto" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
+      <DialogContent dir="rtl" className="max-h-[85vh] max-w-[520px] overflow-y-auto font-body">
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: "'Space Grotesk', sans-serif" }}>راهنمای سایز</DialogTitle>
+          <DialogTitle className="font-display">راهنمای سایز</DialogTitle>
         </DialogHeader>
         <p className="text-sm leading-7 text-gray-600">
           یه متر خیاطی بردار، سینه و کمرت رو اندازه بگیر، و با جدول‌های پایین مقایسه کن. اگه بین دو سایز بودی، سایز

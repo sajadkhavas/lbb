@@ -5,8 +5,7 @@ export function Breadcrumb({ items, light = true }: { items: Crumb[]; light?: bo
     <nav
       dir="rtl"
       aria-label="breadcrumb"
-      className={`text-xs ${light ? "text-gray-500" : "text-white/50"}`}
-      style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+      className={`text-xs ${light ? "text-gray-500" : "text-white/50"} font-body`}
     >
       <ol className="flex flex-wrap items-center gap-1.5">
         {items.map((it, i) => (

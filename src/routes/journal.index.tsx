@@ -70,7 +70,9 @@ function JournalIndexPage() {
                 <div className="aspect-[16/9] overflow-hidden bg-[#f2f2f2]">
                   <img
                     src={covers[a.cover]}
-                    alt={a.title}
+                    alt={`تصویر شاخص مقاله ${a.title}`}
+                    width={960}
+                    height={540}
                     loading="lazy"
                     decoding="async"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

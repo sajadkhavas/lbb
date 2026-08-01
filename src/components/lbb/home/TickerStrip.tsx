@@ -15,8 +15,8 @@ export function TickerStrip() {
       {ITEMS.map((t, i) => (
         <span
           key={i}
-          className="flex items-center gap-6 whitespace-nowrap px-6 text-[11px] uppercase text-white"
-          style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.3em" }}
+          className="flex items-center gap-6 whitespace-nowrap px-6 text-[11px] uppercase text-white font-mono"
+          style={{ letterSpacing: "0.3em" }}
         >
           {t}
           <span>✦</span>

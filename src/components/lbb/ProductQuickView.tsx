@@ -30,6 +30,17 @@ export function ProductQuickView() {
     setImg(0);
   }, [product]);
 
+  useEffect(() => {
+    if (!product) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [product, close]);
+
   if (!product) return null;
   const p = product;
   const gallery = productGallery(p.slug).slice(0, 4);
@@ -49,8 +60,7 @@ export function ProductQuickView() {
   return (
     <div
       dir="rtl"
-      className="fixed inset-0 z-[300] flex items-end justify-center md:items-center"
-      style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+      className="fixed inset-0 z-[300] flex items-end justify-center md:items-center font-body"
     >
       <button
         aria-label="بستن"
@@ -121,8 +131,7 @@ export function ProductQuickView() {
         {/* info */}
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5 md:p-7">
           <span
-            className="text-[10px] uppercase tracking-widest text-[var(--lbb-red)]"
-            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            className="text-[10px] uppercase tracking-widest text-[var(--lbb-red)] font-mono"
           >
             {CATEGORIES[p.category].nameFa}
           </span>
@@ -140,8 +149,7 @@ export function ProductQuickView() {
 
           <div className="mt-3 flex items-baseline gap-2">
             <span
-              className="text-[22px] font-bold text-black"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              className="text-[22px] font-bold text-black font-display"
             >
               {fmtToman(p.price)}
             </span>

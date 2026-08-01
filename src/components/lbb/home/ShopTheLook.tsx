@@ -21,8 +21,7 @@ export function ShopTheLook() {
         <div className="flex items-end justify-between">
           <h2
             id="stl-title"
-            className="text-[26px] font-bold text-[#0A0A0A] md:text-[32px]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            className="text-[26px] font-bold text-[#0A0A0A] md:text-[32px] font-display"
           >
             ست کامل رو بخر
           </h2>

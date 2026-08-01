@@ -40,16 +40,15 @@ export function EditorialSplit() {
                 className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-105"
               />
             </div>
-            <div className="w-full md:w-1/2" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
+            <div className="w-full md:w-1/2 font-body">
               <span
-                className="text-[11px] uppercase text-[var(--lbb-red)]"
-                style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.3em" }}
+                className="text-[11px] uppercase text-[var(--lbb-red)] font-mono"
+                style={{ letterSpacing: "0.3em" }}
               >
                 {b.eyebrow}
               </span>
               <h3
-                className="mt-4 text-[26px] font-bold text-white md:text-[36px]"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                className="mt-4 text-[26px] font-bold text-white md:text-[36px] font-display"
               >
                 {b.title}
               </h3>

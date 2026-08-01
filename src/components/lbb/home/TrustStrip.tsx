@@ -47,7 +47,7 @@ export function TrustStrip() {
           <div key={title} className="trust-item flex items-start gap-3 px-2">
             <Icon size={24} className="shrink-0 text-[var(--lbb-red)]" aria-hidden="true" />
             <div>
-              <p className="text-[13px] font-semibold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <p className="text-[13px] font-semibold text-white font-display">
                 {title}
               </p>
               <p className="mt-1 text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>

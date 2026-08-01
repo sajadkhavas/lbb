@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
@@ -13,6 +13,10 @@ export const Route = createFileRoute("/cart")({
       { title: "سبد خرید | LBB" },
       { name: "description", content: "سبد خرید فروشگاه LBB" },
       { name: "robots", content: "noindex, follow" },
+      { property: "og:title", content: "سبد خرید | LBB" },
+      { property: "og:description", content: "سبد خرید فروشگاه LBB" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/cart" },
     ],
     links: [{ rel: "canonical", href: "/cart" }],
   }),
@@ -32,9 +36,9 @@ function CartPage() {
           {lines.length === 0 ? (
             <div className="mt-16 text-center text-gray-500">
               <p>سبد خرید شما خالی است.</p>
-              <a href="/shop" className="mt-6 inline-block rounded-lg bg-[var(--lbb-red)] px-6 py-3 text-sm font-bold text-white">
+              <Link to="/shop" className="mt-6 inline-block rounded-lg bg-[var(--lbb-red)] px-6 py-3 text-sm font-bold text-white">
                 رفتن به فروشگاه
-              </a>
+              </Link>
             </div>
           ) : (
             <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-[65%_35%]">

@@ -68,7 +68,9 @@ function CollectionsIndexPage() {
                 <div className="aspect-[4/5] overflow-hidden bg-[#f2f2f2]">
                   <img
                     src={productImage(c.productSlugs[0])}
-                    alt={c.nameFa}
+                    alt={`تصویر کالکشن ${c.nameFa}`}
+                    width={640}
+                    height={800}
                     loading="lazy"
                     decoding="async"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

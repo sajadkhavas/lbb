@@ -36,8 +36,7 @@ export function Newsletter() {
       <div className="relative mx-auto flex max-w-[720px] flex-col items-center gap-6 text-center">
         <h2
           id="newsletter-title"
-          className="text-[28px] font-black text-white md:text-[40px]"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          className="text-[28px] font-black text-white md:text-[40px] font-display"
         >
           عضو خانواده LBB شو
         </h2>
@@ -54,7 +53,6 @@ export function Newsletter() {
             aria-label="ایمیل"
             dir="ltr"
             className="h-12 flex-1 rounded-lg border border-white/30 bg-white/10 px-4 text-sm text-white placeholder:text-white/60 outline-none focus:border-white"
-            style={{ fontFamily: "'Vazirmatn', sans-serif" }}
           />
           <button
             type="submit"

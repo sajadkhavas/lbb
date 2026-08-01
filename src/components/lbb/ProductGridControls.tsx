@@ -72,7 +72,7 @@ export function ProductGridControls({ filters, onChange, resultCount, filterSlot
   }
 
   return (
-    <div dir="rtl" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
+    <div dir="rtl" className="font-body">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-gray-500">{resultCount.toLocaleString("fa-IR")} محصول</p>
         <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export function ProductGridControls({ filters, onChange, resultCount, filterSlot
             </SheetTrigger>
             <SheetContent side="bottom" dir="rtl" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
               <SheetHeader>
-                <SheetTitle className="text-right" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
+                <SheetTitle className="text-right font-body">
                   فیلترها
                 </SheetTitle>
               </SheetHeader>

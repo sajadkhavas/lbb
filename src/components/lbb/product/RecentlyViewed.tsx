@@ -17,7 +17,7 @@ export function RecentlyViewed({ excludeSlug }: { excludeSlug: string }) {
   return (
     <section className="border-t border-black/[0.06] py-10">
       <div className="mx-auto max-w-[1280px] px-4 md:px-8">
-        <h3 className="mb-4 text-lg font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        <h3 className="mb-4 text-lg font-semibold font-display">
           اخیراً دیده‌شده
         </h3>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">

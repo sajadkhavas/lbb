@@ -17,13 +17,12 @@ export function MobileBottomBar() {
     <nav
       dir="rtl"
       aria-label="ناوبری موبایل"
-      className="fixed inset-x-0 bottom-0 z-[150] flex border-t border-white/[0.08] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-[150] flex border-t border-white/[0.08] md:hidden font-body"
       style={{
         height: "calc(64px + env(safe-area-inset-bottom))",
         paddingBottom: "env(safe-area-inset-bottom)",
         background: "rgba(10,10,10,0.95)",
         backdropFilter: "blur(16px)",
-        fontFamily: "'Vazirmatn', sans-serif",
       }}
     >
       <Link to="/" className={itemCls} style={color(pathname === "/")}>

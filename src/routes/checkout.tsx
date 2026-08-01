@@ -16,10 +16,13 @@ export const Route = createFileRoute("/checkout")({
     meta: [
       { title: "تکمیل سفارش | LBB" },
       { name: "description", content: "تکمیل اطلاعات ارسال و پرداخت سفارش در فروشگاه LBB." },
-      { name: "robots", content: "noindex, nofollow" },
+      { name: "robots", content: "noindex, follow" },
       { property: "og:title", content: "تکمیل سفارش | LBB" },
       { property: "og:description", content: "تکمیل اطلاعات ارسال و پرداخت سفارش در فروشگاه LBB." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/checkout" },
     ],
+    links: [{ rel: "canonical", href: "/checkout" }],
   }),
   component: Checkout,
 });
