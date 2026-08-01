@@ -152,7 +152,6 @@ export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "li
                         ? "border-black/10 bg-white text-black"
                         : "border-white/15 bg-black text-white"
                     }`}
-                    style={{ fontFamily: "'Vazirmatn', sans-serif" }}
                   />
                 </form>
               )}
@@ -239,10 +238,9 @@ export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "li
       {open && (
         <div
           dir="rtl"
-          className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-[#0A0A0A] lg:hidden"
+          className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-[#0A0A0A] lg:hidden font-body"
           style={{
             animation: "lbb-slide-down 0.4s cubic-bezier(0.76,0,0.24,1)",
-            fontFamily: "'Vazirmatn', sans-serif",
           }}
         >
           <div className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-white/[0.07] bg-[#0A0A0A]/95 px-4 backdrop-blur">

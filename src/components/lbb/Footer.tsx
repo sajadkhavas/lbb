@@ -32,8 +32,8 @@ export function Footer({ theme = "dark" }: { theme?: "dark" | "light" }) {
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
         <div>
           <span
-            className="font-black text-[var(--lbb-red)]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 28 }}
+            className="font-black text-[var(--lbb-red)] font-display"
+            style={{ fontSize: 28 }}
           >
             LBB
           </span>

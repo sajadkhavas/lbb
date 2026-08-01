@@ -19,10 +19,9 @@ export function StickyBuyBar({
       dir="rtl"
       className={`fixed inset-x-0 z-[140] border-t border-black/[0.06] bg-white/95 backdrop-blur transition-transform duration-300 md:hidden ${
         visible ? "translate-y-0" : "translate-y-full"
-      }`}
+      } font-body`}
       style={{
         bottom: "calc(64px + env(safe-area-inset-bottom))",
-        fontFamily: "'Vazirmatn', sans-serif",
         boxShadow: "0 -4px 20px rgba(0,0,0,0.06)",
       }}
     >

@@ -51,8 +51,8 @@ export function FeaturedPinned() {
   const header = (
     <div className="flex flex-col justify-center" dir="rtl">
       <span
-        className="text-[11px] uppercase text-[var(--lbb-red)]"
-        style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.3em" }}
+        className="text-[11px] uppercase text-[var(--lbb-red)] font-mono"
+        style={{ letterSpacing: "0.3em" }}
       >
         محصولات جدید
       </span>

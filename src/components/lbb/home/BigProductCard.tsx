@@ -19,8 +19,8 @@ export function BigProductCard({ p, wide = false }: { p: Product; wide?: boolean
           style={{ background: `radial-gradient(circle at 50% 40%, ${p.colors[0]}25 0%, #ffffff 70%)` }}
         >
           <span
-            className="font-black text-black/[0.07]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: wide ? 96 : 64 }}
+            className="font-black text-black/[0.07] font-display"
+            style={{ fontSize: wide ? 96 : 64 }}
           >
             LBB
           </span>

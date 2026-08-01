@@ -53,7 +53,6 @@ export function Newsletter() {
             aria-label="ایمیل"
             dir="ltr"
             className="h-12 flex-1 rounded-lg border border-white/30 bg-white/10 px-4 text-sm text-white placeholder:text-white/60 outline-none focus:border-white"
-            style={{ fontFamily: "'Vazirmatn', sans-serif" }}
           />
           <button
             type="submit"

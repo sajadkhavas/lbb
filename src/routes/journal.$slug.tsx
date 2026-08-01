@@ -99,7 +99,16 @@ function JournalDetailPage() {
 
         <div className="mx-auto max-w-[1000px] px-4 md:px-8">
           <div className="aspect-[16/8] overflow-hidden rounded-xl bg-[#f2f2f2]">
-            <img src={covers[a.cover]} alt={a.title} className="h-full w-full object-cover" loading="eager" decoding="async" />
+            <img
+              src={covers[a.cover]}
+              alt={`تصویر شاخص مقاله ${a.title}`}
+              width={1200}
+              height={600}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
           </div>
         </div>
 

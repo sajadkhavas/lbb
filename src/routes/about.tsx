@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
@@ -77,9 +77,9 @@ function AboutPage() {
 
         <section className="border-t border-black/[0.06] py-12 text-center">
           <p className="mb-4 text-sm text-gray-600">آماده‌ای یه چیز جدید امتحان کنی؟</p>
-          <a href="/shop" className="inline-flex h-12 items-center rounded-lg bg-[var(--lbb-red)] px-8 text-sm font-bold text-white hover:brightness-110">
+          <Link to="/shop" className="inline-flex h-12 items-center rounded-lg bg-[var(--lbb-red)] px-8 text-sm font-bold text-white hover:brightness-110">
             فروشگاه ما رو ببین
-          </a>
+          </Link>
         </section>
       </main>
       <Footer theme="light" />

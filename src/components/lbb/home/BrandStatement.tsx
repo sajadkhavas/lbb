@@ -62,8 +62,8 @@ export function BrandStatement() {
         </span>
       </div>
       <span
-        className="absolute bottom-8 left-8 text-[11px]"
-        style={{ fontFamily: "'JetBrains Mono', monospace", color: "rgba(255,255,255,0.4)" }}
+        className="absolute bottom-8 left-8 text-[11px] font-mono"
+        style={{ color: "rgba(255,255,255,0.4)" }}
       >
         LBB ✦ استریت‌ویر ایران
       </span>

@@ -42,8 +42,8 @@ export function EditorialSplit() {
             </div>
             <div className="w-full md:w-1/2 font-body">
               <span
-                className="text-[11px] uppercase text-[var(--lbb-red)]"
-                style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.3em" }}
+                className="text-[11px] uppercase text-[var(--lbb-red)] font-mono"
+                style={{ letterSpacing: "0.3em" }}
               >
                 {b.eyebrow}
               </span>

@@ -52,8 +52,8 @@ export function NewDropCountdown() {
       />
       <div className="relative mx-auto flex max-w-[1000px] flex-col items-center gap-8 text-center">
         <span
-          className="text-[11px] uppercase text-[var(--lbb-red)]"
-          style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.35em" }}
+          className="text-[11px] uppercase text-[var(--lbb-red)] font-mono"
+          style={{ letterSpacing: "0.35em" }}
         >
           New Drop
         </span>
