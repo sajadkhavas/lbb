@@ -1,367 +1,441 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Menu, X, ShoppingBag, Search, Heart } from "lucide-react";
+import { Menu, X, ShoppingBag, Search, Heart, ArrowUpLeft } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
 import { categoryImage } from "@/lib/category-images";
-import { products } from "@/lib/products";
+import { products, fmtToman } from "@/lib/products";
 import { productImage } from "@/lib/product-images";
-import { fmtToman } from "@/lib/products";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { TechLabel } from "@/components/lbb/ui/primitives";
 
 type NavLink =
-  | { label: string; to: "/" | "/shop" | "/about" | "/contact" | "/lookbook" }
-  | { label: string; to: "/$category"; category: string };
+  | { label: string; latin: string; to: "/" | "/shop" | "/lookbook" | "/collections" | "/journal" | "/about" | "/contact" }
+  | { label: string; latin: string; to: "/$category"; category: string };
 
-const links: NavLink[] = [
-  { label: "خانه", to: "/" },
-  { label: "فروشگاه", to: "/shop" },
-  { label: "هودی", to: "/$category", category: "hoodies" },
-  { label: "شلوار", to: "/$category", category: "pants" },
-  { label: "کتونی", to: "/$category", category: "shoes" },
-  { label: "لوک‌بوک", to: "/lookbook" },
-  { label: "درباره ما", to: "/about" },
-  { label: "تماس", to: "/contact" },
+const PRIMARY: NavLink[] = [
+  { label: "فروشگاه", latin: "SHOP ALL", to: "/shop" },
+  { label: "هودی", latin: "HOODIES", to: "/$category", category: "hoodies" },
+  { label: "شلوار", latin: "PANTS", to: "/$category", category: "pants" },
+  { label: "کتونی", latin: "FOOTWEAR", to: "/$category", category: "shoes" },
+  { label: "لوک‌بوک", latin: "LOOKBOOK", to: "/lookbook" },
 ];
 
-function NavItem({ l, className, onClick }: { l: NavLink; className?: string; onClick?: () => void }) {
+const SECONDARY: NavLink[] = [
+  { label: "کالکشن‌ها", latin: "COLLECTIONS", to: "/collections" },
+  { label: "ژورنال", latin: "JOURNAL", to: "/journal" },
+  { label: "درباره ما", latin: "ABOUT", to: "/about" },
+  { label: "تماس", latin: "CONTACT", to: "/contact" },
+];
+
+function hrefOf(l: NavLink) {
+  return l.to === "/$category" ? `/${l.category}` : l.to;
+}
+
+function NavItem({
+  l,
+  className,
+  onClick,
+  children,
+}: {
+  l: NavLink;
+  className?: string;
+  onClick?: () => void;
+  children?: React.ReactNode;
+}) {
   if (l.to === "/$category") {
     return (
-      <Link to="/$category" params={{ category: l.category }} className={className} onClick={onClick}>
-        {l.label}
+      <Link
+        to="/$category"
+        params={{ category: l.category }}
+        className={className}
+        onClick={onClick}
+      >
+        {children ?? l.label}
       </Link>
     );
   }
   return (
     <Link to={l.to} className={className} onClick={onClick}>
-      {l.label}
+      {children ?? l.label}
     </Link>
   );
 }
 
-export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "light"; offsetTop?: number }) {
+function Count({ n }: { n: number }) {
+  if (n <= 0) return null;
+  return (
+    <span className="num absolute -left-1 -top-1 flex h-[15px] min-w-[15px] items-center justify-center bg-signal px-[3px] text-[9px] font-bold leading-none text-bone">
+      {n.toLocaleString("fa-IR")}
+    </span>
+  );
+}
+
+export function Navbar({
+  theme = "dark",
+  offsetTop = 0,
+}: {
+  theme?: "dark" | "light";
+  offsetTop?: number;
+}) {
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [q, setQ] = useState("");
   const { count, openDrawer } = useCart();
   const { count: wishCount } = useWishlist();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const boxRef = useRef<HTMLDivElement>(null);
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
+  useFocusTrap(menuOpen, menuRef, closeMenu);
+  useFocusTrap(searchOpen, searchRef, closeSearch);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Any navigation closes both overlays.
   useEffect(() => {
-    if (!searchOpen) return;
-    const onDown = (e: MouseEvent) => {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setSearchOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [searchOpen]);
+    setMenuOpen(false);
+    setSearchOpen(false);
+  }, [pathname]);
 
   const term = q.trim();
-  const suggestions = term
-    ? products
-        .filter(
-          (p) =>
-            p.name.includes(term) ||
-            p.shortDescription.includes(term) ||
-            CATEGORIES[p.category].nameFa.includes(term),
-        )
-        .slice(0, 5)
-    : [];
+  const suggestions = useMemo(() => {
+    if (!term) return [];
+    return products
+      .filter(
+        (p) =>
+          p.name.includes(term) ||
+          p.latinName.toLowerCase().includes(term.toLowerCase()) ||
+          p.shortDescription.includes(term) ||
+          CATEGORIES[p.category].nameFa.includes(term),
+      )
+      .slice(0, 6);
+  }, [term]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!term) return;
     setSearchOpen(false);
+    setMenuOpen(false);
     navigate({ to: "/search", search: { q: term } });
   };
 
   const isLight = theme === "light";
-  const textColor = isLight ? "text-black" : "text-white";
-  const linkBase = isLight
-    ? "text-black/80 hover:text-[var(--lbb-red)]"
-    : "text-white/80 hover:text-[var(--lbb-red)]";
-  const barBg = scrolled
+  const ink = isLight ? "text-obsidian" : "text-bone";
+  const barSkin = scrolled
     ? isLight
-      ? "border-b border-black/[0.06] bg-white/85 backdrop-blur-xl"
-      : "border-b border-white/[0.07] bg-black/85 backdrop-blur-xl"
-    : "bg-transparent";
+      ? "border-b border-hairline-ink bg-bone/90 backdrop-blur-xl"
+      : "border-b border-hairline bg-obsidian/85 backdrop-blur-xl"
+    : "border-b border-transparent bg-transparent";
+  const iconBtn = `relative grid tap-target place-items-center transition-colors duration-[220ms] ${ink} hover:text-signal`;
 
   return (
     <>
       <nav
-        role="navigation"
         aria-label="ناوبری اصلی"
         dir="rtl"
-        className={`fixed inset-x-0 z-[100] transition-all duration-300 ${barBg}`}
+        className={`fixed inset-x-0 z-[100] transition-colors duration-300 ${barSkin}`}
         style={{ top: offsetTop }}
       >
-        <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 md:px-8">
-          <Link to="/" className="flex shrink-0 items-center gap-1.5" aria-label="LBB خانه">
-            <span
-              className="text-[26px] font-black leading-none text-[var(--lbb-red)] font-display"
-            >
+        <div
+          className="lbb-shell grid items-center gap-4"
+          style={{
+            height: "var(--lbb-nav-h)",
+            gridTemplateColumns: "auto minmax(0,1fr) auto",
+          }}
+        >
+          {/* mark */}
+          <Link to="/" aria-label="LBB — خانه" className="flex shrink-0 items-baseline gap-1.5">
+            <span className="font-display text-[22px] font-black leading-none tracking-[-0.06em] text-signal md:text-[26px]">
               LBB
             </span>
             <span
-              className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--lbb-red)]"
-              style={{ animation: "lbb-blink 0.8s infinite" }}
+              aria-hidden="true"
+              className="h-1 w-1 rounded-full bg-signal scroll-line"
             />
           </Link>
 
-          <div className="hidden items-center gap-7 lg:flex">
-            {links.map((l) => {
-              const href = l.to === "/$category" ? `/${l.category}` : l.to;
-              const active = pathname === href;
+          {/* desktop links */}
+          <ul className="hidden min-w-0 items-center justify-center gap-8 lg:flex">
+            {PRIMARY.map((l) => {
+              const active = pathname === hrefOf(l);
               return (
-                <span key={href} className="relative">
+                <li key={hrefOf(l)} className="relative">
                   <NavItem
                     l={l}
-                    className={`text-sm ${linkBase} transition-colors`}
-                  />
+                    className={`tech transition-colors duration-[220ms] ${
+                      active ? "text-signal" : `${ink} opacity-70 hover:opacity-100`
+                    }`}
+                  >
+                    {l.label}
+                  </NavItem>
                   {active && (
-                    <span className="absolute -bottom-1.5 right-0 left-0 h-0.5 bg-[var(--lbb-red)]" />
+                    <span
+                      aria-hidden="true"
+                      className="absolute -bottom-2 inset-x-0 h-px bg-signal"
+                    />
                   )}
-                </span>
+                </li>
               );
             })}
-          </div>
+          </ul>
 
-          <div className="flex shrink-0 items-center gap-1.5">
-            <div ref={boxRef} className="relative flex items-center">
-              {searchOpen && (
-                <form onSubmit={submit}>
-                  <input
-                    autoFocus
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    type="search"
-                    placeholder="جستجو در LBB..."
-                    aria-label="جستجو"
-                    className={`w-[200px] rounded-md border px-3 py-1.5 text-xs outline-none transition-all md:w-[260px] ${
-                      isLight
-                        ? "border-black/10 bg-white text-black"
-                        : "border-white/15 bg-black text-white"
-                    }`}
-                  />
-                </form>
-              )}
-              {searchOpen && suggestions.length > 0 && (
-                <ul className="absolute top-11 right-0 z-50 w-[280px] overflow-hidden rounded-lg border border-black/10 bg-white shadow-xl md:w-[320px]">
-                  {suggestions.map((s) => (
-                    <li key={s.id}>
-                      <Link
-                        to="/product/$slug"
-                        params={{ slug: s.slug }}
-                        onClick={() => setSearchOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-black/[0.04]"
-                      >
-                        <img
-                          src={productImage(s.slug)}
-                          alt=""
-                          width={40}
-                          height={50}
-                          loading="lazy"
-                          className="h-[50px] w-10 rounded object-cover"
-                        />
-                        <span className="flex min-w-0 flex-1 flex-col">
-                          <span className="truncate text-xs font-semibold text-black">{s.name}</span>
-                          <span className="text-[11px] text-gray-500">{fmtToman(s.price)}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <button
-                aria-label="جستجو"
-                onClick={() => setSearchOpen((v) => !v)}
-                className={`p-2 ${textColor} hover:text-[var(--lbb-red)]`}
-              >
-                <Search size={18} strokeWidth={1.5} />
-              </button>
-            </div>
-
-            <Link
-              to="/wishlist"
-              aria-label="علاقه‌مندی‌ها"
-              className={`relative hidden p-2 sm:block ${textColor} hover:text-[var(--lbb-red)]`}
-            >
-              <Heart size={18} strokeWidth={1.5} />
-              {wishCount > 0 && (
-                <span className="absolute -top-0.5 -left-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--lbb-red)] px-1 text-[9px] font-bold text-white">
-                  {wishCount}
-                </span>
-              )}
-            </Link>
-
+          {/* actions */}
+          <div className="flex shrink-0 items-center gap-0.5">
             <button
-              onClick={openDrawer}
-              aria-label="سبد خرید"
-              className={`relative p-2 ${textColor} hover:text-[var(--lbb-red)]`}
+              type="button"
+              aria-label="جست‌وجو"
+              aria-expanded={searchOpen}
+              onClick={() => setSearchOpen(true)}
+              className={iconBtn}
             >
-              <ShoppingBag size={18} strokeWidth={1.5} />
-              {count > 0 && (
-                <span className="absolute -top-0.5 -left-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--lbb-red)] px-1 text-[9px] font-bold text-white">
-                  {count}
-                </span>
-              )}
+              <Search size={18} strokeWidth={1.5} aria-hidden="true" />
             </button>
 
             <Link
-              to="/shop"
-              className="hidden h-9 items-center rounded-md bg-[var(--lbb-red)] px-4 text-[11px] font-bold text-white hover:brightness-110 md:inline-flex font-body"
+              to="/wishlist"
+              aria-label={`علاقه‌مندی‌ها (${wishCount})`}
+              className={`${iconBtn} hidden sm:grid`}
             >
-              خرید کن
+              <Heart size={18} strokeWidth={1.5} aria-hidden="true" />
+              <Count n={wishCount} />
             </Link>
+
             <button
-              aria-label="منو"
-              onClick={() => setOpen(true)}
-              className={`p-2 lg:hidden ${textColor}`}
+              type="button"
+              onClick={openDrawer}
+              aria-label={`سبد خرید (${count})`}
+              className={iconBtn}
             >
-              <Menu size={22} />
+              <ShoppingBag size={18} strokeWidth={1.5} aria-hidden="true" />
+              <Count n={count} />
+            </button>
+
+            <button
+              type="button"
+              aria-label="منو"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(true)}
+              className={`${iconBtn} ms-1`}
+            >
+              <Menu size={20} strokeWidth={1.5} aria-hidden="true" />
             </button>
           </div>
         </div>
-        <style>{`@keyframes lbb-blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
       </nav>
 
-      {open && (
+      {/* ---------------- search overlay ---------------- */}
+      {searchOpen && (
         <div
           dir="rtl"
-          className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-[#0A0A0A] lg:hidden font-body"
-          style={{
-            animation: "lbb-slide-down 0.4s cubic-bezier(0.76,0,0.24,1)",
+          className="fixed inset-0 z-[210] bg-obsidian/80 backdrop-blur-md"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setSearchOpen(false);
           }}
         >
-          <div className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-white/[0.07] bg-[#0A0A0A]/95 px-4 backdrop-blur">
-            <span
-              className="text-[22px] font-black text-[var(--lbb-red)] font-display"
-            >
-              LBB
-            </span>
-            <button
-              aria-label="بستن منو"
-              onClick={() => setOpen(false)}
-              className="grid h-10 w-10 place-items-center rounded-full border border-white/15 text-white transition active:scale-90"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* search */}
-          <form
-            onSubmit={(e) => {
-              submit(e);
-              if (term) setOpen(false);
-            }}
-            className="px-4 pt-4"
-            style={{ animation: "lbb-fade-up 0.4s both ease-out" }}
+          <div
+            ref={searchRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="جست‌وجوی محصولات"
+            className="mx-auto w-full max-w-[720px] border-b border-hairline bg-obsidian px-4 pb-6 pt-5 md:mt-[10vh] md:border md:px-8 md:pb-8"
           >
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3">
-              <Search size={17} className="text-white/40" />
+            <div className="flex items-center justify-between">
+              <TechLabel tone="signal">SEARCH</TechLabel>
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                aria-label="بستن جست‌وجو"
+                className="grid tap-target place-items-center text-metal hover:text-bone"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={submit} className="mt-3 flex items-center gap-3 border-b border-hairline pb-3">
+              <Search size={20} className="shrink-0 text-mute" aria-hidden="true" />
               <input
+                autoFocus
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 type="search"
-                placeholder="دنبال چی می‌گردی؟"
-                aria-label="جستجوی محصولات"
-                className="h-12 w-full bg-transparent text-[13px] text-white outline-none placeholder:text-white/35"
+                enterKeyHint="search"
+                placeholder="نام محصول، دسته یا کد…"
+                aria-label="عبارت جست‌وجو"
+                className="h-11 w-full min-w-0 bg-transparent text-base text-bone outline-none placeholder:text-mute"
               />
-            </div>
-          </form>
+              <button type="submit" className="tech shrink-0 text-signal disabled:opacity-40" disabled={!term}>
+                برو
+              </button>
+            </form>
 
-          {/* category cards */}
-          <div className="grid grid-cols-2 gap-3 px-4 pt-5">
-            {CATEGORY_SLUGS.map((s, i) => (
-              <Link
-                key={s}
-                to="/$category"
-                params={{ category: s }}
-                onClick={() => setOpen(false)}
-                className="relative overflow-hidden rounded-2xl"
-                style={{ animation: `lbb-fade-up 0.45s ${0.05 + i * 0.05}s both ease-out` }}
-              >
-                <div className="relative aspect-[4/3] w-full">
-                  <img
-                    src={categoryImage(s)}
-                    alt={CATEGORIES[s].nameFa}
-                    width={900}
-                    height={1200}
-                    loading="lazy"
-                    decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <span
-                    aria-hidden
-                    className="absolute inset-0"
-                    style={{
-                      background: "linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.1))",
-                    }}
-                  />
-                  <span
-                    className="absolute bottom-2.5 right-3 text-[16px] font-bold text-white font-display"
+            {term && suggestions.length === 0 && (
+              <p className="mt-6 text-sm text-metal">نتیجه‌ای پیدا نشد. عبارت دیگری امتحان کنید.</p>
+            )}
+
+            {suggestions.length > 0 && (
+              <ul className="mt-4 max-h-[52vh] overflow-y-auto">
+                {suggestions.map((s) => (
+                  <li key={s.id}>
+                    <Link
+                      to="/product/$slug"
+                      params={{ slug: s.slug }}
+                      onClick={() => setSearchOpen(false)}
+                      className="group flex items-center gap-3 border-b border-hairline-soft py-2.5 transition-colors hover:bg-carbon"
+                    >
+                      <img
+                        src={productImage(s.slug)}
+                        alt=""
+                        width={44}
+                        height={55}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-[55px] w-11 shrink-0 object-cover"
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate text-[13px] font-semibold text-bone">{s.name}</span>
+                        <span className="num mt-0.5 text-[11px] text-metal">{fmtToman(s.price)}</span>
+                      </span>
+                      <ArrowUpLeft
+                        size={15}
+                        aria-hidden="true"
+                        className="shrink-0 text-mute transition-colors group-hover:text-signal"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- full-screen editorial menu ---------------- */}
+      {menuOpen && (
+        <div
+          ref={menuRef}
+          dir="rtl"
+          role="dialog"
+          aria-modal="true"
+          aria-label="منوی اصلی"
+          className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-obsidian"
+        >
+          <div
+            className="lbb-shell sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-hairline bg-obsidian/95 backdrop-blur"
+            style={{ height: "var(--lbb-nav-h)" }}
+          >
+            <span className="font-display text-[22px] font-black tracking-[-0.06em] text-signal">LBB</span>
+            <button
+              type="button"
+              aria-label="بستن منو"
+              onClick={() => setMenuOpen(false)}
+              className="grid tap-target place-items-center border border-hairline text-bone transition-colors hover:border-signal hover:text-signal"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="lbb-shell grid flex-1 gap-10 py-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-12">
+            {/* index list */}
+            <nav aria-label="فهرست بخش‌ها" className="min-w-0">
+              <TechLabel tone="signal">INDEX / 001</TechLabel>
+              <ul className="mt-4 flex flex-col">
+                {PRIMARY.map((l, i) => (
+                  <li key={hrefOf(l)} className="fade-up" style={{ animationDelay: `${i * 40}ms` }}>
+                    <NavItem
+                      l={l}
+                      onClick={() => setMenuOpen(false)}
+                      className="group flex items-baseline justify-between gap-4 border-b border-hairline py-3.5"
+                    >
+                      <span className="min-w-0 truncate text-display-3 text-bone transition-colors group-hover:text-signal">
+                        {l.label}
+                      </span>
+                      <span className="tech shrink-0 text-mute">{l.latin}</span>
+                    </NavItem>
+                  </li>
+                ))}
+              </ul>
+
+              <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
+                {SECONDARY.map((l) => (
+                  <li key={hrefOf(l)}>
+                    <NavItem
+                      l={l}
+                      onClick={() => setMenuOpen(false)}
+                      className="tech text-metal transition-colors hover:text-bone"
+                    >
+                      {l.label}
+                    </NavItem>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-hairline pt-6">
+                <a
+                  href="https://www.instagram.com/lbbclo"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="tech text-metal transition-colors hover:text-signal"
+                >
+                  INSTAGRAM / @LBBCLO
+                </a>
+                <span aria-hidden="true" className="h-px flex-1 bg-hairline" />
+                <span className="tech text-mute">TEHRAN, IR</span>
+              </div>
+            </nav>
+
+            {/* category plates */}
+            <div className="min-w-0">
+              <TechLabel>CATEGORIES</TechLabel>
+              <div className="mt-4 grid grid-cols-2 gap-px bg-hairline">
+                {CATEGORY_SLUGS.map((s, i) => (
+                  <Link
+                    key={s}
+                    to="/$category"
+                    params={{ category: s }}
+                    onClick={() => setMenuOpen(false)}
+                    className="group relative block overflow-hidden bg-obsidian fade-up"
+                    style={{ animationDelay: `${60 + i * 40}ms` }}
                   >
-                    {CATEGORIES[s].nameFa}
-                  </span>
-                </div>
-              </Link>
-            ))}
+                    <div className="relative" style={{ aspectRatio: "4/3" }}>
+                      <img
+                        src={categoryImage(s)}
+                        alt={`دستهٔ ${CATEGORIES[s].nameFa}`}
+                        width={800}
+                        height={600}
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(max-width: 1024px) 50vw, 22vw"
+                        className="absolute inset-0 h-full w-full object-cover opacity-70 frame-zoom transition-opacity duration-500 group-hover:opacity-100"
+                      />
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "linear-gradient(to top, rgba(5,5,5,0.9), rgba(5,5,5,0.05))",
+                        }}
+                      />
+                      <span className="absolute bottom-2.5 right-3 text-sm font-bold text-bone">
+                        {CATEGORIES[s].nameFa}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
-
-          {/* links */}
-          <ul className="mt-5 flex flex-col px-4">
-            {links.map((l, i) => (
-              <li
-                key={l.to === "/$category" ? l.category : l.to}
-                style={{ animation: `lbb-fade-up 0.45s ${0.15 + i * 0.04}s both ease-out` }}
-              >
-                <NavItem
-                  l={l}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between border-b border-white/[0.06] py-3.5 text-[17px] font-semibold text-white/90"
-                />
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-6 flex gap-2 px-4">
-            <Link
-              to="/shop"
-              onClick={() => setOpen(false)}
-              className="flex h-12 flex-1 items-center justify-center rounded-xl bg-[var(--lbb-red)] text-[13px] font-bold text-white"
-            >
-              شروع خرید
-            </Link>
-            <Link
-              to="/wishlist"
-              onClick={() => setOpen(false)}
-              className="grid h-12 w-12 place-items-center rounded-xl border border-white/15 text-white"
-              aria-label="علاقه‌مندی‌ها"
-            >
-              <Heart size={18} />
-            </Link>
-          </div>
-
-          <div className="mt-8 border-t border-white/10 px-4 py-6 text-center text-xs text-white/40">
-            اینستاگرام:{" "}
-            <a href="https://www.instagram.com/lbbclo" className="text-white/70">
-              @lbbclo
-            </a>
-          </div>
-          <style>{`
-            @keyframes lbb-slide-down { from { transform: translateY(-100%); } to { transform: none; } }
-            @keyframes lbb-fade-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
-          `}</style>
         </div>
       )}
     </>
