@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +15,12 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
   const { has, toggle } = useWishlist();
   const { open: openQuickView } = useQuickView();
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  // The image can finish loading (or be cached) before React attaches onLoad
+  // during hydration — check completeness once mounted so it never stays hidden.
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true);
+  }, []);
   const liked = has(p.slug);
   const discount =
     p.originalPrice && p.originalPrice > p.price
@@ -46,6 +52,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
           <div className="absolute inset-0 skeleton-shimmer" aria-hidden="true" />
         )}
         <img
+          ref={imgRef}
           src={productImage(p.slug)}
           alt={p.name}
           width={1024}
@@ -54,6 +61,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
           fetchPriority={priority ? "high" : "auto"}
           decoding="async"
           onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
           className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.03] group-hover:opacity-0 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}
