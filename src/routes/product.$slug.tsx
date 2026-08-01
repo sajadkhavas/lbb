@@ -9,13 +9,13 @@ import { colorName } from "@/lib/color-names";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { Gallery } from "@/components/lbb/product/Gallery";
 import { StickyBuyBar } from "@/components/lbb/product/StickyBuyBar";
-import { Reviews } from "@/components/lbb/product/Reviews";
+import { FitGuide } from "@/components/lbb/product/FitGuide";
 import { RecentlyViewed } from "@/components/lbb/product/RecentlyViewed";
 import { SizeGuideDialog } from "@/components/lbb/product/SizeGuideDialog";
 import { productBySlug, productsByCategory, fmtToman } from "@/lib/products";
 import { CATEGORIES } from "@/lib/categories";
 import { useCart } from "@/lib/cart";
-import { reviewSummary } from "@/lib/reviews";
+import { productImage } from "@/lib/product-images";
 import { recordRecentlyViewed } from "@/lib/recently-viewed";
 import { ShoppingBag, Check } from "lucide-react";
 
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/product/$slug")({
     const cat = CATEGORIES[p.category];
     const title = `${p.name} | خرید از LBB — ${cat.nameFa}`;
     const desc = `${p.name} را از LBB بخرید. ${p.shortDescription}. قیمت: ${fmtToman(p.price)}. ارسال سریع.`;
-    const { avg, count, reviews } = reviewSummary(p.slug);
+    // No real review data exists, so no Review/AggregateRating schema is emitted.
     const productLd = {
       "@context": "https://schema.org",
       "@type": "Product",
@@ -52,20 +52,8 @@ export const Route = createFileRoute("/product/$slug")({
           : "https://schema.org/OutOfStock",
         seller: { "@type": "Organization", name: "LBB" },
       },
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: p.avgRating ?? avg,
-        reviewCount: p.reviewCount ?? count,
-        bestRating: 5,
-      },
-      review: reviews.map((r) => ({
-        "@type": "Review",
-        author: { "@type": "Person", name: r.author },
-        datePublished: r.isoDate,
-        reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
-        name: r.title,
-        reviewBody: r.body,
-      })),
+      image: [productImage(p.slug)],
+
     };
     const breadcrumbLd = {
       "@context": "https://schema.org",
@@ -104,12 +92,12 @@ function ProductPage() {
   const [size, setSize] = useState(p.sizes[0]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const [tab, setTab] = useState<"desc" | "care" | "shipping" | "reviews">("desc");
+  const [tab, setTab] = useState<"desc" | "care" | "shipping" | "fit">("desc");
   const [stickyVisible, setStickyVisible] = useState(false);
   const { add, openDrawer } = useCart();
   const addBtnRef = useRef<HTMLButtonElement>(null);
   const discount = p.originalPrice ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
-  const { avg, count } = reviewSummary(p.slug);
+
 
   useEffect(() => {
     recordRecentlyViewed(p.slug);
@@ -168,15 +156,8 @@ function ProductPage() {
             <h1 className="text-2xl font-bold md:text-[26px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {p.name}
             </h1>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span className="text-[var(--lbb-red)]">
-                {"★".repeat(Math.round(p.avgRating ?? avg))}
-                <span className="text-gray-300">{"★".repeat(5 - Math.round(p.avgRating ?? avg))}</span>
-              </span>
-              <span>
-                {fa(p.avgRating ?? avg)} از ۵ — {fa(p.reviewCount ?? count)} نظر
-              </span>
-            </div>
+            <p className="text-sm leading-7 text-metal">{p.shortDescription}</p>
+
 
             <div className="flex items-baseline gap-3">
               <span className="text-2xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -293,7 +274,7 @@ function ProductPage() {
                   ["desc", "توضیحات"],
                   ["care", "جنس و مراقبت"],
                   ["shipping", "ارسال و مرجوعی"],
-                  ["reviews", `نظرات (${fa(p.reviewCount ?? count)})`],
+                  ["fit", "راهنمای فیت"],
                 ] as const
               ).map(([id, label]) => (
                 <button
@@ -334,7 +315,7 @@ function ProductPage() {
                   <li>📦 بسته‌بندی مطمئن و رهگیری آنلاین سفارش</li>
                 </ul>
               )}
-              {tab === "reviews" && <Reviews slug={p.slug} />}
+              {tab === "fit" && <FitGuide product={p} />}
             </div>
           </div>
         </section>
