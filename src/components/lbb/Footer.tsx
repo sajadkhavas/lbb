@@ -1,111 +1,136 @@
-import { Instagram } from "lucide-react";
+import { Link, type LinkProps } from "@tanstack/react-router";
+import { Instagram, ArrowUpLeft } from "lucide-react";
+import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
+import { TechLabel } from "@/components/lbb/ui/primitives";
 
-const shop = [
-  { l: "هودی", h: "/hoodies" },
-  { l: "شلوار", h: "/pants" },
-  { l: "تیشرت", h: "/tshirts" },
-  { l: "کتونی", h: "/shoes" },
-  { l: "اکسسوری", h: "/accessories" },
-];
-const info = [
-  { l: "درباره ما", h: "/about" },
-  { l: "تماس", h: "/contact" },
-  { l: "راهنمای سایز", h: "/size-guide" },
-  { l: "سوالات متداول", h: "/faq" },
-  { l: "کالکشن‌ها", h: "/collections" },
-  { l: "ژورنال", h: "/journal" },
-  { l: "پیگیری سفارش", h: "/track-order" },
-  { l: "ارسال و مرجوعی", h: "/shipping-returns" },
-  { l: "قوانین و مقررات", h: "/terms" },
-  { l: "حریم خصوصی", h: "/privacy" },
+type Item = { label: string; to: LinkProps["to"]; params?: LinkProps["params"] };
+
+const HELP: Item[] = [
+  { label: "راهنمای سایز", to: "/size-guide" },
+  { label: "ارسال و مرجوعی", to: "/shipping-returns" },
+  { label: "پیگیری سفارش", to: "/track-order" },
+  { label: "سوالات متداول", to: "/faq" },
+  { label: "تماس با ما", to: "/contact" },
 ];
 
-export function Footer({ theme = "dark" }: { theme?: "dark" | "light" }) {
-  const isLight = theme === "light";
+const BRAND: Item[] = [
+  { label: "درباره LBB", to: "/about" },
+  { label: "کالکشن‌ها", to: "/collections" },
+  { label: "ژورنال", to: "/journal" },
+  { label: "لوک‌بوک", to: "/lookbook" },
+  { label: "قوانین و مقررات", to: "/terms" },
+  { label: "حریم خصوصی", to: "/privacy" },
+];
+
+/**
+ * The footer is dark-only in the new identity; `theme` is still accepted so
+ * existing call sites keep compiling, but it no longer changes the skin.
+ */
+export function Footer(_props: { theme?: "dark" | "light" } = {}) {
+
   return (
-    <footer
-      dir="rtl"
-      className={`border-t px-6 pt-16 pb-24 md:px-10 md:pb-10 ${
-        isLight ? "border-black/[0.06] bg-white text-black" : "border-white/[0.08] bg-black text-white"
-      } font-body`}
-    >
-      <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <span
-            className="font-black text-[var(--lbb-red)] font-display"
-            style={{ fontSize: 28 }}
-          >
-            LBB
-          </span>
-          <p className={`mt-4 max-w-xs text-xs leading-relaxed ${isLight ? "text-black/50" : "text-white/45"}`}>
-            استریت‌ویر پریمیوم ایرانی. طراحی شده برای خیابون‌های تهران، پوشیده شده در همه‌جا.
+    <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
+      {/* oversized wordmark band */}
+      <div className="lbb-shell overflow-hidden pt-14 md:pt-20">
+        <p
+          aria-hidden="true"
+          className="font-display font-black leading-[0.8] tracking-[-0.06em] text-carbon-2 select-none"
+          style={{ fontSize: "clamp(4.5rem, 16vw, 15rem)" }}
+        >
+          LBB
+        </p>
+      </div>
+
+      <div className="lbb-shell grid gap-10 pt-10 md:grid-cols-2 lg:grid-cols-4">
+        <div className="min-w-0">
+          <TechLabel tone="signal">LBB / TEHRAN</TechLabel>
+          <p className="mt-4 max-w-xs text-sm leading-7 text-metal">
+            استریت‌ویر ایرانی با برش‌های واقعی و جنس ماندگار. طراحی و تولید در تهران.
           </p>
           <a
             href="https://www.instagram.com/lbbclo"
             target="_blank"
             rel="noreferrer"
-            aria-label="Instagram"
-            className={`mt-6 inline-flex h-10 w-10 items-center justify-center rounded-full border ${isLight ? "border-black/15 text-black/60" : "border-white/20 text-white/70"} hover:border-[var(--lbb-red)]`}
+            className="mt-6 inline-flex items-center gap-2 border border-hairline px-3 py-2 text-metal transition-colors hover:border-signal hover:text-signal"
           >
-            <Instagram size={16} />
+            <Instagram size={15} aria-hidden="true" />
+            <span className="tech">@LBBCLO</span>
           </a>
         </div>
-        <FooterCol title="فروشگاه" items={shop} light={isLight} />
-        <FooterCol title="راهنما" items={info} light={isLight} />
-        <div>
-          <h4 className="mb-4 text-xs font-bold">عضویت در خبرنامه</h4>
-          <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
-            <label htmlFor="lbb-email" className="sr-only">ایمیل</label>
-            <input
-              id="lbb-email"
-              type="email"
-              placeholder="your@email.com"
-              className={`flex-1 rounded-md border px-3 py-2 text-xs outline-none focus:border-[var(--lbb-red)] ${
-                isLight ? "border-black/15 bg-white text-black" : "border-white/20 bg-black text-white"
-              }`}
+
+        <nav aria-labelledby="ft-shop" className="min-w-0">
+          <h2 id="ft-shop" className="tech text-bone">
+            خرید
+          </h2>
+          <ul className="mt-4 flex flex-col gap-2.5">
+            {CATEGORY_SLUGS.map((s) => (
+              <li key={s}>
+                <Link
+                  to="/$category"
+                  params={{ category: s }}
+                  className="text-sm text-metal transition-colors hover:text-signal"
+                >
+                  {CATEGORIES[s].nameFa}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link to="/shop" className="text-sm text-bone transition-colors hover:text-signal">
+                همهٔ محصولات
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        <nav aria-labelledby="ft-help" className="min-w-0">
+          <h2 id="ft-help" className="tech text-bone">
+            پشتیبانی
+          </h2>
+          <ul className="mt-4 flex flex-col gap-2.5">
+            {HELP.map((i) => (
+              <li key={String(i.to)}>
+                <Link to={i.to} className="text-sm text-metal transition-colors hover:text-signal">
+                  {i.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="min-w-0">
+          <nav aria-labelledby="ft-brand">
+            <h2 id="ft-brand" className="tech text-bone">
+              برند
+            </h2>
+            <ul className="mt-4 flex flex-col gap-2.5">
+              {BRAND.map((i) => (
+                <li key={String(i.to)}>
+                  <Link to={i.to} className="text-sm text-metal transition-colors hover:text-signal">
+                    {i.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <Link
+            to="/shop"
+            className="group mt-8 flex items-center justify-between gap-3 border border-hairline px-4 py-3 transition-colors hover:border-signal"
+          >
+            <span className="text-sm font-bold text-bone">شروع خرید</span>
+            <ArrowUpLeft
+              size={16}
+              aria-hidden="true"
+              className="text-metal transition-colors group-hover:text-signal"
             />
-            <button className={`rounded-md border px-3 text-[11px] font-bold hover:border-[var(--lbb-red)] ${isLight ? "border-black/25 text-black" : "border-white/30 text-white"}`}>
-              عضویت
-            </button>
-          </form>
-          {/* Enamad + Samandehi placeholders */}
-          <div className="mt-6 flex gap-3">
-            {/* جایگزین با کد اینماد اصلی پس از ثبت‌نام در https://enamad.ir */}
-            <div
-              className={`grid h-20 w-20 place-items-center rounded-md border border-dashed p-1 text-center text-[9px] leading-tight ${isLight ? "border-black/30 text-black/50" : "border-white/25 text-white/50"}`}
-            >
-              اینماد اینجا قرار می‌گیره
-            </div>
-            <div
-              className={`grid h-20 w-20 place-items-center rounded-md border border-dashed p-1 text-center text-[9px] leading-tight ${isLight ? "border-black/30 text-black/50" : "border-white/25 text-white/50"}`}
-            >
-              ساماندهی
-            </div>
-          </div>
+          </Link>
         </div>
       </div>
 
-      <div className={`mx-auto mt-12 flex max-w-[1600px] flex-col items-start justify-between gap-2 border-t pt-6 text-[10px] md:flex-row ${isLight ? "border-black/[0.06] text-black/40" : "border-white/[0.06] text-white/30"}`}>
-        <span>© ۱۴۰۵ LBB — تمامی حقوق محفوظ است</span>
-        <span>طراحی شده برای خیابون‌های تهران</span>
+      <div className="lbb-shell mt-14 flex flex-col gap-2 border-t border-hairline py-6 text-mute md:flex-row md:items-center md:justify-between">
+        <span className="tech">© 2026 LBB — ALL RIGHTS RESERVED</span>
+        <span className="text-xs">طراحی و ساخت در تهران</span>
       </div>
     </footer>
-  );
-}
-
-function FooterCol({ title, items, light }: { title: string; items: { l: string; h: string }[]; light: boolean }) {
-  return (
-    <div>
-      <h4 className="mb-4 text-xs font-bold">{title}</h4>
-      <ul className="space-y-2.5">
-        {items.map((i) => (
-          <li key={i.h}>
-            <a href={i.h} className={`text-xs hover:text-[var(--lbb-red)] ${light ? "text-black/60" : "text-white/55"}`}>
-              {i.l}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
