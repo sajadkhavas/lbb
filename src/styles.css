@@ -4,97 +4,470 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-red: var(--lbb-red);
-  --color-black: var(--lbb-black);
-  --color-white: var(--lbb-white);
-  --color-primary: var(--lbb-red);
-  --color-primary-foreground: var(--lbb-white);
-  --color-border: var(--border);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --font-display: "Space Grotesk", "Bebas Neue", "Arial Black", sans-serif;
-  --font-body: "Vazirmatn", "Inter", "Helvetica Neue", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --tracking-tightest: -0.04em;
-  --tracking-tighter: -0.02em;
-}
+/* =========================================================================
+   LBB — Persian neo-industrial design tokens
+   Single source of truth. Never hardcode hex values in components.
+   ========================================================================= */
 
 :root {
-  --lbb-red: #E8001D;
-  --lbb-black: #0A0A0A;
-  --lbb-white: #FFFFFF;
-  --lbb-glass: rgba(10, 10, 10, 0.7);
-  --background: #FFFFFF;
-  --foreground: #0A0A0A;
-  --border: rgba(0, 0, 0, 0.08);
-  --muted: rgba(0, 0, 0, 0.04);
-  --muted-foreground: rgba(0, 0, 0, 0.5);
-  --transition: 200ms ease;
+  /* --- Core palette --- */
+  --lbb-obsidian: #050505; /* page ground */
+  --lbb-carbon: #0c0c0d; /* raised panel */
+  --lbb-carbon-2: #131315; /* second raise */
+  --lbb-bone: #f2efe8; /* primary text / inverted surface */
+  --lbb-signal: #e6291e; /* signal only — max ~10-12% of a viewport */
+  --lbb-metal: #9b9b9b; /* secondary text */
+  --lbb-mute: #6f6f6f; /* tertiary text / disabled */
+  --lbb-hairline: rgba(255, 255, 255, 0.14);
+  --lbb-hairline-soft: rgba(255, 255, 255, 0.07);
+  --lbb-hairline-ink: rgba(5, 5, 5, 0.14);
+
+  /* --- Legacy aliases (kept so existing var() usages retheme cleanly) --- */
+  --lbb-red: var(--lbb-signal);
+  --lbb-black: var(--lbb-obsidian);
+  --lbb-white: var(--lbb-bone);
+  --lbb-glass: rgba(5, 5, 5, 0.72);
+
+  /* --- shadcn semantic mapping (dark-first) --- */
+  --background: var(--lbb-obsidian);
+  --foreground: var(--lbb-bone);
+  --card: var(--lbb-carbon);
+  --card-foreground: var(--lbb-bone);
+  --popover: var(--lbb-carbon);
+  --popover-foreground: var(--lbb-bone);
+  --primary: var(--lbb-signal);
+  --primary-foreground: var(--lbb-bone);
+  --secondary: var(--lbb-carbon-2);
+  --secondary-foreground: var(--lbb-bone);
+  --accent: var(--lbb-carbon-2);
+  --accent-foreground: var(--lbb-bone);
+  --destructive: var(--lbb-signal);
+  --destructive-foreground: var(--lbb-bone);
+  --border: var(--lbb-hairline);
+  --input: var(--lbb-hairline);
+  --ring: var(--lbb-signal);
+  --muted: var(--lbb-carbon-2);
+  --muted-foreground: var(--lbb-metal);
+
+  /* --- Motion --- */
+  --ease-lbb: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 220ms;
+  --dur-reveal: 640ms;
+  --transition: var(--dur-micro) var(--ease-lbb);
+
+  /* --- Layout --- */
+  --lbb-max: 1600px;
+  --lbb-gutter: 1rem;
+  --lbb-nav-h: 60px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --lbb-gutter: 2rem;
+    --lbb-nav-h: 68px;
+  }
+}
+@media (min-width: 1280px) {
+  :root {
+    --lbb-gutter: 3rem;
+  }
+}
+
+@theme inline {
+  /* Palette utilities: bg-obsidian, text-bone, border-hairline, bg-signal … */
+  --color-obsidian: var(--lbb-obsidian);
+  --color-carbon: var(--lbb-carbon);
+  --color-carbon-2: var(--lbb-carbon-2);
+  --color-bone: var(--lbb-bone);
+  --color-signal: var(--lbb-signal);
+  --color-metal: var(--lbb-metal);
+  --color-mute: var(--lbb-mute);
+  --color-hairline: var(--lbb-hairline);
+  --color-hairline-soft: var(--lbb-hairline-soft);
+  --color-hairline-ink: var(--lbb-hairline-ink);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Legacy names still referenced in a few places */
+  --color-red: var(--lbb-signal);
+  --color-black: var(--lbb-obsidian);
+  --color-white: var(--lbb-bone);
+
+  --font-display: "Space Grotesk", "Arial Black", sans-serif;
+  --font-body: "Vazirmatn", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Sharp by decree: every named radius collapses to a 2px hairline chamfer.
+     rounded-full is intentionally untouched (dots, avatars, badges). */
+  --radius: 2px;
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
+  --radius-4xl: 2px;
+
+  --tracking-tightest: -0.05em;
+  --tracking-tighter: -0.03em;
+
+  --ease-lbb: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
-  html, body {
-    background-color: #FFFFFF;
-    color: #0A0A0A;
+  html {
+    background-color: var(--lbb-obsidian);
+    color-scheme: dark;
+    scrollbar-color: var(--lbb-mute) var(--lbb-obsidian);
+  }
+  body {
+    background-color: var(--lbb-obsidian);
+    color: var(--lbb-bone);
     font-family: var(--font-body);
+    font-feature-settings: "ss02";
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
-  body[data-theme="dark"] {
-    background-color: var(--lbb-black);
-    color: var(--lbb-white);
+  /* Inverted (bone) surfaces opt in explicitly */
+  body[data-theme="light"] {
+    background-color: var(--lbb-bone);
+    color: var(--lbb-obsidian);
   }
-  h1, h2, h3, .font-display {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  /* Persian headings read better with the body face at display sizes */
+  :where(h1, h2, h3, h4):lang(fa) {
+    font-family: var(--font-body);
+  }
+  p {
+    text-wrap: pretty;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  ::selection {
+    background: var(--lbb-signal);
+    color: var(--lbb-bone);
   }
   :focus-visible {
-    outline: 2px solid var(--lbb-red);
+    outline: 2px solid var(--lbb-signal);
     outline-offset: 2px;
+    border-radius: 0;
   }
-  a { color: inherit; text-decoration: none; }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--lbb-obsidian);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a2c;
+    border: 3px solid var(--lbb-obsidian);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--lbb-mute);
+  }
+  input,
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+  }
+  img {
+    max-width: 100%;
+  }
   @media (hover: hover) and (pointer: fine) {
-    html.lbb-custom-cursor, html.lbb-custom-cursor * { cursor: none !important; }
+    html.lbb-custom-cursor,
+    html.lbb-custom-cursor * {
+      cursor: none !important;
+    }
   }
 }
 
-@utility marquee-track {
-  animation: lbb-marquee 30s linear infinite;
+/* =========================================================================
+   Typography scale — fluid, editorial, controlled on mobile
+   ========================================================================= */
+@utility text-hero {
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.94;
+  font-size: clamp(2.5rem, 1.6rem + 6.2vw, 8rem);
+}
+@utility text-display-1 {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+  font-size: clamp(2rem, 1.4rem + 3.6vw, 5rem);
+}
+@utility text-display-2 {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-size: clamp(1.625rem, 1.2rem + 2.2vw, 3.25rem);
+}
+@utility text-display-3 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  font-size: clamp(1.25rem, 1.05rem + 1.1vw, 2rem);
+}
+@utility text-lede {
+  font-size: clamp(0.9375rem, 0.88rem + 0.35vw, 1.125rem);
+  line-height: 1.85;
+  color: var(--lbb-metal);
 }
 
+/** Latin technical label — stays LTR inside the RTL shell. */
+@utility tech {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
+
+/* =========================================================================
+   Layout primitives
+   ========================================================================= */
+@utility lbb-shell {
+  width: 100%;
+  max-width: var(--lbb-max);
+  margin-inline: auto;
+  padding-inline: var(--lbb-gutter);
+}
+@utility lbb-read {
+  width: 100%;
+  max-width: 68ch;
+  margin-inline: auto;
+  padding-inline: var(--lbb-gutter);
+}
+@utility lbb-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--lbb-gutter);
+}
+@media (min-width: 1024px) {
+  .lbb-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+@utility lbb-rhythm {
+  padding-block: clamp(3.5rem, 2rem + 6vw, 8rem);
+}
+@utility hairline-b {
+  border-block-end: 1px solid var(--lbb-hairline);
+}
+@utility hairline-t {
+  border-block-start: 1px solid var(--lbb-hairline);
+}
+
+/* Faint technical grid overlay for editorial sections */
+@utility grid-marks {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, var(--lbb-hairline-soft) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--lbb-hairline-soft) 1px, transparent 1px);
+    background-size: 25% 25%;
+  }
+}
+
+/* =========================================================================
+   Interaction helpers
+   ========================================================================= */
+@utility tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility pb-bottombar {
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+}
+@utility sr-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  &:focus-visible {
+    position: fixed;
+    inset-block-start: 0.75rem;
+    inset-inline-end: 0.75rem;
+    z-index: 300;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    padding: 0.625rem 1.25rem;
+    background: var(--lbb-signal);
+    color: var(--lbb-bone);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+}
+
+/** Slow, restrained image hover used across every product/editorial frame. */
+@utility frame-zoom {
+  transition: transform 700ms var(--ease-lbb);
+  will-change: transform;
+  .group:hover & {
+    transform: scale(1.035);
+  }
+}
+
+@utility size-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  min-width: 30px;
+  padding: 0 8px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--lbb-obsidian) 82%, transparent);
+  color: var(--lbb-bone);
+  border: 1px solid var(--lbb-hairline);
+  transition: all var(--dur-micro) var(--ease-lbb);
+}
+@utility size-chip-disabled {
+  opacity: 0.3;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+@utility skeleton-shimmer {
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.03) 30%,
+    rgba(255, 255, 255, 0.08) 45%,
+    rgba(255, 255, 255, 0.03) 60%
+  );
+  background-size: 200% 100%;
+  animation: lbb-shimmer 1.4s ease-in-out infinite;
+}
+
+/* =========================================================================
+   Keyframes
+   ========================================================================= */
+@keyframes lbb-shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -50% 0;
+  }
+}
 @keyframes lbb-marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
-
+@utility marquee-track {
+  animation: lbb-marquee 34s linear infinite;
+}
 @keyframes lbb-pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.2; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
 }
-
 @utility scroll-line {
-  animation: lbb-pulse 1.5s ease-in-out infinite;
+  animation: lbb-pulse 1.8s ease-in-out infinite;
 }
-
 @keyframes lbb-check-draw {
-  from { stroke-dashoffset: 60; }
-  to   { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 60;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
-
 .check-draw {
   stroke-dasharray: 60;
   animation: lbb-check-draw 0.8s ease forwards;
 }
+@keyframes lbb-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility fade-up {
+  animation: lbb-fade-up var(--dur-reveal) var(--ease-lbb) both;
+}
+@keyframes lbb-scan {
+  0% {
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: right;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
 }
@@ -109,75 +482,4 @@
   .font-mono {
     font-family: var(--font-mono);
   }
-}
-
-/* ===== Display type scale (SOTF / Dime-style oversized headlines) ===== */
-@utility text-display-1 {
-  font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 0.92;
-  font-size: clamp(2.75rem, 3rem + 4vw, 7.5rem);
-}
-@utility text-display-2 {
-  font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
-  font-size: clamp(2.25rem, 2rem + 3vw, 4.5rem);
-}
-@utility text-display-3 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
-}
-
-/* ===== Safe-area / touch helpers ===== */
-@utility safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-@utility pb-bottombar {
-  padding-bottom: calc(64px + env(safe-area-inset-bottom));
-}
-@utility tap-target {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-/* ===== Product hover size chips ===== */
-@utility size-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 26px;
-  min-width: 26px;
-  padding: 0 6px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--lbb-black);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  transition: background-color 150ms ease, color 150ms ease;
-}
-@utility size-chip-disabled {
-  opacity: 0.35;
-  text-decoration: line-through;
-}
-
-@utility skeleton-shimmer {
-  background: linear-gradient(
-    100deg,
-    rgba(0, 0, 0, 0.06) 30%,
-    rgba(0, 0, 0, 0.11) 45%,
-    rgba(0, 0, 0, 0.06) 60%
-  );
-  background-size: 200% 100%;
-  animation: lbb-shimmer 1.4s ease-in-out infinite;
-}
-@keyframes lbb-shimmer {
-  0% { background-position: 150% 0; }
-  100% { background-position: -50% 0; }
 }
