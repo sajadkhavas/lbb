@@ -97,7 +97,10 @@ function LookbookPage() {
                 <img
                   src={s.src}
                   alt={s.alt}
+                  width={s.span === "row-span-2" ? 480 : s.span === "col-span-2" ? 960 : 480}
+                  height={s.span === "row-span-2" ? 1280 : s.span === "col-span-2" ? 640 : 640}
                   loading={i < 2 ? "eager" : "lazy"}
+                  fetchPriority={i < 2 ? "high" : undefined}
                   decoding="async"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
@@ -140,6 +143,10 @@ function LookbookPage() {
           <img
             src={active.src}
             alt={active.alt}
+            width={1200}
+            height={1500}
+            loading="eager"
+            decoding="async"
             className="max-h-[88vh] max-w-full rounded-lg object-contain"
           />
         </div>
