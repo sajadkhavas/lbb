@@ -1,6 +1,6 @@
-import type { Product } from "./products";
+import { discountPercent, type Product } from "./products";
 
-export type SortKey = "newest" | "price-asc" | "price-desc" | "rating";
+export type SortKey = "newest" | "best" | "price-asc" | "price-desc" | "discount";
 
 export type Filters = {
   cats: string[];
@@ -22,13 +22,14 @@ export const EMPTY_FILTERS: Filters = {
   sort: "newest",
 };
 
-const SORTS: SortKey[] = ["newest", "price-asc", "price-desc", "rating"];
+const SORTS: SortKey[] = ["newest", "best", "price-asc", "price-desc", "discount"];
 
 export const SORT_LABELS: Record<SortKey, string> = {
   newest: "جدیدترین",
+  best: "پرفروش‌ترین",
   "price-asc": "ارزان‌ترین",
   "price-desc": "گران‌ترین",
-  rating: "محبوب‌ترین",
+  discount: "بیشترین تخفیف",
 };
 
 const toArray = (v: unknown): string[] =>
@@ -40,9 +41,10 @@ const toArray = (v: unknown): string[] =>
 
 /** Parses raw URL search into a safe Filters object. */
 export function parseFilters(s: Record<string, unknown>): Filters {
-  const sort = typeof s.sort === "string" && SORTS.includes(s.sort as SortKey)
-    ? (s.sort as SortKey)
-    : "newest";
+  const sort =
+    typeof s.sort === "string" && SORTS.includes(s.sort as SortKey)
+      ? (s.sort as SortKey)
+      : "newest";
   const max = Number(s.max);
   return {
     cats: toArray(s.cats),
@@ -55,7 +57,7 @@ export function parseFilters(s: Record<string, unknown>): Filters {
   };
 }
 
-/** Strips defaults so clean URLs stay clean. */
+/** Strips defaults so clean URLs stay clean (`/shop`, `/hoodies`). */
 export function serializeFilters(f: Filters): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   if (f.cats.length) out.cats = f.cats;
@@ -79,6 +81,10 @@ export function activeCount(f: Filters) {
   );
 }
 
+export function clearFilters(f: Filters): Filters {
+  return { ...EMPTY_FILTERS, sort: f.sort };
+}
+
 export function applyFilters(list: Product[], f: Filters): Product[] {
   const out = list.filter((p) => {
     if (f.cats.length && !f.cats.includes(p.category)) return false;
@@ -86,17 +92,19 @@ export function applyFilters(list: Product[], f: Filters): Product[] {
     if (f.sizes.length && !p.sizes.some((s) => f.sizes.includes(s))) return false;
     if (f.max > 0 && p.price > f.max) return false;
     if (f.instock && !p.inStock) return false;
-    if (f.sale && !(p.originalPrice && p.originalPrice > p.price)) return false;
+    if (f.sale && discountPercent(p) === 0) return false;
     return true;
   });
 
   switch (f.sort) {
+    case "best":
+      return [...out].sort((a, b) => a.rank - b.rank);
     case "price-asc":
       return [...out].sort((a, b) => a.price - b.price);
     case "price-desc":
       return [...out].sort((a, b) => b.price - a.price);
-    case "rating":
-      return [...out].sort((a, b) => (b.avgRating ?? 0) - (a.avgRating ?? 0));
+    case "discount":
+      return [...out].sort((a, b) => discountPercent(b) - discountPercent(a));
     default:
       return [...out].sort(
         (a, b) => Number(!!b.isNew) - Number(!!a.isNew) || Number(a.id) - Number(b.id),
