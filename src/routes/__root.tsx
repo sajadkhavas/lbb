@@ -17,6 +17,7 @@ import { CartDrawer } from "@/components/lbb/CartDrawer";
 import { QuickViewProvider } from "@/lib/quickview";
 import { ProductQuickView } from "@/components/lbb/ProductQuickView";
 import { Toaster } from "@/components/ui/sonner";
+import { registerPwa } from "@/lib/pwa";
 
 
 function NotFoundComponent() {
@@ -88,6 +89,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "LBB" },
       { name: "theme-color", content: "#0A0A0A" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "LBB" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { property: "og:site_name", content: "LBB" },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "fa_IR" },
@@ -95,7 +99,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -124,6 +130,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    void registerPwa();
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <WishlistProvider>
