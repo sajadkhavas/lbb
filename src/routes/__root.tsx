@@ -77,7 +77,7 @@ const orgJsonLd = {
   "@type": "Organization",
   name: "LBB",
   url: "/",
-  logo: "/favicon.ico",
+  logo: "/icons/icon-512.png",
   description: "برند پوشاک استریت‌ویر ایرانی",
   sameAs: ["https://www.instagram.com/lbbclo"],
 };
