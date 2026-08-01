@@ -21,6 +21,8 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --tracking-tightest: -0.04em;
+  --tracking-tighter: -0.02em;
 }
 
 :root {
@@ -95,4 +97,87 @@
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+@layer base {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* ===== Display type scale (SOTF / Dime-style oversized headlines) ===== */
+@utility text-display-1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  font-size: clamp(2.75rem, 3rem + 4vw, 7.5rem);
+}
+@utility text-display-2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  font-size: clamp(2.25rem, 2rem + 3vw, 4.5rem);
+}
+@utility text-display-3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+}
+
+/* ===== Safe-area / touch helpers ===== */
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility pb-bottombar {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+@utility tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ===== Product hover size chips ===== */
+@utility size-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--lbb-black);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+@utility size-chip-disabled {
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+
+@utility skeleton-shimmer {
+  background: linear-gradient(
+    100deg,
+    rgba(0, 0, 0, 0.06) 30%,
+    rgba(0, 0, 0, 0.11) 45%,
+    rgba(0, 0, 0, 0.06) 60%
+  );
+  background-size: 200% 100%;
+  animation: lbb-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes lbb-shimmer {
+  0% { background-position: 150% 0; }
+  100% { background-position: -50% 0; }
 }
