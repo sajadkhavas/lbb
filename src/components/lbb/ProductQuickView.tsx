@@ -139,13 +139,8 @@ export function ProductQuickView() {
             {p.name}
           </h2>
 
-          {p.avgRating && (
-            <div className="mt-2 flex items-center gap-1.5 text-[12px] text-gray-500">
-              <Star size={14} className="fill-[var(--lbb-red)] text-[var(--lbb-red)]" />
-              <span className="font-semibold text-black">{fa(p.avgRating)}</span>
-              <span>({fa(p.reviewCount ?? 0)} نظر)</span>
-            </div>
-          )}
+          <p className="mt-2 text-[12px] leading-6 text-metal">{p.shortDescription}</p>
+
 
           <div className="mt-3 flex items-baseline gap-2">
             <span

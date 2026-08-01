@@ -1,11 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
-import { products } from "@/lib/products";
+import { bestSellers } from "@/lib/products";
 import { ProductCard } from "@/components/lbb/ProductCard";
 
-const bestsellers = [...products]
-  .sort((a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0))
-  .slice(0, 4);
+const bestsellers = bestSellers(4);
+
 
 export function BestSellers() {
   const ref = useRef<HTMLElement>(null);
