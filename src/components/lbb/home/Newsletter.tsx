@@ -36,8 +36,7 @@ export function Newsletter() {
       <div className="relative mx-auto flex max-w-[720px] flex-col items-center gap-6 text-center">
         <h2
           id="newsletter-title"
-          className="text-[28px] font-black text-white md:text-[40px]"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          className="text-[28px] font-black text-white md:text-[40px] font-display"
         >
           عضو خانواده LBB شو
         </h2>

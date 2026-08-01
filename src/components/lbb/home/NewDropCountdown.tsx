@@ -59,8 +59,7 @@ export function NewDropCountdown() {
         </span>
         <h2
           id="drop-title"
-          className="text-[30px] font-bold text-white md:text-[44px]"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          className="text-[30px] font-bold text-white md:text-[44px] font-display"
         >
           کالکشن بعدی به‌زودی می‌رسد
         </h2>
@@ -75,8 +74,7 @@ export function NewDropCountdown() {
               className="flex w-[70px] flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] py-4 md:w-[110px] md:py-6"
             >
               <span
-                className="text-[26px] font-black text-white tabular-nums md:text-[42px]"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                className="text-[26px] font-black text-white tabular-nums md:text-[42px] font-display"
               >
                 {fa(mounted ? parts[u.key] : 0).padStart(2, "۰")}
               </span>

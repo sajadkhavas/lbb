@@ -27,8 +27,7 @@ export function Footer({ theme = "dark" }: { theme?: "dark" | "light" }) {
       dir="rtl"
       className={`border-t px-6 pt-16 pb-24 md:px-10 md:pb-10 ${
         isLight ? "border-black/[0.06] bg-white text-black" : "border-white/[0.08] bg-black text-white"
-      }`}
-      style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+      } font-body`}
     >
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
         <div>

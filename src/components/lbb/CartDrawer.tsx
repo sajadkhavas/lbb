@@ -25,11 +25,10 @@ export function CartDrawer() {
   return (
     <div
       dir="rtl"
-      className="fixed inset-0 z-[300]"
+      className="fixed inset-0 z-[300] font-body"
       role="dialog"
       aria-modal="true"
       aria-label="سبد خرید"
-      style={{ fontFamily: "'Vazirmatn', sans-serif" }}
     >
       <button
         aria-label="بستن سبد"
@@ -121,8 +120,7 @@ export function CartDrawer() {
                           </button>
                         </div>
                         <span
-                          className="text-[13px] font-bold"
-                          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                          className="text-[13px] font-bold font-display"
                         >
                           {fmtToman(l.price * l.qty)}
                         </span>
@@ -137,8 +135,7 @@ export function CartDrawer() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">جمع کل</span>
                 <span
-                  className="text-lg font-bold"
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  className="text-lg font-bold font-display"
                 >
                   {fmtToman(subtotal)}
                 </span>

@@ -32,7 +32,7 @@ function toggleValue(list: string[], v: string): string[] {
 
 export function ProductFilters({ filters, onChange, colors, sizes, priceCeil, showCategory }: Props) {
   return (
-    <div dir="rtl" className="flex flex-col gap-7" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
+    <div dir="rtl" className="flex flex-col gap-7 font-body">
       <div className="flex items-center gap-2 text-sm font-bold text-black">
         <SlidersHorizontal size={16} className="text-[var(--lbb-red)]" />
         فیلترها
@@ -102,7 +102,7 @@ export function ProductFilters({ filters, onChange, colors, sizes, priceCeil, sh
       <section>
         <h3 className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-wide text-gray-500">
           <span>حداکثر قیمت</span>
-          <span className="text-black normal-case" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <span className="text-black normal-case font-display">
             {filters.max > 0 ? fmtToman(filters.max) : fmtToman(priceCeil)}
           </span>
         </h3>

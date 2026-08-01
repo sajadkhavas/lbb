@@ -35,8 +35,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
   return (
     <article
       dir="rtl"
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-black/[0.06] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-12px_rgba(0,0,0,0.25)]"
-      style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+      className="group relative flex flex-col overflow-hidden rounded-xl border border-black/[0.06] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-12px_rgba(0,0,0,0.25)] font-body"
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#f2f2f2]">
         <img
@@ -123,8 +122,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
 
       <div className="flex flex-col gap-1.5 p-3">
         <span
-          className="text-[10px] uppercase tracking-wider text-[var(--lbb-red)]"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          className="text-[10px] uppercase tracking-wider text-[var(--lbb-red)] font-mono"
         >
           {cat.nameFa}
         </span>
@@ -135,8 +133,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
         </h3>
         <div className="mt-1 flex items-baseline gap-2">
           <span
-            className="text-base font-bold text-black"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            className="text-base font-bold text-black font-display"
           >
             {fmtToman(p.price)}
           </span>

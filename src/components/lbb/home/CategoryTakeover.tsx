@@ -92,8 +92,7 @@ export function CategoryTakeover() {
                   <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
                     <div className="min-w-0">
                       <p
-                        className="truncate text-[20px] font-bold text-white md:text-[30px]"
-                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                        className="truncate text-[20px] font-bold text-white md:text-[30px] font-display"
                       >
                         {c.nameFa}
                       </p>

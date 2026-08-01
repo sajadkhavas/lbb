@@ -33,19 +33,17 @@ export function BigProductCard({ p, wide = false }: { p: Product; wide?: boolean
       </div>
       <div className="p-4">
         <span
-          className="text-[9px] uppercase text-[var(--lbb-red)]"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          className="text-[9px] uppercase text-[var(--lbb-red)] font-mono"
         >
           {cat.nameFa}
         </span>
         <h3
-          className="truncate text-[15px] font-semibold text-[#0A0A0A]"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          className="truncate text-[15px] font-semibold text-[#0A0A0A] font-display"
         >
           {p.name}
         </h3>
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-[17px] font-bold text-[#0A0A0A]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <span className="text-[17px] font-bold text-[#0A0A0A] font-display">
             {fmtToman(p.price)}
           </span>
           {p.originalPrice && (

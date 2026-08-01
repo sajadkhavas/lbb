@@ -55,7 +55,10 @@ export const Route = createFileRoute("/search")({
         { name: "robots", content: "noindex, follow" },
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: "/search" },
       ],
+      links: [{ rel: "canonical", href: "/search" }],
     };
   },
   component: SearchPage,

@@ -56,7 +56,7 @@ export function FeaturedPinned() {
       >
         محصولات جدید
       </span>
-      <h2 className="mt-4 leading-[0.95]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+      <h2 className="mt-4 leading-[0.95] font-display">
         <span className="block text-[clamp(34px,4vw,52px)] font-black text-white">آخرین</span>
         <span className="block text-[clamp(34px,4vw,52px)] font-black text-[var(--lbb-red)]">ورودی‌ها</span>
       </h2>

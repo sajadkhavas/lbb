@@ -44,8 +44,7 @@ export function Testimonials() {
         </span>
         <h2
           id="testi-title"
-          className="mt-4 text-[26px] font-bold text-white md:text-[36px]"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          className="mt-4 text-[26px] font-bold text-white md:text-[36px] font-display"
         >
           حرف مشتری‌های واقعی
         </h2>

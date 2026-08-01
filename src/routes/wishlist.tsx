@@ -15,7 +15,10 @@ export const Route = createFileRoute("/wishlist")({
       { name: "robots", content: "noindex, follow" },
       { property: "og:title", content: "علاقه‌مندی‌ها | LBB" },
       { property: "og:description", content: "لیست محصولات مورد علاقه شما در فروشگاه استریت‌ویر LBB." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/wishlist" },
     ],
+    links: [{ rel: "canonical", href: "/wishlist" }],
   }),
   component: Wishlist,
 });

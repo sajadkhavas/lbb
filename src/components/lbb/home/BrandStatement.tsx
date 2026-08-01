@@ -46,7 +46,7 @@ export function BrandStatement() {
       className="relative grid min-h-[100svh] place-items-center overflow-hidden bg-[var(--lbb-red)] px-6"
       aria-label="بیانیه برند"
     >
-      <div className="statement-inner text-center" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+      <div className="statement-inner text-center font-display">
         <span className="block text-[9vw] font-black leading-[0.95] text-white">پوشاک</span>
         <span
           className="block font-black leading-[0.95] text-white"

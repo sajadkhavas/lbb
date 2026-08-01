@@ -22,7 +22,7 @@ export function Reviews({ slug }: { slug: string }) {
     <div dir="rtl">
       <div className="mb-6 flex flex-col items-start gap-4 rounded-xl border border-black/[0.06] p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <span className="text-3xl font-bold font-display">
             {avg}
           </span>
           <div>

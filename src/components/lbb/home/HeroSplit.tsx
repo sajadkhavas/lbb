@@ -88,8 +88,7 @@ export function HeroSplit() {
             }}
           />
           <div
-            className="hero-badge absolute left-6 top-24 rounded-full bg-[var(--lbb-red)] px-4 py-2 text-[11px] font-bold text-white md:top-28"
-            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            className="hero-badge absolute left-6 top-24 rounded-full bg-[var(--lbb-red)] px-4 py-2 text-[11px] font-bold text-white md:top-28 font-mono"
           >
             NEW DROP ✦ 1404
           </div>
@@ -97,8 +96,7 @@ export function HeroSplit() {
 
         {/* Text panel */}
         <div
-          className="relative order-2 flex w-full flex-col justify-center px-6 py-12 md:order-1 md:w-[55%] md:px-16"
-          style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+          className="relative order-2 flex w-full flex-col justify-center px-6 py-12 md:order-1 md:w-[55%] md:px-16 font-body"
         >
           <span
             className="hero-eyebrow text-[10px] uppercase text-[var(--lbb-red)]"
@@ -107,7 +105,7 @@ export function HeroSplit() {
             کالکشن جدید ۱۴۰۵
           </span>
 
-          <h1 className="mt-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <h1 className="mt-6 font-display">
             {HERO_LINES.map((l) => (
               <span key={l.text} className="block overflow-hidden">
                 <span

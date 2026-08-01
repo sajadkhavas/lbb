@@ -108,8 +108,7 @@ export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "li
         <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 md:px-8">
           <Link to="/" className="flex shrink-0 items-center gap-1.5" aria-label="LBB خانه">
             <span
-              className="text-[26px] font-black leading-none text-[var(--lbb-red)]"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              className="text-[26px] font-black leading-none text-[var(--lbb-red)] font-display"
             >
               LBB
             </span>
@@ -221,8 +220,7 @@ export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "li
 
             <Link
               to="/shop"
-              className="hidden h-9 items-center rounded-md bg-[var(--lbb-red)] px-4 text-[11px] font-bold text-white hover:brightness-110 md:inline-flex"
-              style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+              className="hidden h-9 items-center rounded-md bg-[var(--lbb-red)] px-4 text-[11px] font-bold text-white hover:brightness-110 md:inline-flex font-body"
             >
               خرید کن
             </Link>
@@ -249,8 +247,7 @@ export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "li
         >
           <div className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-white/[0.07] bg-[#0A0A0A]/95 px-4 backdrop-blur">
             <span
-              className="text-[22px] font-black text-[var(--lbb-red)]"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              className="text-[22px] font-black text-[var(--lbb-red)] font-display"
             >
               LBB
             </span>
@@ -314,8 +311,7 @@ export function Navbar({ theme = "dark", offsetTop = 0 }: { theme?: "dark" | "li
                     }}
                   />
                   <span
-                    className="absolute bottom-2.5 right-3 text-[16px] font-bold text-white"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    className="absolute bottom-2.5 right-3 text-[16px] font-bold text-white font-display"
                   >
                     {CATEGORIES[s].nameFa}
                   </span>
