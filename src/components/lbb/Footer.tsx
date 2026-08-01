@@ -22,7 +22,12 @@ const BRAND: Item[] = [
   { label: "حریم خصوصی", to: "/privacy" },
 ];
 
-export function Footer() {
+/**
+ * The footer is dark-only in the new identity; `theme` is still accepted so
+ * existing call sites keep compiling, but it no longer changes the skin.
+ */
+export function Footer(_props: { theme?: "dark" | "light" } = {}) {
+
   return (
     <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
       {/* oversized wordmark band */}
