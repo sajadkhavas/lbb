@@ -1,5 +1,6 @@
 import { ShoppingBag } from "lucide-react";
 import { fmtToman } from "@/lib/products";
+import { CtaClasses } from "@/components/lbb/ui/primitives";
 
 export function StickyBuyBar({
   visible,
@@ -17,27 +18,25 @@ export function StickyBuyBar({
   return (
     <div
       dir="rtl"
-      className={`fixed inset-x-0 z-[140] border-t border-black/[0.06] bg-white/95 backdrop-blur transition-transform duration-300 md:hidden ${
+      aria-hidden={!visible}
+      className={`safe-bottom fixed inset-x-0 z-[140] border-t border-hairline bg-obsidian/95 backdrop-blur-xl transition-transform duration-300 ease-[var(--ease-lbb)] md:hidden ${
         visible ? "translate-y-0" : "translate-y-full"
-      } font-body`}
-      style={{
-        bottom: "calc(64px + env(safe-area-inset-bottom))",
-        boxShadow: "0 -4px 20px rgba(0,0,0,0.06)",
-      }}
+      }`}
+      style={{ bottom: "calc(60px + env(safe-area-inset-bottom))" }}
     >
       <div className="flex items-center gap-3 px-4 py-2.5">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs text-gray-500">{name}</p>
-          <p className="text-sm font-bold font-display">
-            {fmtToman(price)}
-          </p>
+          <p className="truncate text-xs text-metal">{name}</p>
+          <p className="num text-sm font-bold text-bone">{fmtToman(price)}</p>
         </div>
         <button
+          type="button"
           onClick={onAdd}
           disabled={!inStock}
-          className="flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[var(--lbb-red)] px-4 text-xs font-bold text-white disabled:opacity-50"
+          tabIndex={visible ? 0 : -1}
+          className={CtaClasses("signal") + " h-11 shrink-0 text-[11px]"}
         >
-          <ShoppingBag size={16} />
+          <ShoppingBag size={16} aria-hidden="true" />
           {inStock ? "افزودن به سبد" : "ناموجود"}
         </button>
       </div>

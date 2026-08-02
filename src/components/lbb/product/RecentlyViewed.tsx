@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { productBySlug } from "@/lib/products";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
+import { Band, Shell, SectionHead } from "@/components/lbb/ui/primitives";
 
 export function RecentlyViewed({ excludeSlug }: { excludeSlug: string }) {
   const [slugs, setSlugs] = useState<string[]>([]);
@@ -15,17 +16,15 @@ export function RecentlyViewed({ excludeSlug }: { excludeSlug: string }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="border-t border-black/[0.06] py-10">
-      <div className="mx-auto max-w-[1280px] px-4 md:px-8">
-        <h3 className="mb-4 text-lg font-semibold font-display">
-          اخیراً دیده‌شده
-        </h3>
+    <Band label="RECENTLY VIEWED">
+      <Shell>
+        <SectionHead label="اخیراً دیده‌شده" title="بازگشت به گزینه‌های قبلی" className="mb-8" />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
           {items.map((p) => (
             <ProductCard key={p.id} p={p} />
           ))}
         </div>
-      </div>
-    </section>
+      </Shell>
+    </Band>
   );
 }

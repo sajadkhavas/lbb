@@ -20,22 +20,42 @@ type WishlistCtx = {
 const Ctx = createContext<WishlistCtx | null>(null);
 const KEY = "lbb-wishlist-v1";
 
+function readWishlist(): string[] {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const s of parsed) {
+      if (typeof s === "string" && s.length > 0 && !seen.has(s)) {
+        seen.add(s);
+        out.push(s);
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [slugs, setSlugs] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setSlugs(JSON.parse(raw));
-    } catch {
-      /* ignore */
-    }
+    setSlugs(readWishlist());
     setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (hydrated) localStorage.setItem(KEY, JSON.stringify(slugs));
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(KEY, JSON.stringify(slugs));
+    } catch {
+      /* ignore */
+    }
   }, [slugs, hydrated]);
 
   const has = useCallback((slug: string) => slugs.includes(slug), [slugs]);
@@ -47,8 +67,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       added = true;
       return [...prev, slug];
     });
-    return !slugs.includes(slug) || added;
-  }, [slugs]);
+    return added;
+  }, []);
 
   const remove = useCallback(
     (slug: string) => setSlugs((prev) => prev.filter((s) => s !== slug)),

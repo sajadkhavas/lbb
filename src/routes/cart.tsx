@@ -78,9 +78,12 @@ function CartPage() {
                   <div className="my-3 h-px bg-black/[0.06]" />
                   <Row label="مجموع" value={fmtToman(subtotal)} bold />
                 </div>
-                <button className="mt-4 h-12 w-full rounded-lg bg-[var(--lbb-red)] text-sm font-bold text-white hover:brightness-110">
+                <Link
+                  to="/checkout"
+                  className="mt-4 flex h-12 w-full items-center justify-center rounded-lg bg-[var(--lbb-red)] text-sm font-bold text-white hover:brightness-110"
+                >
                   تکمیل سفارش
-                </button>
+                </Link>
               </aside>
             </div>
           )}

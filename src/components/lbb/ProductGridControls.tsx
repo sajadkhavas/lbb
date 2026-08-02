@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import {
   Select,
@@ -7,19 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
+import { colorName } from "@/lib/color-names";
 import { activeCount, EMPTY_FILTERS, SORT_LABELS, type Filters, type SortKey } from "@/lib/product-filter";
 import { fmtToman } from "@/lib/products";
-import { colorLabel } from "@/components/lbb/ProductFilters";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 
 type Props = {
   filters: Filters;
@@ -31,6 +24,9 @@ type Props = {
 
 export function ProductGridControls({ filters, onChange, resultCount, filterSlot, lockedCategory }: Props) {
   const [open, setOpen] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const close = () => setOpen(false);
+  useFocusTrap(open, sheetRef, close);
   const count = activeCount(filters);
 
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
@@ -46,7 +42,7 @@ export function ProductGridControls({ filters, onChange, resultCount, filterSlot
   filters.colors.forEach((c) =>
     chips.push({
       key: `color-${c}`,
-      label: colorLabel(c),
+      label: colorName(c),
       onRemove: () => onChange({ ...filters, colors: filters.colors.filter((x) => x !== c) }),
     }),
   );
@@ -58,11 +54,7 @@ export function ProductGridControls({ filters, onChange, resultCount, filterSlot
     }),
   );
   if (filters.max > 0) {
-    chips.push({
-      key: "max",
-      label: `تا ${fmtToman(filters.max)}`,
-      onRemove: () => onChange({ ...filters, max: 0 }),
-    });
+    chips.push({ key: "max", label: `تا ${fmtToman(filters.max)}`, onRemove: () => onChange({ ...filters, max: 0 }) });
   }
   if (filters.instock) {
     chips.push({ key: "instock", label: "فقط موجود", onRemove: () => onChange({ ...filters, instock: false }) });
@@ -72,42 +64,29 @@ export function ProductGridControls({ filters, onChange, resultCount, filterSlot
   }
 
   return (
-    <div dir="rtl" className="font-body">
+    <div dir="rtl">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-gray-500">{resultCount.toLocaleString("fa-IR")} محصول</p>
+        <p aria-live="polite" className="tech text-metal">
+          {resultCount.toLocaleString("fa-IR")} محصول
+        </p>
         <div className="flex items-center gap-2">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-10 gap-1.5 rounded-lg border-black/15 text-xs font-semibold lg:hidden"
-              >
-                <SlidersHorizontal size={14} />
-                فیلترها
-                {count > 0 && (
-                  <span className="grid h-4 min-w-4 place-items-center rounded-full bg-[var(--lbb-red)] px-1 text-[10px] text-white">
-                    {count}
-                  </span>
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" dir="rtl" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
-              <SheetHeader>
-                <SheetTitle className="text-right font-body">
-                  فیلترها
-                </SheetTitle>
-              </SheetHeader>
-              <div className="mt-4">{filterSlot}</div>
-              <SheetClose asChild>
-                <Button className="mt-6 w-full bg-[var(--lbb-red)] text-white hover:bg-[var(--lbb-red)]/90">
-                  نمایش {resultCount.toLocaleString("fa-IR")} محصول
-                </Button>
-              </SheetClose>
-            </SheetContent>
-          </Sheet>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-haspopup="dialog"
+            className="tap-target inline-flex items-center gap-1.5 border border-hairline px-3 tech text-bone transition-colors hover:border-signal hover:text-signal lg:hidden"
+          >
+            <SlidersHorizontal size={14} aria-hidden="true" />
+            فیلترها
+            {count > 0 && (
+              <span className="num grid h-4 min-w-4 place-items-center bg-signal px-1 text-[10px] text-bone">
+                {count}
+              </span>
+            )}
+          </button>
 
           <Select value={filters.sort} onValueChange={(v) => onChange({ ...filters, sort: v as SortKey })}>
-            <SelectTrigger className="h-10 w-[150px] rounded-lg border-black/15 text-xs font-semibold" dir="rtl">
+            <SelectTrigger aria-label="مرتب‌سازی" className="h-11 w-[150px] rounded-none border-hairline bg-transparent text-xs text-bone">
               <SelectValue />
             </SelectTrigger>
             <SelectContent dir="rtl">
@@ -128,19 +107,58 @@ export function ProductGridControls({ filters, onChange, resultCount, filterSlot
               key={c.key}
               type="button"
               onClick={c.onRemove}
-              className="flex items-center gap-1.5 rounded-full border border-black/15 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 hover:border-[var(--lbb-red)] hover:text-[var(--lbb-red)]"
+              aria-label={`حذف فیلتر ${c.label}`}
+              className="flex items-center gap-1.5 border border-hairline px-3 py-1.5 text-xs text-metal transition-colors hover:border-signal hover:text-signal"
             >
               {c.label}
-              <X size={12} />
+              <X size={12} aria-hidden="true" />
             </button>
           ))}
           <button
             type="button"
             onClick={() => onChange({ ...EMPTY_FILTERS, sort: filters.sort })}
-            className="text-xs font-semibold text-[var(--lbb-red)] underline underline-offset-2"
+            className="tech text-signal underline underline-offset-4"
           >
             پاک کردن همه
           </button>
+        </div>
+      )}
+
+      {open && (
+        <div
+          dir="rtl"
+          className="fixed inset-0 z-[220] bg-obsidian/80 backdrop-blur-md lg:hidden"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) close();
+          }}
+        >
+          <div
+            ref={sheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="فیلترها"
+            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto border-t border-hairline bg-obsidian p-5 pb-8 safe-bottom"
+          >
+            <div className="flex items-center justify-between border-b border-hairline pb-4">
+              <TechLabel tone="signal">فیلترها</TechLabel>
+              <button
+                type="button"
+                onClick={close}
+                aria-label="بستن فیلترها"
+                className="tap-target grid place-items-center text-metal hover:text-bone"
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+            <div className="mt-5">{filterSlot}</div>
+            <button
+              type="button"
+              onClick={close}
+              className={`${CtaClasses("signal")} mt-6 w-full`}
+            >
+              نمایش {resultCount.toLocaleString("fa-IR")} محصول
+            </button>
+          </div>
         </div>
       )}
     </div>

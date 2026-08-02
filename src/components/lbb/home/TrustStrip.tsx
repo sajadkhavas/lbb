@@ -1,58 +1,30 @@
-import { useEffect, useRef } from "react";
-import { Truck, RotateCcw, Lock, Phone } from "lucide-react";
+import { Truck, RotateCcw, MapPin } from "lucide-react";
+import { useReveal } from "@/hooks/use-reveal";
 
+/** Only factual, verifiable statements — no fabricated guarantees. */
 const ITEMS = [
-  { Icon: Truck, title: "ارسال به سراسر ایران", sub: "ارسال رایگان بالای ۵۰۰ هزار تومان" },
-  { Icon: RotateCcw, title: "مرجوعی آسان", sub: "تا ۷ روز بدون سوال" },
-  { Icon: Lock, title: "پرداخت امن", sub: "درگاه بانکی معتبر" },
-  { Icon: Phone, title: "پشتیبانی", sub: "۹ صبح تا ۹ شب" },
+  { Icon: MapPin, title: "ارسال از تهران", sub: "بسته‌بندی و ارسال از انبار تهران" },
+  { Icon: RotateCcw, title: "تبادل سایز تا ۷ روز", sub: "امکان تعویض سایز طی یک هفته از دریافت" },
+  { Icon: Truck, title: "پرداخت در محل تهران", sub: "برای سفارش‌های داخل تهران" },
 ];
 
 export function TrustStrip() {
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let cleanup = () => {};
-    let cancelled = false;
-    (async () => {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-      if (cancelled) return;
-      const ctx = gsap.context(() => {
-        gsap.from(".trust-item", {
-          x: -20,
-          opacity: 0,
-          stagger: 0.08,
-          duration: 0.5,
-          ease: "power3.out",
-          scrollTrigger: { trigger: root, start: "top 85%" },
-        });
-      }, root);
-      cleanup = () => ctx.revert();
-    })();
-    return () => {
-      cancelled = true;
-      cleanup();
-    };
-  }, []);
+  const ref = useReveal<HTMLElement>({ selector: ".trust-item", y: 16 });
 
   return (
-    <section ref={ref} dir="rtl" className="bg-[#0A0A0A] px-5 py-10 md:px-10" aria-label="مزایای خرید از LBB">
-      <div className="mx-auto grid max-w-[1280px] grid-cols-2 gap-6 md:grid-cols-4 md:divide-x md:divide-white/[0.07]">
+    <section
+      ref={ref}
+      dir="rtl"
+      className="hairline-t bg-obsidian px-5 py-10 md:px-10"
+      aria-label="اطلاعات ارسال و مرجوعی"
+    >
+      <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 md:grid-cols-3 md:divide-x md:divide-hairline-soft">
         {ITEMS.map(({ Icon, title, sub }) => (
           <div key={title} className="trust-item flex items-start gap-3 px-2">
-            <Icon size={24} className="shrink-0 text-[var(--lbb-red)]" aria-hidden="true" />
+            <Icon size={22} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
             <div>
-              <p className="text-[13px] font-semibold text-white font-display">
-                {title}
-              </p>
-              <p className="mt-1 text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
-                {sub}
-              </p>
+              <p className="text-sm font-semibold text-bone">{title}</p>
+              <p className="mt-1 text-xs leading-6 text-metal">{sub}</p>
             </div>
           </div>
         ))}

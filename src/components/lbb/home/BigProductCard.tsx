@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { fmtToman, type Product } from "@/lib/products";
 import { CATEGORIES } from "@/lib/categories";
+import { productImage } from "@/lib/product-images";
+import { Frame, TechLabel } from "@/components/lbb/ui/primitives";
 
 export function BigProductCard({ p, wide = false, tall = false }: { p: Product; wide?: boolean; tall?: boolean }) {
   const cat = CATEGORIES[p.category];
@@ -8,57 +10,31 @@ export function BigProductCard({ p, wide = false, tall = false }: { p: Product; 
     <Link
       to="/product/$slug"
       params={{ slug: p.slug }}
-      dir="rtl"
-      className="group flex shrink-0 flex-col overflow-hidden rounded-2xl bg-white"
-      style={{ width: wide ? 400 : undefined, height: wide ? 560 : undefined }}
+      className="group flex shrink-0 flex-col overflow-hidden border border-hairline bg-carbon"
+      style={{ width: wide ? 320 : undefined }}
     >
-      <div className="relative flex-1 overflow-hidden bg-white" style={{ minHeight: wide ? 0 : tall ? 320 : 220 }}>
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 grid place-items-center transition-transform duration-400 group-hover:scale-105"
-          style={{ background: `radial-gradient(circle at 50% 40%, ${p.colors[0]}25 0%, #ffffff 70%)` }}
-        >
-          <span
-            className="font-black text-black/[0.07] font-display"
-            style={{ fontSize: wide ? 96 : 64 }}
-          >
-            LBB
-          </span>
-        </div>
+      <Frame
+        src={productImage(p.slug)}
+        alt={p.name}
+        ratio={tall ? "3/4" : "4/5"}
+        className={wide ? "h-[440px]" : undefined}
+        width={900}
+        height={1200}
+      >
         {p.isNew && (
-          <span className="absolute right-3 top-3 rounded bg-[var(--lbb-red)] px-2 py-0.5 text-[10px] font-bold text-white">
+          <TechLabel tone="signal" className="absolute inset-inline-end-3 top-3 bg-signal px-2 py-1">
             جدید
-          </span>
+          </TechLabel>
         )}
-      </div>
-      <div className="p-4">
-        <span
-          className="text-[9px] uppercase text-[var(--lbb-red)] font-mono"
-        >
-          {cat.nameFa}
-        </span>
-        <h3
-          className="truncate text-[15px] font-semibold text-[#0A0A0A] font-display"
-        >
-          {p.name}
-        </h3>
-        <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-[17px] font-bold text-[#0A0A0A] font-display">
-            {fmtToman(p.price)}
-          </span>
+      </Frame>
+      <div className="flex flex-col gap-1.5 p-4">
+        <TechLabel tone="signal">{cat.nameFa}</TechLabel>
+        <h3 className="truncate text-sm font-semibold text-bone">{p.name}</h3>
+        <div className="flex items-baseline gap-2">
+          <span className="num text-base font-bold text-bone">{fmtToman(p.price)}</span>
           {p.originalPrice && (
-            <span className="text-[13px] text-gray-400 line-through">{fmtToman(p.originalPrice)}</span>
+            <span className="num text-xs text-mute line-through">{fmtToman(p.originalPrice)}</span>
           )}
-        </div>
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex gap-1.5">
-            {p.colors.map((c) => (
-              <span key={c} className="h-2 w-2 rounded-full border border-black/10" style={{ background: c }} />
-            ))}
-          </div>
-          <span className="translate-y-2 rounded-full bg-[var(--lbb-red)] px-3 py-1 text-[10px] font-bold text-white opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
-            افزودن
-          </span>
         </div>
       </div>
     </Link>

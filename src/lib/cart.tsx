@@ -25,21 +25,53 @@ type CartCtx = {
 const Ctx = createContext<CartCtx | null>(null);
 const KEY = "lbb-cart-v1";
 
+/** Runtime shape check — never trust persisted JSON. */
+function isValidLine(x: unknown): x is CartLine {
+  if (!x || typeof x !== "object") return false;
+  const l = x as Record<string, unknown>;
+  return (
+    typeof l.slug === "string" &&
+    l.slug.length > 0 &&
+    typeof l.name === "string" &&
+    typeof l.price === "number" &&
+    Number.isFinite(l.price) &&
+    l.price >= 0 &&
+    typeof l.qty === "number" &&
+    Number.isFinite(l.qty) &&
+    l.qty > 0 &&
+    (l.color === undefined || typeof l.color === "string") &&
+    (l.size === undefined || typeof l.size === "string")
+  );
+}
+
+function readCart(): CartLine[] {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidLine);
+  } catch {
+    return [];
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setLines(JSON.parse(raw));
-    } catch {}
+    setLines(readCart());
     setHydrated(true);
   }, []);
   useEffect(() => {
-    if (hydrated) localStorage.setItem(KEY, JSON.stringify(lines));
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(KEY, JSON.stringify(lines));
+    } catch {
+      /* storage may be unavailable (private mode, quota) — ignore */
+    }
   }, [lines, hydrated]);
 
   const add = (l: CartLine) =>
@@ -83,7 +115,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       {children}
     </Ctx.Provider>
   );
-
 }
 
 export function useCart() {

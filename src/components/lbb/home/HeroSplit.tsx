@@ -1,14 +1,14 @@
 import { useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import { Link } from "@tanstack/react-router";
 import { heroMain } from "@/lib/product-images";
-import { MagneticButton } from "@/components/lbb/MagneticButton";
+import { PRODUCT_COUNT, fmtNum } from "@/lib/products";
+import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 
-const HERO_LINES = [
-  { text: "استایل", size: "clamp(56px, 11vw, 150px)", weight: 900, color: "#FFFFFF", ls: "-0.04em" },
-  { text: "خودتو", size: "clamp(56px, 11vw, 150px)", weight: 900, color: "#E8001D", ls: "-0.04em" },
-  { text: "تعریف کن", size: "clamp(36px, 7vw, 96px)", weight: 700, color: "rgba(255,255,255,0.5)", ls: "-0.02em" },
-];
-
+/**
+ * Full-viewport asymmetric 60/40 editorial hero. Fixed image dimensions
+ * (no CLS). Entrance sequence: scanline → wordmark → image mask →
+ * headline → metadata → CTA. Respects prefers-reduced-motion.
+ */
 export function HeroSplit() {
   const rootRef = useRef<HTMLElement>(null);
 
@@ -17,32 +17,32 @@ export function HeroSplit() {
     if (!root) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    let cleanup = () => {};
     let cancelled = false;
+    let cleanup = () => {};
 
     (async () => {
       const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
       if (cancelled) return;
 
       const ctx = gsap.context(() => {
-        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-        tl.from(".hero-eyebrow", { y: 15, opacity: 0, duration: 0.5, delay: 0.1 })
-          .from(".hero-line-inner", { yPercent: 110, duration: 0.7, stagger: 0.12 }, "-=0.2")
-          .from(".hero-sub", { opacity: 0, duration: 0.5 }, 0.9)
-          .from(".hero-ctas", { y: 16, opacity: 0, duration: 0.5 }, 1.1)
-          .from(".hero-badge", { scale: 0.7, opacity: 0, duration: 0.5 }, 1.4);
-
-        gsap.fromTo(
-          ".hero-media",
-          { clipPath: "inset(0 100% 0 0)" },
-          { clipPath: "inset(0 0% 0 0)", duration: 1.2, ease: "power3.inOut", delay: 0.2 },
-        );
+        const ease = "cubic-bezier(0.16,1,0.3,1)";
+        const tl = gsap.timeline({ defaults: { ease } });
+        tl.fromTo(".hero-scanline", { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 0.5 })
+          .to(".hero-scanline", { opacity: 0, duration: 0.3 }, "-=0.05")
+          .from(".hero-wordmark", { yPercent: 110, duration: 0.7 }, "-=0.35")
+          .fromTo(
+            ".hero-media",
+            { clipPath: "inset(0 0 100% 0)" },
+            { clipPath: "inset(0 0 0% 0)", duration: 0.9 },
+            "-=0.5",
+          )
+          .from(".hero-headline-line", { yPercent: 105, duration: 0.6, stagger: 0.08 }, "-=0.55")
+          .from(".hero-meta-item", { y: 10, opacity: 0, duration: 0.4, stagger: 0.06 }, "-=0.25")
+          .from(".hero-cta", { y: 10, opacity: 0, duration: 0.4, stagger: 0.06 }, "-=0.2");
 
         if (window.innerWidth >= 768) {
-          gsap.to(".hero-media-inner", {
-            y: -80,
+          gsap.to(".hero-media-img", {
+            yPercent: 8,
             ease: "none",
             scrollTrigger: { trigger: root, start: "top top", end: "bottom top", scrub: 1 },
           });
@@ -62,104 +62,96 @@ export function HeroSplit() {
     <section
       ref={rootRef}
       dir="rtl"
-      className="relative w-full overflow-hidden bg-[#0A0A0A]"
+      className="relative w-full overflow-hidden bg-obsidian grid-marks"
       style={{ minHeight: "100svh" }}
-      aria-label="معرفی برند"
+      aria-label="LBB — درپ ۰۰۱"
     >
+      <span
+        aria-hidden="true"
+        className="hero-scanline pointer-events-none absolute inset-x-0 top-1/2 z-30 h-px origin-start bg-signal"
+      />
+
       <div className="flex min-h-[100svh] flex-col md:flex-row">
-        {/* Media panel (left in RTL flow = second) */}
-        <div className="relative order-1 h-[50svh] w-full overflow-hidden bg-[#111111] md:order-2 md:h-auto md:min-h-[100svh] md:w-[45%]">
-          <div className="hero-media absolute inset-0 overflow-hidden">
-            <div className="hero-media-inner absolute" style={{ inset: "-10%" }}>
-              <img
-                src={heroMain}
-                alt="مدل LBB با کالکشن جدید"
-                className="h-full w-full object-cover"
-                fetchPriority="high"
-              />
+        {/* Text panel — 60% */}
+        <div className="relative order-2 flex w-full flex-col justify-center gap-8 px-5 py-16 md:order-1 md:w-[60%] md:px-14 md:py-10">
+          <div className="overflow-hidden">
+            <TechLabel tone="signal" className="hero-wordmark block">
+              LBB / DROP 001 / TEHRAN
+            </TechLabel>
+          </div>
+
+          <h1 className="leading-[0.9]">
+            <span className="block overflow-hidden">
+              <span className="hero-headline-line block text-hero text-bone">استایل</span>
+            </span>
+            <span className="block overflow-hidden">
+              <span className="hero-headline-line block text-hero text-signal">خودتو</span>
+            </span>
+            <span className="block overflow-hidden">
+              <span className="hero-headline-line block text-hero text-metal">تعریف کن</span>
+            </span>
+          </h1>
+
+          <p className="hero-meta-item max-w-md text-lede">
+            هودی، شلوار، تیشرت، کتونی و اکسسوری از اولین دراپ LBB — طراحی‌شده برای خیابان‌های تهران.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Link to="/shop" className={`hero-cta ${CtaClasses("signal")}`}>
+              خرید کالکشن جدید
+            </Link>
+            <Link to="/shop" className={`hero-cta ${CtaClasses("line")}`}>
+              مشاهده فروشگاه
+            </Link>
+          </div>
+
+          <dl className="hero-meta-item mt-4 flex flex-wrap items-center gap-x-8 gap-y-3 hairline-t pt-6">
+            <div>
+              <dt className="tech text-mute">مبدا</dt>
+              <dd className="num text-sm text-bone">تهران</dd>
             </div>
+            <div>
+              <dt className="tech text-mute">دراپ</dt>
+              <dd className="num text-sm text-bone">001</dd>
+            </div>
+            <div>
+              <dt className="tech text-mute">تعداد قطعات</dt>
+              <dd className="num text-sm text-bone">{fmtNum(PRODUCT_COUNT)}</dd>
+            </div>
+          </dl>
+        </div>
+
+        {/* Media panel — 40% */}
+        <div className="relative order-1 h-[46svh] w-full overflow-hidden bg-carbon md:order-2 md:h-auto md:min-h-[100svh] md:w-[40%]">
+          <div className="hero-media absolute inset-0 overflow-hidden">
+            <img
+              src={heroMain}
+              alt="مدل LBB با کالکشن دراپ ۰۰۱"
+              width={1200}
+              height={1500}
+              fetchPriority="high"
+              decoding="sync"
+              className="hero-media-img absolute inset-0 h-full w-full object-cover"
+              style={{ transform: "scale(1.08)" }}
+            />
           </div>
           <div
             aria-hidden="true"
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to left, rgba(10,10,10,0.75) 0%, transparent 55%)",
+                "linear-gradient(to inline-start, rgba(5,5,5,0.65) 0%, transparent 45%)",
             }}
           />
-          <div
-            className="hero-badge absolute left-6 top-24 rounded-full bg-[var(--lbb-red)] px-4 py-2 text-[11px] font-bold text-white md:top-28 font-mono"
-          >
-            NEW DROP ✦ 1404
-          </div>
         </div>
+      </div>
 
-        {/* Text panel */}
-        <div
-          className="relative order-2 flex w-full flex-col justify-center px-6 py-12 md:order-1 md:w-[55%] md:px-16 font-body"
-        >
-          <span
-            className="hero-eyebrow text-[10px] uppercase text-[var(--lbb-red)] font-mono"
-            style={{ letterSpacing: "0.4em" }}
-          >
-            کالکشن جدید ۱۴۰۵
-          </span>
-
-          <h1 className="mt-6 font-display">
-            {HERO_LINES.map((l) => (
-              <span key={l.text} className="block overflow-hidden">
-                <span
-                  className="hero-line-inner block leading-[0.92]"
-                  style={{
-                    fontSize: l.size,
-                    fontWeight: l.weight,
-                    color: l.color,
-                    letterSpacing: l.ls,
-                  }}
-                >
-                  {l.text}
-                </span>
-              </span>
-            ))}
-          </h1>
-
-          <p
-            className="hero-sub mt-6 text-[13px]"
-            style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.1em" }}
-          >
-            هودی · شلوار · تیشرت · کتونی · اکسسوری
-          </p>
-
-          <div className="hero-ctas mt-8 flex flex-wrap items-center gap-3">
-            <MagneticButton
-              href="/shop"
-              className="inline-flex h-[52px] items-center justify-center rounded-lg bg-[var(--lbb-red)] px-7 text-[13px] font-bold text-white hover:brightness-110"
-            >
-              خرید کالکشن جدید
-            </MagneticButton>
-            <MagneticButton
-              href="/shop"
-              className="inline-flex h-[52px] items-center justify-center rounded-lg border border-white/20 px-7 text-[13px] font-bold text-white transition-colors duration-200 hover:border-[var(--lbb-red)] hover:text-[var(--lbb-red)]"
-            >
-              مشاهده فروشگاه
-            </MagneticButton>
-          </div>
-
-          <div className="absolute bottom-8 left-8 hidden flex-col items-center gap-3 md:flex" aria-hidden="true">
-            <span
-              className="text-[9px] font-mono"
-              style={{
-                writingMode: "vertical-rl",
-                transform: "rotate(180deg)",
-                letterSpacing: "0.2em",
-                color: "rgba(255,255,255,0.25)",
-              }}
-            >
-              اسکرول کنید
-            </span>
-            <span className="scroll-line block h-12 w-px bg-white/15" />
-          </div>
-        </div>
+      <div
+        className="pointer-events-none absolute bottom-6 inset-inline-start-6 hidden flex-col items-center gap-3 md:flex"
+        aria-hidden="true"
+      >
+        <TechLabel className="[writing-mode:vertical-rl] rotate-180">اسکرول کنید</TechLabel>
+        <span className="block h-12 w-px bg-hairline" />
       </div>
     </section>
   );
