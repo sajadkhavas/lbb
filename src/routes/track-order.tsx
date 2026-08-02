@@ -4,17 +4,11 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { Package, Truck, CheckCircle2, Search } from "lucide-react";
+import { DemoNotice } from "@/components/lbb/ui/primitives";
+import { Search } from "lucide-react";
 
 const TITLE = "پیگیری سفارش | LBB";
-const DESC = "با وارد کردن کد پیگیری، وضعیت سفارش خودت رو از LBB چک کن.";
-
-const STAGES = [
-  { icon: Package, label: "ثبت سفارش" },
-  { icon: Package, label: "آماده‌سازی" },
-  { icon: Truck, label: "ارسال شده" },
-  { icon: CheckCircle2, label: "تحویل شده" },
-];
+const DESC = "پیگیری سفارش در فروشگاه نمایشی LBB — این قابلیت هنوز به سامانهٔ واقعی وصل نیست.";
 
 export const Route = createFileRoute("/track-order")({
   head: () => ({
@@ -22,32 +16,18 @@ export const Route = createFileRoute("/track-order")({
       { title: TITLE },
       { name: "description", content: DESC },
       { name: "robots", content: "noindex, follow" },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESC },
-      { property: "og:url", content: "/track-order" },
     ],
-    links: [{ rel: "canonical", href: "/track-order" }],
   }),
   component: TrackOrderPage,
 });
 
 function TrackOrderPage() {
   const [code, setCode] = useState("");
-  const [stage, setStage] = useState<number | null>(null);
-  const [error, setError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = code.trim();
-    if (trimmed.length < 4) {
-      setError("کد پیگیری معتبر نیست. لطفاً کد سفارش خودتو دوباره بررسی کن.");
-      setStage(null);
-      return;
-    }
-    setError("");
-    // Fake deterministic staging based on code length/chars
-    const sum = trimmed.split("").reduce((s, c) => s + c.charCodeAt(0), 0);
-    setStage(sum % 4);
+    setSubmitted(true);
   };
 
   return (
@@ -65,55 +45,34 @@ function TrackOrderPage() {
             پیگیری سفارش
           </h1>
           <p className="mt-3 text-sm leading-7 text-gray-600">
-            کد پیگیری‌ای که بعد از ثبت سفارش دریافت کردی رو وارد کن تا وضعیت آخرین به‌روزرسانی سفارشت رو ببینی.
+            کد مرجعی که بعد از ثبت سفارش نمایشی گرفتی رو اینجا وارد کن.
           </p>
 
+          <DemoNotice className="mt-6 rounded-xl">
+            پیگیری واقعی سفارش هنوز در این فروشگاه نمایشی فعال نیست؛ چون سیستم سفارش به هیچ بک‌اند یا انبار واقعی وصل نیست. کد مرجع فقط در همان لحظهٔ ثبت سفارش نمایشی معتبر بود و وضعیتی برای نمایش وجود ندارد.
+          </DemoNotice>
+
           <form onSubmit={onSubmit} className="mt-8 flex gap-2">
-            <label htmlFor="order-code" className="sr-only">کد پیگیری</label>
+            <label htmlFor="order-code" className="sr-only">کد مرجع سفارش</label>
             <input
               id="order-code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="مثال: LBB-2938471"
+              placeholder="مثال: ۱۲۳۴۵۶"
               className="h-12 flex-1 rounded-lg border border-black/15 px-4 text-sm outline-none focus:border-[var(--lbb-red)]"
             />
             <button
               type="submit"
               className="flex h-12 items-center gap-2 rounded-lg bg-[var(--lbb-red)] px-6 text-sm font-bold text-white hover:brightness-110"
             >
-              <Search size={16} /> پیگیری
+              <Search size={16} /> بررسی
             </button>
           </form>
 
-          {error && <p className="mt-3 text-xs text-[var(--lbb-red)]">{error}</p>}
-
-          {stage !== null && (
-            <div className="mt-10 rounded-xl border border-black/[0.06] p-6">
-              <p className="mb-6 text-sm text-gray-600">
-                کد <span className="font-bold text-black">{code}</span> پیدا شد. وضعیت فعلی:
-              </p>
-              <div className="flex items-center justify-between">
-                {STAGES.map((s, i) => {
-                  const Icon = s.icon;
-                  const done = i <= stage;
-                  return (
-                    <div key={s.label} className="flex flex-1 flex-col items-center gap-2 text-center">
-                      <div
-                        className={`grid h-11 w-11 place-items-center rounded-full border-2 ${
-                          done ? "border-[var(--lbb-red)] bg-[var(--lbb-red)] text-white" : "border-black/15 text-gray-400"
-                        }`}
-                      >
-                        <Icon size={18} />
-                      </div>
-                      <span className={`text-[11px] ${done ? "font-semibold text-black" : "text-gray-400"}`}>{s.label}</span>
-                      {i < STAGES.length - 1 && (
-                        <span className="absolute mt-5 hidden h-0.5 w-full translate-x-1/2 bg-transparent md:block" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          {submitted && (
+            <p className="mt-4 text-sm text-gray-600" role="status">
+              پیگیری وضعیت سفارش در این نسخهٔ نمایشی در دسترس نیست.
+            </p>
           )}
         </section>
       </main>
