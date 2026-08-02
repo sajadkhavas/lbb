@@ -1,68 +1,36 @@
-import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { bestSellers } from "@/lib/products";
 import { ProductCard } from "@/components/lbb/ProductCard";
+import { Band, SectionHead } from "@/components/lbb/ui/primitives";
+import { useReveal } from "@/hooks/use-reveal";
 
 const bestsellers = bestSellers(4);
 
-
 export function BestSellers() {
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let cleanup = () => {};
-    let cancelled = false;
-    (async () => {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-      if (cancelled) return;
-      const ctx = gsap.context(() => {
-        gsap.from(".bs-card", {
-          y: 60,
-          opacity: 0,
-          stagger: 0.1,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: root, start: "top 75%" },
-        });
-      }, root);
-      cleanup = () => ctx.revert();
-    })();
-    return () => {
-      cancelled = true;
-      cleanup();
-    };
-  }, []);
+  const ref = useReveal<HTMLElement>({ selector: ".bs-card", y: 40 });
 
   return (
-    <section ref={ref} dir="rtl" className="bg-white px-5 py-16 md:px-10" aria-labelledby="bestsellers-title">
-      <div className="mx-auto max-w-[1280px]">
-        <div className="flex items-end justify-between">
-          <h2
-            id="bestsellers-title"
-            className="text-[26px] font-bold text-[#0A0A0A] md:text-[32px] font-display"
-          >
-            پرفروش‌ترین‌ها
-          </h2>
-          <Link to="/shop" className="text-[13px] font-bold text-[var(--lbb-red)] hover:underline">
-            مشاهده همه →
-          </Link>
-        </div>
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:grid-rows-2">
+    <Band label="پرفروش‌ترین‌ها">
+      <div ref={ref}>
+        <SectionHead
+          index="07"
+          label="BESTSELLERS"
+          title="پرفروش‌ترین‌ها"
+          action={
+            <Link to="/shop" className="tech text-bone transition-colors hover:text-signal">
+              مشاهده همه →
+            </Link>
+          }
+          className="px-5 md:px-10"
+        />
+        <div className="mt-8 grid grid-cols-2 gap-4 px-5 lg:grid-cols-4 lg:grid-rows-2 md:px-10">
           {bestsellers.map((p, i) => (
-            <div
-              key={p.id}
-              className={`bs-card ${i === 0 ? "col-span-2 lg:col-span-2 lg:row-span-2" : ""}`}
-            >
+            <div key={p.id} className={`bs-card ${i === 0 ? "col-span-2 lg:col-span-2 lg:row-span-2" : ""}`}>
               <ProductCard p={p} priority={i === 0} />
             </div>
           ))}
         </div>
       </div>
-    </section>
+    </Band>
   );
 }

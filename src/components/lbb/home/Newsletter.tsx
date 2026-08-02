@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { CtaClasses } from "@/components/lbb/ui/primitives";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,29 +20,23 @@ export function Newsletter() {
       setLoading(false);
       setEmail("");
       toast.success("عضویت با موفقیت انجام شد", {
-        description: "کد تخفیف ۱۰٪ برات ایمیل شد 🎉",
+        description: "خبر دراپ‌های جدید LBB براتون ایمیل می‌شه.",
       });
     }, 600);
   };
 
   return (
-    <section dir="rtl" className="relative overflow-hidden bg-[var(--lbb-red)] px-6 py-20 md:px-10" aria-labelledby="newsletter-title">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: "repeating-linear-gradient(-45deg, #fff 0, #fff 1px, transparent 1px, transparent 22px)",
-        }}
-        aria-hidden="true"
-      />
+    <section
+      dir="rtl"
+      className="relative overflow-hidden bg-carbon px-6 py-20 md:px-10"
+      aria-labelledby="newsletter-title"
+    >
       <div className="relative mx-auto flex max-w-[720px] flex-col items-center gap-6 text-center">
-        <h2
-          id="newsletter-title"
-          className="text-[28px] font-black text-white md:text-[40px] font-display"
-        >
-          عضو خانواده LBB شو
+        <h2 id="newsletter-title" className="text-display-2 text-bone">
+          خبر دراپ‌های بعدی رو زودتر بگیر
         </h2>
-        <p className="max-w-md text-sm text-white/85">
-          با عضویت در خبرنامه از تخفیف‌های ویژه و کالکشن‌های جدید زودتر از همه باخبر شو.
+        <p className="max-w-md text-lede">
+          با عضویت در خبرنامه، همزمان با انتشار هر دراپ جدید ایمیل دریافت می‌کنی.
         </p>
 
         <form onSubmit={submit} className="mt-2 flex w-full max-w-md flex-col gap-3 sm:flex-row" noValidate>
@@ -52,13 +47,9 @@ export function Newsletter() {
             placeholder="ایمیل خود را وارد کنید"
             aria-label="ایمیل"
             dir="ltr"
-            className="h-12 flex-1 rounded-lg border border-white/30 bg-white/10 px-4 text-sm text-white placeholder:text-white/60 outline-none focus:border-white"
+            className="h-12 flex-1 border border-hairline bg-obsidian px-4 text-sm text-bone placeholder:text-mute outline-none focus:border-signal"
           />
-          <button
-            type="submit"
-            disabled={loading}
-            className="h-12 shrink-0 rounded-lg bg-black px-7 text-[13px] font-bold text-white transition-transform hover:scale-[1.03] disabled:opacity-60"
-          >
+          <button type="submit" disabled={loading} className={CtaClasses("signal")}>
             {loading ? "در حال ارسال..." : "عضویت"}
           </button>
         </form>

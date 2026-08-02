@@ -2,20 +2,12 @@ import { SlidersHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
+import { colorName } from "@/lib/color-names";
 import type { Filters } from "@/lib/product-filter";
 import { fmtToman, type CategorySlug } from "@/lib/products";
+import { TechLabel } from "@/components/lbb/ui/primitives";
 
-export const COLOR_LABELS: Record<string, string> = {
-  "#0A0A0A": "مشکی",
-  "#FFFFFF": "سفید",
-  "#E8001D": "قرمز",
-  "#888": "طوسی",
-  "#1a3c6e": "سرمه‌ای",
-};
-
-export function colorLabel(hex: string) {
-  return COLOR_LABELS[hex] ?? hex;
-}
+export { colorName as colorLabel };
 
 type Props = {
   filters: Filters;
@@ -32,31 +24,29 @@ function toggleValue(list: string[], v: string): string[] {
 
 export function ProductFilters({ filters, onChange, colors, sizes, priceCeil, showCategory }: Props) {
   return (
-    <div dir="rtl" className="flex flex-col gap-7 font-body">
-      <div className="flex items-center gap-2 text-sm font-bold text-black">
-        <SlidersHorizontal size={16} className="text-[var(--lbb-red)]" />
-        فیلترها
+    <div dir="rtl" className="flex flex-col gap-8">
+      <div className="flex items-center gap-2">
+        <SlidersHorizontal size={15} className="text-signal" aria-hidden="true" />
+        <TechLabel tone="signal">فیلترها</TechLabel>
       </div>
 
       {showCategory && (
-        <section>
-          <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-500">دسته‌بندی</h3>
-          <div className="flex flex-col gap-2.5">
-            {CATEGORY_SLUGS.map((s: CategorySlug) => (
-              <label key={s} className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700">
-                <Checkbox
-                  checked={filters.cats.includes(s)}
-                  onCheckedChange={() => onChange({ ...filters, cats: toggleValue(filters.cats, s) })}
-                />
-                {CATEGORIES[s].nameFa}
-              </label>
-            ))}
-          </div>
-        </section>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="tech mb-1 text-metal">دسته‌بندی</legend>
+          {CATEGORY_SLUGS.map((s: CategorySlug) => (
+            <label key={s} className="flex cursor-pointer items-center gap-2.5 text-sm text-bone">
+              <Checkbox
+                checked={filters.cats.includes(s)}
+                onCheckedChange={() => onChange({ ...filters, cats: toggleValue(filters.cats, s) })}
+              />
+              {CATEGORIES[s].nameFa}
+            </label>
+          ))}
+        </fieldset>
       )}
 
-      <section>
-        <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-500">رنگ</h3>
+      <fieldset>
+        <legend className="tech mb-3 text-metal">رنگ</legend>
         <div className="flex flex-wrap gap-2.5">
           {colors.map((c) => {
             const active = filters.colors.includes(c);
@@ -64,20 +54,28 @@ export function ProductFilters({ filters, onChange, colors, sizes, priceCeil, sh
               <button
                 key={c}
                 type="button"
-                title={colorLabel(c)}
-                aria-label={colorLabel(c)}
+                title={colorName(c)}
+                aria-label={colorName(c)}
                 aria-pressed={active}
                 onClick={() => onChange({ ...filters, colors: toggleValue(filters.colors, c) })}
-                className="relative h-8 w-8 rounded-full border border-black/15 transition-transform hover:scale-110"
-                style={{ background: c, outline: active ? "2px solid var(--lbb-red)" : "none", outlineOffset: 2 }}
-              />
+                className="tap-target relative grid place-items-center"
+              >
+                <span
+                  className="h-7 w-7 rounded-full border transition-transform hover:scale-110"
+                  style={{
+                    background: c,
+                    borderColor: active ? "var(--lbb-signal)" : "var(--lbb-hairline)",
+                    boxShadow: active ? "0 0 0 2px var(--lbb-signal)" : "none",
+                  }}
+                />
+              </button>
             );
           })}
         </div>
-      </section>
+      </fieldset>
 
-      <section>
-        <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-500">سایز</h3>
+      <fieldset>
+        <legend className="tech mb-3 text-metal">سایز</legend>
         <div className="flex flex-wrap gap-2">
           {sizes.map((s) => {
             const active = filters.sizes.includes(s);
@@ -85,53 +83,52 @@ export function ProductFilters({ filters, onChange, colors, sizes, priceCeil, sh
               <button
                 key={s}
                 type="button"
+                aria-pressed={active}
                 onClick={() => onChange({ ...filters, sizes: toggleValue(filters.sizes, s) })}
-                className={`h-9 min-w-[36px] rounded-lg border px-2.5 text-xs font-semibold transition-colors ${
-                  active
-                    ? "border-[var(--lbb-red)] bg-[var(--lbb-red)] text-white"
-                    : "border-black/15 text-gray-700 hover:border-black/40"
-                }`}
+                className={`size-chip ${active ? "border-signal bg-signal text-bone" : "hover:border-bone"}`}
               >
                 {s}
               </button>
             );
           })}
         </div>
-      </section>
+      </fieldset>
 
-      <section>
-        <h3 className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-wide text-gray-500">
+      <fieldset>
+        <legend className="tech mb-3 flex w-full items-center justify-between text-metal">
           <span>حداکثر قیمت</span>
-          <span className="text-black normal-case font-display">
+          <span className="num text-bone">
             {filters.max > 0 ? fmtToman(filters.max) : fmtToman(priceCeil)}
           </span>
-        </h3>
+        </legend>
         <Slider
           dir="ltr"
           min={0}
           max={priceCeil}
           step={50000}
+          aria-label="حداکثر قیمت"
           value={[filters.max > 0 ? filters.max : priceCeil]}
           onValueChange={([v]) => onChange({ ...filters, max: v >= priceCeil ? 0 : v })}
         />
-      </section>
+      </fieldset>
 
-      <section className="flex flex-col gap-3">
-        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700">
+      <fieldset className="flex flex-col gap-3">
+        <legend className="sr-only">وضعیت موجودی</legend>
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-bone">
           <Checkbox
             checked={filters.instock}
             onCheckedChange={(v) => onChange({ ...filters, instock: v === true })}
           />
           فقط کالاهای موجود
         </label>
-        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700">
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-bone">
           <Checkbox
             checked={filters.sale}
             onCheckedChange={(v) => onChange({ ...filters, sale: v === true })}
           />
           فقط تخفیف‌دارها
         </label>
-      </section>
+      </fieldset>
     </div>
   );
 }

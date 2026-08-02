@@ -1,71 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useReveal } from "@/hooks/use-reveal";
 
 export function BrandStatement() {
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let cleanup = () => {};
-    let cancelled = false;
-    (async () => {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-      if (cancelled) return;
-      const ctx = gsap.context(() => {
-        gsap.fromTo(
-          ".statement-inner",
-          { scale: 0.7, opacity: 0.3 },
-          {
-            scale: 1,
-            opacity: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: root,
-              start: "top bottom",
-              end: "center center",
-              scrub: 0.5,
-            },
-          },
-        );
-      }, root);
-      cleanup = () => ctx.revert();
-    })();
-    return () => {
-      cancelled = true;
-      cleanup();
-    };
-  }, []);
+  const ref = useReveal<HTMLElement>({ selector: ".statement-inner", y: 0, duration: 1 });
 
   return (
     <section
       ref={ref}
       dir="rtl"
-      className="relative grid min-h-[100svh] place-items-center overflow-hidden bg-[var(--lbb-red)] px-6"
+      className="relative grid min-h-[70svh] place-items-center overflow-hidden bg-signal px-6 py-24"
       aria-label="بیانیه برند"
     >
-      <div className="statement-inner text-center font-display">
-        <span className="block text-[9vw] font-black leading-[0.95] text-white">پوشاک</span>
+      <div className="statement-inner text-center">
+        <span className="block text-[9vw] font-black leading-[0.95] text-bone">پوشاک</span>
         <span
-          className="block font-black leading-[0.95] text-white"
+          className="block font-black leading-[0.95] text-bone"
           style={{ fontSize: "13vw", letterSpacing: "-0.04em" }}
         >
           یه حرف
         </span>
-        <span
-          className="block text-[9vw] font-bold leading-[0.95]"
-          style={{ color: "rgba(255,255,255,0.5)" }}
-        >
-          می‌زنه.
-        </span>
+        <span className="block text-[9vw] font-bold leading-[0.95] text-bone/50">می‌زنه.</span>
       </div>
-      <span
-        className="absolute bottom-8 left-8 text-[11px] font-mono"
-        style={{ color: "rgba(255,255,255,0.4)" }}
-      >
-        LBB ✦ استریت‌ویر ایران
+      <span className="tech absolute bottom-8 inset-inline-start-8 text-bone/70">
+        LBB ✦ استریت‌ویر تهران
       </span>
     </section>
   );
