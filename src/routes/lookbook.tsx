@@ -6,10 +6,11 @@ import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { lifestyle1, lifestyle2, heroMain, productImage } from "@/lib/product-images";
+import { Shell, Band, SectionHead, CtaClasses } from "@/components/lbb/ui/primitives";
+import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 
 const TITLE = "لوک‌بوک LBB | استایل‌های استریت‌ویر فصل";
-const DESC =
-  "لوک‌بوک LBB: گالری استایل‌های استریت‌ویر، ست‌های کامل هودی، کارگو و کتونی. الهام بگیر و ست خودت رو بساز.";
+const DESC = "لوک‌بوک LBB: گالری استایل‌های استریت‌ویر و ست‌های کامل هودی، کارگو و کتونی برای الهام گرفتن.";
 
 type Shot = { src: string; alt: string; span: string };
 
@@ -26,30 +27,10 @@ const shots: Shot[] = [
 
 export const Route = createFileRoute("/lookbook")({
   head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESC },
-      { name: "robots", content: "index, follow" },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESC },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "/lookbook" },
-      { name: "twitter:title", content: TITLE },
-      { name: "twitter:description", content: DESC },
-    ],
-    links: [{ rel: "canonical", href: "/lookbook" }],
+    meta: pageMeta({ title: TITLE, description: DESC, path: "/lookbook" }),
+    links: canonical("/lookbook"),
     scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "خانه", item: "/" },
-            { "@type": "ListItem", position: 2, name: "لوک‌بوک", item: "/lookbook" },
-          ],
-        }),
-      },
+      { type: "application/ld+json", children: JSON.stringify(breadcrumbLd([{ name: "خانه", path: "/" }, { name: "لوک‌بوک", path: "/lookbook" }])) },
     ],
   }),
   component: LookbookPage,
@@ -61,84 +42,74 @@ function LookbookPage() {
   return (
     <>
       <Navbar theme="light" />
-      <main
-        dir="rtl"
-        className="min-h-screen bg-white pt-16 text-black"
-        style={{ paddingBottom: "80px", fontFamily: "'Vazirmatn', sans-serif" }}
-      >
-        <div className="border-b border-black/[0.06]">
-          <div className="mx-auto max-w-[1280px] px-4 py-3 md:px-8">
-            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "لوک‌بوک" }]} />
-          </div>
-        </div>
+      <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
+        <Shell className="py-3">
+          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "لوک‌بوک" }]} />
+        </Shell>
 
-        <header className="mx-auto max-w-[1280px] px-4 py-10 md:px-8">
-          <h1
-            className="text-3xl font-bold md:text-[42px]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            لوک‌بوک
-          </h1>
-          <p className="mt-3 max-w-[560px] text-sm leading-7 text-gray-600">
-            ست‌های کامل فصل، همون‌طور که توی خیابون دیده می‌شن. روی هر تصویر بزن تا بزرگ ببینیش.
-          </p>
-        </header>
+        <Band hairline={false} className="pb-0 pt-6">
+          <Shell>
+            <SectionHead
+              label="LOOKBOOK"
+              title="لوک‌بوک"
+              lede="ست‌های کامل فصل، همان‌طور که در خیابان دیده می‌شوند. روی هر تصویر بزنید تا بزرگ ببینید."
+            />
+          </Shell>
+        </Band>
 
-        <section className="mx-auto max-w-[1280px] px-4 pb-14 md:px-8">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-            {shots.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => setActive(s)}
-                className={`group relative overflow-hidden rounded-xl bg-[#f2f2f2] ${s.span}`}
-                style={{ aspectRatio: s.span === "row-span-2" ? "3 / 8" : "3 / 4" }}
-                aria-label={s.alt}
-              >
-                <img
-                  src={s.src}
-                  alt={s.alt}
-                  width={s.span === "row-span-2" ? 480 : s.span === "col-span-2" ? 960 : 480}
-                  height={s.span === "row-span-2" ? 1280 : s.span === "col-span-2" ? 640 : 640}
-                  loading={i < 2 ? "eager" : "lazy"}
-                  fetchPriority={i < 2 ? "high" : undefined}
-                  decoding="async"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <span className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/15" />
-              </button>
-            ))}
-          </div>
+        <Band>
+          <Shell>
+            <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4">
+              {shots.map((s, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActive(s)}
+                  className={`group relative overflow-hidden bg-carbon ${s.span}`}
+                  style={{ aspectRatio: s.span === "row-span-2" ? "3 / 8" : "3 / 4" }}
+                  aria-label={s.alt}
+                >
+                  <img
+                    src={s.src}
+                    alt={s.alt}
+                    width={s.span === "row-span-2" ? 480 : s.span === "col-span-2" ? 960 : 480}
+                    height={s.span === "row-span-2" ? 1280 : s.span === "col-span-2" ? 640 : 640}
+                    loading={i < 2 ? "eager" : "lazy"}
+                    fetchPriority={i < 2 ? "high" : undefined}
+                    decoding="async"
+                    className="frame-zoom h-full w-full object-cover group-hover:scale-105"
+                  />
+                </button>
+              ))}
+            </div>
 
-          <div className="mt-12 rounded-2xl bg-[#0A0A0A] px-6 py-10 text-center text-white">
-            <h2 className="text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              ست مورد علاقه‌ت رو پیدا کن
-            </h2>
-            <p className="mx-auto mt-2 max-w-[420px] text-[13px] text-white/60">
-              همه قطعات این لوک‌بوک توی فروشگاه موجودن.
-            </p>
-            <Link
-              to="/shop"
-              className="mt-5 inline-flex h-12 items-center rounded-lg bg-[var(--lbb-red)] px-7 text-xs font-bold"
-            >
-              رفتن به فروشگاه
-            </Link>
-          </div>
-        </section>
+            <div className="mt-12 border border-hairline bg-carbon px-6 py-10 text-center">
+              <h2 className="text-display-3 text-bone">ست مورد علاقه‌تان را پیدا کنید</h2>
+              <p className="mx-auto mt-2 max-w-[420px] text-sm text-metal">
+                همه قطعات این لوک‌بوک در فروشگاه موجودند.
+              </p>
+              <Link to="/shop" className={CtaClasses("signal") + " mt-6"}>
+                رفتن به فروشگاه
+              </Link>
+            </div>
+          </Shell>
+        </Band>
       </main>
 
       {active && (
         <div
-          className="fixed inset-0 z-[300] grid place-items-center bg-black/85 p-4"
+          className="fixed inset-0 z-[300] grid place-items-center bg-obsidian/90 p-4"
           role="dialog"
           aria-modal="true"
           onClick={() => setActive(null)}
         >
           <button
+            type="button"
             aria-label="بستن"
             onClick={() => setActive(null)}
-            className="absolute left-5 top-5 text-white"
+            className="tap-target absolute end-4 top-4 text-bone"
           >
-            <X size={28} />
+            <X size={28} aria-hidden="true" />
           </button>
           <img
             src={active.src}
@@ -147,7 +118,7 @@ function LookbookPage() {
             height={1500}
             loading="eager"
             decoding="async"
-            className="max-h-[88vh] max-w-full rounded-lg object-contain"
+            className="max-h-[88vh] max-w-full object-contain"
           />
         </div>
       )}
