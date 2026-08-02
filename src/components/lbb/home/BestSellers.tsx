@@ -7,7 +7,7 @@ import { useReveal } from "@/hooks/use-reveal";
 const bestsellers = bestSellers(4);
 
 export function BestSellers() {
-  const ref = useReveal<HTMLElement>({ selector: ".bs-card", y: 40 });
+  const ref = useReveal<HTMLDivElement>({ selector: ".bs-card", y: 40 });
 
   return (
     <Band label="پرفروش‌ترین‌ها">
