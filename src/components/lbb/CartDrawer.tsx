@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { X, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useCart } from "@/lib/cart";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { fmtToman } from "@/lib/products";
 import { productImage } from "@/lib/product-images";
 
@@ -9,16 +10,8 @@ export function CartDrawer() {
   const { lines, drawerOpen, closeDrawer, setQty, remove, subtotal, count } =
     useCart();
 
-  useEffect(() => {
-    if (!drawerOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeDrawer();
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [drawerOpen, closeDrawer]);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(drawerOpen, panelRef, closeDrawer);
 
   if (!drawerOpen) return null;
 
@@ -37,6 +30,7 @@ export function CartDrawer() {
         style={{ animation: "lbb-fade 0.2s ease" }}
       />
       <aside
+        ref={panelRef}
         className="absolute inset-y-0 left-0 flex w-full max-w-[400px] flex-col bg-white text-black shadow-2xl"
         style={{ animation: "lbb-drawer-in 0.32s cubic-bezier(0.22,1,0.36,1)" }}
       >
