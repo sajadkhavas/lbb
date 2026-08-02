@@ -340,7 +340,7 @@ function ProductPage() {
                       </tbody>
                     </table>
                     <ul className="flex flex-col gap-1.5">
-                      {p.care.map((c) => (
+                      {p.care.map((c: string) => (
                         <li key={c} className="flex gap-2">
                           <span aria-hidden="true" className="mt-3 h-px w-3 shrink-0 bg-signal" />
                           {c}
@@ -382,7 +382,7 @@ function ProductPage() {
             <Shell>
               <SectionHead label="شاید بپسندید" title="پیشنهاد برای شما" className="mb-8" />
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-                {related.map((r) => (
+                {related.map((r: Product) => (
                   <ProductCard key={r.id} p={r} />
                 ))}
               </div>
