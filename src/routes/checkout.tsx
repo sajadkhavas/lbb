@@ -5,6 +5,7 @@ import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { useCart } from "@/lib/cart";
 import { fmtToman } from "@/lib/products";
+import { DemoNotice } from "@/components/lbb/ui/primitives";
 
 const PROVINCES = [
   "تهران", "البرز", "اصفهان", "فارس", "خراسان رضوی", "آذربایجان شرقی", "آذربایجان غربی",
@@ -56,10 +57,15 @@ function Checkout() {
   };
 
   const submitOrder = () => {
-    // Replace with real payment gateway integration
-    const orderNumber = String(Math.floor(100000 + Math.random() * 900000));
+    // Demo-only: no payment gateway is connected and no order is actually
+    // transmitted anywhere. This reference id only exists in this browser tab.
+    const ref = String(Math.floor(100000 + Math.random() * 900000));
+    const itemCount = lines.reduce((a, l) => a + l.qty, 0);
     clear();
-    navigate({ to: "/order-confirmation", search: { order: orderNumber, phone: form.phone } });
+    navigate({
+      to: "/order-confirmation",
+      search: { ref, itemCount: String(itemCount), total: String(total) },
+    });
   };
 
   return (
@@ -166,10 +172,12 @@ function Checkout() {
                 ))}
               </div>
 
-              <button onClick={submitOrder} className="mt-6 h-[56px] w-full rounded-xl bg-[var(--lbb-red)] text-[14px] font-bold text-white">
-                پرداخت و ثبت سفارش
+              <DemoNotice className="mt-6 rounded-xl">
+                این یک فروشگاه نمایشی است. با کلیک روی «ثبت سفارش نمایشی» هیچ پرداخت واقعی انجام نمی‌شود، هیچ سفارشی برای شما ارسال نمی‌شود و پیامک یا ایمیلی دریافت نخواهید کرد.
+              </DemoNotice>
+              <button onClick={submitOrder} className="mt-4 h-[56px] w-full rounded-xl bg-[var(--lbb-red)] text-[14px] font-bold text-white">
+                ثبت سفارش نمایشی
               </button>
-              <p className="mt-3 text-center text-[11px] text-[#888]">🔒 پرداخت از طریق درگاه امن بانکی</p>
               <button onClick={() => setStep(1)} className="mt-4 w-full text-[12px] text-black/50">
                 بازگشت به اطلاعات ارسال
               </button>

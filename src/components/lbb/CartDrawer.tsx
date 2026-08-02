@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { X, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useCart } from "@/lib/cart";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { fmtToman } from "@/lib/products";
