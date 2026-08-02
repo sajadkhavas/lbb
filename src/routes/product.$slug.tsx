@@ -13,6 +13,7 @@ import { StickyBuyBar } from "@/components/lbb/product/StickyBuyBar";
 import { FitGuide } from "@/components/lbb/product/FitGuide";
 import { RecentlyViewed } from "@/components/lbb/product/RecentlyViewed";
 import { SizeGuideDialog } from "@/components/lbb/product/SizeGuideDialog";
+import type { Product } from "@/lib/products";
 import {
   productBySlug,
   productsByCategory,
