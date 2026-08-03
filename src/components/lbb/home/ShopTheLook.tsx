@@ -30,7 +30,7 @@ export function ShopTheLook() {
       />
 
       <div className="relative mx-auto mt-8 max-w-[560px]">
-        <Frame src={lifestyle1} alt="ست کامل استریت‌ویر LBB" ratio="4/5" zoom={false} width={1200} height={1500}>
+        <Frame src={lifestyle1} alt="ست کامل استریت‌ویر LBB" ratio="4/5" zoom={false} width={1200} height={1500} className="rounded-2xl border border-hairline">
           {HOTSPOTS.map((h) => {
             const product = products.find((p) => p.slug === h.slug);
             if (!product) return null;
@@ -46,14 +46,14 @@ export function ShopTheLook() {
                   aria-label={`نمایش ${product.name}`}
                   aria-expanded={isActive}
                   onClick={() => setActive(isActive ? null : h.slug)}
-                  className="tap-target relative flex h-9 w-9 items-center justify-center rounded-full bg-bone text-obsidian shadow-lg ring-4 ring-bone/30 transition-transform hover:scale-110"
+                  className="tap-target relative flex h-9 w-9 items-center justify-center rounded-full bg-bone text-obsidian shadow-lg ring-4 ring-bone/30 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-signal"
                 >
                   {isActive ? <X size={16} /> : <Plus size={16} />}
                 </button>
 
                 {isActive && (
                   <div
-                    className="absolute z-20 w-48 border border-hairline bg-carbon p-3 shadow-2xl"
+                    className="absolute z-20 w-48 rounded-xl border border-hairline bg-carbon p-3 shadow-2xl"
                     style={{
                       top: h.y > 55 ? "auto" : "calc(100% + 12px)",
                       bottom: h.y > 55 ? "calc(100% + 12px)" : "auto",

@@ -42,7 +42,7 @@ const storeJsonLd = {
   name: "LBB",
   alternateName: "ال‌بی‌بی",
   url: "/",
-  logo: "/favicon.ico",
+  logo: "/favicon.png",
   description: "فروشگاه آنلاین پوشاک استریت‌ویر LBB. خرید هودی، شلوار، تیشرت، کتونی و جوراب.",
   priceRange: "$$",
   currenciesAccepted: "IRR",

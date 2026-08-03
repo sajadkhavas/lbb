@@ -5,7 +5,7 @@ import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { useCart } from "@/lib/cart";
 import { fmtToman } from "@/lib/products";
-import { DemoNotice, Shell, CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
+import { DemoNotice, CtaClasses } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
