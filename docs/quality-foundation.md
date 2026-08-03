@@ -23,6 +23,12 @@ npm run dead-code:report
 
 `npm run release:check` runs the same validation chain after dependencies and Chromium are installed.
 
+### TypeScript ownership boundary
+
+`npm run typecheck` executes the full TypeScript compiler. It stores all diagnostics in `artifacts/typecheck`, fails on diagnostics in F8-A-owned files, and reports diagnostics in feature-owned files as explicit Final Review handoff items. This keeps the quality branch verifiable without editing parallel feature work.
+
+`npm run typecheck:integration` is the strict, unfiltered full-project command. It is expected to become mandatory and fully green after all feature branches are merged in Final Review.
+
 ## PWA cache policy
 
 The worker precaches hashed JavaScript, CSS, font and SVG build assets. Public documents use a bounded `NetworkFirst` cache. Public product/editorial images use a bounded `StaleWhileRevalidate` cache.
