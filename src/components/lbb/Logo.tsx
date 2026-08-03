@@ -1,10 +1,7 @@
-import logoAsset from "@/assets/brand/lbb-logo.jpg.asset.json";
 import { cn } from "@/lib/utils";
 
-/**
- * Official LBB brand mark (red canvas, Persian «ال‌بی‌بی» wordmark).
- * Cropped to a square via object-fit so it reads at every size.
- */
+const LOGO_SRC = "/brand/lbb-logo.svg";
+
 export function Logo({
   size = 34,
   className,
@@ -17,11 +14,12 @@ export function Logo({
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <img
-        src={logoAsset.url}
-        alt="LBB — ال‌بی‌بی"
+        src={LOGO_SRC}
+        alt={withWordmark ? "" : "LBB"}
         width={size}
         height={size}
-        className="shrink-0 rounded-xl object-cover"
+        decoding="async"
+        className="shrink-0 rounded-xl"
         style={{ width: size, height: size }}
       />
       {withWordmark ? (
