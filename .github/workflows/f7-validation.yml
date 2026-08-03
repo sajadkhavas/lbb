@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies with npm ci
         run: npm ci --no-audit --no-fund --legacy-peer-deps
 
+      - name: Install typecheck runtime
+        run: npm install --no-save --package-lock=false --legacy-peer-deps @typescript/native-preview@7.0.0-dev.20260707.2
+
       - name: Typecheck
         run: npm run typecheck
 
