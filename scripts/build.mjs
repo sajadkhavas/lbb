@@ -1,10 +1,13 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { build, loadEnv } from "vite";
+import { loadEnv } from "vite";
 
 const root = process.cwd();
-const publicOutputDir = path.join(root, ".output", "public");
+const outputDir = path.join(root, ".output");
+const publicOutputDir = path.join(outputDir, "public");
+const serverEntry = path.join(outputDir, "server", "index.mjs");
 const mode = process.argv[2] ?? "production";
 const env = loadEnv(mode, root, "");
 const configuredUrl = process.env.VITE_SITE_URL || env.VITE_SITE_URL;
@@ -38,9 +41,14 @@ function normalizeSiteUrl(value) {
   return parsed.origin;
 }
 
-const siteUrl = normalizeSiteUrl(configuredUrl);
-process.env.VITE_SITE_URL = siteUrl;
+async function assertFile(file, description) {
+  const fileStat = await stat(file).catch(() => null);
+  if (!fileStat?.isFile() || fileStat.size === 0) {
+    throw new Error(`${description} was not emitted: ${path.relative(root, file)}`);
+  }
+}
 
+const siteUrl = normalizeSiteUrl(configuredUrl);
 const robotsPath = path.join(root, "public", "robots.txt");
 const manifestPath = path.join(root, "public", "manifest.webmanifest");
 const robotsTemplate = await readFile(robotsPath, "utf8");
@@ -54,25 +62,36 @@ if (!manifest.name || manifest.display !== "standalone" || !Array.isArray(manife
 }
 
 const renderedRobots = robotsTemplate.replaceAll("{{SITE_URL}}", siteUrl);
+const viteCli = path.join(root, "node_modules", "vite", "bin", "vite.js");
+const buildResult = spawnSync(process.execPath, [viteCli, "build", "--mode", mode], {
+  cwd: root,
+  env: { ...process.env, VITE_SITE_URL: siteUrl },
+  stdio: "inherit",
+});
 
-try {
-  await build({ mode });
+if (buildResult.error) throw buildResult.error;
+if (buildResult.status !== 0) {
+  throw new Error(`Vite production build failed with exit code ${buildResult.status}.`);
+}
 
-  await mkdir(publicOutputDir, { recursive: true });
-  const builtRobotsPath = path.join(publicOutputDir, "robots.txt");
-  const builtManifestPath = path.join(publicOutputDir, "manifest.webmanifest");
-  await Promise.all([
-    writeFile(builtRobotsPath, renderedRobots, "utf8"),
-    copyFile(manifestPath, builtManifestPath),
-  ]);
+await assertFile(serverEntry, "TanStack Start SSR server entry");
+await mkdir(publicOutputDir, { recursive: true });
+const builtRobotsPath = path.join(publicOutputDir, "robots.txt");
+const builtManifestPath = path.join(publicOutputDir, "manifest.webmanifest");
+await Promise.all([
+  writeFile(builtRobotsPath, renderedRobots, "utf8"),
+  copyFile(manifestPath, builtManifestPath),
+]);
 
-  const builtRobots = await readFile(builtRobotsPath, "utf8");
-  if (builtRobots.includes("{{SITE_URL}}")) {
-    throw new Error("Production robots.txt still contains an unresolved SITE_URL token.");
-  }
-  if (!builtRobots.includes(`Sitemap: ${siteUrl}/sitemap.xml`)) {
-    throw new Error("Production robots.txt does not contain the absolute configured sitemap URL.");
-  }
-} finally {
-  await writeFile(robotsPath, robotsTemplate, "utf8");
+await Promise.all([
+  assertFile(builtRobotsPath, "Production robots.txt"),
+  assertFile(builtManifestPath, "Production web manifest"),
+]);
+
+const builtRobots = await readFile(builtRobotsPath, "utf8");
+if (builtRobots.includes("{{SITE_URL}}")) {
+  throw new Error("Production robots.txt still contains an unresolved SITE_URL token.");
+}
+if (!builtRobots.includes(`Sitemap: ${siteUrl}/sitemap.xml`)) {
+  throw new Error("Production robots.txt does not contain the absolute configured sitemap URL.");
 }
