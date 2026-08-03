@@ -93,7 +93,7 @@ export function HeroSplit() {
           </h1>
 
           <p className="hero-meta-item max-w-md text-lede">
-            هودی، شلوار، تیشرت، کتونی و اکسسوری از اولین دراپ LBB — طراحی‌شده برای خیابان‌های تهران.
+            هودی، شلوار، تیشرت، کتونی و جوراب از اولین دراپ LBB — طراحی‌شده برای خیابان‌های تهران.
           </p>
 
           <div className="flex flex-wrap items-center gap-3">

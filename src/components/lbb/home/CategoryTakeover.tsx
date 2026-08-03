@@ -20,7 +20,7 @@ export function CategoryTakeover() {
         index="02"
         label="CATEGORIES"
         title="دسته‌بندی‌ها"
-        lede={`${current.heroTagline} — از هودی و شلوار تا کتونی و اکسسوری، هر چیزی که یک ست استریت‌ویر کامل لازم دارد.`}
+        lede={`${current.heroTagline} — از هودی و شلوار تا کتونی و جوراب، هر چیزی که یک ست استریت‌ویر کامل لازم دارد.`}
         action={
           <Link to="/shop" className="tech text-bone transition-colors hover:text-signal">
             همه محصولات ←

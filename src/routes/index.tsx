@@ -22,7 +22,7 @@ import { pageMeta, canonical } from "@/lib/site";
 
 const TITLE = "LBB | استریت‌ویر تهران — هودی، شلوار، کتونی، تیشرت";
 const DESC =
-  "LBB، برند استریت‌ویر تهران. دراپ ۰۰۱ شامل هودی، شلوار، تیشرت، کتونی و اکسسوری. ارسال از تهران.";
+  "LBB، برند استریت‌ویر تهران. دراپ ۰۰۱ شامل هودی، شلوار، تیشرت، کتونی و جوراب. ارسال از تهران.";
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -43,7 +43,7 @@ const storeJsonLd = {
   alternateName: "ال‌بی‌بی",
   url: "/",
   logo: "/favicon.ico",
-  description: "فروشگاه آنلاین پوشاک استریت‌ویر LBB. خرید هودی، شلوار، تیشرت، کتونی و اکسسوری.",
+  description: "فروشگاه آنلاین پوشاک استریت‌ویر LBB. خرید هودی، شلوار، تیشرت، کتونی و جوراب.",
   priceRange: "$$",
   currenciesAccepted: "IRR",
   paymentAccepted: "درگاه بانکی",

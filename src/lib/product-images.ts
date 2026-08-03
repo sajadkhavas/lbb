@@ -2,7 +2,7 @@ import hoodieClassic from "@/assets/products/hoodie-classic.jpg";
 import cargoPants from "@/assets/products/cargo-pants.jpg";
 import signatureTee from "@/assets/products/signature-tee.jpg";
 import urbanRunner from "@/assets/products/urban-runner.jpg";
-import lbbCap from "@/assets/products/lbb-cap.jpg";
+import lbbSocks from "@/assets/products/lbb-socks.jpg";
 import oversizedBlackHoodie from "@/assets/products/oversized-black-hoodie.jpg";
 import denimBaggy from "@/assets/products/denim-baggy.jpg";
 import graphicTeeRed from "@/assets/products/graphic-tee-red.jpg";
@@ -17,7 +17,7 @@ const MAIN: Record<string, string> = {
   "cargo-street-pants": cargoPants,
   "lbb-signature-tee": signatureTee,
   "urban-runner-sneaker": urbanRunner,
-  "lbb-cap": lbbCap,
+  "lbb-crew-socks": lbbSocks,
   "oversized-black-hoodie": oversizedBlackHoodie,
   "denim-baggy-jean": denimBaggy,
   "graphic-tee-red": graphicTeeRed,
