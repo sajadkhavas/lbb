@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { build, loadEnv } from "vite";
@@ -48,12 +48,14 @@ if (!robotsTemplate.includes("{{SITE_URL}}")) {
 }
 
 const renderedRobots = robotsTemplate.replaceAll("{{SITE_URL}}", siteUrl);
-await writeFile(robotsPath, renderedRobots, "utf8");
 
 try {
   await build({ mode });
 
+  await mkdir(publicOutputDir, { recursive: true });
   const builtRobotsPath = path.join(publicOutputDir, "robots.txt");
+  await writeFile(builtRobotsPath, renderedRobots, "utf8");
+
   const builtRobots = await readFile(builtRobotsPath, "utf8");
   if (builtRobots.includes("{{SITE_URL}}")) {
     throw new Error("Production robots.txt still contains an unresolved SITE_URL token.");
