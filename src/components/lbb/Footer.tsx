@@ -2,6 +2,7 @@ import { Link, type LinkProps } from "@tanstack/react-router";
 import { Instagram, ArrowUpLeft } from "lucide-react";
 import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
 import { TechLabel } from "@/components/lbb/ui/primitives";
+import { Logo } from "@/components/lbb/Logo";
 
 type Item = { label: string; to: LinkProps["to"]; params?: LinkProps["params"] };
 
