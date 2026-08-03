@@ -19,7 +19,7 @@
     "test": "npm run test:quality",
     "test:quality": "playwright test tests/quality",
     "test:a11y": "playwright test tests/quality/accessibility.spec.ts",
-    "test:visual": "playwright test tests/visual",
+    "test:visual": "playwright test --config=playwright.visual.config.ts",
     "bundle:report": "node scripts/bundle-report.mjs",
     "bundle:check": "node scripts/bundle-report.mjs --check",
     "dead-code:report": "node scripts/dead-code-report.mjs",
