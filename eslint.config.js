@@ -6,12 +6,30 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", ".output", ".vinxi"] },
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    ignores: [
+      "dist",
+      ".output",
+      ".vinxi",
+      "artifacts",
+      "playwright-report",
+      "test-results",
+      "tests/visual/__screenshots__",
+    ],
+  },
+  js.configs.recommended,
+  {
+    files: ["scripts/**/*.mjs", "*.config.{js,ts}", "playwright*.config.ts"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: globals.node,
+    },
+  },
+  {
+    extends: [...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2022,
       globals: globals.browser,
     },
     plugins: {
@@ -34,6 +52,12 @@ export default tseslint.config(
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  {
+    files: ["tests/**/*.ts", "playwright*.config.ts"],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
     },
   },
   eslintPluginPrettier,
