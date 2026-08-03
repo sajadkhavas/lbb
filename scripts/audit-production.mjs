@@ -3,7 +3,7 @@ import path from "node:path";
 import process from "node:process";
 
 const root = process.cwd();
-const clientDir = path.join(root, "dist", "client");
+const clientDir = path.join(root, ".output", "public");
 const artifactsDir = path.join(root, "artifacts", "audit");
 const configuredSiteUrl = process.env.VITE_SITE_URL;
 
@@ -72,7 +72,7 @@ check(
 check("legacy broad page cache removed", !sw.includes("lbb-pages"), "legacy cache name absent");
 
 const logoPath = path.join(clientDir, "brand", "lbb-logo.svg");
-check("optimized logo emitted", await exists(logoPath), "dist/client/brand/lbb-logo.svg");
+check("optimized logo emitted", await exists(logoPath), ".output/public/brand/lbb-logo.svg");
 
 const files = await walk(clientDir);
 const textExtensions = new Set([".html", ".js", ".mjs", ".css", ".json", ".xml", ".txt", ".svg"]);
@@ -109,6 +109,7 @@ check(
 
 const report = {
   generatedAt: new Date().toISOString(),
+  publicOutputDir: ".output/public",
   siteUrl,
   status: checks.every((item) => item.pass) ? "PASS" : "FAIL",
   checks,
