@@ -19,6 +19,7 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd, absUrl } from "@/lib/site";
+import { EMPTY_FILTERS } from "@/lib/product-filter";
 
 export const Route = createFileRoute("/collections/$slug")({
   loader: ({ params }): { collection: Collection; items: Product[] } => {
@@ -204,7 +205,7 @@ function CollectionDetailPage() {
                 title="محصولی برای این کالکشن ثبت نشده"
                 body="فهرست این کالکشن در حال حاضر به محصول فعالی متصل نیست."
                 action={
-                  <Link to="/shop" className={CtaClasses("signal")}>
+                  <Link to="/shop" search={EMPTY_FILTERS} className={CtaClasses("signal")}>
                     رفتن به فروشگاه
                   </Link>
                 }

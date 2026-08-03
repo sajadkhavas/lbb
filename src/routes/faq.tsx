@@ -6,6 +6,7 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { Band, CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";
+import { EMPTY_FILTERS } from "@/lib/product-filter";
 
 const TITLE = "سوالات متداول LBB | محصول، سایز، موجودی و سفارش";
 const DESC =
@@ -218,7 +219,7 @@ function FaqPage() {
               <Link to="/journal" className={CtaClasses("line")}>
                 ژورنال
               </Link>
-              <Link to="/shop" className={CtaClasses("signal")}>
+              <Link to="/shop" search={EMPTY_FILTERS} className={CtaClasses("signal")}>
                 فروشگاه
               </Link>
             </div>

@@ -17,6 +17,7 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import { EMPTY_FILTERS } from "@/lib/product-filter";
 
 const TITLE = "درباره LBB | ساختار فروشگاه و رویکرد محتوایی";
 const DESC =
@@ -82,7 +83,7 @@ function AboutPage() {
                 این صفحه درباره ساختار همین تجربه است. درباره اندازه تیم، محل تولید، حجم فروش یا شعبه فیزیکی ادعایی مطرح نمی‌شود؛ اطلاعاتی که برای تصمیم خرید اهمیت دارد باید از داده واقعی محصول و مراحل سفارش بیاید.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link to="/shop" className={CtaClasses("signal")}>
+                <Link to="/shop" search={EMPTY_FILTERS} className={CtaClasses("signal")}>
                   مشاهده فروشگاه
                 </Link>
                 <Link to="/collections" className={CtaClasses("line")}>

@@ -8,6 +8,7 @@ import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { lifestyle1, lifestyle2, heroMain, productImage } from "@/lib/product-images";
 import { Band, CtaClasses, SectionHead, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import { EMPTY_FILTERS } from "@/lib/product-filter";
 
 const TITLE = "لوک‌بوک LBB | ایده‌های استایل با محصولات موجود";
 const DESC =
@@ -202,7 +203,7 @@ function LookbookPage() {
               <Link to="/collections" className={CtaClasses("line")}>
                 کالکشن‌ها
               </Link>
-              <Link to="/shop" className={CtaClasses("signal")}>
+              <Link to="/shop" search={EMPTY_FILTERS} className={CtaClasses("signal")}>
                 فروشگاه
               </Link>
             </div>
