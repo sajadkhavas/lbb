@@ -38,6 +38,73 @@ jobs:
           npm install --no-save --package-lock=false --legacy-peer-deps @typescript/native-preview@7.0.0-dev.20260707.2 @playwright/test@1.54.2
           npx playwright install --with-deps chromium
 
+      - name: Correct F7 not-found heading hierarchy
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          collection_path = Path("src/routes/collections.$slug.tsx")
+          collection_text = collection_path.read_text()
+          collection_old = '''            <EmptyState
+              icon={<Layers3 aria-hidden="true" size={34} />}
+              title="این کالکشن پیدا نشد"
+              body="آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد."
+              action={
+                <Link to="/collections" className={CtaClasses("signal")}>
+                  بازگشت به کالکشن‌ها
+                </Link>
+              }
+            />'''
+          collection_new = '''            <div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
+              <span className="text-mute">
+                <Layers3 aria-hidden="true" size={34} />
+              </span>
+              <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
+              <p className="max-w-[42ch] text-sm leading-7 text-metal">
+                آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.
+              </p>
+              <Link to="/collections" className={CtaClasses("signal")}>
+                بازگشت به کالکشن‌ها
+              </Link>
+            </div>'''
+          if collection_old in collection_text:
+              collection_path.write_text(collection_text.replace(collection_old, collection_new))
+          elif collection_new not in collection_text:
+              raise RuntimeError("Collection not-found block was not found")
+
+          journal_path = Path("src/routes/journal.$slug.tsx")
+          journal_text = journal_path.read_text()
+          journal_old = '''            <EmptyState
+              icon={<BookOpenText aria-hidden="true" size={34} />}
+              title="این مقاله پیدا نشد"
+              body="آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد."
+              action={
+                <Link to="/journal" className={CtaClasses("signal")}>
+                  بازگشت به ژورنال
+                </Link>
+              }
+            />'''
+          journal_new = '''            <div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
+              <span className="text-mute">
+                <BookOpenText aria-hidden="true" size={34} />
+              </span>
+              <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
+              <p className="max-w-[42ch] text-sm leading-7 text-metal">
+                آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
+              </p>
+              <Link to="/journal" className={CtaClasses("signal")}>
+                بازگشت به ژورنال
+              </Link>
+            </div>'''
+          if journal_old in journal_text:
+              journal_text = journal_text.replace(journal_old, journal_new)
+          elif journal_new not in journal_text:
+              raise RuntimeError("Journal not-found block was not found")
+
+          journal_text = journal_text.replace("  EmptyState,\n", "")
+          journal_path.write_text(journal_text)
+          PY
+
       - name: Format only F7-owned files
         run: |
           npx prettier --write \
@@ -51,7 +118,7 @@ jobs:
             src/lib/collections.ts \
             src/lib/journal.ts
 
-      - name: Commit scoped formatting
+      - name: Commit scoped F7 changes
         run: |
           if git diff --quiet -- \
             src/routes/collections.index.tsx \
@@ -63,7 +130,7 @@ jobs:
             src/routes/faq.tsx \
             src/lib/collections.ts \
             src/lib/journal.ts; then
-            echo "No formatting changes required."
+            echo "No scoped changes required."
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -77,7 +144,7 @@ jobs:
               src/routes/faq.tsx \
               src/lib/collections.ts \
               src/lib/journal.ts
-            git commit -m "F7: format owned content pages"
+            git commit -m "F7: correct not-found heading hierarchy"
             git push origin HEAD:phase/f7-content-editorial
           fi
 
