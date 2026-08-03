@@ -36,7 +36,7 @@ jobs:
       - name: Install temporary validation runtimes
         run: |
           npm install --no-save --package-lock=false --legacy-peer-deps @typescript/native-preview@7.0.0-dev.20260707.2 @playwright/test@1.54.2
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
 
       - name: Correct F7 not-found heading hierarchy
         run: |
