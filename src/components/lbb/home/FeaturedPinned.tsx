@@ -1,100 +1,90 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { products } from "@/lib/products";
 import { BigProductCard } from "./BigProductCard";
-import { TechLabel } from "@/components/lbb/ui/primitives";
+import { Shell, TechLabel } from "@/components/lbb/ui/primitives";
 
-const featured = products.filter((p) => p.isNew).concat(products.filter((p) => !p.isNew)).slice(0, 4);
+const featured = products
+  .filter((p) => p.isNew)
+  .concat(products.filter((p) => !p.isNew))
+  .slice(0, 6);
 
-/** Desktop-only horizontal pin; a plain grid ships on mobile — no long pinning there. */
+/**
+ * آخرین ورودی‌ها — a native RTL scroll-snap rail.
+ * Deliberately no scroll pinning: pinning fought the page scroll on both
+ * touch and trackpads, so the rail scrolls on its own axis instead.
+ */
 export function FeaturedPinned() {
-  const outerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
+  const railRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const outer = outerRef.current;
-    const track = trackRef.current;
-    if (!outer || !track) return;
-    if (window.innerWidth < 768) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let cleanup = () => {};
-    let cancelled = false;
-    (async () => {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-      if (cancelled) return;
-      const ctx = gsap.context(() => {
-        const distance = () => Math.max(0, track.scrollWidth - track.clientWidth);
-        gsap.to(track, {
-          x: () => -distance(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: outer,
-            start: "top top",
-            end: "bottom bottom",
-            pin: ".pin-inner",
-            scrub: 1,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => setProgress(self.progress),
-          },
-        });
-      }, outer);
-      cleanup = () => ctx.revert();
-    })();
-    return () => {
-      cancelled = true;
-      cleanup();
-    };
-  }, []);
-
-  const header = (
-    <div className="flex flex-col justify-center">
-      <TechLabel tone="signal">03 / NEW ARRIVALS</TechLabel>
-      <h2 className="mt-4 text-display-1 text-bone">آخرین ورودی‌ها</h2>
-      <p className="mt-3 text-lede">بهترین لباس‌های استریت‌ویر دراپ ۰۰۱</p>
-      <div className="mt-6 flex gap-2" aria-hidden="true">
-        {featured.map((_, i) => (
-          <span
-            key={i}
-            className="h-1 w-8 transition-colors"
-            style={{ background: progress * featured.length >= i ? "var(--lbb-signal)" : "var(--lbb-hairline)" }}
-          />
-        ))}
-      </div>
-      <Link to="/shop" className="mt-6 tech text-signal">
-        مشاهده همه ←
-      </Link>
-    </div>
-  );
+  const nudge = (dir: 1 | -1) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const step = Math.max(240, rail.clientWidth * 0.6);
+    rail.scrollBy({ left: dir * step, behavior: "smooth" });
+  };
 
   return (
-    <>
-      <div ref={outerRef} className="relative hidden bg-obsidian md:block" style={{ height: "400vh" }}>
-        <div className="pin-inner sticky top-0 h-[100svh] overflow-hidden">
-          <div className="mx-auto grid h-full max-w-[1600px] grid-cols-[30%_70%] items-center gap-8 px-10">
-            {header}
-            <div ref={trackRef} className="flex gap-6" style={{ transform: "translateX(0)" }}>
-              {featured.map((p) => (
-                <BigProductCard key={p.id} p={p} wide />
-              ))}
+    <section dir="rtl" className="bg-obsidian py-14 md:py-20" aria-labelledby="new-arrivals-title">
+      <Shell>
+        <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+          <div className="min-w-0">
+            <TechLabel tone="signal">03 / NEW ARRIVALS</TechLabel>
+            <h2 id="new-arrivals-title" className="mt-4 text-display-1 text-bone">
+              آخرین ورودی‌ها
+            </h2>
+            <p className="text-lede mt-3 max-w-prose">
+              تازه‌ترین قطعه‌های دراپ ۰۰۱ — از هودی و شلوار تا کتونی و جوراب.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              to="/shop"
+              className="tech rounded-xl border border-hairline px-4 py-3 text-bone transition-colors hover:border-signal hover:text-signal"
+            >
+              مشاهده همه
+            </Link>
+            <div className="hidden gap-2 md:flex">
+              <button
+                type="button"
+                onClick={() => nudge(1)}
+                aria-label="قبلی"
+                className="tap-target grid place-items-center rounded-xl border border-hairline text-bone transition-colors hover:border-signal hover:text-signal"
+              >
+                <ChevronRight size={18} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => nudge(-1)}
+                aria-label="بعدی"
+                className="tap-target grid place-items-center rounded-xl border border-hairline text-bone transition-colors hover:border-signal hover:text-signal"
+              >
+                <ChevronLeft size={18} aria-hidden="true" />
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </Shell>
 
-      <section className="bg-obsidian px-5 py-14 md:hidden" aria-label="محصولات جدید">
-        {header}
-        <div className="mt-8 grid grid-cols-2 gap-3">
-          {featured.map((p, i) => (
-            <div key={p.id} className={i === 0 ? "col-span-2" : ""}>
-              <BigProductCard p={p} tall={i === 0} />
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
+      <div
+        ref={railRef}
+        dir="rtl"
+        tabIndex={0}
+        aria-label="فهرست آخرین ورودی‌ها"
+        className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-smooth px-[var(--lbb-gutter)] pb-4 md:gap-6"
+        style={{ scrollbarWidth: "none" }}
+      >
+        {featured.map((p) => (
+          <div
+            key={p.id}
+            className="w-[74vw] shrink-0 snap-start sm:w-[46vw] lg:w-[30vw] xl:w-[22vw]"
+          >
+            <BigProductCard p={p} />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
