@@ -1,0 +1,61 @@
+name: F7 scoped validation patch
+
+on:
+  push:
+    branches:
+      - phase/f7-content-editorial
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: phase/f7-content-editorial
+
+      - name: Apply scoped fixes
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              Path("src/routes/collections.$slug.tsx"): (
+                  "if (!collection) throw notFound();",
+                  'if (!collection) throw notFound({ routeId: "/collections/$slug" });',
+              ),
+              Path("src/routes/journal.$slug.tsx"): (
+                  "if (!article) throw notFound();",
+                  'if (!article) throw notFound({ routeId: "/journal/$slug" });',
+              ),
+              Path("f7-final-smoke.spec.mjs"): (
+                  'page.locator("img")',
+                  'page.locator("main img")',
+              ),
+          }
+
+          for path, (old, new) in replacements.items():
+              text = path.read_text()
+              if old in text:
+                  path.write_text(text.replace(old, new))
+              elif new not in text:
+                  raise RuntimeError(f"Expected pattern missing in {path}")
+          PY
+
+      - name: Format changed files
+        run: npx prettier --write 'src/routes/collections.$slug.tsx' 'src/routes/journal.$slug.tsx' f7-final-smoke.spec.mjs
+
+      - name: Commit scoped fixes
+        run: |
+          if git diff --quiet; then
+            echo "Scoped fixes already applied."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'src/routes/collections.$slug.tsx' 'src/routes/journal.$slug.tsx' f7-final-smoke.spec.mjs
+          git commit -m "F7: isolate content assets and route 404 boundaries"
+          git push origin HEAD:phase/f7-content-editorial
