@@ -1,0 +1,8 @@
+{
+  "$schema": "./bundle-budgets.schema.json",
+  "maxTotalJsGzipBytes": 1200000,
+  "maxLargestJsGzipBytes": 500000,
+  "maxTotalCssGzipBytes": 180000,
+  "maxTotalFontRawBytes": 2000000,
+  "maxTotalClientRawBytes": 30000000
+}
