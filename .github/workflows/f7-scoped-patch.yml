@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - phase/f7-content-editorial
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
