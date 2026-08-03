@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 /**
  * Snapshot capture is intentionally deferred until all feature branches are
@@ -16,9 +16,7 @@ test.describe("LBB integrated visual baselines", () => {
     await page.locator("[data-testid='countdown']").evaluateAll((nodes) => {
       for (const node of nodes) node.setAttribute("style", "visibility:hidden");
     });
-    await page.screenshot({
-      path: test.info().snapshotPath("home-full.png"),
-      fullPage: true,
-    });
+
+    await expect(page).toHaveScreenshot("home-full.png", { fullPage: true });
   });
 });
