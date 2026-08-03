@@ -8,15 +8,7 @@
     "playwright.config.ts",
     "scripts/*.mjs"
   ],
-  "project": [
-    "src/**/*.{ts,tsx}",
-    "tests/**/*.ts",
-    "vite.config.ts",
-    "playwright.config.ts"
-  ],
-  "ignore": [
-    "src/routeTree.gen.ts",
-    "tests/visual/**"
-  ],
+  "project": ["src/**/*.{ts,tsx}", "tests/**/*.ts", "vite.config.ts", "playwright.config.ts"],
+  "ignore": ["src/routeTree.gen.ts", "tests/visual/**"],
   "ignoreBinaries": ["tsgo"]
 }

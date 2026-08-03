@@ -12,7 +12,11 @@ function sitemapEntries(): Entry[] {
   return [
     { path: "/", priority: "1.0", changefreq: "weekly" },
     { path: "/shop", priority: "0.9", changefreq: "weekly" },
-    ...CATEGORY_SLUGS.map((slug) => ({ path: `/${slug}`, priority: "0.9", changefreq: "weekly" as const })),
+    ...CATEGORY_SLUGS.map((slug) => ({
+      path: `/${slug}`,
+      priority: "0.9",
+      changefreq: "weekly" as const,
+    })),
     ...products.map((product) => ({
       path: `/product/${product.slug}`,
       priority: "0.8",
@@ -24,7 +28,10 @@ function sitemapEntries(): Entry[] {
     { path: "/size-guide", priority: "0.5" },
     { path: "/faq", priority: "0.5" },
     { path: "/collections", priority: "0.7", changefreq: "weekly" },
-    ...COLLECTIONS.map((collection) => ({ path: `/collections/${collection.slug}`, priority: "0.7" })),
+    ...COLLECTIONS.map((collection) => ({
+      path: `/collections/${collection.slug}`,
+      priority: "0.7",
+    })),
     { path: "/journal", priority: "0.6", changefreq: "weekly" },
     ...JOURNAL_ARTICLES.map((article) => ({ path: `/journal/${article.slug}`, priority: "0.6" })),
     { path: "/track-order", priority: "0.4" },

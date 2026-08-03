@@ -26,21 +26,12 @@ export default defineConfig({
         outDir: "dist/client",
         devOptions: { enabled: false },
         manifest: false,
-        includeAssets: [
-          "favicon.png",
-          "apple-touch-icon.png",
-          "icons/*.png",
-          "brand/lbb-logo.svg",
-        ],
+        includeAssets: ["favicon.png", "apple-touch-icon.png", "icons/*.png", "brand/lbb-logo.svg"],
         workbox: {
           globPatterns: ["**/*.{js,css,woff2,svg}"],
           globIgnores: ["**/*.map"],
           maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
-          navigateFallbackDenylist: [
-            sensitivePath,
-            /^\/sitemap\.xml$/,
-            /^\/robots\.txt$/,
-          ],
+          navigateFallbackDenylist: [sensitivePath, /^\/sitemap\.xml$/, /^\/robots\.txt$/],
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,

@@ -8,7 +8,10 @@ export default defineConfig({
   timeout: 45_000,
   outputDir: "artifacts/playwright/visual-results",
   snapshotPathTemplate: "{testDir}/__screenshots__/{testFilePath}/{projectName}/{arg}{ext}",
-  reporter: [["list"], ["html", { outputFolder: "artifacts/playwright/visual-html", open: "never" }]],
+  reporter: [
+    ["list"],
+    ["html", { outputFolder: "artifacts/playwright/visual-html", open: "never" }],
+  ],
   expect: {
     toHaveScreenshot: {
       animations: "disabled",

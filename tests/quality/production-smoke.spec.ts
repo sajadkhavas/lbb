@@ -105,7 +105,9 @@ test("browser requests self-hosted fonts and optimized logo", async ({ page, req
   expect(requestedUrls.some((url) => url.includes("fonts.gstatic.com"))).toBeFalsy();
   const servedOrigin = new URL(page.url()).origin;
   expect(
-    requestedUrls.some((url) => url.startsWith(servedOrigin) && new URL(url).pathname.endsWith(".woff2")),
+    requestedUrls.some(
+      (url) => url.startsWith(servedOrigin) && new URL(url).pathname.endsWith(".woff2"),
+    ),
   ).toBeTruthy();
 
   await expect(page.locator('img[src="/brand/lbb-logo.svg"]').first()).toBeVisible();

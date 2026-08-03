@@ -17,7 +17,7 @@ function normalizeSiteUrl(value) {
   }
 
   const parsed = new URL(value);
-  if (!['http:', 'https:'].includes(parsed.protocol)) {
+  if (!["http:", "https:"].includes(parsed.protocol)) {
     throw new Error("VITE_SITE_URL must use http or https.");
   }
   if (mode === "production" && parsed.protocol !== "https:") {
@@ -30,7 +30,9 @@ function normalizeSiteUrl(value) {
     parsed.search ||
     parsed.hash
   ) {
-    throw new Error("VITE_SITE_URL must be a clean origin without path, credentials, query, or hash.");
+    throw new Error(
+      "VITE_SITE_URL must be a clean origin without path, credentials, query, or hash.",
+    );
   }
   return parsed.origin;
 }

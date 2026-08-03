@@ -24,7 +24,8 @@ function kind(file) {
   if ([".js", ".mjs"].includes(extension)) return "javascript";
   if (extension === ".css") return "css";
   if ([".woff", ".woff2", ".ttf", ".otf"].includes(extension)) return "font";
-  if ([".png", ".jpg", ".jpeg", ".webp", ".avif", ".svg", ".ico"].includes(extension)) return "image";
+  if ([".png", ".jpg", ".jpeg", ".webp", ".avif", ".svg", ".ico"].includes(extension))
+    return "image";
   return "other";
 }
 
@@ -134,11 +135,16 @@ const markdown = [
 ].join("\n");
 
 await mkdir(artifactsDir, { recursive: true });
-await writeFile(path.join(artifactsDir, "bundle-report.json"), `${JSON.stringify(report, null, 2)}\n`);
+await writeFile(
+  path.join(artifactsDir, "bundle-report.json"),
+  `${JSON.stringify(report, null, 2)}\n`,
+);
 await writeFile(path.join(artifactsDir, "bundle-report.md"), markdown);
 
 for (const check of checks) {
-  console.log(`${check.pass ? "PASS" : "FAIL"} ${check.name}: ${formatKb(check.actual)} / ${formatKb(check.budget)}`);
+  console.log(
+    `${check.pass ? "PASS" : "FAIL"} ${check.name}: ${formatKb(check.actual)} / ${formatKb(check.budget)}`,
+  );
 }
 
 if (shouldCheck && checks.some((check) => !check.pass)) {

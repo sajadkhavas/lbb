@@ -22,7 +22,10 @@ async function walk(directory) {
 }
 
 async function exists(file) {
-  return stat(file).then(() => true, () => false);
+  return stat(file).then(
+    () => true,
+    () => false,
+  );
 }
 
 const checks = [];
@@ -32,7 +35,11 @@ function check(name, pass, detail) {
 
 const robotsPath = path.join(clientDir, "robots.txt");
 const robots = await readFile(robotsPath, "utf8");
-check("robots token resolved", !robots.includes("{{SITE_URL}}"), "robots.txt has no template token");
+check(
+  "robots token resolved",
+  !robots.includes("{{SITE_URL}}"),
+  "robots.txt has no template token",
+);
 check(
   "robots sitemap absolute",
   robots.includes(`Sitemap: ${siteUrl}/sitemap.xml`),
@@ -41,15 +48,27 @@ check(
 
 const manifestPath = path.join(clientDir, "manifest.webmanifest");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-check("manifest name", typeof manifest.name === "string" && manifest.name.length > 0, manifest.name);
+check(
+  "manifest name",
+  typeof manifest.name === "string" && manifest.name.length > 0,
+  manifest.name,
+);
 check("manifest standalone", manifest.display === "standalone", manifest.display);
-check("manifest icons", Array.isArray(manifest.icons) && manifest.icons.length >= 2, `${manifest.icons?.length ?? 0} icons`);
+check(
+  "manifest icons",
+  Array.isArray(manifest.icons) && manifest.icons.length >= 2,
+  `${manifest.icons?.length ?? 0} icons`,
+);
 
 const swPath = path.join(clientDir, "sw.js");
 const swExists = await exists(swPath);
 const sw = swExists ? await readFile(swPath, "utf8") : "";
 check("service worker emitted", swExists && sw.length > 500, `${sw.length} bytes`);
-check("safe public page cache", sw.includes("lbb-public-pages-v1"), "public page cache is versioned");
+check(
+  "safe public page cache",
+  sw.includes("lbb-public-pages-v1"),
+  "public page cache is versioned",
+);
 check("legacy broad page cache removed", !sw.includes("lbb-pages"), "legacy cache name absent");
 
 const logoPath = path.join(clientDir, "brand", "lbb-logo.svg");
@@ -64,7 +83,10 @@ for (const file of files) {
   const content = await readFile(file, "utf8");
   for (const pattern of forbiddenPatterns) {
     if (content.includes(pattern)) {
-      forbiddenHits.push({ file: path.relative(clientDir, file).replaceAll(path.sep, "/"), pattern });
+      forbiddenHits.push({
+        file: path.relative(clientDir, file).replaceAll(path.sep, "/"),
+        pattern,
+      });
     }
   }
 }
@@ -93,7 +115,10 @@ const report = {
 };
 
 await mkdir(artifactsDir, { recursive: true });
-await writeFile(path.join(artifactsDir, "production-audit.json"), `${JSON.stringify(report, null, 2)}\n`);
+await writeFile(
+  path.join(artifactsDir, "production-audit.json"),
+  `${JSON.stringify(report, null, 2)}\n`,
+);
 
 for (const item of checks) {
   console.log(`${item.pass ? "PASS" : "FAIL"} ${item.name} — ${item.detail}`);
