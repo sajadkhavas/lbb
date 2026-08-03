@@ -35,11 +35,11 @@ function OrderConfirmation() {
       <main
         dir="rtl"
         className="grid min-h-screen place-items-center bg-white px-5 pb-28 pt-28 text-center"
-        style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+        style={{ fontFamily: "var(--font-body)" }}
       >
         {hasOrder ? (
           <div className="w-full max-w-[420px]">
-            <h1 className="text-[24px] font-bold text-[#0A0A0A]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <h1 className="text-[24px] font-bold text-[#0A0A0A]" style={{ fontFamily: "var(--font-display)" }}>
               ثبت سفارش نمایشی انجام شد
             </h1>
             <p className="mt-2 text-[14px] font-semibold text-[var(--lbb-red)]">

@@ -27,12 +27,12 @@ function AboutPage() {
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-16 text-black" style={{ paddingBottom: 80, fontFamily: "'Vazirmatn', sans-serif" }}>
+      <main dir="rtl" className="min-h-screen bg-white pt-16 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
         <section
           className="relative flex h-[45vh] items-center justify-center overflow-hidden bg-black text-white"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--lbb-red)]/40 via-transparent to-black" />
-          <h1 className="relative z-10 text-5xl font-black md:text-7xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <h1 className="relative z-10 text-5xl font-black md:text-7xl" style={{ fontFamily: "var(--font-display)" }}>
             داستان LBB
           </h1>
         </section>
@@ -43,12 +43,12 @@ function AboutPage() {
 
         <section className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-4 py-8 md:grid-cols-2 md:px-8">
           <div className="grid aspect-[4/5] place-items-center rounded-xl bg-gray-50">
-            <span className="text-[var(--lbb-red)]/20 text-9xl font-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <span className="text-[var(--lbb-red)]/20 text-9xl font-black" style={{ fontFamily: "var(--font-display)" }}>
               LBB
             </span>
           </div>
           <div className="flex flex-col justify-center gap-4">
-            <h2 className="text-2xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>ما کی هستیم</h2>
+            <h2 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>ما کی هستیم</h2>
             <p className="text-sm leading-8 text-gray-600">
               LBB یه برند استریت‌ویر ایرانیه که از تهران شروع شد و با یه هدف ساده جلو اومد: ترکیب فرهنگ خیابون‌های ایران با کیفیت جهانی. 
               ما باور داریم که لباس فقط پوشش نیست — یه بیانیه‌ست. هر قطعه‌ای که طراحی می‌کنیم، از انتخاب پارچه تا دوخت نهایی، با همین ذهنیت پیش می‌ره.

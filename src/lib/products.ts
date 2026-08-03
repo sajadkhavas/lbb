@@ -1,4 +1,4 @@
-export type CategorySlug = "hoodies" | "pants" | "tshirts" | "shoes" | "accessories";
+export type CategorySlug = "hoodies" | "pants" | "tshirts" | "shoes" | "socks";
 
 export type FitKey = "oversized" | "boxy" | "relaxed" | "regular" | "true";
 
@@ -155,7 +155,7 @@ export const products: Product[] = [
     slug: "lbb-cap",
     name: "کلاه لبه‌دار LBB",
     latinName: "LBB 6-Panel Cap",
-    category: "accessories",
+    category: "socks",
     price: 420000,
     colors: ["#0A0A0A", "#E6291E"],
     sizes: ["ONE"],

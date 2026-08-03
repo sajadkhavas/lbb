@@ -28,10 +28,10 @@ function CartPage() {
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-24 text-black" style={{ paddingBottom: 80, fontFamily: "'Vazirmatn', sans-serif" }}>
+      <main dir="rtl" className="min-h-screen bg-white pt-24 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
         <div className="mx-auto max-w-[1280px] px-4 md:px-8">
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "سبد خرید" }]} />
-          <h1 className="mt-4 text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>سبد خرید</h1>
+          <h1 className="mt-4 text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>سبد خرید</h1>
 
           {lines.length === 0 ? (
             <div className="mt-16 text-center text-gray-500">
@@ -59,7 +59,7 @@ function CartPage() {
                       </div>
                     </div>
                     <div className="shrink-0 text-left">
-                      <p className="text-sm font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      <p className="text-sm font-bold" style={{ fontFamily: "var(--font-display)" }}>
                         {fmtToman(l.price * l.qty)}
                       </p>
                       <button onClick={() => remove(i)} className="mt-2 text-gray-400 hover:text-[var(--lbb-red)]" aria-label="حذف">

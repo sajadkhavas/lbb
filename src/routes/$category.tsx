@@ -118,7 +118,7 @@ function CategoryPage() {
       <main
         dir="rtl"
         className="min-h-screen bg-white pt-16 text-black"
-        style={{ paddingBottom: "80px", fontFamily: "'Vazirmatn', sans-serif" }}
+        style={{ paddingBottom: "80px", fontFamily: "var(--font-body)" }}
       >
         <div className="border-b border-black/[0.06]">
           <div className="mx-auto max-w-[1280px] px-4 py-3 md:px-8">
@@ -138,13 +138,13 @@ function CategoryPage() {
             <div className="grid aspect-[4/3] place-items-center rounded-xl bg-gray-50 md:aspect-auto">
               <span
                 className="font-black text-black/[0.08]"
-                style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 96 }}
+                style={{ fontFamily: "var(--font-display)", fontSize: 96 }}
               >
                 {cat.nameFa}
               </span>
             </div>
             <div className="flex flex-col justify-center gap-3">
-              <h1 className="text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
                 {cat.h1}
               </h1>
               <p className="text-base text-gray-600">{cat.heroTagline}</p>

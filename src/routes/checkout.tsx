@@ -71,7 +71,7 @@ function Checkout() {
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white px-5 pb-28 pt-28" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
+      <main dir="rtl" className="min-h-screen bg-white px-5 pb-28 pt-28" style={{ fontFamily: "var(--font-body)" }}>
         <div className="mx-auto w-full max-w-[560px]">
           <ol className="mb-8 flex items-center justify-between text-[12px]">
             {["۱. سبد خرید", "۲. اطلاعات", "۳. پرداخت"].map((label, i) => {
@@ -84,7 +84,7 @@ function Checkout() {
             })}
           </ol>
 
-          <h1 className="text-[24px] font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <h1 className="text-[24px] font-bold" style={{ fontFamily: "var(--font-display)" }}>
             تکمیل سفارش
           </h1>
 

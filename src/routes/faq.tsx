@@ -46,10 +46,10 @@ function FaqPage() {
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-24 text-black" style={{ paddingBottom: 80, fontFamily: "'Vazirmatn', sans-serif" }}>
+      <main dir="rtl" className="min-h-screen bg-white pt-24 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
         <div className="mx-auto max-w-[900px] px-4 md:px-8">
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "سوالات متداول" }]} />
-          <h1 className="mt-4 text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>سوالات متداول</h1>
+          <h1 className="mt-4 text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>سوالات متداول</h1>
           <div className="mt-6 divide-y divide-black/[0.06] border-t border-black/[0.06]">
             {QA.map(([q, a]) => (
               <details key={q} className="group py-4">

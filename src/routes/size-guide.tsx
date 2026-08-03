@@ -57,10 +57,10 @@ function SizeGuide() {
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-24 text-black" style={{ paddingBottom: 80, fontFamily: "'Vazirmatn', sans-serif" }}>
+      <main dir="rtl" className="min-h-screen bg-white pt-24 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
         <div className="mx-auto max-w-[900px] px-4 md:px-8">
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "راهنمای سایز" }]} />
-          <h1 className="mt-4 text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>راهنمای سایز</h1>
+          <h1 className="mt-4 text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>راهنمای سایز</h1>
           <p className="mt-3 text-sm leading-8 text-gray-600">
             انتخاب سایز مناسب کار سختی نیست. یه متر خیاطی بردار، سینه و کمرت رو اندازه بگیر، و با جدول‌های پایین مقایسه کن. 
             اگه بین دو سایز بودی، سایز بزرگ‌تر رو انتخاب کن — LBB معمولاً برش اورسایز داره.
@@ -70,7 +70,7 @@ function SizeGuide() {
           <Table title="شلوار" rows={pantsSizes} />
 
           <div className="mt-10">
-            <h2 className="text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>سوالات رایج</h2>
+            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>سوالات رایج</h2>
             <FAQ q="اگه سایزم درست نبود چیکار کنم؟" a="تا ۷ روز فرصت داری کالا رو با کالای دیگه در همون سایز جایگزین کنی. برای اطلاعات بیشتر به صفحه تماس مراجعه کن." />
             <FAQ q="سایزبندی LBB به سایز جهانی نزدیکه؟" a="بله، برش‌های LBB بر اساس استانداردهای بین‌المللی طراحی شدن اما تمایل به اورسایز دارن." />
           </div>
@@ -85,7 +85,7 @@ function SizeGuide() {
 function Table({ title, rows }: { title: string; rows: string[][] }) {
   return (
     <div className="mt-8">
-      <h2 className="mb-3 text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{title}</h2>
+      <h2 className="mb-3 text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
       <div className="overflow-x-auto rounded-xl border border-black/[0.06]">
         <table className="w-full text-sm">
           <thead>

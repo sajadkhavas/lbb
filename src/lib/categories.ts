@@ -60,8 +60,8 @@ export const CATEGORIES: Record<CategorySlug, CategoryMeta> = {
     seoText:
       "کتونی‌های LBB با تمرکز روی راحتی و استایل طراحی شدن. زیره EVA سبک، رویه چرم مصنوعی مقاوم و رنگ‌بندی مینیمال، این کتونی‌ها رو به یه انتخاب پایه برای هر گاردروبی تبدیل می‌کنه.",
   },
-  accessories: {
-    slug: "accessories",
+  socks: {
+    slug: "socks",
     nameFa: "اکسسوری",
     nameFaPlural: "اکسسوری‌ها",
     h1: "خرید اکسسوری استریت‌ویر LBB",

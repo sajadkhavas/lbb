@@ -33,12 +33,12 @@ function Wishlist() {
       <main
         dir="rtl"
         className="min-h-screen bg-white px-5 pb-28 pt-28 md:px-10"
-        style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+        style={{ fontFamily: "var(--font-body)" }}
       >
         <div className="mx-auto max-w-[1280px]">
           <h1
             className="text-[24px] font-bold text-[#0A0A0A]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ fontFamily: "var(--font-display)" }}
           >
             علاقه‌مندی‌ها
           </h1>
