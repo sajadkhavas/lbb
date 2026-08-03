@@ -10,7 +10,9 @@ import { ProductFilters } from "@/components/lbb/ProductFilters";
 import { ProductGridControls } from "@/components/lbb/ProductGridControls";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, CATEGORY_SLUGS, isValidCategory } from "@/lib/categories";
+import { categoryImage } from "@/lib/category-images";
 import { productsByCategory, type Product } from "@/lib/products";
+import { pageMeta, canonical, breadcrumbLd, absUrl, absAsset } from "@/lib/site";
 import {
   activeCount,
   applyFilters,
@@ -35,21 +37,18 @@ export const Route = createFileRoute("/$category")({
     const { cat, items } = loaderData;
     const filters = m.search as Filters;
     const filtered = activeCount(filters) > 0;
-    const breadcrumbLd = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "خانه", item: "/" },
-        { "@type": "ListItem", position: 2, name: "فروشگاه", item: "/shop" },
-        { "@type": "ListItem", position: 3, name: cat.nameFa, item: `/${cat.slug}` },
-      ],
-    };
+
+    const crumbLd = breadcrumbLd([
+      { name: "خانه", path: "/" },
+      { name: "فروشگاه", path: "/shop" },
+      { name: cat.nameFa, path: `/${cat.slug}` },
+    ]);
     const collectionLd = {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       name: cat.h1,
       description: cat.metaDesc,
-      url: `/${cat.slug}`,
+      url: absUrl(`/${cat.slug}`),
     };
     const itemListLd = {
       "@context": "https://schema.org",
@@ -59,25 +58,34 @@ export const Route = createFileRoute("/$category")({
       itemListElement: items.slice(0, 20).map((p, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `/product/${p.slug}`,
+        url: absUrl(`/product/${p.slug}`),
         name: p.name,
       })),
     };
+    const faqLd = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: cat.faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    };
+
     return {
-      meta: [
-        { title: cat.metaTitle },
-        { name: "description", content: cat.metaDesc },
-        { name: "robots", content: filtered ? "noindex, follow" : "index, follow" },
-        { property: "og:title", content: cat.metaTitle },
-        { property: "og:description", content: cat.metaDesc },
-        { property: "og:type", content: "website" },
-        { property: "og:url", content: `/${cat.slug}` },
-      ],
-      links: [{ rel: "canonical", href: `/${cat.slug}` }],
+      meta: pageMeta({
+        title: cat.metaTitle,
+        description: cat.metaDesc,
+        path: `/${cat.slug}`,
+        image: absAsset(categoryImage(cat.slug)),
+        noindex: filtered,
+      }),
+      links: canonical(`/${cat.slug}`),
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(breadcrumbLd) },
+        { type: "application/ld+json", children: JSON.stringify(crumbLd) },
         { type: "application/ld+json", children: JSON.stringify(collectionLd) },
         { type: "application/ld+json", children: JSON.stringify(itemListLd) },
+        { type: "application/ld+json", children: JSON.stringify(faqLd) },
       ],
     };
   },
@@ -135,13 +143,16 @@ function CategoryPage() {
         {/* Hero */}
         <section className="border-b border-black/[0.06]">
           <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[40%_60%] md:px-8 md:py-10">
-            <div className="grid aspect-[4/3] place-items-center rounded-xl bg-gray-50 md:aspect-auto">
-              <span
-                className="font-black text-black/[0.08]"
-                style={{ fontFamily: "var(--font-display)", fontSize: 96 }}
-              >
-                {cat.nameFa}
-              </span>
+            <div className="overflow-hidden rounded-2xl bg-gray-50">
+              <img
+                src={categoryImage(cat.slug)}
+                alt={`مدل در حال پوشیدن ${cat.nameFaPlural} استریت‌ویر LBB`}
+                width={640}
+                height={480}
+                loading="eager"
+                fetchPriority="high"
+                className="aspect-[4/3] h-full w-full object-cover md:aspect-auto"
+              />
             </div>
             <div className="flex flex-col justify-center gap-3">
               <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
@@ -151,18 +162,20 @@ function CategoryPage() {
               <p className="text-sm font-semibold text-[var(--lbb-red)]">
                 {items.length.toLocaleString("fa-IR")} محصول موجود
               </p>
+              <ul className="mt-2 flex flex-col gap-2 text-sm text-gray-700">
+                {cat.bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--lbb-red)]" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>
 
-        {/* SEO text */}
-        <section className="mx-auto max-w-[900px] px-4 py-8 md:px-8">
-          <h2 className="mb-3 text-base font-semibold">{cat.nameFaPlural} استریت‌ویر LBB</h2>
-          <p className="text-sm leading-8 text-gray-600">{cat.seoText}</p>
-        </section>
-
         {/* Grid */}
-        <section className="mx-auto max-w-[1280px] px-4 pb-16 md:px-8">
+        <section className="mx-auto max-w-[1280px] px-4 pb-16 pt-8 md:px-8">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
             <aside className="hidden lg:block">
               <div className="sticky top-24">{filterUi}</div>
@@ -207,6 +220,36 @@ function CategoryPage() {
                   )}
                 </>
               )}
+            </div>
+          </div>
+        </section>
+
+        {/* SEO / AEO content */}
+        <section className="border-t border-black/[0.06] bg-gray-50/60 py-10">
+          <div className="mx-auto max-w-[900px] px-4 md:px-8">
+            <h2 className="mb-3 text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+              {cat.nameFaPlural} استریت‌ویر LBB چه ویژگی‌هایی دارن؟
+            </h2>
+            <p className="text-sm leading-8 text-gray-700">{cat.seoText}</p>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-10">
+          <div className="mx-auto max-w-[900px] px-4 md:px-8">
+            <h2 className="mb-4 text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+              سوالات متداول درباره {cat.nameFaPlural}
+            </h2>
+            <div className="divide-y divide-black/[0.06] border-t border-black/[0.06]">
+              {cat.faqs.map((f) => (
+                <details key={f.q} className="group py-4">
+                  <summary className="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold">
+                    {f.q}
+                    <span className="shrink-0 transition-transform group-open:rotate-180">▾</span>
+                  </summary>
+                  <p className="mt-3 text-sm leading-8 text-gray-600">{f.a}</p>
+                </details>
+              ))}
             </div>
           </div>
         </section>
