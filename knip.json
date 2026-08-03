@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/router.tsx",
+    "src/server.ts",
+    "src/routes/**/*.{ts,tsx}",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "scripts/*.mjs"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "tests/**/*.ts",
+    "vite.config.ts",
+    "playwright.config.ts"
+  ],
+  "ignore": [
+    "src/routeTree.gen.ts",
+    "tests/visual/**"
+  ],
+  "ignoreBinaries": ["tsgo"]
+}
