@@ -1,9 +1,6 @@
 name: F7 final validation
 
 on:
-  push:
-    branches:
-      - phase/f7-content-editorial
   pull_request:
     branches:
       - main
@@ -43,69 +40,48 @@ jobs:
           python <<'PY'
           from pathlib import Path
 
-          collection_path = Path("src/routes/collections.$slug.tsx")
-          collection_text = collection_path.read_text()
-          collection_old = '''            <EmptyState
-              icon={<Layers3 aria-hidden="true" size={34} />}
-              title="این کالکشن پیدا نشد"
-              body="آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد."
-              action={
-                <Link to="/collections" className={CtaClasses("signal")}>
-                  بازگشت به کالکشن‌ها
-                </Link>
-              }
-            />'''
-          collection_new = '''            <div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
-              <span className="text-mute">
-                <Layers3 aria-hidden="true" size={34} />
-              </span>
-              <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
-              <p className="max-w-[42ch] text-sm leading-7 text-metal">
-                آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.
-              </p>
-              <Link to="/collections" className={CtaClasses("signal")}>
-                بازگشت به کالکشن‌ها
-              </Link>
-            </div>'''
-          if collection_old in collection_text:
-              collection_path.write_text(collection_text.replace(collection_old, collection_new))
-          elif collection_new not in collection_text:
-              raise RuntimeError("Collection not-found block was not found")
+          def replace_empty_state(path: Path, title: str, replacement: str) -> None:
+              text = path.read_text()
+              if f'<h1 className="text-display-3 text-bone">{title}</h1>' in text:
+                  return
+
+              marker_index = text.index(f'title="{title}"')
+              start = text.rfind("<EmptyState", 0, marker_index)
+              end = text.index("/>", marker_index) + 2
+              if start < 0:
+                  raise RuntimeError(f"EmptyState start not found in {path}")
+
+              line_start = text.rfind("\n", 0, start) + 1
+              indent = text[line_start:start]
+              rendered = "\n".join(indent + line for line in replacement.splitlines())
+              path.write_text(text[:line_start] + rendered + text[end:])
+
+          replace_empty_state(
+              Path("src/routes/collections.$slug.tsx"),
+              "این کالکشن پیدا نشد",
+              '''<div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
+  <span className="text-mute"><Layers3 aria-hidden="true" size={34} /></span>
+  <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
+  <p className="max-w-[42ch] text-sm leading-7 text-metal">آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.</p>
+  <Link to="/collections" className={CtaClasses("signal")}>بازگشت به کالکشن‌ها</Link>
+</div>''',
+          )
 
           journal_path = Path("src/routes/journal.$slug.tsx")
-          journal_text = journal_path.read_text()
-          journal_old = '''            <EmptyState
-              icon={<BookOpenText aria-hidden="true" size={34} />}
-              title="این مقاله پیدا نشد"
-              body="آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد."
-              action={
-                <Link to="/journal" className={CtaClasses("signal")}>
-                  بازگشت به ژورنال
-                </Link>
-              }
-            />'''
-          journal_new = '''            <div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
-              <span className="text-mute">
-                <BookOpenText aria-hidden="true" size={34} />
-              </span>
-              <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
-              <p className="max-w-[42ch] text-sm leading-7 text-metal">
-                آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
-              </p>
-              <Link to="/journal" className={CtaClasses("signal")}>
-                بازگشت به ژورنال
-              </Link>
-            </div>'''
-          if journal_old in journal_text:
-              journal_text = journal_text.replace(journal_old, journal_new)
-          elif journal_new not in journal_text:
-              raise RuntimeError("Journal not-found block was not found")
-
-          journal_text = journal_text.replace("  EmptyState,\n", "")
-          journal_path.write_text(journal_text)
+          replace_empty_state(
+              journal_path,
+              "این مقاله پیدا نشد",
+              '''<div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
+  <span className="text-mute"><BookOpenText aria-hidden="true" size={34} /></span>
+  <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
+  <p className="max-w-[42ch] text-sm leading-7 text-metal">آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.</p>
+  <Link to="/journal" className={CtaClasses("signal")}>بازگشت به ژورنال</Link>
+</div>''',
+          )
+          journal_path.write_text(journal_path.read_text().replace("  EmptyState,\n", ""))
           PY
 
-      - name: Format only F7-owned files
+      - name: Format F7-owned files
         run: |
           npx prettier --write \
             src/routes/collections.index.tsx \
@@ -120,16 +96,7 @@ jobs:
 
       - name: Commit scoped F7 changes
         run: |
-          if git diff --quiet -- \
-            src/routes/collections.index.tsx \
-            'src/routes/collections.$slug.tsx' \
-            src/routes/lookbook.tsx \
-            src/routes/journal.index.tsx \
-            'src/routes/journal.$slug.tsx' \
-            src/routes/about.tsx \
-            src/routes/faq.tsx \
-            src/lib/collections.ts \
-            src/lib/journal.ts; then
+          if git diff --quiet -- src/routes src/lib/collections.ts src/lib/journal.ts; then
             echo "No scoped changes required."
           else
             git config user.name "github-actions[bot]"
@@ -144,11 +111,11 @@ jobs:
               src/routes/faq.tsx \
               src/lib/collections.ts \
               src/lib/journal.ts
-            git commit -m "F7: correct not-found heading hierarchy"
+            git commit -m "F7: finalize owned content pages"
             git push origin HEAD:phase/f7-content-editorial
           fi
 
-      - name: Run repository typecheck and enforce F7 ownership
+      - name: Typecheck and enforce F7 ownership
         id: typecheck
         run: |
           set +e
@@ -156,12 +123,10 @@ jobs:
           repo_code=${PIPESTATUS[0]}
           set -e
           echo "repository_exit_code=$repo_code" >> "$GITHUB_OUTPUT"
-
           if grep -E 'src/(routes/(collections\.index|collections\.\$slug|lookbook|journal\.index|journal\.\$slug|about|faq)\.tsx|lib/(collections|journal)\.ts)' /tmp/typecheck.log; then
             echo "Type errors remain inside F7 ownership."
             exit 1
           fi
-
           echo "F7-owned TypeScript files are clean."
 
       - name: Lint F7-owned files
@@ -177,7 +142,7 @@ jobs:
             src/lib/collections.ts \
             src/lib/journal.ts
 
-      - name: Record full repository lint result
+      - name: Record repository lint result
         id: full_lint
         continue-on-error: true
         run: npm run lint
@@ -187,40 +152,13 @@ jobs:
 
       - name: Start validation server
         run: |
-          nohup npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/lbb-validation-server.log 2>&1 &
+          nohup npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/lbb-server.log 2>&1 &
           for attempt in {1..60}; do
-            if curl --fail --silent http://127.0.0.1:4173/collections > /dev/null; then
-              exit 0
-            fi
+            if curl --fail --silent http://127.0.0.1:4173/collections > /dev/null; then exit 0; fi
             sleep 1
           done
-          cat /tmp/lbb-validation-server.log
+          cat /tmp/lbb-server.log
           exit 1
-
-      - name: Diagnose global failed resources
-        env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
-        run: |
-          node <<'EOF'
-          const { chromium } = require('@playwright/test');
-          (async () => {
-            const browser = await chromium.launch({ headless: true });
-            const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-            const failures = [];
-            page.on('response', (response) => {
-              if (response.status() >= 400) failures.push(`${response.status()} ${response.url()}`);
-            });
-            await page.goto(`${process.env.PLAYWRIGHT_BASE_URL}/collections`, { waitUntil: 'networkidle' });
-            await page.reload({ waitUntil: 'networkidle' });
-            console.log('FAILED_RESOURCES_BEGIN');
-            for (const failure of failures) console.log(failure);
-            console.log('FAILED_RESOURCES_END');
-            await browser.close();
-          })().catch((error) => {
-            console.error(error);
-            process.exit(1);
-          });
-          EOF
 
       - name: Run complete F7 browser suite
         env:
