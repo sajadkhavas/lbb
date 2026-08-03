@@ -1,0 +1,173 @@
+name: F7 final validation
+
+on:
+  push:
+    branches:
+      - phase/f7-content-editorial
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout F7 branch
+        uses: actions/checkout@v4
+        with:
+          ref: phase/f7-content-editorial
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Prepare temporary lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund --legacy-peer-deps
+
+      - name: Install dependencies with npm ci
+        run: npm ci --no-audit --no-fund --legacy-peer-deps
+
+      - name: Install temporary validation runtimes
+        run: |
+          npm install --no-save --package-lock=false --legacy-peer-deps @typescript/native-preview@7.0.0-dev.20260707.2 @playwright/test@1.54.2
+          npx playwright install --with-deps chromium
+
+      - name: Format only F7-owned files
+        run: |
+          npx prettier --write \
+            src/routes/collections.index.tsx \
+            'src/routes/collections.$slug.tsx' \
+            src/routes/lookbook.tsx \
+            src/routes/journal.index.tsx \
+            'src/routes/journal.$slug.tsx' \
+            src/routes/about.tsx \
+            src/routes/faq.tsx \
+            src/lib/collections.ts \
+            src/lib/journal.ts
+
+      - name: Commit scoped formatting
+        run: |
+          if git diff --quiet -- \
+            src/routes/collections.index.tsx \
+            'src/routes/collections.$slug.tsx' \
+            src/routes/lookbook.tsx \
+            src/routes/journal.index.tsx \
+            'src/routes/journal.$slug.tsx' \
+            src/routes/about.tsx \
+            src/routes/faq.tsx \
+            src/lib/collections.ts \
+            src/lib/journal.ts; then
+            echo "No formatting changes required."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add \
+              src/routes/collections.index.tsx \
+              'src/routes/collections.$slug.tsx' \
+              src/routes/lookbook.tsx \
+              src/routes/journal.index.tsx \
+              'src/routes/journal.$slug.tsx' \
+              src/routes/about.tsx \
+              src/routes/faq.tsx \
+              src/lib/collections.ts \
+              src/lib/journal.ts
+            git commit -m "F7: format owned content pages"
+            git push origin HEAD:phase/f7-content-editorial
+          fi
+
+      - name: Run repository typecheck and enforce F7 ownership
+        id: typecheck
+        run: |
+          set +e
+          npm run typecheck 2>&1 | tee /tmp/typecheck.log
+          repo_code=${PIPESTATUS[0]}
+          set -e
+          echo "repository_exit_code=$repo_code" >> "$GITHUB_OUTPUT"
+
+          if grep -E 'src/(routes/(collections\.index|collections\.\$slug|lookbook|journal\.index|journal\.\$slug|about|faq)\.tsx|lib/(collections|journal)\.ts)' /tmp/typecheck.log; then
+            echo "Type errors remain inside F7 ownership."
+            exit 1
+          fi
+
+          echo "F7-owned TypeScript files are clean."
+
+      - name: Lint F7-owned files
+        run: |
+          npx eslint \
+            src/routes/collections.index.tsx \
+            'src/routes/collections.$slug.tsx' \
+            src/routes/lookbook.tsx \
+            src/routes/journal.index.tsx \
+            'src/routes/journal.$slug.tsx' \
+            src/routes/about.tsx \
+            src/routes/faq.tsx \
+            src/lib/collections.ts \
+            src/lib/journal.ts
+
+      - name: Record full repository lint result
+        id: full_lint
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Start validation server
+        run: |
+          nohup npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/lbb-validation-server.log 2>&1 &
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:4173/collections > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/lbb-validation-server.log
+          exit 1
+
+      - name: Diagnose global failed resources
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
+        run: |
+          node <<'EOF'
+          const { chromium } = require('@playwright/test');
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+            const failures = [];
+            page.on('response', (response) => {
+              if (response.status() >= 400) failures.push(`${response.status()} ${response.url()}`);
+            });
+            await page.goto(`${process.env.PLAYWRIGHT_BASE_URL}/collections`, { waitUntil: 'networkidle' });
+            await page.reload({ waitUntil: 'networkidle' });
+            console.log('FAILED_RESOURCES_BEGIN');
+            for (const failure of failures) console.log(failure);
+            console.log('FAILED_RESOURCES_END');
+            await browser.close();
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          EOF
+
+      - name: Run complete F7 browser suite
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test f7-final-smoke.spec.mjs --reporter=line --workers=1
+
+      - name: Upload responsive screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f7-final-responsive-screenshots
+          path: f7-artifacts
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Report repository-wide blockers
+        if: always()
+        run: |
+          echo "Repository typecheck exit code: ${{ steps.typecheck.outputs.repository_exit_code }}"
+          echo "Full repository lint outcome: ${{ steps.full_lint.outcome }}"
