@@ -26,7 +26,13 @@ export default defineConfig({
         outDir: ".output/public",
         devOptions: { enabled: false },
         manifest: false,
-        includeAssets: ["favicon.png", "apple-touch-icon.png", "icons/*.png", "brand/lbb-logo.svg"],
+        includeAssets: [
+          "manifest.webmanifest",
+          "favicon.png",
+          "apple-touch-icon.png",
+          "icons/*.png",
+          "brand/lbb-logo.svg",
+        ],
         workbox: {
           globPatterns: ["**/*.{js,css,woff2,svg}"],
           globIgnores: ["**/*.map"],
