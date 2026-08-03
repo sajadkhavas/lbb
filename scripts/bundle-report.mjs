@@ -4,7 +4,7 @@ import path from "node:path";
 import process from "node:process";
 
 const root = process.cwd();
-const clientDir = path.join(root, "dist", "client");
+const clientDir = path.join(root, ".output", "public");
 const artifactsDir = path.join(root, "artifacts", "bundle");
 const shouldCheck = process.argv.includes("--check");
 
@@ -34,7 +34,7 @@ function sum(items, key) {
 }
 
 await stat(clientDir).catch(() => {
-  throw new Error("dist/client does not exist. Run npm run build before bundle reporting.");
+  throw new Error(".output/public does not exist. Run npm run build before bundle reporting.");
 });
 
 const files = [];
@@ -99,7 +99,7 @@ const checks = [
 
 const report = {
   generatedAt: new Date().toISOString(),
-  clientDir: "dist/client",
+  clientDir: ".output/public",
   totals,
   budgets,
   checks,
