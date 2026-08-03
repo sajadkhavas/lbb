@@ -4,6 +4,7 @@ import { Menu, X, ShoppingBag, Search, Heart, ArrowUpLeft } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
+import { Logo } from "@/components/lbb/Logo";
 import { categoryImage } from "@/lib/category-images";
 import { products, fmtToman } from "@/lib/products";
 import { productImage } from "@/lib/product-images";

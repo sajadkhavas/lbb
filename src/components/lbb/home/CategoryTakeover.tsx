@@ -36,7 +36,7 @@ export function CategoryTakeover() {
               params={{ category: c.slug }}
               onMouseEnter={() => setActive(i)}
               onFocus={() => setActive(i)}
-              className="group relative block h-full overflow-hidden"
+              className="group relative block h-full overflow-hidden rounded-2xl border border-hairline transition-transform duration-300 ease-[var(--ease-lbb)] hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
             >
               <Frame
                 src={categoryImage(c.slug)}
@@ -44,6 +44,7 @@ export function CategoryTakeover() {
                 ratio="4/5"
                 width={900}
                 height={1200}
+                className="rounded-2xl"
               >
                 <div
                   aria-hidden
@@ -55,7 +56,7 @@ export function CategoryTakeover() {
                 />
                 <TechLabel
                   tone="bone"
-                  className="absolute inset-inline-end-4 top-4 bg-obsidian/70 px-2.5 py-1 backdrop-blur"
+                  className="absolute inset-inline-end-4 top-4 rounded-lg bg-obsidian/70 px-2.5 py-1 backdrop-blur"
                 >
                   {fmtNum(c.count)} محصول
                 </TechLabel>
@@ -66,7 +67,7 @@ export function CategoryTakeover() {
                   </div>
                   <span
                     aria-hidden
-                    className="grid h-9 w-9 shrink-0 place-items-center bg-bone text-obsidian transition-colors duration-300 group-hover:bg-signal group-hover:text-bone"
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-bone text-obsidian transition-colors duration-300 group-hover:bg-signal group-hover:text-bone"
                   >
                     ←
                   </span>
