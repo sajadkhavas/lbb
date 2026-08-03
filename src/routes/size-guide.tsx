@@ -3,6 +3,8 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
+import { Shell } from "@/components/lbb/ui/primitives";
+import { pageMeta, canonical } from "@/lib/site";
 
 const TITLE = "راهنمای سایز LBB | جدول سایزبندی هودی، شلوار، کتونی";
 const DESC = "برای انتخاب سایز مناسب در LBB این راهنما رو ببین. جدول سایزبندی کامل برای هودی، تیشرت، شلوار و کتونی.";
@@ -20,16 +22,8 @@ const howToLd = {
 
 export const Route = createFileRoute("/size-guide")({
   head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESC },
-      { name: "robots", content: "index, follow" },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESC },
-      { property: "og:type", content: "article" },
-      { property: "og:url", content: "/size-guide" },
-    ],
-    links: [{ rel: "canonical", href: "/size-guide" }],
+    meta: pageMeta({ title: TITLE, description: DESC, path: "/size-guide", type: "article" }),
+    links: canonical("/size-guide"),
     scripts: [{ type: "application/ld+json", children: JSON.stringify(howToLd) }],
   }),
   component: SizeGuide,
@@ -56,13 +50,13 @@ const pantsSizes = [
 function SizeGuide() {
   return (
     <>
-      <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-24 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
-        <div className="mx-auto max-w-[900px] px-4 md:px-8">
+      <Navbar />
+      <main dir="rtl" className="min-h-screen bg-obsidian pb-28 pt-24">
+        <Shell className="max-w-[900px]">
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "راهنمای سایز" }]} />
-          <h1 className="mt-4 text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>راهنمای سایز</h1>
-          <p className="mt-3 text-sm leading-8 text-gray-600">
-            انتخاب سایز مناسب کار سختی نیست. یه متر خیاطی بردار، سینه و کمرت رو اندازه بگیر، و با جدول‌های پایین مقایسه کن. 
+          <h1 className="mt-4 text-display-2 text-bone">راهنمای سایز</h1>
+          <p className="mt-3 text-sm leading-8 text-metal">
+            انتخاب سایز مناسب کار سختی نیست. یه متر خیاطی بردار، سینه و کمرت رو اندازه بگیر، و با جدول‌های پایین مقایسه کن.
             اگه بین دو سایز بودی، سایز بزرگ‌تر رو انتخاب کن — LBB معمولاً برش اورسایز داره.
           </p>
 
@@ -70,13 +64,13 @@ function SizeGuide() {
           <Table title="شلوار" rows={pantsSizes} />
 
           <div className="mt-10">
-            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>سوالات رایج</h2>
+            <h2 className="text-xl font-bold text-bone">سوالات رایج</h2>
             <FAQ q="اگه سایزم درست نبود چیکار کنم؟" a="تا ۷ روز فرصت داری کالا رو با کالای دیگه در همون سایز جایگزین کنی. برای اطلاعات بیشتر به صفحه تماس مراجعه کن." />
             <FAQ q="سایزبندی LBB به سایز جهانی نزدیکه؟" a="بله، برش‌های LBB بر اساس استانداردهای بین‌المللی طراحی شدن اما تمایل به اورسایز دارن." />
           </div>
-        </div>
+        </Shell>
       </main>
-      <Footer theme="light" />
+      <Footer />
       <MobileBottomBar />
     </>
   );
@@ -85,17 +79,17 @@ function SizeGuide() {
 function Table({ title, rows }: { title: string; rows: string[][] }) {
   return (
     <div className="mt-8">
-      <h2 className="mb-3 text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
-      <div className="overflow-x-auto rounded-xl border border-black/[0.06]">
+      <h2 className="mb-3 text-xl font-bold text-bone">{title}</h2>
+      <div className="overflow-x-auto rounded-2xl border border-hairline">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gray-50 text-gray-600">
-              {rows[0].map((h) => <th key={h} className="p-3 text-right font-semibold">{h}</th>)}
+            <tr className="bg-carbon text-metal">
+              {rows[0].map((h) => <th key={h} className="p-3 text-start font-semibold">{h}</th>)}
             </tr>
           </thead>
           <tbody>
             {rows.slice(1).map((r, i) => (
-              <tr key={i} className="border-t border-black/[0.06]">
+              <tr key={i} className="border-t border-hairline text-bone">
                 {r.map((c, j) => <td key={j} className="p-3">{c}</td>)}
               </tr>
             ))}
@@ -108,9 +102,9 @@ function Table({ title, rows }: { title: string; rows: string[][] }) {
 
 function FAQ({ q, a }: { q: string; a: string }) {
   return (
-    <details className="border-b border-black/[0.06] py-3">
-      <summary className="cursor-pointer text-sm font-semibold">{q}</summary>
-      <p className="mt-2 text-sm leading-7 text-gray-600">{a}</p>
+    <details className="border-b border-hairline py-3">
+      <summary className="cursor-pointer text-sm font-semibold text-bone tap-target">{q}</summary>
+      <p className="mt-2 text-sm leading-7 text-metal">{a}</p>
     </details>
   );
 }

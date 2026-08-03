@@ -65,7 +65,7 @@ export const Route = createFileRoute("/$category")({
     const faqLd = {
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      mainEntity: cat.faqs.map((f) => ({
+      mainEntity: cat.faqs.map((f: { q: string; a: string }) => ({
         "@type": "Question",
         name: f.q,
         acceptedAnswer: { "@type": "Answer", text: f.a },
@@ -163,7 +163,7 @@ function CategoryPage() {
                 {items.length.toLocaleString("fa-IR")} محصول موجود
               </p>
               <ul className="mt-2 flex flex-col gap-2 text-sm text-gray-700">
-                {cat.bullets.map((b) => (
+                {cat.bullets.map((b: string) => (
                   <li key={b} className="flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--lbb-red)]" />
                     <span>{b}</span>
@@ -241,7 +241,7 @@ function CategoryPage() {
               سوالات متداول درباره {cat.nameFaPlural}
             </h2>
             <div className="divide-y divide-black/[0.06] border-t border-black/[0.06]">
-              {cat.faqs.map((f) => (
+              {cat.faqs.map((f: { q: string; a: string }) => (
                 <details key={f.q} className="group py-4">
                   <summary className="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold">
                     {f.q}
