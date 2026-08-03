@@ -16,6 +16,7 @@ import { CartDrawer } from "@/components/lbb/CartDrawer";
 import { ProductQuickView } from "@/components/lbb/ProductQuickView";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/lib/cart";
+import { EMPTY_FILTERS } from "@/lib/product-filter";
 import { registerPwa } from "@/lib/pwa";
 import { QuickViewProvider } from "@/lib/quickview";
 import {
@@ -55,7 +56,7 @@ function NotFoundComponent() {
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Link
             to="/shop"
-            search={true}
+            search={EMPTY_FILTERS}
             className="rounded-full border border-white/25 px-4 py-2 text-[12px]"
           >
             فروشگاه
@@ -63,7 +64,7 @@ function NotFoundComponent() {
           <Link
             to="/$category"
             params={{ category: "hoodies" }}
-            search={true}
+            search={EMPTY_FILTERS}
             className="rounded-full border border-white/25 px-4 py-2 text-[12px]"
           >
             هودی
