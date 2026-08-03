@@ -97,10 +97,10 @@ export function HeroSplit() {
           </p>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Link to="/shop" className={`hero-cta ${CtaClasses("signal")}`}>
+            <Link to="/shop" className={`hero-cta ${CtaClasses("signal")} rounded-xl`}>
               خرید کالکشن جدید
             </Link>
-            <Link to="/shop" className={`hero-cta ${CtaClasses("line")}`}>
+            <Link to="/shop" className={`hero-cta ${CtaClasses("line")} rounded-xl`}>
               مشاهده فروشگاه
             </Link>
           </div>
@@ -140,7 +140,7 @@ export function HeroSplit() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to inline-start, rgba(5,5,5,0.65) 0%, transparent 45%)",
+                "linear-gradient(to inline-end, rgba(5,5,5,0.65) 0%, transparent 45%)",
             }}
           />
         </div>

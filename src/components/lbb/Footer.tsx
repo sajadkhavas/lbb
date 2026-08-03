@@ -43,10 +43,14 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
 
       <div className="lbb-shell grid gap-10 pt-10 md:grid-cols-2 lg:grid-cols-4">
         <div className="min-w-0">
-          <TechLabel tone="signal">LBB / TEHRAN</TechLabel>
+          <Logo size={44} withWordmark />
+          <div className="mt-4">
+            <TechLabel tone="signal">LBB / TEHRAN</TechLabel>
+          </div>
           <p className="mt-4 max-w-xs text-sm leading-7 text-metal">
             استریت‌ویر ایرانی با برش‌های واقعی و جنس ماندگار. طراحی و تولید در تهران.
           </p>
+
           <a
             href="https://www.instagram.com/lbbclo"
             target="_blank"
