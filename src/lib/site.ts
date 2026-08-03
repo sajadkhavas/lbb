@@ -65,7 +65,9 @@ export const OG_IMAGE = absUrl("/icons/icon-512.png");
 export const NOINDEX = { name: "robots", content: "noindex, nofollow" } as const;
 
 type MetaEntry =
-  { title: string } | { name: string; content: string } | { property: string; content: string };
+  | { title: string }
+  | { name: string; content: string }
+  | { property: string; content: string };
 
 export function pageMeta(opts: {
   title: string;
@@ -149,6 +151,6 @@ export function escapeXml(value: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
 }
