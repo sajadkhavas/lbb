@@ -10,7 +10,7 @@
     "dev": "vite dev",
     "build": "node scripts/build.mjs",
     "build:dev": "node scripts/build.mjs development",
-    "preview": "vite preview",
+    "preview": "node scripts/preview.mjs",
     "lint": "node scripts/lint-owned.mjs",
     "lint:integration": "eslint .",
     "format": "prettier --write .",
