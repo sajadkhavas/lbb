@@ -18,16 +18,7 @@ const wranglerBin = path.join(
 
 const child = spawn(
   wranglerBin,
-  [
-    "dev",
-    "--config",
-    ".output/server/wrangler.json",
-    "--no-bundle",
-    "--ip",
-    host,
-    "--port",
-    port,
-  ],
+  ["dev", "--config", ".output/server/wrangler.json", "--no-bundle", "--ip", host, "--port", port],
   {
     cwd: process.cwd(),
     env: { ...process.env, WRANGLER_SEND_METRICS: "false" },
