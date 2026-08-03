@@ -21,7 +21,7 @@ export const COLLECTIONS: Collection[] = [
       "دراپ ۰۱ شبگرد از LBB: کالکشن محدود تمام‌مشکی شامل هودی اورسایز، کتونی و جوراب. ساخته‌شده برای خیابون‌های تاریک شهر.",
     description:
       "شبگرد اولین دراپ کپسولی LBB است؛ مجموعه‌ای محدود که حول رنگ مشکی و برش‌های اورسایز شکل گرفته. این کالکشن برای کسایی طراحی شده که شب‌های شهر رو با استایل خودشون تسخیر می‌کنن. تعداد محدود، تولید محدود.",
-    productSlugs: ["oversized-black-hoodie", "cargo-street-pants", "urban-runner-sneaker", "lbb-cap"],
+    productSlugs: ["oversized-black-hoodie", "cargo-street-pants", "urban-runner-sneaker", "lbb-crew-socks"],
   },
   {
     slug: "drop-02-atashe-sorkh",
@@ -32,7 +32,7 @@ export const COLLECTIONS: Collection[] = [
       "دراپ ۰۲ آتش سرخ: کالکشنی جسورانه با رنگ قرمز سیگنیچر LBB. تیشرت گرافیک، هودی کلاسیک و جوراب قرمز.",
     description:
       "آتش سرخ دومین دراپ LBB است که رنگ قرمز امضای برند رو به مرکز توجه می‌آره. این کالکشن برای اونایی ساخته شده که می‌خوان توی جمع دیده بشن، بدون این‌که از اصالت استریت‌ویر فاصله بگیرن.",
-    productSlugs: ["graphic-tee-red", "lbb-classic-hoodie", "lbb-signature-tee", "lbb-cap"],
+    productSlugs: ["graphic-tee-red", "lbb-classic-hoodie", "lbb-signature-tee", "lbb-crew-socks"],
   },
   {
     slug: "capsule-denim",
