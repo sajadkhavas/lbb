@@ -54,7 +54,8 @@ const parsedDiagnostics = diagnosticLines.flatMap((line) => {
   ];
 });
 
-const isOwned = (file) => ownedFiles.has(file) || ownedPrefixes.some((prefix) => file.startsWith(prefix));
+const isOwned = (file) =>
+  ownedFiles.has(file) || ownedPrefixes.some((prefix) => file.startsWith(prefix));
 const ownedDiagnostics = parsedDiagnostics.filter((diagnostic) => isOwned(diagnostic.file));
 const integrationDiagnostics = parsedDiagnostics.filter((diagnostic) => !isOwned(diagnostic.file));
 const unparsedFailure = result.status !== 0 && parsedDiagnostics.length === 0;
@@ -62,10 +63,7 @@ const unparsedFailure = result.status !== 0 && parsedDiagnostics.length === 0;
 const report = {
   generatedAt: new Date().toISOString(),
   compilerExitCode: result.status,
-  status:
-    ownedDiagnostics.length === 0 && !unparsedFailure
-      ? "PASS_F8A_SCOPE"
-      : "FAIL_F8A_SCOPE",
+  status: ownedDiagnostics.length === 0 && !unparsedFailure ? "PASS_F8A_SCOPE" : "FAIL_F8A_SCOPE",
   ownedDiagnosticCount: ownedDiagnostics.length,
   integrationDiagnosticCount: integrationDiagnostics.length,
   ownedDiagnostics,
