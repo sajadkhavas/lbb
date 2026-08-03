@@ -53,12 +53,17 @@ function NotFoundComponent() {
         </h1>
         <p className="mt-2 text-[13px] text-white/50">شاید دنبال یکی از این‌ها بودید:</p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <Link to="/shop" className="rounded-full border border-white/25 px-4 py-2 text-[12px]">
+          <Link
+            to="/shop"
+            search={true}
+            className="rounded-full border border-white/25 px-4 py-2 text-[12px]"
+          >
             فروشگاه
           </Link>
           <Link
             to="/$category"
             params={{ category: "hoodies" }}
+            search={true}
             className="rounded-full border border-white/25 px-4 py-2 text-[12px]"
           >
             هودی
