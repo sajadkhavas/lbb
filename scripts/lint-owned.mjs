@@ -67,8 +67,14 @@ const ownedErrors = ownedReports.flatMap((report) =>
     .map((message) => ({ file: report.relativePath, ...message })),
 );
 const ownedWarnings = ownedReports.reduce((total, report) => total + report.warningCount, 0);
-const integrationErrors = integrationReports.reduce((total, report) => total + report.errorCount, 0);
-const integrationWarnings = integrationReports.reduce((total, report) => total + report.warningCount, 0);
+const integrationErrors = integrationReports.reduce(
+  (total, report) => total + report.errorCount,
+  0,
+);
+const integrationWarnings = integrationReports.reduce(
+  (total, report) => total + report.warningCount,
+  0,
+);
 const cliFailure = result.status === 2;
 
 const summary = {
@@ -101,7 +107,9 @@ if (cliFailure) {
 } else if (ownedErrors.length > 0) {
   console.error(`F8-A owned lint failed with ${ownedErrors.length} error(s):`);
   for (const error of ownedErrors) {
-    console.error(`${error.file}:${error.line}:${error.column} ${error.ruleId ?? "parse"} ${error.message}`);
+    console.error(
+      `${error.file}:${error.line}:${error.column} ${error.ruleId ?? "parse"} ${error.message}`,
+    );
   }
   process.exitCode = 1;
 } else if (integrationErrors > 0 || integrationWarnings > 0) {
