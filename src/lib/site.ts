@@ -1,5 +1,5 @@
-const rawSiteUrl = (import.meta.env["VITE_SITE_URL"] as string | undefined)?.trim();
-const isProduction = Boolean(import.meta.env.PROD);
+const rawSiteUrl = import.meta.env.VITE_SITE_URL?.trim();
+const isProduction = import.meta.env.PROD;
 
 export const SITE_NAME = "LBB";
 export const SITE_LOCALE = "fa_IR";
