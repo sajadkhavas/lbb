@@ -24,7 +24,6 @@ export default defineConfig({
     baseURL: externalBaseUrl || localBaseUrl,
     locale: "fa-IR",
     colorScheme: "dark",
-    reducedMotion: "reduce",
     serviceWorkers: "block",
   },
   webServer: externalBaseUrl
