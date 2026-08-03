@@ -6,6 +6,14 @@ on:
       - phase/f8-quality-foundation
     paths:
       - .github/workflows/validate-wrangler-preview.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/validate-wrangler-preview.yml
+      - package.json
+      - package-lock.json
+      - scripts/preview.mjs
   workflow_dispatch:
 
 permissions:
