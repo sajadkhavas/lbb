@@ -76,17 +76,33 @@ check("optimized logo emitted", await exists(logoPath), ".output/public/brand/lb
 
 const files = await walk(clientDir);
 const textExtensions = new Set([".html", ".js", ".mjs", ".css", ".json", ".xml", ".txt", ".svg"]);
-const forbiddenPatterns = ["/__l5e/", "assets-v1/", "lovableproject.com", "lovableproject-dev.com"];
+const forbiddenInternalPaths = ["/__l5e/", "assets-v1/"];
+const lovableHostnames = new Set(["lovableproject.com", "lovableproject-dev.com"]);
 const forbiddenHits = [];
 for (const file of files) {
   if (!textExtensions.has(path.extname(file).toLowerCase())) continue;
   const content = await readFile(file, "utf8");
-  for (const pattern of forbiddenPatterns) {
-    if (content.includes(pattern)) {
-      forbiddenHits.push({
-        file: path.relative(clientDir, file).replaceAll(path.sep, "/"),
-        pattern,
-      });
+  const relativeFile = path.relative(clientDir, file).replaceAll(path.sep, "/");
+
+  for (const internalPath of forbiddenInternalPaths) {
+    if (content.includes(internalPath)) {
+      forbiddenHits.push({ file: relativeFile, type: "internal-path", value: internalPath });
+    }
+  }
+
+  for (const match of content.matchAll(/(?:https?:)?\/\/[^\s"'`<>\\)]+/g)) {
+    const candidate = match[0].startsWith("//") ? `https:${match[0]}` : match[0];
+    try {
+      const parsed = new URL(candidate);
+      const hostname = parsed.hostname.toLowerCase();
+      const isLovableUrl = [...lovableHostnames].some(
+        (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+      );
+      if (isLovableUrl) {
+        forbiddenHits.push({ file: relativeFile, type: "absolute-url", value: match[0] });
+      }
+    } catch {
+      // Ignore non-URL code fragments; only deployable URLs are relevant to this gate.
     }
   }
 }
