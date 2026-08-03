@@ -151,9 +151,12 @@ function LookbookPage() {
         <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
           <Shell>
             <TechLabel tone="signal">LBB / SEASONAL LOOKS</TechLabel>
-            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">لوک‌بوک؛ فرم، رنگ و لایه در یک قاب</h1>
+            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+              لوک‌بوک؛ فرم، رنگ و لایه در یک قاب
+            </h1>
             <p className="text-lede mt-5 max-w-[60ch]">
-              این گالری با محصولات موجود در کاتالوگ ساخته شده است. برای دیدن تصویر بزرگ، هر قاب را باز کنید؛ برای جزئیات خرید به صفحه محصول بروید.
+              این گالری با محصولات موجود در کاتالوگ ساخته شده است. برای دیدن تصویر بزرگ، هر قاب را
+              باز کنید؛ برای جزئیات خرید به صفحه محصول بروید.
             </p>
           </Shell>
         </Band>

@@ -72,9 +72,12 @@ function JournalIndexPage() {
         <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
           <Shell>
             <TechLabel tone="signal">LBB / EDITORIAL NOTES</TechLabel>
-            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">ژورنال؛ راهنماهایی برای انتخاب و استفاده بهتر</h1>
+            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+              ژورنال؛ راهنماهایی برای انتخاب و استفاده بهتر
+            </h1>
             <p className="text-lede mt-5 max-w-[62ch]">
-              مقاله‌های کوتاه و کاربردی درباره فیت، رنگ، پارچه و نگهداری؛ بدون جایگزین کردن اطلاعات دقیق صفحه هر محصول.
+              مقاله‌های کوتاه و کاربردی درباره فیت، رنگ، پارچه و نگهداری؛ بدون جایگزین کردن اطلاعات
+              دقیق صفحه هر محصول.
             </p>
           </Shell>
         </Band>

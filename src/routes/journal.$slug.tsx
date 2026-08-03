@@ -25,14 +25,19 @@ export const Route = createFileRoute("/journal/$slug")({
     if (!article) throw notFound();
 
     const related = JOURNAL_ARTICLES.filter((candidate) => candidate.slug !== article.slug)
-      .sort((left, right) => Number(right.category === article.category) - Number(left.category === article.category))
+      .sort(
+        (left, right) =>
+          Number(right.category === article.category) - Number(left.category === article.category),
+      )
       .slice(0, 2);
 
     return { article, related };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "مقاله پیدا نشد" }, { name: "robots", content: "noindex, nofollow" }] };
+      return {
+        meta: [{ title: "مقاله پیدا نشد" }, { name: "robots", content: "noindex, nofollow" }],
+      };
     }
 
     const { article } = loaderData;
@@ -85,7 +90,13 @@ function JournalNotFound() {
       <Navbar theme="light" />
       <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
         <Shell className="py-3">
-          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال", href: "/journal" }, { label: "پیدا نشد" }]} />
+          <Breadcrumb
+            items={[
+              { label: "خانه", href: "/" },
+              { label: "ژورنال", href: "/journal" },
+              { label: "پیدا نشد" },
+            ]}
+          />
         </Shell>
         <Band hairline={false}>
           <Shell>
@@ -109,7 +120,8 @@ function JournalNotFound() {
 }
 
 function JournalDetailPage() {
-  const { article, related }: { article: JournalArticle; related: JournalArticle[] } = Route.useLoaderData();
+  const { article, related }: { article: JournalArticle; related: JournalArticle[] } =
+    Route.useLoaderData();
 
   return (
     <>
@@ -158,7 +170,10 @@ function JournalDetailPage() {
 
         <Band>
           <Shell className="grid max-w-[1100px] gap-10 lg:grid-cols-[240px_minmax(0,720px)] lg:items-start lg:justify-center">
-            <aside className="rounded-2xl border border-hairline bg-carbon p-5 lg:sticky lg:top-24" aria-label="فهرست مقاله">
+            <aside
+              className="rounded-2xl border border-hairline bg-carbon p-5 lg:sticky lg:top-24"
+              aria-label="فهرست مقاله"
+            >
               <TechLabel tone="signal">IN THIS ARTICLE</TechLabel>
               <ol className="mt-4 space-y-3">
                 {article.sections.map((section, index) => (
@@ -224,7 +239,9 @@ function JournalDetailPage() {
                     <div className="flex flex-col justify-center p-5">
                       <TechLabel tone="signal">{item.category}</TechLabel>
                       <h3 className="mt-3 text-lg font-bold leading-8 text-bone">{item.title}</h3>
-                      <p className="mt-2 line-clamp-2 text-xs leading-6 text-metal">{item.excerpt}</p>
+                      <p className="mt-2 line-clamp-2 text-xs leading-6 text-metal">
+                        {item.excerpt}
+                      </p>
                       <span className="tech mt-4 inline-flex items-center gap-2 text-bone transition-colors group-hover:text-signal">
                         خواندن
                         <ArrowUpLeft aria-hidden="true" size={14} />

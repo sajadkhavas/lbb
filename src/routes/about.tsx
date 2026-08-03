@@ -75,12 +75,17 @@ function AboutPage() {
           <Shell className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div>
               <TechLabel tone="signal">ABOUT / LBB</TechLabel>
-              <h1 className="mt-5 max-w-[14ch] text-display-1 text-bone">یک تجربه متمرکز برای دیدن، مقایسه و انتخاب</h1>
+              <h1 className="mt-5 max-w-[14ch] text-display-1 text-bone">
+                یک تجربه متمرکز برای دیدن، مقایسه و انتخاب
+              </h1>
               <p className="text-lede mt-5 max-w-[58ch]">
-                LBB محصولات را در یک زبان بصری واحد نمایش می‌دهد و مسیر انتخاب را با کالکشن، لوک‌بوک و مقاله‌های راهنما کامل می‌کند.
+                LBB محصولات را در یک زبان بصری واحد نمایش می‌دهد و مسیر انتخاب را با کالکشن، لوک‌بوک
+                و مقاله‌های راهنما کامل می‌کند.
               </p>
               <p className="mt-6 max-w-[62ch] text-sm leading-8 text-metal">
-                این صفحه درباره ساختار همین تجربه است. درباره اندازه تیم، محل تولید، حجم فروش یا شعبه فیزیکی ادعایی مطرح نمی‌شود؛ اطلاعاتی که برای تصمیم خرید اهمیت دارد باید از داده واقعی محصول و مراحل سفارش بیاید.
+                این صفحه درباره ساختار همین تجربه است. درباره اندازه تیم، محل تولید، حجم فروش یا
+                شعبه فیزیکی ادعایی مطرح نمی‌شود؛ اطلاعاتی که برای تصمیم خرید اهمیت دارد باید از داده
+                واقعی محصول و مراحل سفارش بیاید.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/shop" search={EMPTY_FILTERS} className={CtaClasses("signal")}>
@@ -137,7 +142,8 @@ function AboutPage() {
               <TechLabel tone="signal">CURRENT CONTENT MAP</TechLabel>
               <h2 className="mt-4 text-display-2 text-bone">آنچه اکنون در LBB پیدا می‌کنید</h2>
               <p className="mt-4 text-sm leading-8 text-metal">
-                عددها مستقیماً از داده فعلی سایت خوانده می‌شوند و با اضافه یا حذف شدن محتوا تغییر می‌کنند.
+                عددها مستقیماً از داده فعلی سایت خوانده می‌شوند و با اضافه یا حذف شدن محتوا تغییر
+                می‌کنند.
               </p>
             </div>
 
@@ -149,7 +155,9 @@ function AboutPage() {
                 { value: JOURNAL_ARTICLES.length, label: "مقاله ژورنال" },
               ].map((item) => (
                 <div key={item.label} className="bg-carbon p-5 text-center md:p-6">
-                  <dd className="font-display text-4xl font-black text-bone">{item.value.toLocaleString("fa-IR")}</dd>
+                  <dd className="font-display text-4xl font-black text-bone">
+                    {item.value.toLocaleString("fa-IR")}
+                  </dd>
                   <dt className="tech mt-2 text-metal">{item.label}</dt>
                 </div>
               ))}
@@ -189,7 +197,10 @@ function AboutPage() {
                   action: "رفتن به فروشگاه",
                 },
               ].map((step) => (
-                <li key={step.index} className="flex flex-col rounded-2xl border border-hairline bg-carbon p-6">
+                <li
+                  key={step.index}
+                  className="flex flex-col rounded-2xl border border-hairline bg-carbon p-6"
+                >
                   <TechLabel tone="signal">STEP {step.index}</TechLabel>
                   <h3 className="mt-4 text-display-3 text-bone">{step.title}</h3>
                   <p className="mt-3 flex-1 text-sm leading-8 text-metal">{step.body}</p>

@@ -153,9 +153,12 @@ function FaqPage() {
         <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
           <Shell>
             <TechLabel tone="signal">FAQ / LBB</TechLabel>
-            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">پاسخ‌های روشن پیش از انتخاب و ثبت سفارش</h1>
+            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+              پاسخ‌های روشن پیش از انتخاب و ثبت سفارش
+            </h1>
             <p className="text-lede mt-5 max-w-[62ch]">
-              پاسخ‌ها بر اساس اطلاعات قابل‌نمایش در سایت نوشته شده‌اند و عدد یا تعهدی درباره فرایندهای تأییدنشده اضافه نمی‌کنند.
+              پاسخ‌ها بر اساس اطلاعات قابل‌نمایش در سایت نوشته شده‌اند و عدد یا تعهدی درباره
+              فرایندهای تأییدنشده اضافه نمی‌کنند.
             </p>
 
             <nav className="mt-8 flex flex-wrap gap-2" aria-label="دسته‌های سوالات متداول">
@@ -179,15 +182,22 @@ function FaqPage() {
                 <section id={group.id} key={group.id} className="scroll-mt-28">
                   <div className="flex flex-wrap items-end justify-between gap-4">
                     <div>
-                      <TechLabel tone="signal">{String(groupIndex + 1).padStart(2, "0")} / {group.label}</TechLabel>
+                      <TechLabel tone="signal">
+                        {String(groupIndex + 1).padStart(2, "0")} / {group.label}
+                      </TechLabel>
                       <h2 className="mt-3 text-display-3 text-bone">{group.title}</h2>
                     </div>
-                    <span className="tech text-mute">{group.items.length.toLocaleString("fa-IR")} پاسخ</span>
+                    <span className="tech text-mute">
+                      {group.items.length.toLocaleString("fa-IR")} پاسخ
+                    </span>
                   </div>
 
                   <div className="mt-5 overflow-hidden rounded-2xl border border-hairline bg-carbon">
                     {group.items.map((item) => (
-                      <details key={item.question} className="group border-b border-hairline last:border-b-0">
+                      <details
+                        key={item.question}
+                        className="group border-b border-hairline last:border-b-0"
+                      >
                         <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 text-sm font-bold leading-7 text-bone transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal md:px-6">
                           <span>{item.question}</span>
                           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-hairline text-metal transition-transform duration-200 group-open:rotate-45 group-open:border-signal group-open:text-signal">
@@ -210,9 +220,12 @@ function FaqPage() {
           <Shell className="grid gap-6 rounded-2xl border border-hairline bg-carbon p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">
             <div>
               <TechLabel tone="signal">KEEP EXPLORING</TechLabel>
-              <h2 className="mt-3 text-display-3 text-bone">برای انتخاب، از داده واقعی محصول شروع کنید</h2>
+              <h2 className="mt-3 text-display-3 text-bone">
+                برای انتخاب، از داده واقعی محصول شروع کنید
+              </h2>
               <p className="mt-3 max-w-[58ch] text-sm leading-7 text-metal">
-                فروشگاه برای قیمت و موجودی، و ژورنال برای راهنماهای عمومی استایل و نگهداری در دسترس‌اند.
+                فروشگاه برای قیمت و موجودی، و ژورنال برای راهنماهای عمومی استایل و نگهداری در
+                دسترس‌اند.
               </p>
             </div>
             <div className="flex flex-wrap gap-3 md:justify-end">

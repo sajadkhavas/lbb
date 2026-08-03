@@ -58,9 +58,12 @@ function CollectionsIndexPage() {
         <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
           <Shell>
             <TechLabel tone="signal">LBB / EDITORIAL COLLECTIONS</TechLabel>
-            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">کالکشن‌ها؛ مسیرهای آماده برای ساختن یک ست</h1>
+            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+              کالکشن‌ها؛ مسیرهای آماده برای ساختن یک ست
+            </h1>
             <p className="text-lede mt-5 max-w-[62ch]">
-              هر کالکشن، محصولات واقعی فروشگاه را بر اساس رنگ، فرم و کاربرد کنار هم می‌گذارد. موجودی و سایز هر قطعه را در صفحه همان محصول بررسی کنید.
+              هر کالکشن، محصولات واقعی فروشگاه را بر اساس رنگ، فرم و کاربرد کنار هم می‌گذارد. موجودی
+              و سایز هر قطعه را در صفحه همان محصول بررسی کنید.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/shop" search={EMPTY_FILTERS} className={CtaClasses("signal")}>
@@ -91,12 +94,19 @@ function CollectionsIndexPage() {
                       alt={`نمای محصول اصلی کالکشن ${collection.nameFa}`}
                       ratio={index === 0 ? "16/9" : "4/5"}
                       priority={index === 0}
-                      sizes={index === 0 ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 1024px) 100vw, 33vw"}
+                      sizes={
+                        index === 0
+                          ? "(max-width: 1024px) 100vw, 66vw"
+                          : "(max-width: 1024px) 100vw, 33vw"
+                      }
                       className="rounded-t-2xl"
                       imgClassName="transition-transform duration-700 group-hover:scale-[1.04]"
                     >
                       <div className="absolute inset-0 bg-gradient-to-t from-obsidian/75 via-transparent to-transparent" />
-                      <StatusTag tone="neutral" className="absolute inset-inline-end-4 top-4 rounded-lg backdrop-blur">
+                      <StatusTag
+                        tone="neutral"
+                        className="absolute inset-inline-end-4 top-4 rounded-lg backdrop-blur"
+                      >
                         {collection.productSlugs.length.toLocaleString("fa-IR")} محصول
                       </StatusTag>
                     </Frame>
@@ -105,9 +115,15 @@ function CollectionsIndexPage() {
                       <TechLabel tone="signal">{collection.latinName}</TechLabel>
                       <h2 className="mt-3 text-display-3 text-bone">{collection.nameFa}</h2>
                       <p className="mt-3 text-sm leading-7 text-metal">{collection.tagline}</p>
-                      <ul className="mt-5 flex flex-wrap gap-2" aria-label={`ویژگی‌های ${collection.nameFa}`}>
+                      <ul
+                        className="mt-5 flex flex-wrap gap-2"
+                        aria-label={`ویژگی‌های ${collection.nameFa}`}
+                      >
                         {collection.storyPoints.map((point) => (
-                          <li key={point} className="rounded-full border border-hairline px-3 py-1.5 text-[11px] text-metal">
+                          <li
+                            key={point}
+                            className="rounded-full border border-hairline px-3 py-1.5 text-[11px] text-metal"
+                          >
                             {point}
                           </li>
                         ))}

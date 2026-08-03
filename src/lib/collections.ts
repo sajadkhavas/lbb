@@ -48,12 +48,7 @@ export const COLLECTIONS: Collection[] = [
     editorialNote:
       "اگر تیشرت قرمز را انتخاب می‌کنید، باقی ست را خنثی نگه دارید. برای استفاده ملایم‌تر از رنگ، جوراب قرمز را به‌عنوان جزئیات پایانی وارد کنید.",
     storyPoints: ["یک رنگ شاخص", "پایه‌های خنثی", "قابل‌استفاده در چند فصل"],
-    productSlugs: [
-      "graphic-tee-red",
-      "lbb-classic-hoodie",
-      "lbb-signature-tee",
-      "lbb-crew-socks",
-    ],
+    productSlugs: ["graphic-tee-red", "lbb-classic-hoodie", "lbb-signature-tee", "lbb-crew-socks"],
   },
   {
     slug: "capsule-denim",
@@ -73,4 +68,5 @@ export const COLLECTIONS: Collection[] = [
   },
 ];
 
-export const collectionBySlug = (slug: string) => COLLECTIONS.find((collection) => collection.slug === slug);
+export const collectionBySlug = (slug: string) =>
+  COLLECTIONS.find((collection) => collection.slug === slug);

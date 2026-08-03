@@ -216,4 +216,5 @@ export const JOURNAL_ARTICLES: JournalArticle[] = [
   },
 ];
 
-export const journalBySlug = (slug: string) => JOURNAL_ARTICLES.find((article) => article.slug === slug);
+export const journalBySlug = (slug: string) =>
+  JOURNAL_ARTICLES.find((article) => article.slug === slug);

@@ -34,7 +34,9 @@ export const Route = createFileRoute("/collections/$slug")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "کالکشن پیدا نشد" }, { name: "robots", content: "noindex, nofollow" }] };
+      return {
+        meta: [{ title: "کالکشن پیدا نشد" }, { name: "robots", content: "noindex, nofollow" }],
+      };
     }
 
     const { collection, items } = loaderData;
@@ -94,7 +96,13 @@ function CollectionNotFound() {
       <Navbar theme="light" />
       <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
         <Shell className="py-3">
-          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "کالکشن‌ها", href: "/collections" }, { label: "پیدا نشد" }]} />
+          <Breadcrumb
+            items={[
+              { label: "خانه", href: "/" },
+              { label: "کالکشن‌ها", href: "/collections" },
+              { label: "پیدا نشد" },
+            ]}
+          />
         </Shell>
         <Band hairline={false}>
           <Shell>
@@ -141,11 +149,16 @@ function CollectionDetailPage() {
               <TechLabel tone="signal">{collection.latinName}</TechLabel>
               <h1 className="mt-5 text-display-1 text-bone">{collection.nameFa}</h1>
               <p className="text-lede mt-5 max-w-[52ch]">{collection.tagline}</p>
-              <p className="mt-6 max-w-[64ch] text-sm leading-8 text-metal">{collection.description}</p>
+              <p className="mt-6 max-w-[64ch] text-sm leading-8 text-metal">
+                {collection.description}
+              </p>
 
               <div className="mt-7 flex flex-wrap gap-2">
                 {collection.storyPoints.map((point) => (
-                  <span key={point} className="rounded-full border border-hairline px-3 py-1.5 text-[11px] text-metal">
+                  <span
+                    key={point}
+                    className="rounded-full border border-hairline px-3 py-1.5 text-[11px] text-metal"
+                  >
                     {point}
                   </span>
                 ))}
@@ -171,7 +184,10 @@ function CollectionDetailPage() {
                 className="rounded-2xl border border-hairline"
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-obsidian/75 via-transparent to-transparent" />
-                <StatusTag tone="neutral" className="absolute inset-inline-end-4 top-4 rounded-lg backdrop-blur">
+                <StatusTag
+                  tone="neutral"
+                  className="absolute inset-inline-end-4 top-4 rounded-lg backdrop-blur"
+                >
                   {items.length.toLocaleString("fa-IR")} قطعه
                 </StatusTag>
                 <div className="absolute inset-x-5 bottom-5">
@@ -219,7 +235,9 @@ function CollectionDetailPage() {
             <div>
               <TechLabel tone="signal">EDITORIAL NOTE</TechLabel>
               <h2 className="mt-3 text-display-3 text-bone">یادداشت استایلینگ</h2>
-              <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">{collection.editorialNote}</p>
+              <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
+                {collection.editorialNote}
+              </p>
             </div>
             <Link to="/lookbook" className={CtaClasses("line")}>
               دیدن لوک‌بوک
