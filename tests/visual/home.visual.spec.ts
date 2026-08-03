@@ -9,6 +9,7 @@ test.describe("LBB integrated visual baselines", () => {
   test.skip(true, "Capture snapshots after feature branches merge in Final Review.");
 
   test("homepage", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "dark" });
     await page.goto("/", { waitUntil: "networkidle" });
     await page.evaluate(async () => {
       await document.fonts.ready;
