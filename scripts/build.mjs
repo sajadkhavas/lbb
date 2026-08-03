@@ -4,6 +4,7 @@ import process from "node:process";
 import { build, loadEnv } from "vite";
 
 const root = process.cwd();
+const publicOutputDir = path.join(root, ".output", "public");
 const mode = process.argv[2] ?? "production";
 const env = loadEnv(mode, root, "");
 const configuredUrl = process.env.VITE_SITE_URL || env.VITE_SITE_URL;
@@ -52,7 +53,7 @@ await writeFile(robotsPath, renderedRobots, "utf8");
 try {
   await build({ mode });
 
-  const builtRobotsPath = path.join(root, "dist", "client", "robots.txt");
+  const builtRobotsPath = path.join(publicOutputDir, "robots.txt");
   const builtRobots = await readFile(builtRobotsPath, "utf8");
   if (builtRobots.includes("{{SITE_URL}}")) {
     throw new Error("Production robots.txt still contains an unresolved SITE_URL token.");
