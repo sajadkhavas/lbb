@@ -5,6 +5,8 @@ Disallow: /checkout
 Disallow: /order-confirmation
 Disallow: /search
 Disallow: /wishlist
+Disallow: /track-order
 Disallow: /admin
+Disallow: /api/
 
-Sitemap: /sitemap.xml
+Sitemap: {{SITE_URL}}/sitemap.xml
