@@ -22,65 +22,61 @@ jobs:
           python <<'PY'
           from pathlib import Path
 
-          collection_path = Path("src/routes/collections.$slug.tsx")
-          collection_text = collection_path.read_text()
-          collection_old = '''            <EmptyState
-              icon={<Layers3 aria-hidden="true" size={34} />}
-              title="این کالکشن پیدا نشد"
-              body="آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد."
-              action={
-                <Link to="/collections" className={CtaClasses("signal")}>
-                  بازگشت به کالکشن‌ها
-                </Link>
-              }
-            />'''
-          collection_new = '''            <div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
-              <span className="text-mute">
-                <Layers3 aria-hidden="true" size={34} />
-              </span>
-              <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
-              <p className="max-w-[42ch] text-sm leading-7 text-metal">
-                آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.
-              </p>
-              <Link to="/collections" className={CtaClasses("signal")}>
-                بازگشت به کالکشن‌ها
-              </Link>
-            </div>'''
-          if collection_old in collection_text:
-              collection_path.write_text(collection_text.replace(collection_old, collection_new))
-          elif collection_new not in collection_text:
-              raise RuntimeError("Collection not-found block was not found")
+          def replace_empty_state(path: Path, title: str, replacement: str) -> None:
+              text = path.read_text()
+              if replacement.strip() in text:
+                  return
+
+              marker = f'title="{title}"'
+              marker_index = text.index(marker)
+              start = text.rfind("<EmptyState", 0, marker_index)
+              end = text.index("/>", marker_index) + 2
+              if start < 0:
+                  raise RuntimeError(f"EmptyState start not found in {path}")
+
+              indentation_start = text.rfind("\n", 0, start) + 1
+              indentation = text[indentation_start:start]
+              rendered = "\n".join(
+                  indentation + line if line else line
+                  for line in replacement.strip("\n").splitlines()
+              )
+              path.write_text(text[:indentation_start] + rendered + text[end:])
+
+          replace_empty_state(
+              Path("src/routes/collections.$slug.tsx"),
+              "این کالکشن پیدا نشد",
+              '''<div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
+  <span className="text-mute">
+    <Layers3 aria-hidden="true" size={34} />
+  </span>
+  <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
+  <p className="max-w-[42ch] text-sm leading-7 text-metal">
+    آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.
+  </p>
+  <Link to="/collections" className={CtaClasses("signal")}>
+    بازگشت به کالکشن‌ها
+  </Link>
+</div>''',
+          )
 
           journal_path = Path("src/routes/journal.$slug.tsx")
-          journal_text = journal_path.read_text()
-          journal_old = '''            <EmptyState
-              icon={<BookOpenText aria-hidden="true" size={34} />}
-              title="این مقاله پیدا نشد"
-              body="آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد."
-              action={
-                <Link to="/journal" className={CtaClasses("signal")}>
-                  بازگشت به ژورنال
-                </Link>
-              }
-            />'''
-          journal_new = '''            <div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
-              <span className="text-mute">
-                <BookOpenText aria-hidden="true" size={34} />
-              </span>
-              <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
-              <p className="max-w-[42ch] text-sm leading-7 text-metal">
-                آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
-              </p>
-              <Link to="/journal" className={CtaClasses("signal")}>
-                بازگشت به ژورنال
-              </Link>
-            </div>'''
-          if journal_old in journal_text:
-              journal_text = journal_text.replace(journal_old, journal_new)
-          elif journal_new not in journal_text:
-              raise RuntimeError("Journal not-found block was not found")
-
-          journal_text = journal_text.replace("  EmptyState,\n", "")
+          replace_empty_state(
+              journal_path,
+              "این مقاله پیدا نشد",
+              '''<div className="flex flex-col items-center gap-4 border border-hairline bg-carbon px-6 py-20 text-center">
+  <span className="text-mute">
+    <BookOpenText aria-hidden="true" size={34} />
+  </span>
+  <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
+  <p className="max-w-[42ch] text-sm leading-7 text-metal">
+    آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
+  </p>
+  <Link to="/journal" className={CtaClasses("signal")}>
+    بازگشت به ژورنال
+  </Link>
+</div>''',
+          )
+          journal_text = journal_path.read_text().replace("  EmptyState,\n", "")
           journal_path.write_text(journal_text)
           PY
 
