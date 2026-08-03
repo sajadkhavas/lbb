@@ -1,0 +1,8 @@
+@import "@fontsource-variable/estedad/wght.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
+
+:root {
+  --font-display: "Estedad Variable", "Vazirmatn", sans-serif;
+  --font-body: "Estedad Variable", "Vazirmatn", sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+}
