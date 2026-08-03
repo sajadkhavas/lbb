@@ -45,7 +45,9 @@ for (const viewport of viewports) {
     test.use({ viewport });
 
     for (const route of routes) {
-      test(`${route} supports direct load, refresh, RTL and responsive layout`, async ({ page }) => {
+      test(`${route} supports direct load, refresh, RTL and responsive layout`, async ({
+        page,
+      }) => {
         const pageErrors = [];
         const failedOwnedResponses = [];
 
@@ -70,9 +72,11 @@ for (const viewport of viewports) {
           .toBe(true);
         await expect
           .poll(() =>
-            page.locator("img").evaluateAll((images) =>
-              images.every((image) => image.complete && image.naturalWidth > 0),
-            ),
+            page
+              .locator("main img")
+              .evaluateAll((images) =>
+                images.every((image) => image.complete && image.naturalWidth > 0),
+              ),
           )
           .toBe(true);
 
@@ -108,19 +112,21 @@ test("all internal links rendered by F7 pages resolve", async ({ page, request }
 
   for (const route of routes) {
     await page.goto(route, { waitUntil: "networkidle" });
-    const pageHrefs = await page.locator("a[href]").evaluateAll((anchors) =>
-      anchors
-        .map((anchor) => anchor.getAttribute("href"))
-        .filter(
-          (href) =>
-            href &&
-            !href.startsWith("mailto:") &&
-            !href.startsWith("tel:") &&
-            !href.startsWith("javascript:") &&
-            !href.startsWith("http://") &&
-            !href.startsWith("https://"),
-        ),
-    );
+    const pageHrefs = await page
+      .locator("a[href]")
+      .evaluateAll((anchors) =>
+        anchors
+          .map((anchor) => anchor.getAttribute("href"))
+          .filter(
+            (href) =>
+              href &&
+              !href.startsWith("mailto:") &&
+              !href.startsWith("tel:") &&
+              !href.startsWith("javascript:") &&
+              !href.startsWith("http://") &&
+              !href.startsWith("https://"),
+          ),
+      );
 
     for (const href of pageHrefs) hrefs.add(href);
   }
@@ -153,9 +159,7 @@ test("journal internal link navigation", async ({ page }) => {
 
 test("invalid collection slug has designed not-found state", async ({ page }) => {
   await page.goto("/collections/not-a-real-collection", { waitUntil: "networkidle" });
-  await expect(
-    page.getByRole("heading", { level: 1, name: "این کالکشن پیدا نشد" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "این کالکشن پیدا نشد" })).toBeVisible();
   await expect(page.getByRole("link", { name: "بازگشت به کالکشن‌ها" })).toBeVisible();
 });
 

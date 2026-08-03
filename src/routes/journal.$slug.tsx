@@ -22,7 +22,7 @@ const COVERS = { hero: heroMain, l1: lifestyle1, l2: lifestyle2 };
 export const Route = createFileRoute("/journal/$slug")({
   loader: ({ params }): { article: JournalArticle; related: JournalArticle[] } => {
     const article = journalBySlug(params.slug);
-    if (!article) throw notFound();
+    if (!article) throw notFound({ routeId: "/journal/$slug" });
 
     const related = JOURNAL_ARTICLES.filter((candidate) => candidate.slug !== article.slug)
       .sort(

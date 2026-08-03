@@ -24,7 +24,7 @@ import { EMPTY_FILTERS } from "@/lib/product-filter";
 export const Route = createFileRoute("/collections/$slug")({
   loader: ({ params }): { collection: Collection; items: Product[] } => {
     const collection = collectionBySlug(params.slug);
-    if (!collection) throw notFound();
+    if (!collection) throw notFound({ routeId: "/collections/$slug" });
 
     const items = collection.productSlugs
       .map((slug) => products.find((product) => product.slug === slug))
