@@ -129,17 +129,17 @@ jobs:
           npm install --no-save --package-lock=false --legacy-peer-deps @playwright/test@1.54.2
           npx playwright install --with-deps chromium
 
-      - name: Start production preview
+      - name: Start validation server
         if: steps.build.outcome == 'success'
         run: |
-          nohup npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/lbb-preview.log 2>&1 &
+          nohup npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/lbb-validation-server.log 2>&1 &
           for attempt in {1..60}; do
-            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then
+            if curl --fail --silent http://127.0.0.1:4173/collections > /dev/null; then
               exit 0
             fi
             sleep 1
           done
-          cat /tmp/lbb-preview.log
+          cat /tmp/lbb-validation-server.log
           exit 1
 
       - name: Run F7 browser smoke suite
