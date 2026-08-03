@@ -25,7 +25,7 @@ export function BestSellers() {
         />
         <div className="mt-8 grid grid-cols-2 gap-4 px-5 lg:grid-cols-4 lg:grid-rows-2 md:px-10">
           {bestsellers.map((p, i) => (
-            <div key={p.id} className={`bs-card ${i === 0 ? "col-span-2 lg:col-span-2 lg:row-span-2" : ""}`}>
+            <div key={p.id} className={`bs-card rounded-2xl transition-transform duration-300 ease-[var(--ease-lbb)] hover:-translate-y-1 ${i === 0 ? "col-span-2 lg:col-span-2 lg:row-span-2" : ""}`}>
               <ProductCard p={p} priority={i === 0} />
             </div>
           ))}
