@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LBB bundle budgets",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "maxTotalJsGzipBytes",
+    "maxLargestJsGzipBytes",
+    "maxTotalCssGzipBytes",
+    "maxTotalFontRawBytes",
+    "maxTotalClientRawBytes"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "maxTotalJsGzipBytes": { "type": "integer", "minimum": 1 },
+    "maxLargestJsGzipBytes": { "type": "integer", "minimum": 1 },
+    "maxTotalCssGzipBytes": { "type": "integer", "minimum": 1 },
+    "maxTotalFontRawBytes": { "type": "integer", "minimum": 1 },
+    "maxTotalClientRawBytes": { "type": "integer", "minimum": 1 }
+  }
+}
