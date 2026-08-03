@@ -6,24 +6,34 @@ on:
       - phase/f8-quality-foundation
     paths:
       - .github/workflows/repair-npm-lockfile.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/repair-npm-lockfile.yml
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: repair-lockfile-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   repair:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: phase/f8-quality-foundation
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22.23.1
+          package-manager-cache: false
 
       - name: Rebuild lockfile from scratch
         run: |
