@@ -62,7 +62,8 @@ jobs:
             echo "npm ci did not accept the updated lockfile."
             exit 1
           fi
-          echo "Resolved native preview: $(node -p \"require('./node_modules/@typescript/native-preview/package.json').version\")"
+          native_version=$(node -e "console.log(require('./node_modules/@typescript/native-preview/package.json').version)")
+          echo "Resolved native preview: ${native_version}"
           npm run typecheck
 
       - name: Commit validated dependency on latest head
