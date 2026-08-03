@@ -1,4 +1,4 @@
-export type CategorySlug = "hoodies" | "pants" | "tshirts" | "shoes" | "accessories";
+export type CategorySlug = "hoodies" | "pants" | "tshirts" | "shoes" | "socks";
 
 export type FitKey = "oversized" | "boxy" | "relaxed" | "regular" | "true";
 
@@ -152,25 +152,26 @@ export const products: Product[] = [
   },
   {
     id: "5",
-    slug: "lbb-cap",
-    name: "کلاه لبه‌دار LBB",
-    latinName: "LBB 6-Panel Cap",
-    category: "accessories",
-    price: 420000,
+    slug: "lbb-crew-socks",
+    name: "جوراب ساقدار LBB",
+    latinName: "LBB Crew Socks",
+    category: "socks",
+    price: 180000,
     colors: ["#0A0A0A", "#E6291E"],
     sizes: ["ONE"],
     inStock: true,
     rank: 6,
-    shortDescription: "شش‌ترک با گلدوزی سه‌بعدی و بند تنظیم فلزی.",
+    shortDescription: "جوراب ساقدار پنبه‌ای با دو خط قرمز سیگنیچر روی ساق.",
     description:
-      "کلاه شش‌ترک LBB از توییل پنبه‌ای با گلدوزی سه‌بعدی جلو، سوراخ‌های تهویه و بند تنظیم فلزی پشت.",
-    material: "توییل پنبه‌ای",
+      "جوراب ساقدار LBB از نخ پنبه‌ای فشرده با کشباف ریب، پاشنه و پنجه تقویت‌شده و دو خط قرمز سیگنیچر روی ساق. کش بالای ساق شکل خودش را پس از شست‌وشوهای مکرر حفظ می‌کند.",
+    material: "۸۰٪ پنبه، ۱۷٪ پلی‌استر، ۳٪ الاستان",
     care: CARE_HARD,
     fit: "regular",
-    fitNote: "فری‌سایز با بند تنظیم؛ محیط دور سر ۵۴ تا ۶۰ سانتی‌متر.",
-    sku: "LBB-AC-001",
+    fitNote: "فری‌سایز؛ مناسب سایز پای ۳۹ تا ۴۴.",
+    sku: "LBB-SO-001",
     drop: "DROP 001",
   },
+
   {
     id: "6",
     slug: "oversized-black-hoodie",

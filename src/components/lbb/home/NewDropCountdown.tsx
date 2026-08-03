@@ -61,6 +61,11 @@ export function NewDropCountdown() {
         }}
         aria-hidden="true"
       />
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+        style={{ background: "color-mix(in srgb, var(--lbb-signal) 22%, transparent)" }}
+        aria-hidden="true"
+      />
       <div className="relative mx-auto flex max-w-[1000px] flex-col items-center gap-8 text-center">
         <TechLabel tone="signal">DROP 002</TechLabel>
         <h2 id="drop-title" className="text-display-2 text-bone">
@@ -77,7 +82,7 @@ export function NewDropCountdown() {
             {UNITS.map((u) => (
               <div
                 key={u.key}
-                className="flex w-[70px] flex-col items-center justify-center border border-hairline bg-carbon py-4 md:w-[110px] md:py-6"
+                className="flex w-[70px] flex-col items-center justify-center rounded-xl border border-hairline bg-carbon py-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition-transform duration-300 hover:-translate-y-0.5 md:w-[110px] md:py-6"
               >
                 <span className="num text-[26px] font-black text-bone md:text-[42px]">
                   {fmtNum(mounted ? parts[u.key] : 0).padStart(2, "۰")}
@@ -88,7 +93,7 @@ export function NewDropCountdown() {
           </div>
         )}
 
-        <Link to="/shop" className={CtaClasses("signal")}>
+        <Link to="/shop" className={`${CtaClasses("signal")} rounded-xl`}>
           {ended ? "مشاهده کالکشن جدید" : "مشاهده فروشگاه"}
         </Link>
       </div>

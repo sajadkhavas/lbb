@@ -33,7 +33,7 @@ export function EditorialSplit() {
               i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"
             }`}
           >
-            <Frame src={b.img} alt={b.title} ratio="4/3" className="w-full md:w-1/2" width={1200} height={900} />
+            <Frame src={b.img} alt={b.title} ratio="4/3" className="w-full rounded-2xl border border-hairline md:w-1/2" width={1200} height={900} />
             <div className="w-full md:w-1/2">
               <TechLabel tone="signal">{b.eyebrow}</TechLabel>
               <h3 className="mt-4 text-display-3 text-bone">{b.title}</h3>

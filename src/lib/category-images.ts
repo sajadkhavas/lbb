@@ -2,7 +2,7 @@ import hoodies from "@/assets/categories/hoodies.jpg";
 import pants from "@/assets/categories/pants.jpg";
 import tshirts from "@/assets/categories/tshirts.jpg";
 import shoes from "@/assets/categories/shoes.jpg";
-import accessories from "@/assets/categories/accessories.jpg";
+import socks from "@/assets/categories/socks.jpg";
 import type { CategorySlug } from "./products";
 
 const IMAGES: Record<CategorySlug, string> = {
@@ -10,7 +10,7 @@ const IMAGES: Record<CategorySlug, string> = {
   pants,
   tshirts,
   shoes,
-  accessories,
+  socks,
 };
 
 /** Editorial cover shot for a category. */

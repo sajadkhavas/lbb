@@ -42,7 +42,7 @@ function JournalIndexPage() {
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-16 text-black" style={{ paddingBottom: 80, fontFamily: "'Vazirmatn', sans-serif" }}>
+      <main dir="rtl" className="min-h-screen bg-white pt-16 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
         <div className="border-b border-black/[0.06]">
           <div className="mx-auto max-w-[1280px] px-4 py-3 md:px-8">
             <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />
@@ -50,7 +50,7 @@ function JournalIndexPage() {
         </div>
 
         <header className="mx-auto max-w-[1280px] px-4 py-10 md:px-8">
-          <h1 className="text-3xl font-bold md:text-[42px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <h1 className="text-3xl font-bold md:text-[42px]" style={{ fontFamily: "var(--font-display)" }}>
             ژورنال
           </h1>
           <p className="mt-3 max-w-[560px] text-sm leading-7 text-gray-600">
@@ -84,7 +84,7 @@ function JournalIndexPage() {
                     <span>·</span>
                     <span>{a.readingTime} مطالعه</span>
                   </div>
-                  <h2 className="mt-2 text-lg font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <h2 className="mt-2 text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>
                     {a.title}
                   </h2>
                   <p className="mt-2 text-xs leading-6 text-gray-600">{a.excerpt}</p>

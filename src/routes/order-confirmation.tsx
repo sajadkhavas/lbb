@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
-import { DemoNotice, EmptyState } from "@/components/lbb/ui/primitives";
+import { DemoNotice, EmptyState, CtaClasses } from "@/components/lbb/ui/primitives";
 import { fmtToman } from "@/lib/products";
 
 type Search = { ref?: string; itemCount?: string; total?: string };
@@ -31,37 +31,23 @@ function OrderConfirmation() {
 
   return (
     <>
-      <Navbar theme="light" />
-      <main
-        dir="rtl"
-        className="grid min-h-screen place-items-center bg-white px-5 pb-28 pt-28 text-center"
-        style={{ fontFamily: "'Vazirmatn', sans-serif" }}
-      >
+      <Navbar />
+      <main dir="rtl" className="grid min-h-screen place-items-center bg-obsidian px-5 pb-28 pt-28 text-center">
         {hasOrder ? (
           <div className="w-full max-w-[420px]">
-            <h1 className="text-[24px] font-bold text-[#0A0A0A]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              ثبت سفارش نمایشی انجام شد
-            </h1>
-            <p className="mt-2 text-[14px] font-semibold text-[var(--lbb-red)]">
-              کد مرجع نمایشی: #{ref}
-            </p>
-            <p className="mt-1 text-[13px] text-black/60">
+            <h1 className="text-display-2 text-bone">ثبت سفارش نمایشی انجام شد</h1>
+            <p className="mt-2 text-sm font-semibold text-signal">کد مرجع نمایشی: #{ref}</p>
+            <p className="mt-1 text-[13px] text-metal">
               {count.toLocaleString("fa-IR")} قلم کالا — مبلغ {fmtToman(totalAmount)}
             </p>
             <DemoNotice className="mt-6 text-start">
               این فروشگاه یک نمونهٔ نمایشی است. هیچ پرداختی از شما دریافت نشد، این سفارش برای هیچ سیستمی ارسال نشد و هیچ پیامک یا ایمیل تأییدی دریافت نخواهید کرد. کد مرجع فقط در همین صفحه معتبر است.
             </DemoNotice>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                to="/track-order"
-                className="inline-flex h-12 items-center rounded-xl border border-black/15 px-6 text-[13px] font-bold text-black"
-              >
+              <Link to="/track-order" className={CtaClasses("line")}>
                 پیگیری سفارش
               </Link>
-              <Link
-                to="/shop"
-                className="inline-flex h-12 items-center rounded-xl bg-[var(--lbb-red)] px-6 text-[13px] font-bold text-white"
-              >
+              <Link to="/shop" className={CtaClasses("signal")}>
                 ادامه خرید
               </Link>
             </div>
@@ -71,17 +57,14 @@ function OrderConfirmation() {
             title="سفارشی برای نمایش نیست"
             body="این صفحه فقط بعد از تکمیل فرآیند سفارش نمایشی قابل مشاهده است."
             action={
-              <Link
-                to="/shop"
-                className="inline-flex h-12 items-center rounded-xl bg-[var(--lbb-red)] px-6 text-[13px] font-bold text-white"
-              >
+              <Link to="/shop" className={CtaClasses("signal")}>
                 رفتن به فروشگاه
               </Link>
             }
           />
         )}
       </main>
-      <Footer theme="light" />
+      <Footer />
       <MobileBottomBar />
     </>
   );

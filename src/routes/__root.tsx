@@ -25,13 +25,13 @@ function NotFoundComponent() {
     <div
       dir="rtl"
       className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0A0A0A] px-4 text-white"
-      style={{ fontFamily: "'Vazirmatn', sans-serif" }}
+      style={{ fontFamily: "var(--font-body)" }}
     >
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 grid place-items-center font-black"
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "var(--font-display)",
           fontSize: "30vw",
           color: "rgba(255,255,255,0.04)",
         }}
@@ -39,7 +39,7 @@ function NotFoundComponent() {
         404
       </span>
       <div className="relative z-10 max-w-md text-center">
-        <h1 className="text-[24px] font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        <h1 className="text-[24px] font-bold" style={{ fontFamily: "var(--font-display)" }}>
           این صفحه وجود ندارد
         </h1>
         <p className="mt-2 text-[13px] text-white/50">شاید دنبال یکی از این‌ها بودید:</p>
@@ -61,7 +61,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   useEffect(() => { reportLovableError(error, { boundary: "tanstack_root_error_component" }); }, [error]);
   return (
-    <div dir="rtl" className="flex min-h-screen items-center justify-center bg-white px-4 text-black" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
+    <div dir="rtl" className="flex min-h-screen items-center justify-center bg-white px-4 text-black" style={{ fontFamily: "var(--font-body)" }}>
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold">مشکلی پیش اومد</h1>
         <button onClick={() => { router.invalidate(); reset(); }} className="mt-4 rounded-md bg-[var(--lbb-red)] px-6 py-2 text-xs font-bold text-white">
@@ -106,8 +106,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Estedad:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap",
       },
+
     ],
     scripts: [
       { type: "application/ld+json", children: JSON.stringify(orgJsonLd) },

@@ -2,6 +2,7 @@ import { Link, type LinkProps } from "@tanstack/react-router";
 import { Instagram, ArrowUpLeft } from "lucide-react";
 import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
 import { TechLabel } from "@/components/lbb/ui/primitives";
+import { Logo } from "@/components/lbb/Logo";
 
 type Item = { label: string; to: LinkProps["to"]; params?: LinkProps["params"] };
 
@@ -43,10 +44,14 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
 
       <div className="lbb-shell grid gap-10 pt-10 md:grid-cols-2 lg:grid-cols-4">
         <div className="min-w-0">
-          <TechLabel tone="signal">LBB / TEHRAN</TechLabel>
+          <Logo size={44} withWordmark />
+          <div className="mt-4">
+            <TechLabel tone="signal">LBB / TEHRAN</TechLabel>
+          </div>
           <p className="mt-4 max-w-xs text-sm leading-7 text-metal">
             استریت‌ویر ایرانی با برش‌های واقعی و جنس ماندگار. طراحی و تولید در تهران.
           </p>
+
           <a
             href="https://www.instagram.com/lbbclo"
             target="_blank"

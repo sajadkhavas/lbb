@@ -4,6 +4,7 @@ import { Menu, X, ShoppingBag, Search, Heart, ArrowUpLeft } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
+import { Logo } from "@/components/lbb/Logo";
 import { categoryImage } from "@/lib/category-images";
 import { products, fmtToman } from "@/lib/products";
 import { productImage } from "@/lib/product-images";
@@ -156,15 +157,13 @@ export function Navbar({
           }}
         >
           {/* mark */}
-          <Link to="/" aria-label="LBB — خانه" className="flex shrink-0 items-baseline gap-1.5">
-            <span className="font-display text-[22px] font-black leading-none tracking-[-0.06em] text-signal md:text-[26px]">
+          <Link to="/" aria-label="LBB — خانه" className="flex shrink-0 items-center gap-2">
+            <Logo size={34} />
+            <span className="font-display text-[20px] font-black leading-none tracking-[-0.04em] text-signal md:text-[23px]">
               LBB
             </span>
-            <span
-              aria-hidden="true"
-              className="h-1 w-1 rounded-full bg-signal scroll-line"
-            />
           </Link>
+
 
           {/* desktop links */}
           <ul className="hidden min-w-0 items-center justify-center gap-8 lg:flex">

@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { DemoNotice } from "@/components/lbb/ui/primitives";
+import { DemoNotice, Shell, CtaClasses } from "@/components/lbb/ui/primitives";
 import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const TITLE = "پیگیری سفارش | LBB";
 const DESC = "پیگیری سفارش در فروشگاه نمایشی LBB — این قابلیت هنوز به سامانهٔ واقعی وصل نیست.";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/track-order")({
 function TrackOrderPage() {
   const [code, setCode] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const inputId = useId();
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,19 +34,17 @@ function TrackOrderPage() {
 
   return (
     <>
-      <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-16 text-black" style={{ paddingBottom: 80, fontFamily: "'Vazirmatn', sans-serif" }}>
-        <div className="border-b border-black/[0.06]">
-          <div className="mx-auto max-w-[1280px] px-4 py-3 md:px-8">
+      <Navbar />
+      <main dir="rtl" className="min-h-screen bg-obsidian pb-28 pt-16">
+        <div className="hairline-b">
+          <Shell className="py-3">
             <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "پیگیری سفارش" }]} />
-          </div>
+          </Shell>
         </div>
 
         <section className="mx-auto max-w-[640px] px-4 py-14 md:px-8">
-          <h1 className="text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            پیگیری سفارش
-          </h1>
-          <p className="mt-3 text-sm leading-7 text-gray-600">
+          <h1 className="text-display-2 text-bone">پیگیری سفارش</h1>
+          <p className="mt-3 text-sm leading-7 text-metal">
             کد مرجعی که بعد از ثبت سفارش نمایشی گرفتی رو اینجا وارد کن.
           </p>
 
@@ -53,30 +53,27 @@ function TrackOrderPage() {
           </DemoNotice>
 
           <form onSubmit={onSubmit} className="mt-8 flex gap-2">
-            <label htmlFor="order-code" className="sr-only">کد مرجع سفارش</label>
+            <label htmlFor={inputId} className="sr-only">کد مرجع سفارش</label>
             <input
-              id="order-code"
+              id={inputId}
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="مثال: ۱۲۳۴۵۶"
-              className="h-12 flex-1 rounded-lg border border-black/15 px-4 text-sm outline-none focus:border-[var(--lbb-red)]"
+              className="h-12 flex-1 rounded-xl border border-hairline bg-carbon px-4 text-sm text-bone outline-none tap-target placeholder:text-mute focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/40"
             />
-            <button
-              type="submit"
-              className="flex h-12 items-center gap-2 rounded-lg bg-[var(--lbb-red)] px-6 text-sm font-bold text-white hover:brightness-110"
-            >
+            <button type="submit" className={cn("gap-2", CtaClasses("signal"))}>
               <Search size={16} /> بررسی
             </button>
           </form>
 
           {submitted && (
-            <p className="mt-4 text-sm text-gray-600" role="status">
+            <p className="mt-4 text-sm text-metal" role="status">
               پیگیری وضعیت سفارش در این نسخهٔ نمایشی در دسترس نیست.
             </p>
           )}
         </section>
       </main>
-      <Footer theme="light" />
+      <Footer />
       <MobileBottomBar />
     </>
   );

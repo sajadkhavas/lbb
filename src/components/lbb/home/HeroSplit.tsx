@@ -93,14 +93,14 @@ export function HeroSplit() {
           </h1>
 
           <p className="hero-meta-item max-w-md text-lede">
-            هودی، شلوار، تیشرت، کتونی و اکسسوری از اولین دراپ LBB — طراحی‌شده برای خیابان‌های تهران.
+            هودی، شلوار، تیشرت، کتونی و جوراب از اولین دراپ LBB — طراحی‌شده برای خیابان‌های تهران.
           </p>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Link to="/shop" className={`hero-cta ${CtaClasses("signal")}`}>
+            <Link to="/shop" className={`hero-cta ${CtaClasses("signal")} rounded-xl`}>
               خرید کالکشن جدید
             </Link>
-            <Link to="/shop" className={`hero-cta ${CtaClasses("line")}`}>
+            <Link to="/shop" className={`hero-cta ${CtaClasses("line")} rounded-xl`}>
               مشاهده فروشگاه
             </Link>
           </div>
@@ -140,7 +140,7 @@ export function HeroSplit() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to inline-start, rgba(5,5,5,0.65) 0%, transparent 45%)",
+                "linear-gradient(to inline-end, rgba(5,5,5,0.65) 0%, transparent 45%)",
             }}
           />
         </div>

@@ -31,6 +31,11 @@ export function Newsletter() {
       className="relative overflow-hidden bg-carbon px-6 py-20 md:px-10"
       aria-labelledby="newsletter-title"
     >
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[380px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+        style={{ background: "color-mix(in srgb, var(--lbb-signal) 14%, transparent)" }}
+        aria-hidden="true"
+      />
       <div className="relative mx-auto flex max-w-[720px] flex-col items-center gap-6 text-center">
         <h2 id="newsletter-title" className="text-display-2 text-bone">
           خبر دراپ‌های بعدی رو زودتر بگیر
@@ -47,9 +52,9 @@ export function Newsletter() {
             placeholder="ایمیل خود را وارد کنید"
             aria-label="ایمیل"
             dir="ltr"
-            className="h-12 flex-1 border border-hairline bg-obsidian px-4 text-sm text-bone placeholder:text-mute outline-none focus:border-signal"
+            className="h-12 flex-1 rounded-xl border border-hairline bg-obsidian px-4 text-sm text-bone placeholder:text-mute outline-none transition-colors focus:border-signal focus:ring-2 focus:ring-signal/30"
           />
-          <button type="submit" disabled={loading} className={CtaClasses("signal")}>
+          <button type="submit" disabled={loading} className={`${CtaClasses("signal")} rounded-xl`}>
             {loading ? "در حال ارسال..." : "عضویت"}
           </button>
         </form>

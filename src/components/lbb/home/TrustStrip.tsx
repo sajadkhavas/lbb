@@ -20,7 +20,7 @@ export function TrustStrip() {
     >
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 md:grid-cols-3 md:divide-x md:divide-hairline-soft">
         {ITEMS.map(({ Icon, title, sub }) => (
-          <div key={title} className="trust-item flex items-start gap-3 px-2">
+          <div key={title} className="trust-item flex items-start gap-3 rounded-xl px-3 py-2 transition-colors hover:bg-carbon/60">
             <Icon size={22} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
             <div>
               <p className="text-sm font-semibold text-bone">{title}</p>

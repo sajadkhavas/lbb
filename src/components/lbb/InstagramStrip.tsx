@@ -15,18 +15,21 @@ const SHOTS = [
 
 export function InstagramStrip() {
   return (
-    <section className="bg-black px-6 py-24 md:px-10">
+    <section dir="rtl" className="bg-black px-6 py-24 md:px-10" aria-label="اینستاگرام LBB">
       <div className="mx-auto max-w-[1600px] text-center">
-        <p className="text-[13px] uppercase tracking-[0.25em] text-white/50">@lbbclo</p>
-        <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-5 md:overflow-visible md:pb-0">
+        <p className="tech text-white/50">@lbbclo</p>
+        <div
+          dir="rtl"
+          className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-5 md:overflow-visible md:pb-0"
+        >
           {SHOTS.map((src, i) => (
             <a
               key={i}
               href="https://www.instagram.com/lbbclo"
               target="_blank"
               rel="noreferrer"
-              className="group relative aspect-square w-[70vw] shrink-0 snap-start overflow-hidden rounded-[2px] border border-white/[0.06] md:w-auto"
-              aria-label="LBB Instagram feed"
+              className="group relative aspect-square w-[70vw] shrink-0 snap-start overflow-hidden rounded-2xl border border-white/[0.08] transition-transform duration-300 hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:w-auto"
+              aria-label="مشاهده پست اینستاگرام LBB"
             >
               <img
                 src={src}
@@ -45,9 +48,9 @@ export function InstagramStrip() {
             href="https://www.instagram.com/lbbclo"
             target="_blank"
             rel="noreferrer"
-            className="inline-block rounded-[4px] border border-white/30 px-8 py-3 text-xs font-bold uppercase tracking-[0.25em] text-white transition-colors hover:border-[var(--lbb-red)]"
+            className="tap-target inline-flex items-center justify-center rounded-xl border border-white/30 px-8 py-3 text-xs font-bold uppercase tracking-[0.25em] text-white transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
           >
-            Follow us on Instagram
+            دنبال ما در اینستاگرام
           </a>
         </div>
       </div>

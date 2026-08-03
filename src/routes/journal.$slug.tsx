@@ -58,7 +58,7 @@ export const Route = createFileRoute("/journal/$slug")({
   notFoundComponent: () => (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="grid min-h-screen place-items-center bg-white pt-16 text-black" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
+      <main dir="rtl" className="grid min-h-screen place-items-center bg-white pt-16 text-black" style={{ fontFamily: "var(--font-body)" }}>
         <div className="text-center">
           <h1 className="text-2xl font-bold">این مقاله پیدا نشد</h1>
           <Link to="/journal" className="mt-4 inline-block text-[var(--lbb-red)]">بازگشت به ژورنال</Link>
@@ -78,7 +78,7 @@ function JournalDetailPage() {
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-16 text-black" style={{ paddingBottom: 80, fontFamily: "'Vazirmatn', sans-serif" }}>
+      <main dir="rtl" className="min-h-screen bg-white pt-16 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
         <div className="border-b border-black/[0.06]">
           <div className="mx-auto max-w-[1280px] px-4 py-3 md:px-8">
             <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال", href: "/journal" }, { label: a.title }]} />
@@ -91,7 +91,7 @@ function JournalDetailPage() {
             <span>·</span>
             <span>{a.readingTime} مطالعه</span>
           </div>
-          <h1 className="mt-3 text-2xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <h1 className="mt-3 text-2xl font-bold md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
             {a.title}
           </h1>
           <p className="mt-4 text-sm leading-7 text-gray-600">{a.excerpt}</p>
@@ -115,7 +115,7 @@ function JournalDetailPage() {
         <article className="mx-auto max-w-[720px] px-4 py-10 md:px-8">
           {a.sections.map((s, i) => (
             <section key={i} className="mb-8">
-              <h2 className="mb-3 text-xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h2 className="mb-3 text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
                 {s.heading}
               </h2>
               {s.paragraphs.map((p, j) => (

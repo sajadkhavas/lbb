@@ -21,7 +21,7 @@ import {
 } from "@/lib/product-filter";
 
 const TITLE = "فروشگاه | خرید هودی، شلوار، تیشرت و کتونی — LBB";
-const DESC = `فروشگاه آنلاین LBB: ${products.length.toLocaleString("fa-IR")} محصول استریت‌ویر شامل هودی، شلوار، تیشرت، کتونی و اکسسوری.`;
+const DESC = `فروشگاه آنلاین LBB: ${products.length.toLocaleString("fa-IR")} محصول استریت‌ویر شامل هودی، شلوار، تیشرت، کتونی و جوراب.`;
 
 const ALL_COLORS = Array.from(new Set(products.flatMap((p) => p.colors)));
 const ALL_SIZES = Array.from(new Set(products.flatMap((p) => p.sizes)));

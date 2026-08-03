@@ -8,6 +8,8 @@ import { ProductCard } from "@/components/lbb/ProductCard";
 import { products } from "@/lib/products";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import { addRecentSearch, clearRecentSearches, getRecentSearches, removeRecentSearch } from "@/lib/recent-searches";
+import { Shell, EmptyState } from "@/components/lbb/ui/primitives";
+import { pageMeta, canonical } from "@/lib/site";
 
 type Search = { q?: string };
 
@@ -30,7 +32,7 @@ function highlight(text: string, query: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="rounded bg-[var(--lbb-red)]/15 text-[var(--lbb-red)]">
+      <mark className="rounded bg-signal/15 text-signal">
         {text.slice(idx, idx + q.length)}
       </mark>
       {text.slice(idx + q.length)}
@@ -47,18 +49,10 @@ export const Route = createFileRoute("/search")({
     const title = q ? `نتایج جستجو برای «${q}» | LBB` : "جستجو | LBB";
     const desc = q
       ? `نتایج جستجو برای «${q}» در فروشگاه استریت‌ویر LBB.`
-      : "جستجو در محصولات فروشگاه استریت‌ویر LBB — هودی، شلوار، تیشرت، کتونی و اکسسوری.";
+      : "جستجو در محصولات فروشگاه استریت‌ویر LBB — هودی، شلوار، تیشرت، کتونی و جوراب.";
     return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { name: "robots", content: "noindex, follow" },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "website" },
-        { property: "og:url", content: "/search" },
-      ],
-      links: [{ rel: "canonical", href: "/search" }],
+      meta: pageMeta({ title, description: desc, path: "/search", noindex: true }),
+      links: canonical("/search"),
     };
   },
   component: SearchPage,
@@ -93,12 +87,10 @@ function SearchPage() {
 
   return (
     <>
-      <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white px-5 pb-28 pt-28 md:px-10" style={{ fontFamily: "'Vazirmatn', sans-serif" }}>
-        <div className="mx-auto max-w-[1280px]">
-          <h1 className="text-[24px] font-bold text-[#0A0A0A]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            جستجو
-          </h1>
+      <Navbar />
+      <main dir="rtl" className="min-h-screen bg-obsidian px-5 pb-28 pt-28 md:px-10">
+        <Shell>
+          <h1 className="text-display-2 text-bone">جستجو</h1>
 
           <div className="relative mt-5">
             <label htmlFor="site-search" className="sr-only">جستجو در محصولات</label>
@@ -107,14 +99,14 @@ function SearchPage() {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder="جستجو در محصولات LBB..."
-              className="h-14 w-full rounded-xl border border-[#e0e0e0] pr-5 pl-24 text-sm outline-none focus:border-[var(--lbb-red)]"
+              className="h-14 w-full rounded-xl border border-hairline bg-carbon ps-24 pe-5 text-sm text-bone outline-none tap-target placeholder:text-mute focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/40"
             />
-            <SearchIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-black/40" aria-hidden="true" />
+            <SearchIcon size={18} className="absolute start-5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true" />
             {value && (
               <button
                 onClick={() => setValue("")}
                 aria-label="پاک کردن جستجو"
-                className="absolute left-12 top-1/2 -translate-y-1/2 text-black/40"
+                className="absolute start-12 top-1/2 -translate-y-1/2 tap-target text-mute"
               >
                 <X size={18} />
               </button>
@@ -124,7 +116,7 @@ function SearchPage() {
           {!q && recent.length > 0 && (
             <div className="mt-6">
               <div className="flex items-center justify-between">
-                <p className="flex items-center gap-1.5 text-[13px] font-semibold text-[#666]">
+                <p className="flex items-center gap-1.5 text-[13px] font-semibold text-metal">
                   <Clock size={14} /> جستجوهای اخیر
                 </p>
                 <button
@@ -132,7 +124,7 @@ function SearchPage() {
                     clearRecentSearches();
                     setRecent([]);
                   }}
-                  className="text-[12px] text-[var(--lbb-red)] hover:underline"
+                  className="text-xs text-signal hover:underline"
                 >
                   پاک کردن همه
                 </button>
@@ -141,9 +133,9 @@ function SearchPage() {
                 {recent.map((r) => (
                   <span
                     key={r}
-                    className="flex items-center gap-1.5 rounded-full border border-black/15 bg-gray-50 px-3 py-1.5 text-[12px] text-gray-700"
+                    className="flex items-center gap-1.5 rounded-full border border-hairline bg-carbon px-3 py-1.5 text-xs text-bone"
                   >
-                    <button onClick={() => setValue(r)} className="hover:text-[var(--lbb-red)]">
+                    <button onClick={() => setValue(r)} className="hover:text-signal">
                       {r}
                     </button>
                     <button
@@ -152,7 +144,7 @@ function SearchPage() {
                         removeRecentSearch(r);
                         setRecent(getRecentSearches());
                       }}
-                      className="text-black/30 hover:text-black/60"
+                      className="text-mute hover:text-bone"
                     >
                       <X size={12} />
                     </button>
@@ -164,14 +156,14 @@ function SearchPage() {
 
           {!q && (
             <div className="mt-8">
-              <p className="text-[13px] font-semibold text-[#666]">دسته‌بندی‌های پرطرفدار</p>
+              <p className="text-[13px] font-semibold text-metal">دسته‌بندی‌های پرطرفدار</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {CATEGORY_SLUGS.map((c) => (
                   <Link
                     key={c}
                     to="/$category"
                     params={{ category: c }}
-                    className="rounded-full border border-black/15 px-4 py-2 text-[12px] hover:border-[var(--lbb-red)] hover:text-[var(--lbb-red)]"
+                    className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal"
                   >
                     {CATEGORIES[c].nameFa}
                   </Link>
@@ -181,43 +173,46 @@ function SearchPage() {
           )}
 
           {q && (
-            <p className="mt-5 text-[13px] text-[#666]">
+            <p className="mt-5 text-[13px] text-metal" role="status" aria-live="polite">
               نتایج برای «{q}»: {results.length.toLocaleString("fa-IR")} محصول
             </p>
           )}
 
           {q && results.length === 0 ? (
-            <div className="py-16 text-center">
-              <SearchIcon size={40} className="mx-auto text-black/20" aria-hidden="true" />
-              <p className="mt-4 text-[15px] font-semibold">محصولی برای «{q}» پیدا نشد</p>
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
-                {(["hoodies", "pants", "shoes"] as const).map((c) => (
-                  <Link
-                    key={c}
-                    to="/$category"
-                    params={{ category: c }}
-                    className="rounded-full border border-black/15 px-4 py-2 text-[12px] hover:border-[var(--lbb-red)] hover:text-[var(--lbb-red)]"
-                  >
-                    {CATEGORIES[c].nameFa}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <EmptyState
+              className="mt-4"
+              icon={<SearchIcon size={40} aria-hidden="true" />}
+              title={`محصولی برای «${q}» پیدا نشد`}
+              action={
+                <div className="flex flex-wrap justify-center gap-2">
+                  {(["hoodies", "pants", "shoes"] as const).map((c) => (
+                    <Link
+                      key={c}
+                      to="/$category"
+                      params={{ category: c }}
+                      className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal"
+                    >
+                      {CATEGORIES[c].nameFa}
+                    </Link>
+                  ))}
+                </div>
+              }
+            />
           ) : q && results.length > 0 ? (
             <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
               {results.map((p) => (
                 <div key={p.id}>
                   <ProductCard p={p} />
-                  <p className="mt-2 line-clamp-1 px-1 text-[11px] text-gray-500">
+                  <p className="mt-2 line-clamp-1 px-1 text-[11px] text-metal">
                     {highlight(p.name, q)}
                   </p>
                 </div>
               ))}
             </div>
           ) : null}
-        </div>
+        </Shell>
       </main>
-      <Footer theme="light" />
+      <Footer />
       <MobileBottomBar />
     </>
   );
