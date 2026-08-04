@@ -16,7 +16,7 @@ import {
   Shell,
   TechLabel,
 } from "@/components/lbb/ui/primitives";
-import { products } from "@/lib/products";
+import { products } from "@/lib/product-catalog";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
@@ -28,29 +28,37 @@ import {
   parseFilters,
   serializeFilters,
   stableSearchString,
+  type FilterScope,
   type Filters,
 } from "@/lib/product-filter";
 
 const TITLE = "فروشگاه | خرید هودی، شلوار، تیشرت و کتونی — LBB";
-const DESC = `فروشگاه آنلاین LBB: ${products.length.toLocaleString("fa-IR")} محصول استریت‌ویر شامل هودی، شلوار، تیشرت، کتونی و جوراب.`;
-const ALL_COLORS = Array.from(new Set(products.flatMap((product) => product.colors)));
-const ALL_SIZES = Array.from(new Set(products.flatMap((product) => product.sizes)));
-const PRICE_CEIL = Math.max(1, ...products.map((product) => product.price));
+const DESC =
+  "فروشگاه آنلاین LBB برای مشاهده مجموعه استریت‌ویر شامل هودی، شلوار، تیشرت، کتونی و جوراب.";
 const PAGE_SIZE = 12;
-const FILTER_SCOPE = { colors: ALL_COLORS, sizes: ALL_SIZES, priceCeil: PRICE_CEIL } as const;
 
-const itemListLd = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "محصولات فروشگاه LBB",
-  numberOfItems: products.length,
-  itemListElement: products.slice(0, 20).map((product, index) => ({
-    "@type": "ListItem",
-    position: index + 1,
-    url: absUrl(`/product/${product.slug}`),
-    name: product.name,
-  })),
-};
+function createFilterScope(): Required<Pick<FilterScope, "colors" | "sizes" | "priceCeil">> {
+  return {
+    colors: Array.from(new Set(products.flatMap((product) => product.colors))),
+    sizes: Array.from(new Set(products.flatMap((product) => product.sizes))),
+    priceCeil: Math.max(1, ...products.map((product) => product.price)),
+  };
+}
+
+function createItemListLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "محصولات فروشگاه LBB",
+    numberOfItems: products.length,
+    itemListElement: products.slice(0, 20).map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: absUrl(`/product/${product.slug}`),
+      name: product.name,
+    })),
+  };
+}
 
 export const Route = createFileRoute("/shop")({
   validateSearch: (search: Record<string, unknown>) => parseFilterSearch(search),
@@ -75,7 +83,7 @@ export const Route = createFileRoute("/shop")({
             ]),
           ),
         },
-        { type: "application/ld+json", children: JSON.stringify(itemListLd) },
+        { type: "application/ld+json", children: JSON.stringify(createItemListLd()) },
       ],
     };
   },
@@ -84,13 +92,14 @@ export const Route = createFileRoute("/shop")({
 
 function ShopPage() {
   const routeFilters = Route.useSearch();
+  const filterScope = useMemo(() => createFilterScope(), []);
   const filters = useMemo(
     () =>
       normalizeFilters(
         parseFilters(routeFilters as unknown as Record<string, unknown>),
-        FILTER_SCOPE,
+        filterScope,
       ),
-    [routeFilters],
+    [filterScope, routeFilters],
   );
   const navigate = useNavigate({ from: "/shop" });
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -108,7 +117,7 @@ function ShopPage() {
   }, [filters, navigate]);
 
   const setFilters = (nextFilters: Filters) => {
-    const normalized = normalizeFilters(nextFilters, FILTER_SCOPE);
+    const normalized = normalizeFilters(nextFilters, filterScope);
     startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
   };
 
@@ -118,9 +127,9 @@ function ShopPage() {
     <ProductFilters
       filters={filters}
       onChange={setFilters}
-      colors={ALL_COLORS}
-      sizes={ALL_SIZES}
-      priceCeil={PRICE_CEIL}
+      colors={filterScope.colors}
+      sizes={filterScope.sizes}
+      priceCeil={filterScope.priceCeil}
       showCategory
     />
   );
