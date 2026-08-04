@@ -1,98 +1,191 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowUpLeft, Clock3 } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { JOURNAL_ARTICLES } from "@/lib/journal";
 import { heroMain, lifestyle1, lifestyle2 } from "@/lib/product-images";
+import {
+  Band,
+  CtaClasses,
+  Frame,
+  SectionHead,
+  Shell,
+  StatusTag,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
+import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 
-const TITLE = "ژورنال LBB | مجله استریت‌ویر و استایل خیابانی";
+const TITLE = "ژورنال LBB | راهنمای استایل، پارچه و نگهداری";
 const DESC =
-  "ژورنال LBB: مقالاتی درباره استایل، فرهنگ خیابانی، پارچه‌شناسی و نگهداری از پوشاک استریت‌ویر.";
+  "ژورنال LBB: راهنماهای کاربردی درباره استایل اورسایز، ترکیب رنگ، شناخت پارچه و نگهداری از هودی، تیشرت، شلوار و کتونی.";
 
-const covers = { hero: heroMain, l1: lifestyle1, l2: lifestyle2 };
-
-const breadcrumbLd = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
-    { "@type": "ListItem", position: 1, name: "خانه", item: "/" },
-    { "@type": "ListItem", position: 2, name: "ژورنال", item: "/journal" },
-  ],
-};
+const COVERS = { hero: heroMain, l1: lifestyle1, l2: lifestyle2 };
 
 export const Route = createFileRoute("/journal/")({
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESC },
-      { name: "robots", content: "index, follow" },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESC },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "/journal" },
-    ],
-    links: [{ rel: "canonical", href: "/journal" }],
-    scripts: [{ type: "application/ld+json", children: JSON.stringify(breadcrumbLd) }],
-  }),
+  head: () => {
+    const itemListLd = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "ژورنال LBB",
+      numberOfItems: JOURNAL_ARTICLES.length,
+      itemListElement: JOURNAL_ARTICLES.map((article, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: article.title,
+        url: absUrl(`/journal/${article.slug}`),
+      })),
+    };
+
+    return {
+      meta: pageMeta({ title: TITLE, description: DESC, path: "/journal", image: heroMain }),
+      links: canonical("/journal"),
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: "ژورنال", path: "/journal" },
+            ]),
+          ),
+        },
+        { type: "application/ld+json", children: JSON.stringify(itemListLd) },
+      ],
+    };
+  },
   component: JournalIndexPage,
 });
 
 function JournalIndexPage() {
+  const [featured, ...articles] = JOURNAL_ARTICLES;
+
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-16 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
-        <div className="border-b border-black/[0.06]">
-          <div className="mx-auto max-w-[1280px] px-4 py-3 md:px-8">
-            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />
-          </div>
-        </div>
+      <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
+        <Shell className="py-3">
+          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />
+        </Shell>
 
-        <header className="mx-auto max-w-[1280px] px-4 py-10 md:px-8">
-          <h1 className="text-3xl font-bold md:text-[42px]" style={{ fontFamily: "var(--font-display)" }}>
-            ژورنال
-          </h1>
-          <p className="mt-3 max-w-[560px] text-sm leading-7 text-gray-600">
-            استایل، فرهنگ خیابونی و راهنماهای عملی، مستقیم از تیم LBB.
-          </p>
-        </header>
+        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
+          <Shell>
+            <TechLabel tone="signal">LBB / EDITORIAL NOTES</TechLabel>
+            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+              ژورنال؛ راهنماهایی برای انتخاب و استفاده بهتر
+            </h1>
+            <p className="text-lede mt-5 max-w-[62ch]">
+              مقاله‌های کوتاه و کاربردی درباره فیت، رنگ، پارچه و نگهداری؛ بدون جایگزین کردن اطلاعات
+              دقیق صفحه هر محصول.
+            </p>
+          </Shell>
+        </Band>
 
-        <section className="mx-auto max-w-[1280px] px-4 pb-16 md:px-8">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {JOURNAL_ARTICLES.map((a) => (
+        {featured ? (
+          <Band>
+            <Shell>
               <Link
-                key={a.slug}
                 to="/journal/$slug"
-                params={{ slug: a.slug }}
-                className="group overflow-hidden rounded-xl border border-black/[0.06] bg-white"
+                params={{ slug: featured.slug }}
+                className="group grid overflow-hidden rounded-2xl border border-hairline bg-carbon transition-transform duration-300 ease-[var(--ease-lbb)] hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal lg:grid-cols-[1.15fr_0.85fr]"
               >
-                <div className="aspect-[16/9] overflow-hidden bg-[#f2f2f2]">
-                  <img
-                    src={covers[a.cover]}
-                    alt={`تصویر شاخص مقاله ${a.title}`}
-                    width={960}
-                    height={540}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-3 text-[11px] text-gray-500">
-                    <span>{a.date}</span>
-                    <span>·</span>
-                    <span>{a.readingTime} مطالعه</span>
+                <Frame
+                  src={COVERS[featured.cover]}
+                  alt={featured.coverAlt}
+                  ratio="16/10"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                  className="lg:rounded-s-2xl"
+                  imgClassName="transition-transform duration-700 group-hover:scale-[1.04]"
+                />
+                <div className="flex flex-col justify-center p-6 md:p-8 lg:p-10">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <StatusTag tone="signal" className="rounded-lg">
+                      مقاله منتخب
+                    </StatusTag>
+                    <TechLabel>{featured.category}</TechLabel>
                   </div>
-                  <h2 className="mt-2 text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>
-                    {a.title}
-                  </h2>
-                  <p className="mt-2 text-xs leading-6 text-gray-600">{a.excerpt}</p>
+                  <h2 className="mt-5 text-display-2 text-bone">{featured.title}</h2>
+                  <p className="mt-4 text-sm leading-8 text-metal">{featured.excerpt}</p>
+                  <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-mute">
+                    <time dateTime={featured.isoDate}>{featured.date}</time>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock3 aria-hidden="true" size={14} />
+                      {featured.readingTime} مطالعه
+                    </span>
+                  </div>
+                  <span className="tech mt-7 inline-flex items-center gap-2 text-bone transition-colors group-hover:text-signal">
+                    خواندن مقاله
+                    <ArrowUpLeft aria-hidden="true" size={15} />
+                  </span>
                 </div>
               </Link>
-            ))}
-          </div>
-        </section>
+            </Shell>
+          </Band>
+        ) : null}
+
+        <Band>
+          <Shell>
+            <SectionHead
+              index="LATEST"
+              label="GUIDES & NOTES"
+              title="همه مقاله‌ها"
+              lede="تاریخ، موضوع و زمان تقریبی مطالعه پیش از ورود به هر مقاله مشخص شده است."
+            />
+
+            <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
+              {articles.map((article) => (
+                <article key={article.slug}>
+                  <Link
+                    to="/journal/$slug"
+                    params={{ slug: article.slug }}
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-hairline bg-carbon transition-transform duration-300 ease-[var(--ease-lbb)] hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  >
+                    <Frame
+                      src={COVERS[article.cover]}
+                      alt={article.coverAlt}
+                      ratio="16/9"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="rounded-t-2xl"
+                      imgClassName="transition-transform duration-700 group-hover:scale-[1.04]"
+                    />
+                    <div className="flex flex-1 flex-col p-5 md:p-6">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <TechLabel tone="signal">{article.category}</TechLabel>
+                        <div className="flex items-center gap-3 text-[11px] text-mute">
+                          <time dateTime={article.isoDate}>{article.date}</time>
+                          <span>{article.readingTime}</span>
+                        </div>
+                      </div>
+                      <h2 className="mt-4 text-display-3 text-bone">{article.title}</h2>
+                      <p className="mt-3 flex-1 text-sm leading-7 text-metal">{article.excerpt}</p>
+                      <span className="tech mt-6 inline-flex items-center gap-2 text-bone transition-colors group-hover:text-signal">
+                        ادامه مطلب
+                        <ArrowUpLeft aria-hidden="true" size={15} />
+                      </span>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </Shell>
+        </Band>
+
+        <Band>
+          <Shell className="grid gap-6 rounded-2xl border border-hairline bg-carbon p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">
+            <div>
+              <TechLabel tone="signal">FROM READING TO STYLING</TechLabel>
+              <h2 className="mt-3 text-display-3 text-bone">ایده‌ها را در لوک‌بوک ببینید</h2>
+              <p className="mt-3 max-w-[58ch] text-sm leading-7 text-metal">
+                بعد از خواندن راهنماها، ترکیب رنگ و فرم قطعه‌ها را در قاب‌های لوک‌بوک مقایسه کنید.
+              </p>
+            </div>
+            <Link to="/lookbook" className={CtaClasses("signal")}>
+              رفتن به لوک‌بوک
+            </Link>
+          </Shell>
+        </Band>
       </main>
       <Footer theme="light" />
       <MobileBottomBar />
