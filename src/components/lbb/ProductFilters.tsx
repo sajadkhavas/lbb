@@ -8,8 +8,6 @@ import type { Filters } from "@/lib/product-filter";
 import { fmtToman, type CategorySlug } from "@/lib/products";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 
-export { colorName as colorLabel };
-
 type Props = {
   filters: Filters;
   onChange: (filters: Filters) => void;
