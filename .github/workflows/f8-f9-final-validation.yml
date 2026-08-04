@@ -1,0 +1,84 @@
+name: F8 F9 final validation
+
+on:
+  pull_request:
+    branches:
+      - validation/f8-f9-final
+
+permissions:
+  contents: write
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase/f8-f9-final-quality
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Rebuild lockfile and install dependencies
+        run: |
+          rm -rf node_modules package-lock.json npm-shrinkwrap.json
+          npm install --ignore-scripts
+          npm install --no-save --package-lock=false @typescript/native-preview
+
+      - name: Format production and quality scope
+        run: >-
+          npx prettier --write
+          '.github/**/*.yml'
+          'scripts/**/*.mjs'
+          'src/**/*.{ts,tsx,css}'
+          'tests/**/*.ts'
+          'package.json'
+          'playwright.config.ts'
+          'vite.config.ts'
+          'tsconfig.json'
+          'public/manifest.webmanifest'
+          'public/sw.js'
+
+      - name: Commit lockfile and formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package-lock.json package.json playwright.config.ts vite.config.ts tsconfig.json public src scripts tests .github
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(f8-f9): lock dependencies and format final scope'
+            git push origin HEAD:phase/f8-f9-final-quality
+          fi
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate Linux visual baselines
+        run: npx playwright test tests/visual.spec.ts --update-snapshots
+
+      - name: Commit visual baselines
+        run: |
+          git add tests/visual.spec.ts-snapshots
+          if ! git diff --cached --quiet; then
+            git commit -m 'test(f9): register responsive visual baselines'
+            git push origin HEAD:phase/f8-f9-final-quality
+          fi
+
+      - name: Run full quality suite
+        run: npm run quality
+
+      - name: Upload browser report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f8-f9-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
