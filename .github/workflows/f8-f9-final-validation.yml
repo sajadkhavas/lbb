@@ -34,7 +34,7 @@ jobs:
       - name: Format production and quality scope
         run: >-
           npx prettier --write
-          '.github/**/*.yml'
+          '.github/**/*.{yml,md}'
           'scripts/**/*.mjs'
           'src/**/*.{ts,tsx,css}'
           'tests/**/*.ts'
