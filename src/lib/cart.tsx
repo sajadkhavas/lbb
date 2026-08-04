@@ -12,11 +12,12 @@ export type CartLine = {
 type CartCtx = {
   lines: CartLine[];
   count: number;
-  add: (l: CartLine) => void;
-  remove: (idx: number) => void;
-  setQty: (idx: number, qty: number) => void;
+  add: (line: CartLine) => void;
+  remove: (index: number) => void;
+  setQty: (index: number, qty: number) => void;
   clear: () => void;
   subtotal: number;
+  hydrated: boolean;
   drawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -24,23 +25,26 @@ type CartCtx = {
 
 const Ctx = createContext<CartCtx | null>(null);
 const KEY = "lbb-cart-v1";
+const MAX_QTY = 20;
 
-/** Runtime shape check — never trust persisted JSON. */
-function isValidLine(x: unknown): x is CartLine {
-  if (!x || typeof x !== "object") return false;
-  const l = x as Record<string, unknown>;
+/** Runtime shape check — persisted browser data is never trusted blindly. */
+function isValidLine(value: unknown): value is CartLine {
+  if (!value || typeof value !== "object") return false;
+  const line = value as Record<string, unknown>;
   return (
-    typeof l.slug === "string" &&
-    l.slug.length > 0 &&
-    typeof l.name === "string" &&
-    typeof l.price === "number" &&
-    Number.isFinite(l.price) &&
-    l.price >= 0 &&
-    typeof l.qty === "number" &&
-    Number.isFinite(l.qty) &&
-    l.qty > 0 &&
-    (l.color === undefined || typeof l.color === "string") &&
-    (l.size === undefined || typeof l.size === "string")
+    typeof line.slug === "string" &&
+    line.slug.length > 0 &&
+    typeof line.name === "string" &&
+    line.name.length > 0 &&
+    typeof line.price === "number" &&
+    Number.isFinite(line.price) &&
+    line.price > 0 &&
+    typeof line.qty === "number" &&
+    Number.isInteger(line.qty) &&
+    line.qty > 0 &&
+    line.qty <= MAX_QTY &&
+    (line.color === undefined || typeof line.color === "string") &&
+    (line.size === undefined || typeof line.size === "string")
   );
 }
 
@@ -48,7 +52,7 @@ function readCart(): CartLine[] {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(isValidLine);
   } catch {
@@ -65,37 +69,48 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines(readCart());
     setHydrated(true);
   }, []);
+
   useEffect(() => {
     if (!hydrated) return;
     try {
       localStorage.setItem(KEY, JSON.stringify(lines));
     } catch {
-      /* storage may be unavailable (private mode, quota) — ignore */
+      // Storage can be unavailable in private mode or after quota exhaustion.
     }
   }, [lines, hydrated]);
 
-  const add = (l: CartLine) =>
-    setLines((prev) => {
-      const i = prev.findIndex(
-        (x) => x.slug === l.slug && x.color === l.color && x.size === l.size,
+  const add = (line: CartLine) =>
+    setLines((previous) => {
+      if (!isValidLine(line)) return previous;
+      const index = previous.findIndex(
+        (item) => item.slug === line.slug && item.color === line.color && item.size === line.size,
       );
-      if (i >= 0) {
-        const copy = [...prev];
-        copy[i] = { ...copy[i], qty: copy[i].qty + l.qty };
+      if (index >= 0) {
+        const copy = [...previous];
+        copy[index] = {
+          ...copy[index],
+          qty: Math.min(MAX_QTY, copy[index].qty + line.qty),
+        };
         return copy;
       }
-      return [...prev, l];
+      return [...previous, { ...line, qty: Math.min(MAX_QTY, line.qty) }];
     });
-  const remove = (idx: number) =>
-    setLines((prev) => prev.filter((_, i) => i !== idx));
-  const setQty = (idx: number, qty: number) =>
-    setLines((prev) =>
-      prev.map((l, i) => (i === idx ? { ...l, qty: Math.max(1, qty) } : l)),
-    );
-  const clear = () => setLines([]);
 
-  const count = lines.reduce((a, b) => a + b.qty, 0);
-  const subtotal = lines.reduce((a, b) => a + b.price * b.qty, 0);
+  const remove = (index: number) =>
+    setLines((previous) => previous.filter((_, itemIndex) => itemIndex !== index));
+
+  const setQty = (index: number, qty: number) =>
+    setLines((previous) =>
+      previous.map((line, itemIndex) =>
+        itemIndex === index
+          ? { ...line, qty: Math.min(MAX_QTY, Math.max(1, Math.floor(qty))) }
+          : line,
+      ),
+    );
+
+  const clear = () => setLines([]);
+  const count = lines.reduce((sum, line) => sum + line.qty, 0);
+  const subtotal = lines.reduce((sum, line) => sum + line.price * line.qty, 0);
 
   return (
     <Ctx.Provider
@@ -107,6 +122,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setQty,
         clear,
         subtotal,
+        hydrated,
         drawerOpen,
         openDrawer: () => setDrawerOpen(true),
         closeDrawer: () => setDrawerOpen(false),
@@ -118,7 +134,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 }
 
 export function useCart() {
-  const c = useContext(Ctx);
-  if (!c) throw new Error("useCart must be used inside CartProvider");
-  return c;
+  const context = useContext(Ctx);
+  if (!context) throw new Error("useCart must be used inside CartProvider");
+  return context;
 }

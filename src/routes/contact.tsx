@@ -1,57 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { Instagram, MessageCircleMore } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { pageMeta, canonical, absUrl } from "@/lib/site";
+import { CtaClasses, DemoNotice, Shell, TechLabel } from "@/components/lbb/ui/primitives";
+import { pageMeta, canonical, absUrl, breadcrumbLd } from "@/lib/site";
 
-const TITLE = "تماس با LBB | پشتیبانی و سفارشات";
-const DESC = "برای سوال، همکاری یا پیگیری سفارش با LBB در تماس باشید. پاسخگویی از طریق اینستاگرام @lbbclo.";
-
-const localBusinessLd = {
-  "@context": "https://schema.org",
-  "@type": "ClothingStore",
-  name: "LBB",
-  url: absUrl("/"),
-  image: absUrl("/icons/icon-512.png"),
-  sameAs: ["https://www.instagram.com/lbbclo"],
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "تهران",
-    addressCountry: "IR",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: 35.6892,
-    longitude: 51.389,
-  },
-  areaServed: {
-    "@type": "Country",
-    name: "IR",
-  },
-  openingHoursSpecification: {
-    "@type": "OpeningHoursSpecification",
-    dayOfWeek: [
-      "Saturday",
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-    ],
-    opens: "09:00",
-    closes: "21:00",
-  },
-  inLanguage: "fa-IR",
-};
+const TITLE = "تماس با LBB | کانال رسمی ارتباط";
+const DESC =
+  "راه ارتباط فعلی با LBB از طریق صفحه رسمی اینستاگرام @lbbclo است. فرم پشتیبانی و سامانه سفارش هنوز فعال نیستند.";
 
 const contactPageLd = {
   "@context": "https://schema.org",
   "@type": "ContactPage",
   name: TITLE,
   url: absUrl("/contact"),
+  inLanguage: "fa-IR",
+  mainEntity: {
+    "@type": "Organization",
+    name: "LBB",
+    url: absUrl("/"),
+    sameAs: ["https://www.instagram.com/lbbclo"],
+  },
 };
 
 export const Route = createFileRoute("/contact")({
@@ -59,68 +30,97 @@ export const Route = createFileRoute("/contact")({
     meta: pageMeta({ title: TITLE, description: DESC, path: "/contact" }),
     links: canonical("/contact"),
     scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          breadcrumbLd([
+            { name: "خانه", path: "/" },
+            { name: "تماس", path: "/contact" },
+          ]),
+        ),
+      },
       { type: "application/ld+json", children: JSON.stringify(contactPageLd) },
-      { type: "application/ld+json", children: JSON.stringify(localBusinessLd) },
     ],
   }),
   component: ContactPage,
 });
 
 function ContactPage() {
-  const [sent, setSent] = useState(false);
   return (
     <>
-      <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-white pt-24 text-black" style={{ paddingBottom: 80, fontFamily: "var(--font-body)" }}>
-        <div className="mx-auto max-w-[1280px] px-4 md:px-8">
-          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "تماس" }]} />
-          <h1 className="mt-4 text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>تماس با ما</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-7 text-gray-600">
-            سریع‌ترین راه تماس با LBB، پیام مستقیم در اینستاگراممونه. تیم پشتیبانی ما هر روز هفته، ۹ صبح تا ۹ شب، به پیام‌ها و سوالات درباره سفارش، سایز و مرجوعی پاسخ می‌ده.
-          </p>
+      <Navbar />
+      <main dir="rtl" className="min-h-screen bg-obsidian pb-28 pt-16 text-bone">
+        <div className="hairline-b">
+          <Shell className="py-3">
+            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "تماس" }]} />
+          </Shell>
+        </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-2">
-            <form
-              onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-              className="flex flex-col gap-4"
-            >
-              <Field label="نام" name="name" required />
-              <Field label="ایمیل" name="email" type="email" required />
-              <div>
-                <label className="mb-1 block text-sm font-semibold">موضوع</label>
-                <select className="w-full rounded-xl border border-black/15 bg-white p-2.5 text-sm outline-none focus:border-[var(--lbb-red)]">
-                  <option>سوال</option><option>سفارش</option><option>همکاری</option>
-                </select>
+        <Shell className="py-14 md:py-20">
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
+            <section>
+              <TechLabel tone="signal">OFFICIAL CONTACT</TechLabel>
+              <h1 className="mt-4 max-w-[14ch] text-display-1 text-bone">ارتباط با LBB</h1>
+              <p className="text-lede mt-5 max-w-[58ch]">
+                در نسخه فعلی، تنها کانال عمومی و قابل‌تأیید LBB صفحه رسمی اینستاگرام است.
+              </p>
+              <p className="mt-5 max-w-[64ch] text-sm leading-8 text-metal">
+                برای پرسش درباره محصولات، سایز یا همکاری می‌توانید پیام مستقیم ارسال کنید. زمان
+                پاسخ، آدرس فیزیکی، شماره تلفن و ایمیل پشتیبانی تا زمانی که به‌صورت رسمی اعلام
+                نشده‌اند در این صفحه درج نمی‌شوند.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a
+                  href="https://www.instagram.com/lbbclo"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={CtaClasses("signal")}
+                >
+                  <Instagram size={17} aria-hidden="true" />
+                  رفتن به @lbbclo
+                </a>
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-semibold">پیام</label>
-                <textarea rows={4} required className="w-full rounded-xl border border-black/15 bg-white p-2.5 text-sm outline-none focus:border-[var(--lbb-red)]" />
+            </section>
+
+            <aside className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-signal text-bone">
+                  <MessageCircleMore size={21} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="tech text-mute">CURRENT CHANNEL</p>
+                  <h2 className="mt-1 text-lg font-bold text-bone">پیام مستقیم اینستاگرام</h2>
+                </div>
               </div>
-              <button className="h-12 rounded-xl bg-[var(--lbb-red)] text-sm font-bold text-white hover:brightness-110">
-                {sent ? "پیام شما ارسال شد ✓" : "ارسال پیام"}
-              </button>
-            </form>
-            <aside className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-6 text-sm">
-              <h2 className="text-lg font-bold">راه‌های تماس</h2>
-              <p><span className="text-gray-500">اینستاگرام: </span><a href="https://www.instagram.com/lbbclo" className="text-[var(--lbb-red)]">@lbbclo</a></p>
-              <p><span className="text-gray-500">پاسخگویی: </span>۹ صبح تا ۹ شب، همه روزه</p>
-              <p><span className="text-gray-500">محدوده فعالیت: </span>ارسال به سراسر ایران، مستقر در تهران</p>
-              <p className="text-gray-600 leading-7">پیام مستقیم در اینستاگرام سریع‌ترین راه تماسه.</p>
+
+              <dl className="mt-7 space-y-4 text-sm">
+                <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
+                  <dt className="text-mute">شناسه رسمی</dt>
+                  <dd className="font-semibold text-bone" dir="ltr">
+                    @lbbclo
+                  </dd>
+                </div>
+                <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
+                  <dt className="text-mute">فرم سایت</dt>
+                  <dd className="text-end font-semibold text-signal">هنوز متصل نیست</dd>
+                </div>
+                <div className="flex items-start justify-between gap-5">
+                  <dt className="text-mute">پیگیری سفارش</dt>
+                  <dd className="text-end font-semibold text-signal">سفارش واقعی فعال نیست</dd>
+                </div>
+              </dl>
+
+              <DemoNotice className="mt-7 rounded-xl">
+                هیچ پیامی از داخل این سایت ارسال یا ذخیره نمی‌شود. دکمه بالا شما را مستقیماً به
+                سرویس بیرونی Instagram هدایت می‌کند و سیاست‌های همان سرویس اعمال خواهد شد.
+              </DemoNotice>
             </aside>
           </div>
-        </div>
+        </Shell>
       </main>
-      <Footer theme="light" />
+      <Footer />
       <MobileBottomBar />
     </>
-  );
-}
-
-function Field({ label, ...p }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <div>
-      <label className="mb-1 block text-sm font-semibold">{label}</label>
-      <input {...p} className="w-full rounded-xl border border-black/15 bg-white p-2.5 text-sm outline-none focus:border-[var(--lbb-red)]" />
-    </div>
   );
 }

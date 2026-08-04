@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/commerce";
+import { fmtToman } from "@/lib/products";
 
-/**
- * Compact technical announcement strip. Honest content only — shipping
- * threshold and the current drop; no fabricated discount-code delivery.
- */
 const MESSAGES = [
-  "ارسال رایگان برای سفارش‌های بالای ۲٬۰۰۰٬۰۰۰ تومان",
-  "DROP 001 — موجود است",
-  "مرجوعی و تعویض تا ۷ روز پس از دریافت",
+  "نسخه نمایشی — پرداخت و ارسال واقعی غیرفعال است",
+  "DROP 001 — کاتالوگ نمایشی فعال",
+  `ارسال رایگان نمایشی از ${fmtToman(FREE_SHIPPING_THRESHOLD)}`,
 ];
 
 const STORAGE_KEY = "lbb-announcement-dismissed";
-
 export const ANNOUNCEMENT_HEIGHT = 28;
 
 export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
@@ -32,7 +29,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
   useEffect(() => {
     if (!visible) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % MESSAGES.length), 5000);
+    const id = setInterval(() => setIndex((current) => (current + 1) % MESSAGES.length), 5000);
     return () => clearInterval(id);
   }, [visible]);
 
@@ -41,7 +38,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {
-      /* storage can be unavailable in private mode — dismissal is per-session then */
+      // Storage can be unavailable; dismissal then lasts only for this render session.
     }
     onDismiss?.();
   };
@@ -59,20 +56,20 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
         LBB
       </span>
       <div className="relative min-w-0 flex-1 overflow-hidden text-center">
-        {MESSAGES.map((m, i) => (
+        {MESSAGES.map((message, messageIndex) => (
           <span
-            key={m}
+            key={message}
             className="tech absolute inset-x-0 truncate px-2 transition-all duration-500"
             style={{
               direction: "rtl",
               letterSpacing: "0.04em",
               textTransform: "none",
-              opacity: i === index ? 1 : 0,
-              transform: i === index ? "translateY(0)" : "translateY(6px)",
+              opacity: messageIndex === index ? 1 : 0,
+              transform: messageIndex === index ? "translateY(0)" : "translateY(6px)",
             }}
-            aria-hidden={i !== index}
+            aria-hidden={messageIndex !== index}
           >
-            {m}
+            {message}
           </span>
         ))}
         <span
@@ -88,7 +85,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
         onClick={dismiss}
         className="grid h-7 w-9 shrink-0 place-items-center text-bone/80 transition-colors hover:text-bone"
       >
-        <X size={13} />
+        <X size={13} aria-hidden="true" />
       </button>
     </div>
   );

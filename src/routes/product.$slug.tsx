@@ -455,11 +455,18 @@ function ProductPage() {
                   ارسال و بازگشت
                 </AccordionTrigger>
                 <AccordionContent>
-                  <ul className="flex flex-col gap-2 text-sm leading-8 text-metal">
-                    <li>ارسال به سراسر ایران، معمولاً ۲ تا ۵ روز کاری.</li>
-                    <li>امکان مرجوعی و تعویض تا ۷ روز پس از دریافت، در صورت سالم بودن کالا.</li>
-                    <li>جزئیات کامل در صفحهٔ ارسال و مرجوعی.</li>
-                  </ul>
+                  <div className="space-y-3 text-sm leading-8 text-metal">
+                    <p>
+                      فروش، پرداخت، ارسال و مرجوعی واقعی هنوز فعال نیستند. افزودن این محصول به سبد
+                      فقط برای آزمایش رابط کاربری انجام می‌شود.
+                    </p>
+                    <a
+                      href="/shipping-returns"
+                      className="inline-flex min-h-11 items-center text-signal underline-offset-4 hover:underline"
+                    >
+                      مشاهده وضعیت فعلی ارسال و مرجوعی
+                    </a>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
