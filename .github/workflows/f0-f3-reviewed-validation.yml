@@ -77,7 +77,8 @@ jobs:
           fi
           tar -cf /tmp/f0-f3-formatted.tar "${paths[@]}"
           git fetch origin integration/f0-f3-reviewed
-          git checkout -B integration-fmt origin/integration/f0-f3-reviewed
+          git reset --hard HEAD
+          git checkout -f -B integration-fmt origin/integration/f0-f3-reviewed
           tar -xf /tmp/f0-f3-formatted.tar
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
