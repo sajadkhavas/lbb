@@ -62,13 +62,17 @@ if (productsFacade.trim() !== 'export * from "./product-catalog";') {
   failures.push("products.ts must remain a compatibility facade over product-catalog.ts.");
 }
 if (!productFilter.includes('from "./product-catalog"')) {
-  failures.push("product-filter.ts must import catalogue helpers directly from product-catalog.ts.");
+  failures.push(
+    "product-filter.ts must import catalogue helpers directly from product-catalog.ts.",
+  );
 }
 if (productFilter.includes('from "./products"')) {
   failures.push("Circular product-filter → products facade dependency has returned.");
 }
 if (/import\s*{[^}]*\bproducts\b[^}]*}\s*from\s*"\.\/product-catalog"/s.test(productFilter)) {
-  failures.push("product-filter.ts must not evaluate the product catalogue during module initialization.");
+  failures.push(
+    "product-filter.ts must not evaluate the product catalogue during module initialization.",
+  );
 }
 if (/products\.(?:flatMap|map)\s*\(/.test(productFilter)) {
   failures.push("Catalogue-derived filter defaults must not run at module initialization.");
