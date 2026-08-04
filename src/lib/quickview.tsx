@@ -2,8 +2,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -11,7 +11,7 @@ import type { Product } from "./products";
 
 type QuickViewCtx = {
   product: Product | null;
-  open: (p: Product) => void;
+  open: (product: Product, trigger?: HTMLElement | null) => void;
   close: () => void;
 };
 
@@ -19,23 +19,23 @@ const Ctx = createContext<QuickViewCtx | null>(null);
 
 export function QuickViewProvider({ children }: { children: ReactNode }) {
   const [product, setProduct] = useState<Product | null>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
-  const open = useCallback((p: Product) => setProduct(p), []);
-  const close = useCallback(() => setProduct(null), []);
+  const open = useCallback((nextProduct: Product, trigger?: HTMLElement | null) => {
+    returnFocusRef.current =
+      trigger ??
+      (typeof document !== "undefined" && document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null);
+    setProduct(nextProduct);
+  }, []);
 
-  useEffect(() => {
-    if (!product) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [product, close]);
+  const close = useCallback(() => {
+    const target = returnFocusRef.current;
+    returnFocusRef.current = null;
+    setProduct(null);
+    if (target?.isConnected) requestAnimationFrame(() => target.focus());
+  }, []);
 
   const value = useMemo(() => ({ product, open, close }), [product, open, close]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
