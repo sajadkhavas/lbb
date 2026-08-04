@@ -42,7 +42,6 @@ jobs:
           'src/lib/quickview.tsx'
           'src/lib/recent-searches.ts'
           'src/lib/recently-viewed.ts'
-          '.github/scripts/f4-f5-reviewed-browser.mjs'
       - name: Typecheck
         run: npm run typecheck
       - name: Lint owned F4/F5 files
