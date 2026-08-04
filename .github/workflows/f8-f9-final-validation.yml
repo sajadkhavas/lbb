@@ -32,10 +32,12 @@ jobs:
       - name: Format final fixes
         run: >-
           npx prettier --write
+          src/styles.css
           src/components/lbb/Footer.tsx
           src/components/lbb/AnnouncementBar.tsx
           src/components/lbb/home/TickerStrip.tsx
           src/components/lbb/home/HeroSplit.tsx
+          src/components/lbb/home/BrandStatement.tsx
           src/routes/search.tsx
           tests/seo-pwa.spec.ts
 
@@ -45,7 +47,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src tests
           if ! git diff --cached --quiet; then
-            git commit -m 'fix(f9): finalize contrast, search history and PWA tests'
+            git commit -m 'fix(f9): finalize contrast, fonts and acceptance tests'
             git push origin HEAD:phase/f8-f9-final-quality
           fi
 
