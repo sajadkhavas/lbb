@@ -1,0 +1,108 @@
+name: Reviewed F0 F3 validation
+
+on:
+  pull_request:
+    branches:
+      - validation/f0-f3-reviewed
+
+permissions:
+  contents: read
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Resolve dependency tree
+        run: |
+          rm -rf node_modules package-lock.json npm-shrinkwrap.json
+          npm install --ignore-scripts
+          rm -rf node_modules
+          npm ci
+
+      - name: Install TypeScript native preview
+        run: npm install --no-save --package-lock=false @typescript/native-preview
+
+      - name: Check F0-F3 formatting
+        run: >-
+          npx prettier --check
+          'vite.config.ts'
+          'public/manifest.webmanifest'
+          'public/sw.js'
+          'src/lib/pwa.ts'
+          'src/routes/__root.tsx'
+          'src/routes/index.tsx'
+          'src/components/SmoothScroll.tsx'
+          'src/components/lbb/AnnouncementBar.tsx'
+          'src/components/lbb/CustomCursor.tsx'
+          'src/components/lbb/Footer.tsx'
+          'src/components/lbb/Logo.tsx'
+          'src/components/lbb/MobileBottomBar.tsx'
+          'src/components/lbb/Navbar.tsx'
+          'src/components/lbb/home/HeroSplit.tsx'
+          'src/components/lbb/home/NewDropCountdown.tsx'
+          'src/components/lbb/home/Newsletter.tsx'
+          'src/hooks/use-reveal.ts'
+          'src/components/lbb/ui/primitives.tsx'
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint F0-F3 scope
+        run: >-
+          npx eslint
+          'vite.config.ts'
+          'src/lib/pwa.ts'
+          'src/routes/__root.tsx'
+          'src/routes/index.tsx'
+          'src/components/SmoothScroll.tsx'
+          'src/components/lbb/AnnouncementBar.tsx'
+          'src/components/lbb/CustomCursor.tsx'
+          'src/components/lbb/Footer.tsx'
+          'src/components/lbb/Logo.tsx'
+          'src/components/lbb/MobileBottomBar.tsx'
+          'src/components/lbb/Navbar.tsx'
+          'src/components/lbb/home/HeroSplit.tsx'
+          'src/components/lbb/home/NewDropCountdown.tsx'
+          'src/components/lbb/home/Newsletter.tsx'
+          'src/hooks/use-reveal.ts'
+          'src/components/lbb/ui/primitives.tsx'
+
+      - name: Production build
+        run: npm run build
+
+      - name: Verify deploy output
+        run: |
+          test -s .output/public/sw.js
+          grep -q 'lbb-2026-08-f0-f3' .output/public/sw.js
+          test -s .output/public/manifest.webmanifest
+          if find .output/public -type f -path '*__l5e*' | grep -q .; then
+            echo 'Lovable-only assets leaked into production output.'
+            exit 1
+          fi
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2
+          npx playwright install chromium
+
+      - name: Start TanStack server
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/lbb-f0-f3-dev.log 2>&1 &
+          for attempt in {1..90}; do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/lbb-f0-f3-dev.log
+          exit 1
+
+      - name: Browser and shell behavior
+        run: node .github/scripts/f0-f3-reviewed-browser.mjs
