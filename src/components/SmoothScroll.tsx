@@ -31,7 +31,6 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       };
     })();
 
-
     return () => {
       cancelled = true;
       destroy();
