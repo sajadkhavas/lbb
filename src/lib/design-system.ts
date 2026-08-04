@@ -26,7 +26,11 @@ export const TYPE_TOKENS = [
   { name: "Display 3", className: "text-display-3", sample: "جزئیات محصول" },
   { name: "Title", className: "text-title", sample: "هودی کلاسیک LBB" },
   { name: "Lede", className: "text-lede", sample: "روایت کوتاه و تصمیم‌ساز برای معرفی بخش." },
-  { name: "Body", className: "body-copy", sample: "متن اصلی فارسی باید خوانا، طبیعی و دارای عرض کنترل‌شده باشد." },
+  {
+    name: "Body",
+    className: "body-copy",
+    sample: "متن اصلی فارسی باید خوانا، طبیعی و دارای عرض کنترل‌شده باشد.",
+  },
   { name: "Technical", className: "tech", sample: "LBB / SYSTEM / 02" },
 ] as const;
 

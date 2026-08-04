@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Heart, Info, LoaderCircle, ShoppingBag, TriangleAlert } from "lucide-react";
+import { Heart, LoaderCircle, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
@@ -125,7 +125,10 @@ function FoundationsSection() {
                 <div key={item.token} className="grid grid-cols-[64px_1fr] items-center gap-4">
                   <TechLabel>{item.name}</TechLabel>
                   <div>
-                    <div className="h-3 bg-signal" style={{ width: `min(var(${item.token}), 100%)` }} />
+                    <div
+                      className="h-3 bg-signal"
+                      style={{ width: `min(var(${item.token}), 100%)` }}
+                    />
                     <p className="mt-1 text-[11px] text-mute">{item.usage}</p>
                   </div>
                 </div>
@@ -161,7 +164,10 @@ function FoundationsSection() {
                   <div className="mt-2 h-2 overflow-hidden bg-obsidian">
                     <div
                       className="h-full bg-signal"
-                      style={{ width: `${30 + index * 15}%`, transition: `width var(${item.token}) var(--ease-lbb)` }}
+                      style={{
+                        width: `${30 + index * 15}%`,
+                        transition: `width var(${item.token}) var(--ease-lbb)`,
+                      }}
                     />
                   </div>
                   <p className="mt-1 text-[11px] text-mute">{item.usage}</p>
@@ -203,7 +209,11 @@ function ComponentStatesSection() {
             </div>
             <Rule caption="ICON / TOGGLE" className="my-7" />
             <div className="flex flex-wrap items-center gap-3">
-              <IconButton label={liked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"} pressed={liked} onClick={() => setLiked((value) => !value)}>
+              <IconButton
+                label={liked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
+                pressed={liked}
+                onClick={() => setLiked((value) => !value)}
+              >
                 <Heart size={18} aria-hidden="true" className={liked ? "fill-current" : ""} />
               </IconButton>
               <IconButton label="سبد خرید">
@@ -221,7 +231,11 @@ function ComponentStatesSection() {
               <legend className="text-xs font-bold text-bone">سایز</legend>
               <div className="mt-3 flex flex-wrap gap-2">
                 {["S", "M", "L", "XL"].map((size) => (
-                  <ChoiceChip key={size} selected={selectedSize === size} onClick={() => setSelectedSize(size)}>
+                  <ChoiceChip
+                    key={size}
+                    selected={selectedSize === size}
+                    onClick={() => setSelectedSize(size)}
+                  >
                     {size}
                   </ChoiceChip>
                 ))}
@@ -260,7 +274,9 @@ function ComponentStatesSection() {
                   aria-describedby="coupon-error"
                   className="mt-2 min-h-12 w-full border border-danger bg-obsidian px-4 text-sm text-bone outline-none focus-visible:ring-2 focus-visible:ring-danger/40"
                 />
-                <FieldMessage id="coupon-error" tone="error">این کد معتبر نیست.</FieldMessage>
+                <FieldMessage id="coupon-error" tone="error">
+                  این کد معتبر نیست.
+                </FieldMessage>
               </label>
               <label className="block text-xs font-bold text-bone">
                 ایمیل تأییدشده
@@ -270,7 +286,9 @@ function ComponentStatesSection() {
                   aria-describedby="email-success"
                   className="mt-2 min-h-12 w-full border border-success bg-obsidian px-4 text-sm text-bone outline-none focus-visible:ring-2 focus-visible:ring-success/40"
                 />
-                <FieldMessage id="email-success" tone="success">فرمت ایمیل صحیح است.</FieldMessage>
+                <FieldMessage id="email-success" tone="success">
+                  فرمت ایمیل صحیح است.
+                </FieldMessage>
               </label>
               <label className="block text-xs font-bold text-mute">
                 فیلد غیرفعال
@@ -310,9 +328,21 @@ function ComponentStatesSection() {
 
 function PhotographySection() {
   const frames = [
-    { src: productImage("lbb-classic-hoodie"), title: "PRODUCT TRUTH", body: "نور خنثی، رنگ واقعی و قاب قابل مقایسه" },
-    { src: lifestyle1, title: "TEHRAN CONTEXT", body: "مکان و نور بخشی از داستان، نه پوشاننده محصول" },
-    { src: lifestyle2, title: "MATERIAL DETAIL", body: "بافت، دوخت، فیت و مقیاس باید قابل فهم باشند" },
+    {
+      src: productImage("lbb-classic-hoodie"),
+      title: "PRODUCT TRUTH",
+      body: "نور خنثی، رنگ واقعی و قاب قابل مقایسه",
+    },
+    {
+      src: lifestyle1,
+      title: "TEHRAN CONTEXT",
+      body: "مکان و نور بخشی از داستان، نه پوشاننده محصول",
+    },
+    {
+      src: lifestyle2,
+      title: "MATERIAL DETAIL",
+      body: "بافت، دوخت، فیت و مقیاس باید قابل فهم باشند",
+    },
   ];
 
   return (
@@ -327,8 +357,16 @@ function PhotographySection() {
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {frames.map((item, index) => (
             <article key={item.title} className="group">
-              <Frame src={item.src} alt={item.body} priority={index === 0} sizes="(max-width: 768px) 100vw, 33vw" className="rounded-lg" />
-              <TechLabel tone="signal" className="mt-4 block">{item.title}</TechLabel>
+              <Frame
+                src={item.src}
+                alt={item.body}
+                priority={index === 0}
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="rounded-lg"
+              />
+              <TechLabel tone="signal" className="mt-4 block">
+                {item.title}
+              </TechLabel>
               <p className="mt-2 text-sm leading-7 text-metal">{item.body}</p>
             </article>
           ))}
@@ -355,7 +393,12 @@ function CompositionSection() {
               <h3 className="mt-2 text-title text-bone">کشف سریع محصول</h3>
             </div>
             <div className="grid grid-cols-[96px_1fr] gap-4 p-4">
-              <Frame src={productImage("graphic-tee-red")} alt="نمونه کارت محصول" ratio="4/5" zoom={false} />
+              <Frame
+                src={productImage("graphic-tee-red")}
+                alt="نمونه کارت محصول"
+                ratio="4/5"
+                zoom={false}
+              />
               <div>
                 <StatusTag tone="success">موجود</StatusTag>
                 <p className="mt-3 text-sm font-bold text-bone">تیشرت گرافیک قرمز</p>
@@ -368,21 +411,40 @@ function CompositionSection() {
             </div>
           </Surface>
 
-          <Surface tone="raised" as="article" className="relative min-h-[420px] overflow-hidden lbb-grain">
-            <img src={heroMain} alt="نمونه روایت تصویری شب تهران" className="absolute inset-0 h-full w-full object-cover opacity-65" />
+          <Surface
+            tone="raised"
+            as="article"
+            className="relative min-h-[420px] overflow-hidden lbb-grain"
+          >
+            <img
+              src={heroMain}
+              alt="نمونه روایت تصویری شب تهران"
+              className="absolute inset-0 h-full w-full object-cover opacity-65"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/25 to-transparent" />
             <div className="relative flex min-h-[420px] flex-col justify-end p-6">
               <TechLabel tone="signal">NARRATIVE / DROP</TechLabel>
               <h3 className="mt-3 text-display-3 max-w-[10ch] text-bone">بعد از آخرین قطار</h3>
-              <p className="mt-3 max-w-[34ch] text-sm leading-7 text-paper">یک Moment اصلی، متن کوتاه و مسیر مستقیم به محصول.</p>
-              <Link to="/collections/drop-01-shabgard" className={`${CtaClasses("signal", "sm")} mt-5 self-start`}>مشاهده کالکشن</Link>
+              <p className="mt-3 max-w-[34ch] text-sm leading-7 text-paper">
+                یک Moment اصلی، متن کوتاه و مسیر مستقیم به محصول.
+              </p>
+              <Link
+                to="/collections/$slug"
+                params={{ slug: "drop-01-shabgard" }}
+                className={`${CtaClasses("signal", "sm")} mt-5 self-start`}
+              >
+                مشاهده کالکشن
+              </Link>
             </div>
           </Surface>
 
           <Surface tone="inverse" as="article" className="p-6 md:p-8">
             <TechLabel tone="inverse">READING / JOURNAL</TechLabel>
             <h3 className="mt-4 text-display-3 text-obsidian">لباس خیابانی چگونه خوانده می‌شود؟</h3>
-            <p className="mt-5 text-sm leading-8 text-obsidian/75">صفحه خواندن از سطح روشن، عرض محدود، Heading روشن و لینک‌های قابل فهم استفاده می‌کند. هیچ افکت نمایشی نباید ریتم مطالعه را قطع کند.</p>
+            <p className="mt-5 text-sm leading-8 text-obsidian/75">
+              صفحه خواندن از سطح روشن، عرض محدود، Heading روشن و لینک‌های قابل فهم استفاده می‌کند.
+              هیچ افکت نمایشی نباید ریتم مطالعه را قطع کند.
+            </p>
             <div className="mt-7 border-t border-hairline-ink pt-4">
               <p className="font-mono text-[10px] text-obsidian/60">READING WIDTH / 72CH</p>
             </div>
@@ -397,31 +459,62 @@ function DesignSystemPage() {
   return (
     <>
       <Navbar theme="dark" />
-      <main id="main" dir="rtl" className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0">
+      <main
+        id="main"
+        dir="rtl"
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
+      >
         <header className="relative overflow-hidden border-b border-hairline lbb-grain grid-marks">
           <Shell className="relative py-16 md:py-24 lg:py-32">
             <div className="lbb-grid items-end">
               <div className="col-span-4 md:col-span-6 lg:col-span-8">
                 <TechLabel tone="signal">LBB / DESIGN SYSTEM / {DESIGN_SYSTEM_VERSION}</TechLabel>
                 <h1 className="text-display-1 mt-5 max-w-[12ch] text-bone">Tehran After Dark</h1>
-                <p className="text-lede mt-6">{EXPERIENCE_NORTH_STAR} یک زبان واحد برای Utility، روایت و خواندن می‌سازد.</p>
+                <p className="text-lede mt-6">
+                  {EXPERIENCE_NORTH_STAR} یک زبان واحد برای Utility، روایت و خواندن می‌سازد.
+                </p>
               </div>
-              <Surface tone="raised" className="col-span-4 mt-10 p-5 md:col-span-2 md:mt-0 lg:col-span-4">
+              <Surface
+                tone="raised"
+                className="col-span-4 mt-10 p-5 md:col-span-2 md:mt-0 lg:col-span-4"
+              >
                 <p className="font-mono text-4xl font-bold text-signal">70</p>
                 <p className="mt-1 text-xs text-metal">Commerce clarity</p>
                 <div className="mt-4 grid grid-cols-2 gap-3 border-t border-hairline pt-4">
-                  <div><p className="font-mono text-xl text-bone">20</p><p className="text-[11px] text-mute">Editorial</p></div>
-                  <div><p className="font-mono text-xl text-bone">10</p><p className="text-[11px] text-mute">Spectacle</p></div>
+                  <div>
+                    <p className="font-mono text-xl text-bone">20</p>
+                    <p className="text-[11px] text-mute">Editorial</p>
+                  </div>
+                  <div>
+                    <p className="font-mono text-xl text-bone">10</p>
+                    <p className="text-[11px] text-mute">Spectacle</p>
+                  </div>
                 </div>
               </Surface>
             </div>
           </Shell>
         </header>
 
-        <nav aria-label="بخش‌های Design System" className="sticky top-[var(--lbb-nav-h)] z-30 border-b border-hairline bg-obsidian/95 backdrop-blur">
+        <nav
+          aria-label="بخش‌های Design System"
+          className="sticky top-[var(--lbb-nav-h)] z-30 border-b border-hairline bg-obsidian/95 backdrop-blur"
+        >
           <Shell className="flex snap-x gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {[ ["colors", "رنگ"], ["typography", "تایپ"], ["foundations", "پایه"], ["states", "حالت"], ["photography", "تصویر"], ["compositions", "ترکیب"] ].map(([id, label]) => (
-              <a key={id} href={`#${id}`} className="tech min-h-11 shrink-0 snap-start px-4 py-3 text-metal hover:text-signal focus-visible:text-signal">{label}</a>
+            {[
+              ["colors", "رنگ"],
+              ["typography", "تایپ"],
+              ["foundations", "پایه"],
+              ["states", "حالت"],
+              ["photography", "تصویر"],
+              ["compositions", "ترکیب"],
+            ].map(([id, label]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className="tech min-h-11 shrink-0 snap-start px-4 py-3 text-metal hover:text-signal focus-visible:text-signal"
+              >
+                {label}
+              </a>
             ))}
           </Shell>
         </nav>
@@ -438,11 +531,18 @@ function DesignSystemPage() {
             <div>
               <TechLabel tone="signal">F11 HANDOFF</TechLabel>
               <h2 className="text-display-3 mt-3 text-bone">سیستم آماده استفاده در F12 است</h2>
-              <p className="mt-3 max-w-[58ch] text-sm leading-7 text-metal">Navbar، Search، Drawer و Global Shell در فاز بعد فقط از همین Tokenها و State Contract استفاده خواهند کرد.</p>
+              <p className="mt-3 max-w-[58ch] text-sm leading-7 text-metal">
+                Navbar، Search، Drawer و Global Shell در فاز بعد فقط از همین Tokenها و State
+                Contract استفاده خواهند کرد.
+              </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link to="/" className={CtaClasses("line")}>بازگشت به خانه</Link>
-              <Link to="/shop" className={CtaClasses("signal")}>بررسی فروشگاه</Link>
+              <Link to="/" className={CtaClasses("line")}>
+                بازگشت به خانه
+              </Link>
+              <Link to="/shop" className={CtaClasses("signal")}>
+                بررسی فروشگاه
+              </Link>
             </div>
           </Shell>
         </Band>

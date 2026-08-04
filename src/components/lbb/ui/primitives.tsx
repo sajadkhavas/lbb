@@ -1,10 +1,5 @@
 import { LoaderCircle } from "lucide-react";
-import {
-  forwardRef,
-  type ButtonHTMLAttributes,
-  type HTMLAttributes,
-  type ReactNode,
-} from "react";
+import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /* =========================================================================
@@ -74,8 +69,7 @@ export function Surface({
         tone === "canvas" && "border-hairline bg-obsidian text-bone",
         tone === "subtle" && "border-hairline bg-carbon text-bone",
         tone === "raised" && "border-hairline bg-carbon-2 text-bone shadow-raised",
-        tone === "elevated" &&
-          "border-hairline-strong bg-graphite text-bone shadow-overlay",
+        tone === "elevated" && "border-hairline-strong bg-graphite text-bone shadow-overlay",
         tone === "inverse" && "border-hairline-ink bg-bone text-obsidian",
         tone === "signal" && "border-signal bg-signal text-obsidian",
         className,
