@@ -15,6 +15,7 @@ const routes = [
   "/order-confirmation",
   "/track-order",
   "/wishlist",
+  "/design-system",
   "/collections",
   "/collections/drop-01-shabgard",
   "/collections/drop-02-atashe-sorkh",
