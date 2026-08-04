@@ -2,31 +2,32 @@ const KEY = "lbb-recently-viewed-v1";
 const MAX = 8;
 
 function readList(): string[] {
+  if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
+    const raw = window.localStorage.getItem(KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((s): s is string => typeof s === "string" && s.length > 0);
+    return Array.from(
+      new Set(parsed.filter((slug): slug is string => typeof slug === "string" && slug.trim().length > 0)),
+    ).slice(0, MAX);
   } catch {
     return [];
   }
 }
 
-/** Reads recently viewed product slugs (most recent first) from localStorage. */
+/** Reads recently viewed product slugs, most recent first. */
 export function getRecentlyViewed(excludeSlug?: string): string[] {
-  if (typeof window === "undefined") return [];
-  return readList().filter((s) => s !== excludeSlug);
+  return readList().filter((slug) => slug !== excludeSlug);
 }
 
-/** Records a product slug as recently viewed (moves it to the front). */
+/** Records a product slug and moves an existing entry to the front. */
 export function recordRecentlyViewed(slug: string) {
-  if (typeof window === "undefined") return;
-  if (typeof slug !== "string" || !slug) return;
+  if (typeof window === "undefined" || typeof slug !== "string" || !slug.trim()) return;
   try {
-    const next = [slug, ...readList().filter((s) => s !== slug)].slice(0, MAX);
-    localStorage.setItem(KEY, JSON.stringify(next));
+    const cleanSlug = slug.trim();
+    const next = [cleanSlug, ...readList().filter((item) => item !== cleanSlug)].slice(0, MAX);
+    window.localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
-    /* ignore */
+    // Storage is a progressive enhancement; never block the PDP.
   }
 }
