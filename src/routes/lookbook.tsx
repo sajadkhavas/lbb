@@ -102,10 +102,13 @@ export const Route = createFileRoute("/lookbook")({
 function LookbookPage() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
   const activeShot = activeIndex === null ? null : SHOTS[activeIndex];
 
+  const isLightboxOpen = activeIndex !== null;
+
   useEffect(() => {
-    if (activeIndex === null) return;
+    if (!isLightboxOpen) return;
 
     const previousOverflow = document.body.style.overflow;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -122,13 +125,14 @@ function LookbookPage() {
 
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleKeyDown);
-    closeButtonRef.current?.focus();
+    requestAnimationFrame(() => closeButtonRef.current?.focus());
 
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      requestAnimationFrame(() => openerRef.current?.focus());
     };
-  }, [activeIndex]);
+  }, [isLightboxOpen]);
 
   const showPrevious = () => {
     setActiveIndex((current) =>
@@ -167,7 +171,10 @@ function LookbookPage() {
                 <button
                   key={shot.label}
                   type="button"
-                  onClick={() => setActiveIndex(index)}
+                  onClick={(event) => {
+                    openerRef.current = event.currentTarget;
+                    setActiveIndex(index);
+                  }}
                   className={`group relative min-h-0 overflow-hidden rounded-2xl border border-hairline bg-carbon text-start transition-transform duration-300 ease-[var(--ease-lbb)] hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${shot.className}`}
                   style={{ aspectRatio: shot.ratio }}
                   aria-haspopup="dialog"

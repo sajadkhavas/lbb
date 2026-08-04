@@ -271,6 +271,7 @@ export function Navbar({
             >
               <Search size={20} className="shrink-0 text-mute" aria-hidden="true" />
               <input
+                data-autofocus
                 autoFocus
                 value={q}
                 onChange={(e) => setQ(e.target.value)}

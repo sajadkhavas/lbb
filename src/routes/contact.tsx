@@ -85,7 +85,7 @@ function ContactPage() {
 
             <aside className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
               <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-xl bg-signal text-bone">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-signal text-obsidian">
                   <MessageCircleMore size={21} aria-hidden="true" />
                 </span>
                 <div>

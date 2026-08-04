@@ -136,6 +136,17 @@ function SearchPage() {
     }
   }, [expectedSearch, navigate]);
 
+  useEffect(() => {
+    const nextQuery = normalizeSearchTerm(draft) || undefined;
+    if (nextQuery === query) return;
+    const timer = window.setTimeout(() => {
+      startTransition(() =>
+        navigate({ search: serializeSearch(nextQuery, filters), replace: true }),
+      );
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [draft, filters, navigate, query]);
+
   const baseResults = useMemo(() => matchesQuery(query ?? ""), [query]);
   const results = useMemo(() => applyFilters(baseResults, filters), [baseResults, filters]);
 
@@ -178,6 +189,8 @@ function SearchPage() {
             </label>
             <input
               id="site-search"
+              type="search"
+              aria-label="جست‌وجوی محصولات"
               value={draft}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 setDraft(event.target.value)

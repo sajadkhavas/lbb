@@ -174,7 +174,7 @@ const CTA_BASE =
 export function CtaClasses(variant: "signal" | "bone" | "ghost" | "line" = "signal") {
   switch (variant) {
     case "bone":
-      return cn(CTA_BASE, "bg-bone text-obsidian hover:bg-signal hover:text-bone");
+      return cn(CTA_BASE, "bg-bone text-obsidian hover:bg-signal hover:text-obsidian");
     case "ghost":
       return cn(CTA_BASE, "bg-transparent text-bone hover:bg-carbon-2");
     case "line":
@@ -183,7 +183,7 @@ export function CtaClasses(variant: "signal" | "bone" | "ghost" | "line" = "sign
         "border border-hairline bg-transparent text-bone hover:border-signal hover:text-signal",
       );
     default:
-      return cn(CTA_BASE, "bg-signal text-bone hover:bg-bone hover:text-obsidian");
+      return cn(CTA_BASE, "bg-signal text-obsidian hover:bg-bone hover:text-obsidian");
   }
 }
 
@@ -201,7 +201,7 @@ export function StatusTag({
     <span
       className={cn(
         "tech inline-flex items-center gap-1.5 px-2 py-1 leading-none",
-        tone === "signal" && "bg-signal text-bone",
+        tone === "signal" && "bg-signal text-obsidian",
         tone === "bone" && "bg-bone text-obsidian",
         tone === "out" && "border border-hairline bg-obsidian/80 text-mute",
         tone === "neutral" && "border border-hairline bg-obsidian/80 text-bone",

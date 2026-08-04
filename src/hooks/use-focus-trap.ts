@@ -22,28 +22,30 @@ export function useFocusTrap(
 
     const focusables = () =>
       Array.from(root?.querySelectorAll<HTMLElement>(SELECTOR) ?? []).filter(
-        (el) => el.offsetParent !== null || el === document.activeElement,
+        (element) => element.offsetParent !== null || element === document.activeElement,
       );
 
-    const first = focusables()[0];
-    first?.focus();
+    requestAnimationFrame(() => {
+      const preferred = root?.querySelector<HTMLElement>("[data-autofocus]");
+      (preferred ?? focusables()[0])?.focus();
+    });
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
         onClose();
         return;
       }
-      if (e.key !== "Tab") return;
+      if (event.key !== "Tab") return;
       const items = focusables();
       if (items.length === 0) return;
       const head = items[0];
       const tail = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === head) {
-        e.preventDefault();
+      if (event.shiftKey && document.activeElement === head) {
+        event.preventDefault();
         tail.focus();
-      } else if (!e.shiftKey && document.activeElement === tail) {
-        e.preventDefault();
+      } else if (!event.shiftKey && document.activeElement === tail) {
+        event.preventDefault();
         head.focus();
       }
     };
@@ -52,7 +54,7 @@ export function useFocusTrap(
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
-      previous?.focus?.();
+      requestAnimationFrame(() => previous?.focus?.());
     };
   }, [active, container, onClose]);
 }

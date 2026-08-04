@@ -49,7 +49,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
     <div
       dir="rtl"
       role="status"
-      className="fixed inset-x-0 top-0 z-[110] flex items-center bg-signal text-bone"
+      className="fixed inset-x-0 top-0 z-[110] flex items-center bg-signal text-obsidian"
       style={{ height: ANNOUNCEMENT_HEIGHT }}
     >
       <span aria-hidden="true" className="tech shrink-0 ps-3 opacity-70">

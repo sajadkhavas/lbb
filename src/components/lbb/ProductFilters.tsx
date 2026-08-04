@@ -115,7 +115,7 @@ export function ProductFilters({
                   aria-label={`${active ? "حذف" : "انتخاب"} فیلتر سایز ${size}`}
                   onClick={() => onChange({ ...filters, sizes: toggleValue(filters.sizes, size) })}
                   className={`size-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
-                    active ? "border-signal bg-signal text-bone" : "hover:border-bone"
+                    active ? "border-signal bg-signal text-obsidian" : "hover:border-bone"
                   }`}
                 >
                   {size}

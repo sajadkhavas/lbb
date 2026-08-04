@@ -18,12 +18,12 @@ test("search URL, refresh and browser history stay synchronized", async ({ page 
 });
 
 test("filtered category deep links survive refresh", async ({ page }) => {
-  await page.goto("/hoodies?size=M&sort=price-asc", { waitUntil: "networkidle" });
-  await expect(page).toHaveURL(/size=M/);
+  await page.goto("/hoodies?sizes=M&sort=price-asc", { waitUntil: "networkidle" });
+  await expect(page).toHaveURL(/sizes=M/);
   await expect(page).toHaveURL(/sort=price-asc/);
   await expect(page.locator("h1")).toHaveCount(1);
   await page.reload({ waitUntil: "networkidle" });
-  await expect(page).toHaveURL(/size=M/);
+  await expect(page).toHaveURL(/sizes=M/);
   await expect(page).toHaveURL(/sort=price-asc/);
 });
 

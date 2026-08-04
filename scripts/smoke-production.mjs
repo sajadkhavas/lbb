@@ -11,16 +11,16 @@ if (!productionOrigin) {
 }
 
 let logs = "";
-const server = spawn(process.execPath, [".output/server/index.mjs"], {
-  env: {
-    ...process.env,
-    HOST: host,
-    PORT: String(port),
-    NITRO_HOST: host,
-    NITRO_PORT: String(port),
+const executable =
+  process.platform === "win32" ? "node_modules/.bin/vite.cmd" : "node_modules/.bin/vite";
+const server = spawn(
+  executable,
+  ["preview", "--host", host, "--port", String(port), "--strictPort"],
+  {
+    env: process.env,
+    stdio: ["ignore", "pipe", "pipe"],
   },
-  stdio: ["ignore", "pipe", "pipe"],
-});
+);
 
 server.stdout.on("data", (chunk) => {
   logs += chunk.toString();
@@ -33,31 +33,34 @@ async function waitForServer() {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
     if (server.exitCode !== null) {
-      throw new Error(`Production server exited early (${server.exitCode}).\n${logs}`);
+      throw new Error(`Production preview exited early (${server.exitCode}).
+${logs}`);
     }
     try {
       const response = await fetch(`${origin}/`);
       if (response.ok) return;
     } catch {
-      // The server is still starting.
+      // Preview is still starting.
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error(`Production server did not become ready.\n${logs}`);
+  throw new Error(`Production preview did not become ready.
+${logs}`);
 }
 
 async function assertResponse(path, expectedType, requiredText) {
   const response = await fetch(`${origin}${path}`, { redirect: "manual" });
   const body = await response.text();
   if (!response.ok) {
-    throw new Error(`${path} returned ${response.status}.\n${body.slice(0, 500)}`);
+    throw new Error(`${path} returned ${response.status}.
+${body.slice(0, 500)}`);
   }
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes(expectedType)) {
     throw new Error(`${path} returned unexpected content type: ${contentType}`);
   }
   for (const text of requiredText) {
-    if (!body.includes(text)) throw new Error(`${path} is missing expected SSR content: ${text}`);
+    if (!body.includes(text)) throw new Error(`${path} is missing expected content: ${text}`);
   }
 }
 
@@ -70,7 +73,7 @@ try {
   ]);
   await assertResponse("/sitemap.xml", "application/xml", [`<loc>${productionOrigin}/</loc>`]);
   await assertResponse("/robots.txt", "text/plain", [`Sitemap: ${productionOrigin}/sitemap.xml`]);
-  console.log("Production SSR smoke test passed.");
+  console.log("Production preview smoke test passed.");
 } finally {
   server.kill("SIGTERM");
   await Promise.race([

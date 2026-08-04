@@ -15,9 +15,9 @@
   --lbb-carbon: #0c0c0d; /* raised panel */
   --lbb-carbon-2: #131315; /* second raise */
   --lbb-bone: #f2efe8; /* primary text / inverted surface */
-  --lbb-signal: #e6291e; /* signal only — max ~10-12% of a viewport */
+  --lbb-signal: #ff4d43; /* signal only — max ~10-12% of a viewport */
   --lbb-metal: #9b9b9b; /* secondary text */
-  --lbb-mute: #6f6f6f; /* tertiary text / disabled */
+  --lbb-mute: #858585; /* tertiary text / disabled */
   --lbb-hairline: rgba(255, 255, 255, 0.14);
   --lbb-hairline-soft: rgba(255, 255, 255, 0.07);
   --lbb-hairline-ink: rgba(5, 5, 5, 0.14);
@@ -36,13 +36,13 @@
   --popover: var(--lbb-carbon);
   --popover-foreground: var(--lbb-bone);
   --primary: var(--lbb-signal);
-  --primary-foreground: var(--lbb-bone);
+  --primary-foreground: var(--lbb-obsidian);
   --secondary: var(--lbb-carbon-2);
   --secondary-foreground: var(--lbb-bone);
   --accent: var(--lbb-carbon-2);
   --accent-foreground: var(--lbb-bone);
   --destructive: var(--lbb-signal);
-  --destructive-foreground: var(--lbb-bone);
+  --destructive-foreground: var(--lbb-obsidian);
   --border: var(--lbb-hairline);
   --input: var(--lbb-hairline);
   --ring: var(--lbb-signal);
@@ -170,7 +170,7 @@
   }
   ::selection {
     background: var(--lbb-signal);
-    color: var(--lbb-bone);
+    color: var(--lbb-obsidian);
   }
   :focus-visible {
     outline: 2px solid var(--lbb-signal);
@@ -340,7 +340,7 @@
     clip-path: none;
     padding: 0.625rem 1.25rem;
     background: var(--lbb-signal);
-    color: var(--lbb-bone);
+    color: var(--lbb-obsidian);
     font-size: 0.75rem;
     font-weight: 700;
   }
