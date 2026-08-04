@@ -15,7 +15,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "tsc --noEmit",
     "audit:production": "node scripts/audit-production.mjs",
     "audit:source": "node scripts/audit-source.mjs",
     "test:e2e": "playwright test",
