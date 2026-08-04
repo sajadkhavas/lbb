@@ -121,7 +121,9 @@ export const Route = createFileRoute("/product/$slug")({
 });
 
 function ProductPage() {
-  const { product: p, related } = Route.useLoaderData();
+  const { product, related } = Route.useLoaderData();
+  const p: Product = product;
+  const relatedItems: Product[] = related;
   const cat = CATEGORIES[p.category];
   const [color, setColor] = useState(p.colors[0] ?? "");
   const [size, setSize] = useState("");
