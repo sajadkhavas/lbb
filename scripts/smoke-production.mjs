@@ -12,12 +12,22 @@ if (!productionOrigin) {
 
 let logs = "";
 const executable =
-  process.platform === "win32" ? "node_modules/.bin/vite.cmd" : "node_modules/.bin/vite";
+  process.platform === "win32" ? "node_modules/.bin/wrangler.cmd" : "node_modules/.bin/wrangler";
 const server = spawn(
   executable,
-  ["preview", "--host", host, "--port", String(port), "--strictPort"],
+  [
+    "dev",
+    "--config",
+    ".output/server/wrangler.json",
+    "--ip",
+    host,
+    "--port",
+    String(port),
+    "--local",
+    "--show-interactive-dev-session=false",
+  ],
   {
-    env: process.env,
+    env: { ...process.env, CI: "true" },
     stdio: ["ignore", "pipe", "pipe"],
   },
 );
@@ -30,30 +40,27 @@ server.stderr.on("data", (chunk) => {
 });
 
 async function waitForServer() {
-  const deadline = Date.now() + 30_000;
+  const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
     if (server.exitCode !== null) {
-      throw new Error(`Production preview exited early (${server.exitCode}).
-${logs}`);
+      throw new Error(`Cloudflare Worker runtime exited early (${server.exitCode}).\n${logs}`);
     }
     try {
       const response = await fetch(`${origin}/`);
       if (response.ok) return;
     } catch {
-      // Preview is still starting.
+      // workerd is still starting.
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error(`Production preview did not become ready.
-${logs}`);
+  throw new Error(`Cloudflare Worker runtime did not become ready.\n${logs}`);
 }
 
 async function assertResponse(path, expectedType, requiredText) {
   const response = await fetch(`${origin}${path}`, { redirect: "manual" });
   const body = await response.text();
   if (!response.ok) {
-    throw new Error(`${path} returned ${response.status}.
-${body.slice(0, 500)}`);
+    throw new Error(`${path} returned ${response.status}.\n${body.slice(0, 500)}`);
   }
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes(expectedType)) {
@@ -73,12 +80,12 @@ try {
   ]);
   await assertResponse("/sitemap.xml", "application/xml", [`<loc>${productionOrigin}/</loc>`]);
   await assertResponse("/robots.txt", "text/plain", [`Sitemap: ${productionOrigin}/sitemap.xml`]);
-  console.log("Production preview smoke test passed.");
+  console.log("Cloudflare Worker production smoke test passed.");
 } finally {
   server.kill("SIGTERM");
   await Promise.race([
     new Promise((resolve) => server.once("exit", resolve)),
-    new Promise((resolve) => setTimeout(resolve, 2_000)),
+    new Promise((resolve) => setTimeout(resolve, 5_000)),
   ]);
   if (server.exitCode === null) server.kill("SIGKILL");
 }
