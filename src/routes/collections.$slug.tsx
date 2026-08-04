@@ -105,16 +105,18 @@ function CollectionNotFound() {
         </Shell>
         <Band hairline={false}>
           <Shell>
-            <EmptyState
-              icon={<Layers3 aria-hidden="true" size={34} />}
-              title="این کالکشن پیدا نشد"
-              body="آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد."
-              action={
-                <Link to="/collections" className={CtaClasses("signal")}>
-                  بازگشت به کالکشن‌ها
-                </Link>
-              }
-            />
+            <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
+              <span className="text-mute">
+                <Layers3 aria-hidden="true" size={34} />
+              </span>
+              <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
+              <p className="max-w-[42ch] text-sm leading-7 text-metal">
+                آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.
+              </p>
+              <Link to="/collections" className={CtaClasses("signal")}>
+                بازگشت به کالکشن‌ها
+              </Link>
+            </div>
           </Shell>
         </Band>
       </main>
