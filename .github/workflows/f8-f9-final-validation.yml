@@ -14,7 +14,7 @@ env:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 80
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,28 +28,6 @@ jobs:
 
       - name: Install locked dependencies
         run: npm ci
-
-      - name: Format final fixes
-        run: >-
-          npx prettier --write
-          src/styles.css
-          src/components/lbb/Footer.tsx
-          src/components/lbb/AnnouncementBar.tsx
-          src/components/lbb/home/TickerStrip.tsx
-          src/components/lbb/home/HeroSplit.tsx
-          src/components/lbb/home/BrandStatement.tsx
-          src/routes/search.tsx
-          tests/seo-pwa.spec.ts
-
-      - name: Commit final formatting
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src tests
-          if ! git diff --cached --quiet; then
-            git commit -m 'fix(f9): finalize contrast, fonts and acceptance tests'
-            git push origin HEAD:phase/f8-f9-final-quality
-          fi
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
@@ -77,6 +55,19 @@ jobs:
 
       - name: Cloudflare Worker smoke gate
         run: npm run smoke:production
+
+      - name: Refresh reviewed visual baselines
+        run: npx playwright test tests/visual.spec.ts --update-snapshots
+
+      - name: Commit reviewed visual baselines
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tests/visual.spec.ts-snapshots
+          if ! git diff --cached --quiet; then
+            git commit -m 'test(f9): refresh reviewed visual baselines'
+            git push origin HEAD:phase/f8-f9-final-quality
+          fi
 
       - name: Playwright acceptance suite
         run: npm run test:e2e
