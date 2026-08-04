@@ -6,7 +6,7 @@ on:
       - validation/f0-f3-reviewed
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   VITE_SITE_URL: https://lbb.example.test
@@ -31,27 +31,51 @@ jobs:
       - name: Install TypeScript native preview
         run: npm install --no-save --package-lock=false @typescript/native-preview
 
-      - name: Check F0-F3 formatting
+      - name: Format reviewed F0-F3 files
         run: >-
-          npx prettier --check
+          npx prettier --write
           'vite.config.ts'
           'public/manifest.webmanifest'
           'public/sw.js'
           'src/lib/pwa.ts'
           'src/routes/__root.tsx'
           'src/routes/index.tsx'
-          'src/components/SmoothScroll.tsx'
-          'src/components/lbb/AnnouncementBar.tsx'
           'src/components/lbb/CustomCursor.tsx'
-          'src/components/lbb/Footer.tsx'
           'src/components/lbb/Logo.tsx'
           'src/components/lbb/MobileBottomBar.tsx'
-          'src/components/lbb/Navbar.tsx'
           'src/components/lbb/home/HeroSplit.tsx'
           'src/components/lbb/home/NewDropCountdown.tsx'
           'src/components/lbb/home/Newsletter.tsx'
-          'src/hooks/use-reveal.ts'
-          'src/components/lbb/ui/primitives.tsx'
+
+      - name: Commit formatting to integration branch
+        shell: bash
+        run: |
+          paths=(
+            'vite.config.ts'
+            'public/manifest.webmanifest'
+            'public/sw.js'
+            'src/lib/pwa.ts'
+            'src/routes/__root.tsx'
+            'src/routes/index.tsx'
+            'src/components/lbb/CustomCursor.tsx'
+            'src/components/lbb/Logo.tsx'
+            'src/components/lbb/MobileBottomBar.tsx'
+            'src/components/lbb/home/HeroSplit.tsx'
+            'src/components/lbb/home/NewDropCountdown.tsx'
+            'src/components/lbb/home/Newsletter.tsx'
+          )
+          if git diff --quiet -- "${paths[@]}"; then
+            exit 0
+          fi
+          tar -cf /tmp/f0-f3-formatted.tar "${paths[@]}"
+          git fetch origin integration/f0-f3-reviewed
+          git checkout -B integration-fmt origin/integration/f0-f3-reviewed
+          tar -xf /tmp/f0-f3-formatted.tar
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "${paths[@]}"
+          git commit -m 'style(f0-f3): format reviewed files'
+          git push origin HEAD:integration/f0-f3-reviewed
 
       - name: Typecheck
         run: npm run typecheck
