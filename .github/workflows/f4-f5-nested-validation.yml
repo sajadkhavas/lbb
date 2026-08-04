@@ -102,45 +102,22 @@ jobs:
         run: npm run lint
       - name: Build
         run: npm run build
-      - name: Install browser runtimes
+      - name: Install Playwright
         run: |
-          npm install --no-save --package-lock=false playwright@1.54.2 wrangler@latest
+          npm install --no-save --package-lock=false playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Normalize generated Wrangler paths
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFile, writeFile } from 'node:fs/promises';
-          import path from 'node:path';
-
-          const configPath = '.output/server/wrangler.json';
-          const configDirectory = path.dirname(configPath);
-          const config = JSON.parse(await readFile(configPath, 'utf8'));
-
-          const relativeToConfig = (value) => {
-            if (typeof value !== 'string' || !value.startsWith('.output/')) return value;
-            const normalized = path.relative(configDirectory, value).replaceAll(path.sep, '/');
-            return normalized.startsWith('.') ? normalized : `./${normalized}`;
-          };
-
-          config.main = relativeToConfig(config.main);
-          if (config.assets?.directory) config.assets.directory = relativeToConfig(config.assets.directory);
-          if (config.site?.bucket) config.site.bucket = relativeToConfig(config.site.bucket);
-
-          await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
-          console.log(await readFile(configPath, 'utf8'));
-          NODE
-      - name: Start built Cloudflare Worker
+      - name: Start TanStack development server
         shell: bash
         run: |
-          npx wrangler dev --config .output/server/wrangler.json --ip 127.0.0.1 --port 4173 > /tmp/lbb-worker.log 2>&1 &
-          echo $! > /tmp/lbb-worker.pid
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/lbb-dev.log 2>&1 &
+          echo $! > /tmp/lbb-dev.pid
           for attempt in {1..90}; do
             if curl --fail --silent http://127.0.0.1:4173/shop > /dev/null; then exit 0; fi
             sleep 1
           done
-          cat /tmp/lbb-worker.log
+          cat /tmp/lbb-dev.log
           exit 1
-      - name: Browser validation
+      - name: Browser validation against TanStack server
         run: node .github/scripts/f4-f5-browser.mjs
       - name: Report full lint blocker
         if: always() && steps.full_lint.outcome != 'success'
