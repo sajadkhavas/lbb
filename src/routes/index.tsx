@@ -59,8 +59,7 @@ export const Route = createFileRoute("/")({
       ...pageMeta({ title: TITLE, description: DESC, path: "/", type: "website" }),
       {
         name: "keywords",
-        content:
-          "خرید هودی، خرید شلوار استریت‌ویر، LBB، فروشگاه لباس ایران، خرید کتونی",
+        content: "خرید هودی، خرید شلوار استریت‌ویر، LBB، فروشگاه لباس ایران، خرید کتونی",
       },
       { name: "twitter:card", content: "summary_large_image" },
     ],

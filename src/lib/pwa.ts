@@ -15,10 +15,7 @@ function isRefusedContext(): boolean {
   const hostname = window.location.hostname;
   if (hostname.startsWith("id-preview--") || hostname.startsWith("preview--")) return true;
   if (hostname === "lovableproject.com" || hostname.endsWith(".lovableproject.com")) return true;
-  if (
-    hostname === "lovableproject-dev.com" ||
-    hostname.endsWith(".lovableproject-dev.com")
-  )
+  if (hostname === "lovableproject-dev.com" || hostname.endsWith(".lovableproject-dev.com"))
     return true;
   if (hostname === "beta.lovable.dev" || hostname.endsWith(".beta.lovable.dev")) return true;
   return false;

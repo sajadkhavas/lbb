@@ -30,11 +30,7 @@ export function HeroSplit() {
       const context = gsap.context(() => {
         const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
         timeline
-          .fromTo(
-            ".hero-scanline",
-            { scaleX: 0, opacity: 1 },
-            { scaleX: 1, duration: 0.5 },
-          )
+          .fromTo(".hero-scanline", { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 0.5 })
           .to(".hero-scanline", { opacity: 0, duration: 0.3 }, "-=0.05")
           .from(".hero-wordmark", { yPercent: 110, duration: 0.7 }, "-=0.35")
           .fromTo(
@@ -43,21 +39,9 @@ export function HeroSplit() {
             { clipPath: "inset(0 0 0% 0)", duration: 0.9 },
             "-=0.5",
           )
-          .from(
-            ".hero-headline-line",
-            { yPercent: 105, duration: 0.6, stagger: 0.08 },
-            "-=0.55",
-          )
-          .from(
-            ".hero-meta-item",
-            { y: 10, opacity: 0, duration: 0.4, stagger: 0.06 },
-            "-=0.25",
-          )
-          .from(
-            ".hero-cta",
-            { y: 10, opacity: 0, duration: 0.4, stagger: 0.06 },
-            "-=0.2",
-          );
+          .from(".hero-headline-line", { yPercent: 105, duration: 0.6, stagger: 0.08 }, "-=0.55")
+          .from(".hero-meta-item", { y: 10, opacity: 0, duration: 0.4, stagger: 0.06 }, "-=0.25")
+          .from(".hero-cta", { y: 10, opacity: 0, duration: 0.4, stagger: 0.06 }, "-=0.2");
 
         if (window.innerWidth >= 768) {
           gsap.to(".hero-media-img", {
@@ -111,18 +95,14 @@ export function HeroSplit() {
           </h1>
 
           <p className="hero-meta-item max-w-md text-lede">
-            هودی، شلوار، تیشرت، کتونی و جوراب از اولین دراپ LBB — طراحی‌شده برای
-            خیابان‌های تهران.
+            هودی، شلوار، تیشرت، کتونی و جوراب از اولین دراپ LBB — طراحی‌شده برای خیابان‌های تهران.
           </p>
 
           <div className="flex flex-wrap items-center gap-3">
             <Link to="/shop" className={`hero-cta ${CtaClasses("signal")} rounded-xl`}>
               خرید کالکشن جدید
             </Link>
-            <Link
-              to="/lookbook"
-              className={`hero-cta ${CtaClasses("line")} rounded-xl`}
-            >
+            <Link to="/lookbook" className={`hero-cta ${CtaClasses("line")} rounded-xl`}>
               مشاهده لوک‌بوک
             </Link>
           </div>

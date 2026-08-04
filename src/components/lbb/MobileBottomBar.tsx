@@ -20,8 +20,7 @@ export function MobileBottomBar() {
   const { count, openDrawer } = useCart();
   const { count: wishCount } = useWishlist();
 
-  const itemClass = (active: boolean) =>
-    `${ITEM} ${active ? "text-signal" : "text-metal"}`;
+  const itemClass = (active: boolean) => `${ITEM} ${active ? "text-signal" : "text-metal"}`;
 
   return (
     <nav
