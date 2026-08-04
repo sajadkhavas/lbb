@@ -40,6 +40,13 @@ jobs:
       - name: Production build and route generation gate
         run: npm run build
 
+      - name: Diagnose generated SSR router bundle
+        run: |
+          for file in .output/server/_ssr/router-*.mjs; do
+            echo "===== $file ====="
+            nl -ba "$file" | sed -n '1,80p'
+          done
+
       - name: TypeScript gate
         run: npm run typecheck
 
