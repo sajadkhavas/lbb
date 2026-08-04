@@ -17,8 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Generate ephemeral lockfile
-        run: npm install --package-lock-only --ignore-scripts
+      - name: Generate clean ephemeral lockfile
+        run: |
+          rm -f package-lock.json npm-shrinkwrap.json
+          npm install --package-lock-only --ignore-scripts
       - name: npm ci
         run: npm ci
       - name: Prettier check owned files
