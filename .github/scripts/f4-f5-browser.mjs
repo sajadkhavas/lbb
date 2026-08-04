@@ -21,7 +21,11 @@ const checkPage = async (page, route, width) => {
   page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
   const response = await page.goto(origin + route, { waitUntil: "networkidle" });
   if (!response || response.status() >= 400) {
-    failures.push(`${width}px ${route}: status ${response?.status() ?? "none"}`);
+    const body = response ? (await response.text()).slice(0, 4000) : "no response";
+    failures.push(
+      `${width}px ${route}: status ${response?.status() ?? "none"}\nBODY:\n${body}`,
+    );
+    return;
   }
   await page.reload({ waitUntil: "networkidle" });
   const overflow = await page.evaluate(
@@ -113,14 +117,17 @@ for (const route of ["/product/not-a-real-product", "/definitely-not-found"]) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const response = await page.goto(origin + route, { waitUntil: "networkidle" });
   if (!response || response.status() !== 404) {
-    failures.push(`${route}: expected 404, got ${response?.status() ?? "none"}`);
+    const body = response ? (await response.text()).slice(0, 4000) : "no response";
+    failures.push(
+      `${route}: expected 404, got ${response?.status() ?? "none"}\nBODY:\n${body}`,
+    );
   }
   await page.close();
 }
 
 await browser.close();
 if (failures.length) {
-  console.error(failures.join("\n"));
+  console.error(failures.join("\n\n"));
   process.exit(1);
 }
 console.log("Browser validation passed at 390, 768, 1440 and 1920.");
