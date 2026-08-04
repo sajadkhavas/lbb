@@ -68,12 +68,8 @@ try {
     "LBB Classic Hoodie",
     'dir="rtl"',
   ]);
-  await assertResponse("/sitemap.xml", "application/xml", [
-    `<loc>${productionOrigin}/</loc>`,
-  ]);
-  await assertResponse("/robots.txt", "text/plain", [
-    `Sitemap: ${productionOrigin}/sitemap.xml`,
-  ]);
+  await assertResponse("/sitemap.xml", "application/xml", [`<loc>${productionOrigin}/</loc>`]);
+  await assertResponse("/robots.txt", "text/plain", [`Sitemap: ${productionOrigin}/sitemap.xml`]);
   console.log("Production SSR smoke test passed.");
 } finally {
   server.kill("SIGTERM");
