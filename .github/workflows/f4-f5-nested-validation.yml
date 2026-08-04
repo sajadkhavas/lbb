@@ -106,15 +106,16 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Start preview
+      - name: Start built Nitro server
         shell: bash
         run: |
-          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/lbb-preview.log 2>&1 &
+          HOST=127.0.0.1 PORT=4173 node .output/server/index.mjs > /tmp/lbb-server.log 2>&1 &
+          echo $! > /tmp/lbb-server.pid
           for attempt in {1..60}; do
             if curl --fail --silent http://127.0.0.1:4173/shop > /dev/null; then exit 0; fi
             sleep 1
           done
-          cat /tmp/lbb-preview.log
+          cat /tmp/lbb-server.log
           exit 1
       - name: Browser validation
         run: node .github/scripts/f4-f5-browser.mjs
