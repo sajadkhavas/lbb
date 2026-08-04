@@ -1,10 +1,9 @@
 name: Reviewed F4 F5 validation
 
 on:
-  push:
+  pull_request:
     branches:
-      - integration/f4-f5-reviewed
-  workflow_dispatch:
+      - validation/f4-f5-reviewed
 
 permissions:
   contents: read
