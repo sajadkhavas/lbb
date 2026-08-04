@@ -16,7 +16,6 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
-import { EMPTY_FILTERS } from "@/lib/product-filter";
 
 const TITLE = "کالکشن‌های LBB | انتخاب‌های ادیتوریال از محصولات موجود";
 const DESC =
@@ -66,7 +65,7 @@ function CollectionsIndexPage() {
               و سایز هر قطعه را در صفحه همان محصول بررسی کنید.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/shop" search={EMPTY_FILTERS} className={CtaClasses("signal")}>
+              <Link to="/shop" search={{}} className={CtaClasses("signal")}>
                 مشاهده همه محصولات
               </Link>
               <Link to="/lookbook" className={CtaClasses("line")}>
