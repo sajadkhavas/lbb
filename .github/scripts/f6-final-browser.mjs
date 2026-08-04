@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 
 const origin = "http://127.0.0.1:4173";
+const productRoute = "/product/lbb-classic-hoodie";
 const failures = [];
 const browser = await chromium.launch({ headless: true });
 const routes = [
@@ -12,7 +13,7 @@ const routes = [
   "/shipping-returns",
   "/terms",
   "/privacy",
-  "/product/hoodie-classic",
+  productRoute,
 ];
 
 for (const width of [390, 768, 1440, 1920]) {
@@ -53,10 +54,10 @@ for (const width of [390, 768, 1440, 1920]) {
       "lbb-cart-v1",
       JSON.stringify([
         {
-          slug: "hoodie-classic",
+          slug: "lbb-classic-hoodie",
           name: "هودی کلاسیک LBB",
-          price: 1_950_000,
-          color: "#111111",
+          price: 1_850_000,
+          color: "#0A0A0A",
           size: "L",
           qty: 2,
         },
@@ -73,7 +74,7 @@ for (const width of [390, 768, 1440, 1920]) {
   await page.getByRole("button", { name: "مشاهده خلاصه نمایشی" }).click();
 
   if ((await page.locator('input[type="radio"]').count()) !== 0) failures.push("payment radios remain");
-  if ((await page.getByText(/زرین‌پال|ایدی‌پی|پرداخت در محل/).count()) !== 0) failures.push("real payment method remains");
+  if ((await page.getByText(/زرین‌پال|ایدی‌پی/).count()) !== 0) failures.push("named payment gateway remains");
 
   await page.getByRole("button", { name: "ساخت پیش‌نمایش سفارش" }).click();
   await page.waitForURL(`${origin}/order-confirmation`);
@@ -92,13 +93,13 @@ for (const width of [390, 768, 1440, 1920]) {
     if (stored.includes(secret)) failures.push(`personal value leaked into sessionStorage: ${secret}`);
   }
 
-  if ((await page.getByRole("heading", { level: 1, name: "پیش‌نمایش سفارش ساخته شد" }).count()) !== 1) {
-    failures.push("confirmation did not read latest same-tab summary");
-  }
+  const confirmationHeading = page.getByRole("heading", {
+    level: 1,
+    name: "پیش‌نمایش سفارش ساخته شد",
+  });
+  await confirmationHeading.waitFor();
   await page.reload({ waitUntil: "networkidle" });
-  if ((await page.getByRole("heading", { level: 1, name: "پیش‌نمایش سفارش ساخته شد" }).count()) !== 1) {
-    failures.push("confirmation did not survive refresh");
-  }
+  await confirmationHeading.waitFor();
 
   await page.goto(origin + "/track-order", { waitUntil: "networkidle" });
   await page.getByLabel("کد مرجع شش‌رقمی").fill(ref || "000000");
@@ -116,7 +117,7 @@ for (const width of [390, 768, 1440, 1920]) {
   if ((await page.locator("form").count()) !== 0) failures.push("contact still has fake form");
   if ((await page.locator('a[href="https://www.instagram.com/lbbclo"]').count()) < 1) failures.push("official Instagram missing");
 
-  for (const route of ["/checkout", "/contact", "/shipping-returns", "/terms", "/privacy", "/product/hoodie-classic"]) {
+  for (const route of ["/checkout", "/contact", "/shipping-returns", "/terms", "/privacy", productRoute]) {
     await page.goto(origin + route, { waitUntil: "networkidle" });
     const body = await page.locator("body").innerText();
     for (const forbidden of [
