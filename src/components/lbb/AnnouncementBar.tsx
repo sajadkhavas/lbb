@@ -52,7 +52,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
       className="fixed inset-x-0 top-0 z-[110] flex items-center bg-signal text-obsidian"
       style={{ height: ANNOUNCEMENT_HEIGHT }}
     >
-      <span aria-hidden="true" className="tech shrink-0 ps-3 opacity-70">
+      <span aria-hidden="true" className="tech shrink-0 ps-3">
         LBB
       </span>
       <div className="relative min-w-0 flex-1 overflow-hidden text-center">
@@ -83,7 +83,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
         type="button"
         aria-label="بستن نوار اطلاعیه"
         onClick={dismiss}
-        className="grid h-7 w-9 shrink-0 place-items-center text-bone/80 transition-colors hover:text-bone"
+        className="grid h-7 w-9 shrink-0 place-items-center text-obsidian/80 transition-colors hover:text-obsidian"
       >
         <X size={13} aria-hidden="true" />
       </button>
