@@ -96,7 +96,7 @@ function Checkout() {
       return;
     }
     clear();
-    window.location.assign(`/order-confirmation?ref=${encodeURIComponent(ref)}`);
+    window.location.assign("/order-confirmation");
   };
 
   return (
