@@ -30,11 +30,10 @@ const BRAND: Item[] = [
 export function Footer(_props: { theme?: "dark" | "light" } = {}) {
   return (
     <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
-      {/* oversized wordmark band */}
       <div className="lbb-shell overflow-hidden pt-14 md:pt-20">
         <p
           aria-hidden="true"
-          className="font-display font-black leading-[0.8] tracking-[-0.06em] text-carbon-2 select-none"
+          className="font-display font-black leading-[0.8] tracking-[-0.06em] text-metal select-none"
           style={{ fontSize: "clamp(4.5rem, 16vw, 15rem)" }}
         >
           LBB
