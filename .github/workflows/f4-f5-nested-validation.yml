@@ -11,7 +11,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,7 +28,7 @@ jobs:
         run: npm ci
       - name: Apply optional search typing migration
         run: node .github/scripts/f4-f5-fix-search-types.mjs
-      - name: Format owned files
+      - name: Format owned files and temporary browser script
         run: >-
           npx prettier --write
           'src/routes/shop.tsx'
@@ -45,6 +45,7 @@ jobs:
           'src/lib/quickview.tsx'
           'src/lib/recent-searches.ts'
           'src/lib/recently-viewed.ts'
+          '.github/scripts/f4-f5-browser.mjs'
       - name: Commit migration and formatting to temporary validation base
         shell: bash
         run: |
@@ -80,7 +81,26 @@ jobs:
         run: npm install --no-save --package-lock=false @typescript/native-preview
       - name: Typecheck
         run: npm run typecheck
-      - name: Lint
+      - name: Lint owned F4/F5 files
+        run: >-
+          npx eslint
+          'src/routes/shop.tsx'
+          'src/routes/$category.tsx'
+          'src/routes/search.tsx'
+          'src/routes/product.$slug.tsx'
+          'src/components/lbb/ProductCard.tsx'
+          'src/components/lbb/ProductFilters.tsx'
+          'src/components/lbb/ProductGridControls.tsx'
+          'src/components/lbb/ProductQuickView.tsx'
+          'src/components/lbb/product/Gallery.tsx'
+          'src/components/lbb/product/StickyBuyBar.tsx'
+          'src/lib/product-filter.ts'
+          'src/lib/quickview.tsx'
+          'src/lib/recent-searches.ts'
+          'src/lib/recently-viewed.ts'
+      - name: Full repository lint gate
+        id: full_lint
+        continue-on-error: true
         run: npm run lint
       - name: Build
         run: npm run build
@@ -100,3 +120,8 @@ jobs:
           exit 1
       - name: Browser validation
         run: node .github/scripts/f4-f5-browser.mjs
+      - name: Report full lint blocker
+        if: always() && steps.full_lint.outcome != 'success'
+        run: |
+          echo 'Full repository lint remains blocked by baseline files outside F4/F5 ownership.'
+          exit 1
