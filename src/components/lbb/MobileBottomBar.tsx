@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, LayoutGrid, Search, ShoppingBag, Heart } from "lucide-react";
+import { Heart, Home, LayoutGrid, Search, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 
@@ -9,18 +9,19 @@ const ITEM =
 function Badge({ n }: { n: number }) {
   if (n <= 0) return null;
   return (
-    <span className="num absolute -top-1.5 -left-2 flex h-4 min-w-4 items-center justify-center bg-signal px-1 text-[9px] font-bold text-bone">
+    <span className="num absolute -left-2 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-signal px-1 text-[9px] font-bold text-bone">
       {n.toLocaleString("fa-IR")}
     </span>
   );
 }
 
 export function MobileBottomBar() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { count, openDrawer } = useCart();
   const { count: wishCount } = useWishlist();
 
-  const cls = (active: boolean) => `${ITEM} ${active ? "text-signal" : "text-metal"}`;
+  const itemClass = (active: boolean) =>
+    `${ITEM} ${active ? "text-signal" : "text-metal"}`;
 
   return (
     <nav
@@ -34,7 +35,7 @@ export function MobileBottomBar() {
     >
       <Link
         to="/"
-        className={cls(pathname === "/")}
+        className={itemClass(pathname === "/")}
         aria-current={pathname === "/" ? "page" : undefined}
       >
         <Home size={20} strokeWidth={1.5} aria-hidden="true" />
@@ -42,7 +43,7 @@ export function MobileBottomBar() {
       </Link>
       <Link
         to="/shop"
-        className={cls(pathname === "/shop")}
+        className={itemClass(pathname === "/shop")}
         aria-current={pathname === "/shop" ? "page" : undefined}
       >
         <LayoutGrid size={20} strokeWidth={1.5} aria-hidden="true" />
@@ -50,7 +51,7 @@ export function MobileBottomBar() {
       </Link>
       <Link
         to="/search"
-        className={cls(pathname === "/search")}
+        className={itemClass(pathname === "/search")}
         aria-current={pathname === "/search" ? "page" : undefined}
       >
         <Search size={20} strokeWidth={1.5} aria-hidden="true" />
@@ -58,7 +59,7 @@ export function MobileBottomBar() {
       </Link>
       <Link
         to="/wishlist"
-        className={cls(pathname === "/wishlist")}
+        className={itemClass(pathname === "/wishlist")}
         aria-current={pathname === "/wishlist" ? "page" : undefined}
       >
         <span className="relative">
@@ -67,9 +68,14 @@ export function MobileBottomBar() {
         </span>
         <span className="text-[10px]">علاقه‌مندی</span>
       </Link>
-      <button type="button" onClick={openDrawer} className={cls(false)}>
-        <span className="relative">
-          <ShoppingBag size={20} strokeWidth={1.5} aria-hidden="true" />
+      <button
+        type="button"
+        onClick={openDrawer}
+        aria-label={`باز کردن سبد خرید (${count.toLocaleString("fa-IR")})`}
+        className={itemClass(false)}
+      >
+        <span className="relative" aria-hidden="true">
+          <ShoppingBag size={20} strokeWidth={1.5} />
           <Badge n={count} />
         </span>
         <span className="text-[10px]">سبد</span>
