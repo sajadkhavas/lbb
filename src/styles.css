@@ -5,85 +5,167 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =========================================================================
-   LBB — Persian neo-industrial design tokens
-   Single source of truth. Never hardcode hex values in components.
+   LBB Design System 2.0 — Tehran After Dark / Editorial Utility
+
+   Contract:
+   1. Primitive values live here.
+   2. Components consume semantic aliases, never raw values.
+   3. Existing aliases remain until every F12-F22 surface has migrated.
    ========================================================================= */
 
 :root {
-  /* --- Core palette --- */
-  --lbb-obsidian: #050505; /* page ground */
-  --lbb-carbon: #0c0c0d; /* raised panel */
-  --lbb-carbon-2: #131315; /* second raise */
-  --lbb-bone: #f2efe8; /* primary text / inverted surface */
-  --lbb-signal: #ff4d43; /* signal only — max ~10-12% of a viewport */
-  --lbb-metal: #9b9b9b; /* secondary text */
-  --lbb-mute: #858585; /* tertiary text / disabled */
-  --lbb-hairline: rgba(255, 255, 255, 0.14);
-  --lbb-hairline-soft: rgba(255, 255, 255, 0.07);
-  --lbb-hairline-ink: rgba(5, 5, 5, 0.14);
+  color-scheme: dark;
 
-  /* --- Legacy aliases (kept so existing var() usages retheme cleanly) --- */
-  --lbb-red: var(--lbb-signal);
-  --lbb-black: var(--lbb-obsidian);
-  --lbb-white: var(--lbb-bone);
-  --lbb-glass: rgba(5, 5, 5, 0.72);
+  /* --- Primitive palette --- */
+  --lbb-ink-1000: #020202;
+  --lbb-obsidian: #050505;
+  --lbb-carbon: #0c0c0d;
+  --lbb-carbon-2: #141416;
+  --lbb-graphite: #1c1c1f;
+  --lbb-steel: #29292d;
+  --lbb-bone: #f4f0e8;
+  --lbb-paper: #ddd7cb;
+  --lbb-metal: #b0ada6;
+  --lbb-mute: #8d8a84;
+  --lbb-signal: #ff5148;
+  --lbb-signal-hover: #ff6e66;
+  --lbb-signal-deep: #cf2f2a;
+  --lbb-green: #62d994;
+  --lbb-amber: #f2b84d;
+  --lbb-blue: #82adff;
 
-  /* --- shadcn semantic mapping (dark-first) --- */
-  --background: var(--lbb-obsidian);
-  --foreground: var(--lbb-bone);
-  --card: var(--lbb-carbon);
-  --card-foreground: var(--lbb-bone);
-  --popover: var(--lbb-carbon);
-  --popover-foreground: var(--lbb-bone);
-  --primary: var(--lbb-signal);
-  --primary-foreground: var(--lbb-obsidian);
-  --secondary: var(--lbb-carbon-2);
-  --secondary-foreground: var(--lbb-bone);
-  --accent: var(--lbb-carbon-2);
-  --accent-foreground: var(--lbb-bone);
-  --destructive: var(--lbb-signal);
-  --destructive-foreground: var(--lbb-obsidian);
-  --border: var(--lbb-hairline);
-  --input: var(--lbb-hairline);
-  --ring: var(--lbb-signal);
-  --muted: var(--lbb-carbon-2);
-  --muted-foreground: var(--lbb-metal);
+  /* --- Semantic surfaces --- */
+  --lbb-surface-canvas: var(--lbb-obsidian);
+  --lbb-surface-subtle: var(--lbb-carbon);
+  --lbb-surface-raised: var(--lbb-carbon-2);
+  --lbb-surface-elevated: var(--lbb-graphite);
+  --lbb-surface-strong: var(--lbb-steel);
+  --lbb-surface-inverse: var(--lbb-bone);
+  --lbb-surface-overlay: rgb(2 2 2 / 78%);
+  --lbb-surface-glass: rgb(5 5 5 / 84%);
 
-  /* --- Motion --- */
-  --ease-lbb: cubic-bezier(0.16, 1, 0.3, 1);
-  --dur-micro: 220ms;
-  --dur-reveal: 640ms;
-  --transition: var(--dur-micro) var(--ease-lbb);
+  /* --- Semantic content and actions --- */
+  --lbb-text-primary: var(--lbb-bone);
+  --lbb-text-secondary: var(--lbb-metal);
+  --lbb-text-tertiary: var(--lbb-mute);
+  --lbb-text-inverse: var(--lbb-obsidian);
+  --lbb-action-primary: var(--lbb-signal);
+  --lbb-action-hover: var(--lbb-signal-hover);
+  --lbb-action-pressed: var(--lbb-signal-deep);
+  --lbb-focus: var(--lbb-signal);
+  --lbb-status-success: var(--lbb-green);
+  --lbb-status-warning: var(--lbb-amber);
+  --lbb-status-danger: var(--lbb-signal-hover);
+  --lbb-status-info: var(--lbb-blue);
 
-  /* --- Layout --- */
-  --lbb-max: 1600px;
-  --lbb-gutter: 1rem;
+  /* --- Borders, shadows and image treatment --- */
+  --lbb-hairline-soft: rgb(255 255 255 / 7%);
+  --lbb-hairline: rgb(255 255 255 / 14%);
+  --lbb-hairline-strong: rgb(255 255 255 / 24%);
+  --lbb-hairline-ink: rgb(5 5 5 / 16%);
+  --lbb-shadow-raised: 0 18px 60px rgb(0 0 0 / 28%);
+  --lbb-shadow-overlay: 0 28px 100px rgb(0 0 0 / 52%);
+  --lbb-image-grade: contrast(1.03) saturate(0.94);
+
+  /* --- Spatial scale --- */
+  --lbb-space-1: 0.25rem;
+  --lbb-space-2: 0.5rem;
+  --lbb-space-3: 0.75rem;
+  --lbb-space-4: 1rem;
+  --lbb-space-5: 1.25rem;
+  --lbb-space-6: 1.5rem;
+  --lbb-space-8: 2rem;
+  --lbb-space-10: 2.5rem;
+  --lbb-space-12: 3rem;
+  --lbb-space-16: 4rem;
+  --lbb-space-20: 5rem;
+  --lbb-space-24: 6rem;
+  --lbb-section-sm: clamp(3.5rem, 6vw, 6rem);
+  --lbb-section-md: clamp(4.5rem, 8vw, 8.5rem);
+  --lbb-section-lg: clamp(6rem, 11vw, 12rem);
+
+  /* --- Layout and readable measures --- */
+  --lbb-max: 1680px;
+  --lbb-reading: 72ch;
+  --lbb-reading-narrow: 54ch;
+  --lbb-gutter: clamp(1rem, 4vw, 4rem);
+  --lbb-grid-gap: clamp(0.75rem, 1.8vw, 2rem);
   --lbb-nav-h: 60px;
+
+  /* --- Motion language --- */
+  --ease-lbb: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-lbb-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-lbb-exit: cubic-bezier(0.4, 0, 1, 1);
+  --dur-instant: 100ms;
+  --dur-micro: 180ms;
+  --dur-state: 280ms;
+  --dur-enter: 480ms;
+  --dur-reveal: 700ms;
+  --transition: var(--dur-micro) var(--ease-lbb-standard);
+
+  /* --- Layer contract --- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 30;
+  --z-nav: 50;
+  --z-overlay: 60;
+  --z-modal: 70;
+  --z-toast: 80;
+
+  /* --- Legacy aliases during F11-F22 migration --- */
+  --lbb-red: var(--lbb-action-primary);
+  --lbb-black: var(--lbb-surface-canvas);
+  --lbb-white: var(--lbb-text-primary);
+  --lbb-glass: var(--lbb-surface-glass);
+
+  /* --- shadcn semantic mapping --- */
+  --background: var(--lbb-surface-canvas);
+  --foreground: var(--lbb-text-primary);
+  --card: var(--lbb-surface-subtle);
+  --card-foreground: var(--lbb-text-primary);
+  --popover: var(--lbb-surface-elevated);
+  --popover-foreground: var(--lbb-text-primary);
+  --primary: var(--lbb-action-primary);
+  --primary-foreground: var(--lbb-text-inverse);
+  --secondary: var(--lbb-surface-raised);
+  --secondary-foreground: var(--lbb-text-primary);
+  --accent: var(--lbb-surface-raised);
+  --accent-foreground: var(--lbb-text-primary);
+  --destructive: var(--lbb-status-danger);
+  --destructive-foreground: var(--lbb-text-inverse);
+  --border: var(--lbb-hairline);
+  --input: var(--lbb-hairline-strong);
+  --ring: var(--lbb-focus);
+  --muted: var(--lbb-surface-raised);
+  --muted-foreground: var(--lbb-text-secondary);
 }
 
 @media (min-width: 768px) {
   :root {
-    --lbb-gutter: 2rem;
     --lbb-nav-h: 68px;
-  }
-}
-@media (min-width: 1280px) {
-  :root {
-    --lbb-gutter: 3rem;
   }
 }
 
 @theme inline {
-  /* Palette utilities: bg-obsidian, text-bone, border-hairline, bg-signal … */
-  --color-obsidian: var(--lbb-obsidian);
-  --color-carbon: var(--lbb-carbon);
-  --color-carbon-2: var(--lbb-carbon-2);
-  --color-bone: var(--lbb-bone);
-  --color-signal: var(--lbb-signal);
-  --color-metal: var(--lbb-metal);
-  --color-mute: var(--lbb-mute);
+  /* Utility-facing color API */
+  --color-obsidian: var(--lbb-surface-canvas);
+  --color-carbon: var(--lbb-surface-subtle);
+  --color-carbon-2: var(--lbb-surface-raised);
+  --color-graphite: var(--lbb-surface-elevated);
+  --color-steel: var(--lbb-surface-strong);
+  --color-bone: var(--lbb-text-primary);
+  --color-paper: var(--lbb-paper);
+  --color-signal: var(--lbb-action-primary);
+  --color-signal-hover: var(--lbb-action-hover);
+  --color-metal: var(--lbb-text-secondary);
+  --color-mute: var(--lbb-text-tertiary);
+  --color-success: var(--lbb-status-success);
+  --color-warning: var(--lbb-status-warning);
+  --color-danger: var(--lbb-status-danger);
+  --color-info: var(--lbb-status-info);
   --color-hairline: var(--lbb-hairline);
   --color-hairline-soft: var(--lbb-hairline-soft);
+  --color-hairline-strong: var(--lbb-hairline-strong);
   --color-hairline-ink: var(--lbb-hairline-ink);
 
   --color-background: var(--background);
@@ -106,55 +188,61 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
-  /* Legacy names still referenced in a few places */
-  --color-red: var(--lbb-signal);
-  --color-black: var(--lbb-obsidian);
-  --color-white: var(--lbb-bone);
+  --color-red: var(--lbb-action-primary);
+  --color-black: var(--lbb-surface-canvas);
+  --color-white: var(--lbb-text-primary);
 
   --font-display: "Estedad Variable", "Vazirmatn", sans-serif;
   --font-body: "Estedad Variable", "Vazirmatn", sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
 
-  /* Soft, consistent rounding across the whole UI. */
-  --radius: 0.75rem;
-  --radius-xs: 0.375rem;
-  --radius-sm: 0.625rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1.125rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
-  --radius-3xl: 2.5rem;
+  /* Raw precision: controls are crisp, media can be softer. */
+  --radius: 0.5rem;
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-pill: 999px;
+
+  --shadow-raised: var(--lbb-shadow-raised);
+  --shadow-overlay: var(--lbb-shadow-overlay);
+  --ease-lbb: var(--ease-lbb);
 }
 
 /* =========================================================================
-   Base / resets
+   Base and accessibility contract
    ========================================================================= */
 * {
   box-sizing: border-box;
 }
 html {
   scroll-behavior: smooth;
-  background: var(--lbb-obsidian);
-  scrollbar-color: var(--lbb-signal) var(--lbb-carbon);
+  background: var(--lbb-surface-canvas);
+  scrollbar-color: var(--lbb-action-primary) var(--lbb-surface-subtle);
   scrollbar-width: thin;
+  text-size-adjust: 100%;
 }
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--lbb-obsidian);
-  color: var(--lbb-bone);
+  overflow-x: clip;
+  background: var(--lbb-surface-canvas);
+  color: var(--lbb-text-primary);
   font-family: "Estedad Variable", "Vazirmatn", sans-serif;
   font-synthesis: none;
+  font-feature-settings: "kern" 1, "liga" 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  overflow-x: clip;
 }
 ::selection {
-  background: var(--lbb-signal);
-  color: var(--lbb-obsidian);
+  background: var(--lbb-action-primary);
+  color: var(--lbb-text-inverse);
 }
 :focus-visible {
-  outline: 2px solid var(--lbb-signal);
+  outline: 2px solid var(--lbb-focus);
   outline-offset: 3px;
 }
 a,
@@ -168,31 +256,42 @@ select,
 textarea {
   font: inherit;
 }
-img {
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+img,
+picture,
+video,
+canvas,
+svg {
   display: block;
   max-width: 100%;
 }
+img {
+  height: auto;
+}
 
 /* =========================================================================
-   Native scrollbar
+   Native chrome
    ========================================================================= */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--lbb-carbon);
+  background: var(--lbb-surface-subtle);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--lbb-mute);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
+  background: var(--lbb-text-tertiary);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--lbb-signal);
+  background: var(--lbb-action-primary);
 }
 
 /* =========================================================================
-   Global layout primitives
+   Layout primitives
    ========================================================================= */
 .lbb-shell {
   width: 100%;
@@ -200,14 +299,37 @@ img {
   margin-inline: auto;
   padding-inline: var(--lbb-gutter);
 }
+.lbb-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--lbb-grid-gap);
+}
+.lbb-reading {
+  width: min(100%, var(--lbb-reading));
+}
+.lbb-reading-narrow {
+  width: min(100%, var(--lbb-reading-narrow));
+}
 .lbb-section {
-  padding-block: clamp(4.5rem, 8vw, 9rem);
+  padding-block: var(--lbb-section-md);
 }
 .lbb-rhythm {
-  padding-block: clamp(3.5rem, 6vw, 7rem);
+  padding-block: var(--lbb-section-sm);
+}
+.lbb-section-major {
+  padding-block: var(--lbb-section-lg);
 }
 .lbb-nav-offset {
   padding-top: var(--lbb-nav-h);
+}
+.lbb-stack > * + * {
+  margin-block-start: var(--lbb-space-6);
+}
+.lbb-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lbb-space-3);
 }
 .hairline-t {
   border-top: 1px solid var(--lbb-hairline);
@@ -219,11 +341,40 @@ img {
   background-image:
     linear-gradient(to right, var(--lbb-hairline-soft) 1px, transparent 1px),
     linear-gradient(to bottom, var(--lbb-hairline-soft) 1px, transparent 1px);
-  background-size: 48px 48px;
+  background-size: clamp(36px, 4vw, 56px) clamp(36px, 4vw, 56px);
+}
+.lbb-grain {
+  position: relative;
+  isolation: isolate;
+}
+.lbb-grain::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.14;
+  background-image: repeating-radial-gradient(
+    circle at 18% 28%,
+    rgb(255 255 255 / 9%) 0 0.5px,
+    transparent 0.5px 4px
+  );
+  mix-blend-mode: soft-light;
+}
+
+@media (min-width: 768px) {
+  .lbb-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1200px) {
+  .lbb-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
 }
 
 /* =========================================================================
-   Type system — five intentional tiers
+   Type system
    ========================================================================= */
 .font-display {
   font-family: "Estedad Variable", "Vazirmatn", sans-serif;
@@ -236,69 +387,95 @@ img {
   font-family: "JetBrains Mono Variable", ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
 }
-
-.text-hero {
+.text-hero,
+.text-display-1,
+.text-display-2,
+.text-display-3,
+.text-title {
   font-family: "Estedad Variable", "Vazirmatn", sans-serif;
-  font-size: clamp(3.4rem, 8.4vw, 10.5rem);
+  text-wrap: balance;
+}
+.text-hero {
+  font-size: clamp(3.25rem, 8.2vw, 10.5rem);
   font-weight: 900;
   letter-spacing: -0.055em;
-  line-height: 0.82;
+  line-height: 0.86;
 }
 .text-display-1 {
-  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
-  font-size: clamp(2.75rem, 6vw, 7rem);
+  font-size: clamp(2.75rem, 6vw, 7.25rem);
   font-weight: 900;
   letter-spacing: -0.045em;
-  line-height: 0.9;
+  line-height: 0.92;
 }
 .text-display-2 {
-  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
-  font-size: clamp(2.2rem, 4.2vw, 5rem);
+  font-size: clamp(2.15rem, 4.2vw, 5rem);
   font-weight: 850;
   letter-spacing: -0.035em;
-  line-height: 0.96;
+  line-height: 0.98;
 }
 .text-display-3 {
-  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
   font-size: clamp(1.55rem, 2.8vw, 3.15rem);
   font-weight: 800;
   letter-spacing: -0.025em;
-  line-height: 1.05;
+  line-height: 1.08;
+}
+.text-title {
+  font-size: clamp(1.2rem, 1.7vw, 1.65rem);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
 }
 .text-lede {
+  max-width: var(--lbb-reading-narrow);
+  color: var(--lbb-text-secondary);
   font-size: clamp(1rem, 1.4vw, 1.25rem);
-  color: var(--lbb-metal);
   line-height: 1.85;
+  text-wrap: pretty;
+}
+.body-copy {
+  color: var(--lbb-text-secondary);
+  font-size: 0.975rem;
+  line-height: 1.95;
+  text-wrap: pretty;
 }
 .tech {
   font-family: "JetBrains Mono Variable", ui-monospace, monospace;
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 650;
+  letter-spacing: 0.075em;
   line-height: 1.5;
   text-transform: uppercase;
-}
-.body-copy {
-  color: var(--lbb-metal);
-  font-size: 0.95rem;
-  line-height: 1.9;
 }
 
 @media (max-width: 640px) {
   .text-hero {
-    line-height: 0.9;
+    line-height: 0.92;
   }
   .tech {
-    letter-spacing: 0.055em;
+    letter-spacing: 0.05em;
   }
 }
 
 /* =========================================================================
-   Interaction utilities
+   Surface and interaction utilities
    ========================================================================= */
+.lbb-surface {
+  border: 1px solid var(--lbb-hairline);
+  background: var(--lbb-surface-subtle);
+}
+.lbb-surface-raised {
+  border: 1px solid var(--lbb-hairline);
+  background: var(--lbb-surface-raised);
+  box-shadow: var(--lbb-shadow-raised);
+}
+.lbb-surface-elevated {
+  border: 1px solid var(--lbb-hairline-strong);
+  background: var(--lbb-surface-elevated);
+  box-shadow: var(--lbb-shadow-overlay);
+}
 .tap-target {
-  min-height: 44px;
   min-width: 44px;
+  min-height: 44px;
 }
 .interactive-line {
   position: relative;
@@ -309,7 +486,7 @@ img {
   bottom: -3px;
   height: 1px;
   content: "";
-  background: var(--lbb-signal);
+  background: var(--lbb-action-primary);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform var(--transition);
@@ -318,18 +495,17 @@ img {
 .interactive-line:focus-visible::after {
   transform: scaleX(1);
 }
-
 .frame-zoom {
-  transition: transform 700ms var(--ease-lbb);
+  transition: transform var(--dur-reveal) var(--ease-lbb);
 }
 @media (hover: hover) {
   .group:hover .frame-zoom {
-    transform: scale(1.035);
+    transform: scale(1.025);
   }
 }
 
 /* =========================================================================
-   Product card grid
+   Product and loading contracts
    ========================================================================= */
 .product-card {
   container-type: inline-size;
@@ -337,21 +513,39 @@ img {
 .product-card__media {
   overflow: hidden;
   border-radius: var(--radius-lg);
-  background: var(--lbb-carbon);
+  background: var(--lbb-surface-subtle);
 }
 .product-card__media img {
+  filter: var(--lbb-image-grade);
   transition:
-    opacity 420ms var(--ease-lbb),
-    transform 700ms var(--ease-lbb);
+    opacity var(--dur-state) var(--ease-lbb-standard),
+    transform var(--dur-reveal) var(--ease-lbb);
 }
 @media (hover: hover) {
   .product-card:hover .product-card__media img {
     transform: scale(1.025);
   }
 }
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-shimmer::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 7%) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 1.6s var(--ease-lbb-standard) infinite;
+}
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
 
 /* =========================================================================
-   Marquee
+   Motion helpers
    ========================================================================= */
 @keyframes marquee-rtl {
   from {
@@ -364,13 +558,9 @@ img {
 .marquee-track {
   animation: marquee-rtl 28s linear infinite;
 }
-
-/* =========================================================================
-   Reveal helpers
-   ========================================================================= */
 [data-reveal] {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translateY(24px);
 }
 [data-reveal].is-visible {
   opacity: 1;
@@ -381,7 +571,7 @@ img {
 }
 
 /* =========================================================================
-   Custom cursor (desktop fine-pointer only)
+   Custom cursor and motion safety
    ========================================================================= */
 @media (hover: hover) and (pointer: fine) {
   .lbb-custom-cursor,
@@ -391,10 +581,6 @@ img {
     cursor: none !important;
   }
 }
-
-/* =========================================================================
-   Motion safety
-   ========================================================================= */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -408,13 +594,14 @@ img {
     opacity: 1 !important;
     transform: none !important;
   }
-  .marquee-track {
+  .marquee-track,
+  .skeleton-shimmer::after {
     animation: none !important;
   }
 }
 
 /* =========================================================================
-   Safe-area / mobile chrome
+   Safe-area and mobile chrome
    ========================================================================= */
 .pb-bottombar {
   padding-bottom: calc(74px + env(safe-area-inset-bottom));
