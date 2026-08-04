@@ -15,9 +15,9 @@
   --lbb-carbon: #0c0c0d; /* raised panel */
   --lbb-carbon-2: #131315; /* second raise */
   --lbb-bone: #f2efe8; /* primary text / inverted surface */
-  --lbb-signal: #e6291e; /* signal only — max ~10-12% of a viewport */
+  --lbb-signal: #ff4d43; /* signal only — max ~10-12% of a viewport */
   --lbb-metal: #9b9b9b; /* secondary text */
-  --lbb-mute: #6f6f6f; /* tertiary text / disabled */
+  --lbb-mute: #858585; /* tertiary text / disabled */
   --lbb-hairline: rgba(255, 255, 255, 0.14);
   --lbb-hairline-soft: rgba(255, 255, 255, 0.07);
   --lbb-hairline-ink: rgba(5, 5, 5, 0.14);
@@ -36,13 +36,13 @@
   --popover: var(--lbb-carbon);
   --popover-foreground: var(--lbb-bone);
   --primary: var(--lbb-signal);
-  --primary-foreground: var(--lbb-bone);
+  --primary-foreground: var(--lbb-obsidian);
   --secondary: var(--lbb-carbon-2);
   --secondary-foreground: var(--lbb-bone);
   --accent: var(--lbb-carbon-2);
   --accent-foreground: var(--lbb-bone);
   --destructive: var(--lbb-signal);
-  --destructive-foreground: var(--lbb-bone);
+  --destructive-foreground: var(--lbb-obsidian);
   --border: var(--lbb-hairline);
   --input: var(--lbb-hairline);
   --ring: var(--lbb-signal);
@@ -111,373 +111,316 @@
   --color-black: var(--lbb-obsidian);
   --color-white: var(--lbb-bone);
 
-  --font-display: "Estedad", "Vazirmatn", sans-serif;
-  --font-body: "Estedad", "Vazirmatn", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Estedad Variable", "Vazirmatn", sans-serif;
+  --font-body: "Estedad Variable", "Vazirmatn", sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
 
   /* Soft, consistent rounding across the whole UI. */
   --radius: 0.75rem;
   --radius-xs: 0.375rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
-  --radius-3xl: 1.5rem;
-  --radius-4xl: 2rem;
-
-
-  --tracking-tightest: -0.05em;
-  --tracking-tighter: -0.03em;
-
-  --ease-lbb: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@layer base {
-  html {
-    background-color: var(--lbb-obsidian);
-    color-scheme: dark;
-    scrollbar-color: var(--lbb-mute) var(--lbb-obsidian);
-  }
-  body {
-    background-color: var(--lbb-obsidian);
-    color: var(--lbb-bone);
-    font-family: var(--font-body);
-    font-feature-settings: "ss02";
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-  /* Inverted (bone) surfaces opt in explicitly */
-  body[data-theme="light"] {
-    background-color: var(--lbb-bone);
-    color: var(--lbb-obsidian);
-  }
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-display);
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    line-height: 1.25;
-    text-wrap: balance;
-  }
-  p {
-    text-wrap: pretty;
-  }
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-  ::selection {
-    background: var(--lbb-signal);
-    color: var(--lbb-bone);
-  }
-  :focus-visible {
-    outline: 2px solid var(--lbb-signal);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
-  }
-
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--lbb-obsidian);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #2a2a2c;
-    border: 3px solid var(--lbb-obsidian);
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--lbb-mute);
-  }
-  input,
-  textarea,
-  select,
-  button {
-    font-family: inherit;
-  }
-  img {
-    max-width: 100%;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    html.lbb-custom-cursor,
-    html.lbb-custom-cursor * {
-      cursor: none !important;
-    }
-  }
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
 }
 
 /* =========================================================================
-   Typography scale — fluid, editorial, controlled on mobile
+   Base / resets
    ========================================================================= */
-@utility text-hero {
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 0.94;
-  font-size: clamp(2.5rem, 1.6rem + 6.2vw, 8rem);
+* {
+  box-sizing: border-box;
 }
-@utility text-display-1 {
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 0.96;
-  font-size: clamp(2rem, 1.4rem + 3.6vw, 5rem);
+html {
+  scroll-behavior: smooth;
+  background: var(--lbb-obsidian);
+  scrollbar-color: var(--lbb-signal) var(--lbb-carbon);
+  scrollbar-width: thin;
 }
-@utility text-display-2 {
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1;
-  font-size: clamp(1.625rem, 1.2rem + 2.2vw, 3.25rem);
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--lbb-obsidian);
+  color: var(--lbb-bone);
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
-@utility text-display-3 {
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.08;
-  font-size: clamp(1.25rem, 1.05rem + 1.1vw, 2rem);
+::selection {
+  background: var(--lbb-signal);
+  color: var(--lbb-obsidian);
 }
-@utility text-lede {
-  font-size: clamp(0.9375rem, 0.88rem + 0.35vw, 1.125rem);
-  line-height: 1.85;
-  color: var(--lbb-metal);
+:focus-visible {
+  outline: 2px solid var(--lbb-signal);
+  outline-offset: 3px;
 }
-
-/** Latin technical label — stays LTR inside the RTL shell. */
-@utility tech {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  direction: ltr;
-  unicode-bidi: isolate;
+a,
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
 }
-@utility num {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  direction: ltr;
-  unicode-bidi: isolate;
-  display: inline-block;
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+img {
+  display: block;
+  max-width: 100%;
 }
 
 /* =========================================================================
-   Layout primitives
+   Native scrollbar
    ========================================================================= */
-@utility lbb-shell {
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--lbb-carbon);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--lbb-mute);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lbb-signal);
+}
+
+/* =========================================================================
+   Global layout primitives
+   ========================================================================= */
+.lbb-shell {
   width: 100%;
   max-width: var(--lbb-max);
   margin-inline: auto;
   padding-inline: var(--lbb-gutter);
 }
-@utility lbb-read {
-  width: 100%;
-  max-width: 68ch;
-  margin-inline: auto;
-  padding-inline: var(--lbb-gutter);
+.lbb-section {
+  padding-block: clamp(4.5rem, 8vw, 9rem);
 }
-@utility lbb-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--lbb-gutter);
+.lbb-rhythm {
+  padding-block: clamp(3.5rem, 6vw, 7rem);
 }
-@media (min-width: 1024px) {
-  .lbb-grid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
+.lbb-nav-offset {
+  padding-top: var(--lbb-nav-h);
 }
-@utility lbb-rhythm {
-  padding-block: clamp(3.5rem, 2rem + 6vw, 8rem);
+.hairline-t {
+  border-top: 1px solid var(--lbb-hairline);
 }
-@utility hairline-b {
-  border-block-end: 1px solid var(--lbb-hairline);
+.hairline-b {
+  border-bottom: 1px solid var(--lbb-hairline);
 }
-@utility hairline-t {
-  border-block-start: 1px solid var(--lbb-hairline);
+.grid-marks {
+  background-image:
+    linear-gradient(to right, var(--lbb-hairline-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--lbb-hairline-soft) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
-/* Faint technical grid overlay for editorial sections */
-@utility grid-marks {
-  position: relative;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(to right, var(--lbb-hairline-soft) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--lbb-hairline-soft) 1px, transparent 1px);
-    background-size: 25% 25%;
+/* =========================================================================
+   Type system — five intentional tiers
+   ========================================================================= */
+.font-display {
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
+}
+.font-body {
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
+}
+.font-mono,
+.num {
+  font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-hero {
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
+  font-size: clamp(3.4rem, 8.4vw, 10.5rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.82;
+}
+.text-display-1 {
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
+  font-size: clamp(2.75rem, 6vw, 7rem);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+}
+.text-display-2 {
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
+  font-size: clamp(2.2rem, 4.2vw, 5rem);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 0.96;
+}
+.text-display-3 {
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
+  font-size: clamp(1.55rem, 2.8vw, 3.15rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+.text-lede {
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  color: var(--lbb-metal);
+  line-height: 1.85;
+}
+.tech {
+  font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.body-copy {
+  color: var(--lbb-metal);
+  font-size: 0.95rem;
+  line-height: 1.9;
+}
+
+@media (max-width: 640px) {
+  .text-hero {
+    line-height: 0.9;
+  }
+  .tech {
+    letter-spacing: 0.055em;
   }
 }
 
 /* =========================================================================
-   Interaction helpers
+   Interaction utilities
    ========================================================================= */
-@utility tap-target {
+.tap-target {
   min-height: 44px;
   min-width: 44px;
 }
-@utility safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+.interactive-line {
+  position: relative;
 }
-@utility pb-bottombar {
-  padding-bottom: calc(60px + env(safe-area-inset-bottom));
-}
-@utility sr-focusable {
+.interactive-line::after {
   position: absolute;
-  width: 1px;
+  inset-inline: 0;
+  bottom: -3px;
   height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  &:focus-visible {
-    position: fixed;
-    inset-block-start: 0.75rem;
-    inset-inline-end: 0.75rem;
-    z-index: 300;
-    width: auto;
-    height: auto;
-    clip-path: none;
-    padding: 0.625rem 1.25rem;
-    background: var(--lbb-signal);
-    color: var(--lbb-bone);
-    font-size: 0.75rem;
-    font-weight: 700;
-  }
+  content: "";
+  background: var(--lbb-signal);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--transition);
+}
+.interactive-line:hover::after,
+.interactive-line:focus-visible::after {
+  transform: scaleX(1);
 }
 
-/** Slow, restrained image hover used across every product/editorial frame. */
-@utility frame-zoom {
+.frame-zoom {
   transition: transform 700ms var(--ease-lbb);
-  will-change: transform;
-  .group:hover & {
+}
+@media (hover: hover) {
+  .group:hover .frame-zoom {
     transform: scale(1.035);
   }
 }
 
-@utility size-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 30px;
-  min-width: 30px;
-  padding: 0 8px;
-  border-radius: 2px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  background: color-mix(in srgb, var(--lbb-obsidian) 82%, transparent);
-  color: var(--lbb-bone);
-  border: 1px solid var(--lbb-hairline);
-  transition: all var(--dur-micro) var(--ease-lbb);
+/* =========================================================================
+   Product card grid
+   ========================================================================= */
+.product-card {
+  container-type: inline-size;
 }
-@utility size-chip-disabled {
-  opacity: 0.3;
-  text-decoration: line-through;
-  cursor: not-allowed;
+.product-card__media {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--lbb-carbon);
 }
-
-@utility skeleton-shimmer {
-  background: linear-gradient(
-    100deg,
-    rgba(255, 255, 255, 0.03) 30%,
-    rgba(255, 255, 255, 0.08) 45%,
-    rgba(255, 255, 255, 0.03) 60%
-  );
-  background-size: 200% 100%;
-  animation: lbb-shimmer 1.4s ease-in-out infinite;
+.product-card__media img {
+  transition:
+    opacity 420ms var(--ease-lbb),
+    transform 700ms var(--ease-lbb);
+}
+@media (hover: hover) {
+  .product-card:hover .product-card__media img {
+    transform: scale(1.025);
+  }
 }
 
 /* =========================================================================
-   Keyframes
+   Marquee
    ========================================================================= */
-@keyframes lbb-shimmer {
-  0% {
-    background-position: 150% 0;
-  }
-  100% {
-    background-position: -50% 0;
-  }
-}
-@keyframes lbb-marquee {
-  0% {
+@keyframes marquee-rtl {
+  from {
     transform: translateX(0);
   }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-@utility marquee-track {
-  animation: lbb-marquee 34s linear infinite;
-}
-@keyframes lbb-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.15;
-  }
-}
-@utility scroll-line {
-  animation: lbb-pulse 1.8s ease-in-out infinite;
-}
-@keyframes lbb-check-draw {
-  from {
-    stroke-dashoffset: 60;
-  }
   to {
-    stroke-dashoffset: 0;
+    transform: translateX(50%);
   }
 }
-.check-draw {
-  stroke-dasharray: 60;
-  animation: lbb-check-draw 0.8s ease forwards;
+.marquee-track {
+  animation: marquee-rtl 28s linear infinite;
 }
-@keyframes lbb-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+
+/* =========================================================================
+   Reveal helpers
+   ========================================================================= */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
 }
-@utility fade-up {
-  animation: lbb-fade-up var(--dur-reveal) var(--ease-lbb) both;
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-reveal) var(--ease-lbb),
+    transform var(--dur-reveal) var(--ease-lbb);
 }
-@keyframes lbb-scan {
-  0% {
-    transform: scaleX(0);
-    transform-origin: right;
-  }
-  100% {
-    transform: scaleX(1);
-    transform-origin: right;
+
+/* =========================================================================
+   Custom cursor (desktop fine-pointer only)
+   ========================================================================= */
+@media (hover: hover) and (pointer: fine) {
+  .lbb-custom-cursor,
+  .lbb-custom-cursor a,
+  .lbb-custom-cursor button,
+  .lbb-custom-cursor [role="button"] {
+    cursor: none !important;
   }
 }
 
+/* =========================================================================
+   Motion safety
+   ========================================================================= */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .marquee-track {
+    animation: none !important;
   }
 }
 
-@layer base {
-  .font-display {
-    font-family: var(--font-display);
-  }
-  .font-body {
-    font-family: var(--font-body);
-  }
-  .font-mono {
-    font-family: var(--font-mono);
+/* =========================================================================
+   Safe-area / mobile chrome
+   ========================================================================= */
+.pb-bottombar {
+  padding-bottom: calc(74px + env(safe-area-inset-bottom));
+}
+@media (min-width: 768px) {
+  .pb-bottombar {
+    padding-bottom: 0;
   }
 }

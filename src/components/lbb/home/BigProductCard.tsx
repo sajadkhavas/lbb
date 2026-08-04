@@ -5,7 +5,15 @@ import { productImage } from "@/lib/product-images";
 import { Frame, TechLabel } from "@/components/lbb/ui/primitives";
 import { cn } from "@/lib/utils";
 
-export function BigProductCard({ p, wide = false, tall = false }: { p: Product; wide?: boolean; tall?: boolean }) {
+export function BigProductCard({
+  p,
+  wide = false,
+  tall = false,
+}: {
+  p: Product;
+  wide?: boolean;
+  tall?: boolean;
+}) {
   const cat = CATEGORIES[p.category];
   return (
     <Link
@@ -23,7 +31,10 @@ export function BigProductCard({ p, wide = false, tall = false }: { p: Product; 
         height={1200}
       >
         {p.isNew && (
-          <TechLabel tone="signal" className="absolute inset-inline-end-3 top-3 rounded-lg bg-signal px-2 py-1">
+          <TechLabel
+            tone="signal"
+            className="absolute inset-inline-end-3 top-3 rounded-lg bg-signal px-2 py-1"
+          >
             جدید
           </TechLabel>
         )}

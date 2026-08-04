@@ -156,7 +156,7 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
             <span className="num text-xs text-mute line-through">{fmtToman(p.originalPrice)}</span>
           ) : null}
         </div>
-        <div className="mt-1 flex gap-1.5" aria-label={`${p.colors.length} رنگ موجود`}>
+        <div role="group" className="mt-1 flex gap-1.5" aria-label={`${p.colors.length} رنگ موجود`}>
           {p.colors.map((color) => (
             <span
               key={color}

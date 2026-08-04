@@ -1,9 +1,4 @@
-import {
-  heroMain,
-  lifestyle1,
-  lifestyle2,
-  productImage,
-} from "@/lib/product-images";
+import { heroMain, lifestyle1, lifestyle2, productImage } from "@/lib/product-images";
 
 const SHOTS = [
   heroMain,

@@ -5,9 +5,7 @@ import { ChevronLeft } from "lucide-react";
  * A crumb links either through typed router props (`to` + `params`) or through
  * a plain internal path (`href`) — both render a client-side `<Link>`.
  */
-export type Crumb = { label: string; href?: string } & Partial<
-  Pick<LinkProps, "to" | "params">
->;
+export type Crumb = { label: string; href?: string } & Partial<Pick<LinkProps, "to" | "params">>;
 
 export function Breadcrumb({ items }: { items: Crumb[] }) {
   return (
@@ -19,11 +17,7 @@ export function Breadcrumb({ items }: { items: Crumb[] }) {
           return (
             <li key={`${it.label}-${i}`} className="flex items-center gap-2">
               {to && !last ? (
-                <Link
-                  to={to}
-                  params={it.params}
-                  className="transition-colors hover:text-signal"
-                >
+                <Link to={to} params={it.params} className="transition-colors hover:text-signal">
                   {it.label}
                 </Link>
               ) : (

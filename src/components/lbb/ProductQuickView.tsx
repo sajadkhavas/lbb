@@ -219,7 +219,7 @@ export function ProductQuickView() {
                         !available
                           ? "cursor-not-allowed border-hairline text-mute line-through opacity-40"
                           : item === size
-                            ? "border-signal bg-signal text-bone"
+                            ? "border-signal bg-signal text-obsidian"
                             : "border-hairline text-bone hover:border-metal"
                       }`}
                     >

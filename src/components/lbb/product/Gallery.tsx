@@ -91,6 +91,7 @@ export function Gallery({ slug, name }: { slug: string; name: string }) {
             role="tab"
             aria-selected={index === active}
             aria-controls={`${id}-panel-${index}`}
+            aria-label={`نمایش تصویر ${index + 1} از ${images.length} برای ${name}`}
             tabIndex={index === active ? 0 : -1}
             onClick={() => scrollToIndex(index)}
             onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) =>

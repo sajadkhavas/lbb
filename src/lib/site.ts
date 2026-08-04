@@ -1,42 +1,49 @@
-/**
- * Absolute-URL helpers for SEO metadata.
- *
- * Set `VITE_SITE_URL` (e.g. https://lbb.example.com) so canonical, Open Graph,
- * Schema.org and sitemap URLs are absolute in production. When it is not set we
- * fall back to root-relative paths, which stay valid but are less portable.
- */
-const RAW = (import.meta.env["VITE_SITE_URL"] as string | undefined) ?? "";
+/** Absolute-URL helpers shared by metadata, structured data and text endpoints. */
+function normalizeSiteUrl(value: string | undefined): string {
+  const raw = value?.trim();
+  if (!raw) {
+    if (import.meta.env.PROD) {
+      throw new Error("VITE_SITE_URL is required for production builds.");
+    }
+    return "";
+  }
 
-/** Configured origin without a trailing slash, or "" when unconfigured. */
-export const SITE_URL = RAW.replace(/\/+$/, "");
+  const url = new URL(raw);
+  if (!["http:", "https:"].includes(url.protocol)) {
+    throw new Error("VITE_SITE_URL must use http or https.");
+  }
+  if (import.meta.env.PROD && url.protocol !== "https:") {
+    throw new Error("VITE_SITE_URL must use https in production.");
+  }
+  if (url.username || url.password || url.pathname !== "/" || url.search || url.hash) {
+    throw new Error(
+      "VITE_SITE_URL must be a clean origin without path, credentials, query or hash.",
+    );
+  }
+  return url.origin;
+}
 
+export const SITE_URL = normalizeSiteUrl(import.meta.env["VITE_SITE_URL"] as string | undefined);
 export const SITE_NAME = "LBB";
 export const SITE_LOCALE = "fa_IR";
 
-/** `/shop` → `https://site/shop` when configured, otherwise `/shop`. */
+/** `/shop` → `https://site/shop` in production and `/shop` during unconfigured development. */
 export function absUrl(path = "/"): string {
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return SITE_URL ? `${SITE_URL}${p === "/" ? "/" : p}` : p;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return SITE_URL ? `${SITE_URL}${normalizedPath === "/" ? "/" : normalizedPath}` : normalizedPath;
 }
 
-/** Absolute URL for a bundled asset import (hashed Vite URL). */
 export function absAsset(assetUrl: string): string {
   if (/^https?:\/\//.test(assetUrl)) return assetUrl;
   return absUrl(assetUrl);
 }
 
-/** Default social share image. */
 export const OG_IMAGE = absUrl("/icons/icon-512.png");
-
-/** Shared meta for pages that must stay out of the index. */
 export const NOINDEX = { name: "robots", content: "noindex, nofollow" } as const;
 
-type MetaEntry = { title: string } | { name: string; content: string } | { property: string; content: string };
+type MetaEntry =
+  { title: string } | { name: string; content: string } | { property: string; content: string };
 
-/**
- * Builds the standard meta block for a content page.
- * `image` should be an absolute https URL (or a bundled asset URL).
- */
 export function pageMeta(opts: {
   title: string;
   description: string;
@@ -75,11 +82,11 @@ export function breadcrumbLd(items: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: items.map((it, i) => ({
+    itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
-      position: i + 1,
-      name: it.name,
-      item: absUrl(it.path),
+      position: index + 1,
+      name: item.name,
+      item: absUrl(item.path),
     })),
   };
 }

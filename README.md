@@ -1,6 +1,7 @@
 # LBB
 
 # LBB — Homepage Prompt for Lovable (Phase 1)
+
 ### Full Modern 3D | SSR-Ready | Red & White | Streetwear Boutique
 
 ---
@@ -10,7 +11,9 @@
 ---
 
 ## ═══════════════════════════════════════════
+
 ## THE PROMPT (copy everything below this line)
+
 ## ═══════════════════════════════════════════
 
 ```
@@ -21,7 +24,7 @@ SECTION 1 — STACK & ARCHITECTURE (MANDATORY)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Use TanStack Start with full SSR. The homepage route ("/") must:
-- Return fully-formed HTML on the first server response (no empty 
+- Return fully-formed HTML on the first server response (no empty
 
 )
 - Include all meta tags in the server-rendered : title, meta description, canonical URL, og:title, og:description, og:image, og:type="website", twitter:card
@@ -139,7 +142,7 @@ Each tile:
 
 GSAP ScrollTrigger entrance: when section enters viewport, cards stagger in from below (y: 80px → 0, opacity: 0→1, stagger: 0.1s, ease: power3.out).
 
-Semantic: 
+Semantic:
 
 Shop By Category
 
@@ -218,7 +221,7 @@ Black background, top 1px solid rgba(255,255,255,0.08).
 
 Bottom bar: "© 2026 LBB — All rights reserved" left, "Designed for the streets of Tehran" right — both 10px, white opacity 0.25.
 
-Semantic: 
+Semantic:
 
 , all links are real  tags.
 
@@ -251,14 +254,14 @@ PERFORMANCE rules (non-negotiable):
 SECTION 12 — ACCESSIBILITY BASELINE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-- One 
+- One
 
  per page: the "LBB" hero headline
 - Heading hierarchy: h1 → h2 (New Arrivals, Shop By Category) → h3 (product names)
 - All interactive elements: keyboard focusable, visible focus ring (outline: 2px solid #E8001D, outline-offset: 2px)
 - All images: descriptive alt text in English AND Persian where relevant. Example: alt="LBB Classic Hoodie — Red streetwear hoodie with embroidered logo"
 - Color contrast: all text meets WCAG AA (white on black passes; white on crimson: check and adjust opacity where needed)
-- Skip-to-content link: Skip to content as the very first element in 
+- Skip-to-content link: Skip to content as the very first element in
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SECTION 13 — FILE STRUCTURE (guide for AI)
@@ -302,13 +305,13 @@ The final result should feel like a fusion of:
 
 ## نکات قبل از پیست‌کردن:
 
-| موضوع | توضیح |
-|---|---|
-| **پروژه جدید** | حتماً یه پروژه‌ی fresh در Lovable باز کن (بعد از می ۱۳ ۲۰۲۶) تا TanStack Start + SSR بگیری |
-| **مدل سه‌بعدی** | پرامت یه placeholder geometry داره؛ مدل واقعی کتونی/هودی رو باید جداگانه export کنی به GLB و بدی به Lovable بعداً |
-| **عکس محصولات** | فعلاً placeholder gradient هست؛ عکس‌های واقعی رو از اینستا بگیر یا عکاسی محصول کن |
-| **فونت Bebas Neue** | رایگانه روی Google Fonts؛ Lovable خودکار لودش می‌کنه |
-| **فاز بعد** | بعد از تأیید هومپیج، یه پرامت جداگانه برای صفحه Shop و ProductDetail می‌زنیم |
+| موضوع               | توضیح                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **پروژه جدید**      | حتماً یه پروژه‌ی fresh در Lovable باز کن (بعد از می ۱۳ ۲۰۲۶) تا TanStack Start + SSR بگیری                        |
+| **مدل سه‌بعدی**     | پرامت یه placeholder geometry داره؛ مدل واقعی کتونی/هودی رو باید جداگانه export کنی به GLB و بدی به Lovable بعداً |
+| **عکس محصولات**     | فعلاً placeholder gradient هست؛ عکس‌های واقعی رو از اینستا بگیر یا عکاسی محصول کن                                 |
+| **فونت Bebas Neue** | رایگانه روی Google Fonts؛ Lovable خودکار لودش می‌کنه                                                              |
+| **فاز بعد**         | بعد از تأیید هومپیج، یه پرامت جداگانه برای صفحه Shop و ProductDetail می‌زنیم                                      |
 
 This project was built with [Lovable](https://lovable.dev).
 

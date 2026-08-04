@@ -1,10 +1,9 @@
 import {
   discountPercent,
   isSizeAvailable,
-  products,
   type CategorySlug,
   type Product,
-} from "./products";
+} from "./product-catalog";
 
 export type SortKey = "newest" | "best" | "price-asc" | "price-desc" | "discount";
 
@@ -48,9 +47,30 @@ export const EMPTY_FILTERS: Filters = {
 
 const SORTS: readonly SortKey[] = ["newest", "best", "price-asc", "price-desc", "discount"];
 const CATEGORY_ORDER: readonly CategorySlug[] = ["hoodies", "pants", "tshirts", "shoes", "socks"];
-const GLOBAL_COLORS = Array.from(new Set(products.flatMap((product) => product.colors)));
-const GLOBAL_SIZES = Array.from(new Set(products.flatMap((product) => product.sizes)));
-const GLOBAL_PRICE_CEIL = Math.max(1, ...products.map((product) => product.price));
+
+/**
+ * Catalogue-wide defaults are explicit so filter module evaluation never depends on
+ * product data being initialized in another Cloudflare Worker chunk.
+ */
+const GLOBAL_COLORS = ["#0A0A0A", "#F2EFE8", "#E6291E", "#6F6F6F", "#1a3c6e"] as const;
+const GLOBAL_SIZES = [
+  "S",
+  "M",
+  "L",
+  "XL",
+  "XXL",
+  "30",
+  "32",
+  "34",
+  "36",
+  "40",
+  "41",
+  "42",
+  "43",
+  "44",
+  "ONE",
+] as const;
+const GLOBAL_PRICE_CEIL = 2_400_000;
 
 export const SORT_LABELS: Record<SortKey, string> = {
   newest: "جدیدترین",

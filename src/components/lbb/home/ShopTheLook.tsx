@@ -30,7 +30,15 @@ export function ShopTheLook() {
       />
 
       <div className="relative mx-auto mt-8 max-w-[560px]">
-        <Frame src={lifestyle1} alt="ست کامل استریت‌ویر LBB" ratio="4/5" zoom={false} width={1200} height={1500} className="rounded-2xl border border-hairline">
+        <Frame
+          src={lifestyle1}
+          alt="ست کامل استریت‌ویر LBB"
+          ratio="4/5"
+          zoom={false}
+          width={1200}
+          height={1500}
+          className="rounded-2xl border border-hairline"
+        >
           {HOTSPOTS.map((h) => {
             const product = products.find((p) => p.slug === h.slug);
             if (!product) return null;
@@ -39,7 +47,11 @@ export function ShopTheLook() {
               <div
                 key={h.slug}
                 className="absolute z-10"
-                style={{ insetInlineStart: `${h.x}%`, top: `${h.y}%`, transform: "translate(-50%, -50%)" }}
+                style={{
+                  insetInlineStart: `${h.x}%`,
+                  top: `${h.y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
               >
                 <button
                   type="button"
@@ -61,10 +73,18 @@ export function ShopTheLook() {
                       transform: "translateX(-50%)",
                     }}
                   >
-                    <Link to="/product/$slug" params={{ slug: product.slug }} className="flex items-center gap-3">
+                    <Link
+                      to="/product/$slug"
+                      params={{ slug: product.slug }}
+                      className="flex items-center gap-3"
+                    >
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-xs font-bold text-bone">{product.name}</span>
-                        <span className="num block text-xs text-signal">{fmtToman(product.price)}</span>
+                        <span className="block truncate text-xs font-bold text-bone">
+                          {product.name}
+                        </span>
+                        <span className="num block text-xs text-signal">
+                          {fmtToman(product.price)}
+                        </span>
                       </span>
                     </Link>
                   </div>

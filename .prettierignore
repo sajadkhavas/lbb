@@ -1,7 +1,11 @@
 node_modules
 dist
 .output
+.wrangler
 .vinxi
+playwright-report
+test-results
+coverage
 pnpm-lock.yaml
 package-lock.json
 bun.lock

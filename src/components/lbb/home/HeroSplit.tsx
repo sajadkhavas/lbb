@@ -144,11 +144,13 @@ export function HeroSplit() {
       </div>
 
       <div
-        className="pointer-events-none absolute bottom-6 inset-inline-start-6 hidden flex-col items-center gap-3 md:flex"
+        className="pointer-events-none absolute bottom-6 inset-inline-start-6 hidden flex-col items-center gap-3 rounded-lg bg-obsidian/95 px-2 py-3 text-bone md:flex"
         aria-hidden="true"
       >
-        <TechLabel className="[writing-mode:vertical-rl] rotate-180">اسکرول کنید</TechLabel>
-        <span className="block h-12 w-px bg-hairline" />
+        <TechLabel className="text-bone [writing-mode:vertical-rl] rotate-180">
+          اسکرول کنید
+        </TechLabel>
+        <span className="block h-12 w-px bg-bone/60" />
       </div>
     </section>
   );
