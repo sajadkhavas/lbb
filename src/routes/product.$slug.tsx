@@ -475,12 +475,12 @@ function ProductPage() {
           </Shell>
         </Band>
 
-        {related.length > 0 ? (
+        {relatedItems.length > 0 ? (
           <Band label="YOU MAY ALSO LIKE">
             <Shell>
               <SectionHead label="شاید بپسندید" title="پیشنهاد برای شما" className="mb-8" />
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-                {related.map((product: Product) => (
+                {relatedItems.map((product: Product) => (
                   <ProductCard key={product.id} p={product} />
                 ))}
               </div>
