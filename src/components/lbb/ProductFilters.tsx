@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -32,13 +32,11 @@ export function ProductFilters({
   showCategory,
 }: Props) {
   const effectiveMax = filters.max > 0 ? Math.min(filters.max, priceCeil) : priceCeil;
-  const [draftMax, setDraftMax] = useState(effectiveMax);
-
-  useEffect(() => {
-    setDraftMax(effectiveMax);
-  }, [effectiveMax]);
+  const [draftMax, setDraftMax] = useState<number | null>(null);
+  const displayedMax = draftMax ?? effectiveMax;
 
   const commitMax = (value: number) => {
+    setDraftMax(null);
     const normalized = value >= priceCeil ? 0 : Math.max(0, Math.floor(value));
     if (normalized !== filters.max) onChange({ ...filters, max: normalized });
   };
@@ -134,7 +132,7 @@ export function ProductFilters({
         <legend className="tech mb-3 flex w-full items-center justify-between gap-3 text-metal">
           <span>حداکثر قیمت</span>
           <output className="num text-bone" aria-live="polite">
-            {fmtToman(draftMax)}
+            {fmtToman(displayedMax)}
           </output>
         </legend>
         <Slider
@@ -143,7 +141,7 @@ export function ProductFilters({
           max={priceCeil}
           step={50000}
           aria-label="حداکثر قیمت"
-          value={[draftMax]}
+          value={[displayedMax]}
           onValueChange={([value]) => setDraftMax(value)}
           onValueCommit={([value]) => commitMax(value)}
         />
