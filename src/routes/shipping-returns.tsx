@@ -3,18 +3,29 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { Shell } from "@/components/lbb/ui/primitives";
+import { DemoNotice, Shell } from "@/components/lbb/ui/primitives";
+import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_FEE } from "@/lib/commerce";
+import { fmtToman } from "@/lib/products";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 
-const TITLE = "ارسال و مرجوعی | LBB";
-const DESC = "همه چیز درباره روش‌های ارسال، هزینه و زمان تحویل، و شرایط مرجوعی و بازگشت وجه در فروشگاه LBB.";
+const TITLE = "وضعیت ارسال و مرجوعی | LBB";
+const DESC =
+  "توضیح وضعیت فعلی ارسال و مرجوعی در نسخه نمایشی LBB؛ فروش، ارسال و بازگشت وجه هنوز فعال نیستند.";
 
 export const Route = createFileRoute("/shipping-returns")({
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESC, path: "/shipping-returns" }),
     links: canonical("/shipping-returns"),
     scripts: [
-      { type: "application/ld+json", children: JSON.stringify(breadcrumbLd([{ name: "خانه", path: "/" }, { name: "ارسال و مرجوعی", path: "/shipping-returns" }])) },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          breadcrumbLd([
+            { name: "خانه", path: "/" },
+            { name: "ارسال و مرجوعی", path: "/shipping-returns" },
+          ]),
+        ),
+      },
     ],
   }),
   component: ShippingReturnsPage,
@@ -22,7 +33,7 @@ export const Route = createFileRoute("/shipping-returns")({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-8">
+    <section className="mb-9">
       <h2 className="mb-3 text-xl font-bold text-bone">{title}</h2>
       <div className="text-sm leading-8 text-metal">{children}</div>
     </section>
@@ -41,36 +52,56 @@ function ShippingReturnsPage() {
         </div>
 
         <header className="mx-auto max-w-[820px] px-4 py-10 md:px-8">
-          <h1 className="text-display-2 text-bone">ارسال و مرجوعی</h1>
-          <p className="mt-3 text-sm text-metal">آخرین به‌روزرسانی: ۱۴۰۵/۰۱/۰۱</p>
+          <p className="tech text-signal">PRE-LAUNCH POLICY</p>
+          <h1 className="mt-3 text-display-2 text-bone">ارسال و مرجوعی</h1>
+          <p className="mt-3 text-sm leading-7 text-metal">
+            وضعیت فعلی این صفحه مربوط به نسخه نمایشی فروشگاه است و قرارداد فروش فعال محسوب نمی‌شود.
+          </p>
         </header>
 
         <div className="mx-auto max-w-[820px] px-4 pb-16 md:px-8">
-          <Section title="روش‌های ارسال">
-            <p className="mb-3">سفارش‌های LBB از طریق پست پیشتاز و شرکت‌های تیپاکس/باربری معتبر به سراسر ایران ارسال می‌شن. زمان تحویل بسته به شهر مقصد بین ۲ تا ۶ روز کاری متغیره.</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li>تهران و کرج: ۱ تا ۲ روز کاری</li>
-              <li>مراکز استان‌ها: ۲ تا ۴ روز کاری</li>
-              <li>سایر شهرها و مناطق دورافتاده: ۴ تا ۶ روز کاری</li>
-            </ul>
+          <DemoNotice className="mb-10 rounded-xl">
+            در حال حاضر هیچ سفارش، پرداخت، بسته‌بندی، ارسال، تعویض، مرجوعی یا بازگشت وجه واقعی از
+            طریق این سایت انجام نمی‌شود. سیاست نهایی پیش از فعال‌شدن فروش با اطلاعات عملیاتی واقعی
+            منتشر خواهد شد.
+          </DemoNotice>
+
+          <Section title="محاسبه فعلی در رابط نمایشی">
+            <p>
+              برای تست رابط کاربری، هزینه ارسال ثابت {fmtToman(STANDARD_SHIPPING_FEE)} در نظر گرفته
+              می‌شود و سبدهای نمایشی از {fmtToman(FREE_SHIPPING_THRESHOLD)} به بالا، ارسال رایگان
+              نمایش می‌دهند. این اعداد فعلاً هزینه قابل پرداخت یا تعهد ارسال نیستند.
+            </p>
           </Section>
-          <Section title="هزینه ارسال">
-            <p>هزینه ارسال بر اساس وزن سفارش و شهر مقصد در مرحله تسویه‌حساب محاسبه می‌شه. برای سفارش‌های بالای {(2000000).toLocaleString("fa-IR")} تومان، ارسال به‌صورت رایگان انجام می‌گیره.</p>
+
+          <Section title="روش و زمان تحویل">
+            <p>
+              شرکت حمل‌ونقل، محدوده ارسال، زمان پردازش، زمان تحویل و کد رهگیری هنوز تعیین و به سامانه
+              متصل نشده‌اند. بنابراین هیچ بازه زمانی یا پوشش جغرافیایی در این نسخه تضمین نمی‌شود.
+            </p>
           </Section>
-          <Section title="شرایط مرجوعی">
-            <p className="mb-3">از تاریخ دریافت مرسوله، ۷ روز فرصت داری تا در صورت عدم رضایت، درخواست مرجوعی رو ثبت کنی. برای این کار کافیه با پشتیبانی از طریق صفحه تماس هماهنگ کنی.</p>
-            <p className="mb-3">شرایط پذیرش مرجوعی:</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li>کالا استفاده نشده و برچسب اصلی روی اون باقی مونده باشه.</li>
-              <li>کالا در بسته‌بندی اولیه و بدون آسیب فیزیکی برگردونده بشه.</li>
-              <li>فاکتور یا کد سفارش همراه مرسوله ارسال بشه.</li>
-            </ul>
+
+          <Section title="مرجوعی و تعویض">
+            <p>
+              چون خرید واقعی فعال نیست، درخواست مرجوعی یا تعویض نیز از سایت قابل ثبت نیست. شرایط
+              نهایی شامل مهلت درخواست، وضعیت قابل‌قبول کالا، هزینه حمل و کالاهای استثنا باید پیش از
+              شروع فروش به‌صورت شفاف اعلام شود.
+            </p>
           </Section>
+
           <Section title="بازگشت وجه">
-            <p>پس از بررسی و تأیید مرجوعی، مبلغ پرداختی حداکثر تا ۷۲ ساعت کاری به همون شماره کارتی که سفارش با اون پرداخت شده، برگشت داده می‌شه.</p>
+            <p>
+              هیچ مبلغی در نسخه فعلی دریافت نمی‌شود؛ در نتیجه فرایند بازگشت وجه هم وجود ندارد. پس از
+              اتصال پرداخت، شیوه و زمان‌بندی بازپرداخت باید مطابق درگاه و فرایند مالی واقعی ثبت شود.
+            </p>
           </Section>
-          <Section title="تعویض کالا">
-            <p>اگه سایز یا رنگ دلخواهت موجود باشه، امکان تعویض مستقیم هم وجود داره. هزینه ارسال مجدد برای تعویض ناشی از اشتباه مشتری بر عهده مشتریه.</p>
+
+          <Section title="مرجع اطلاعات">
+            <p>
+              تا پیش از راه‌اندازی فروش، تنها اطلاعیه‌های رسمی منتشرشده در همین سایت و صفحه Instagram
+              با شناسه <span dir="ltr">@lbbclo</span> معتبرند. از ارسال اطلاعات بانکی یا پرداخت از
+              طریق پیام مستقیم خودداری کنید.
+            </p>
           </Section>
         </div>
       </main>
