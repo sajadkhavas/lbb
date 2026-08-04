@@ -12,6 +12,7 @@ const templates = [
   "/journal",
   "/journal/materials-101-parche-shenasi",
   "/contact",
+  "/design-system",
 ];
 
 for (const route of templates) {
