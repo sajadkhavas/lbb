@@ -25,40 +25,26 @@ jobs:
         with:
           node-version: 24
 
-      - name: Apply deterministic final fixes
-        run: python scripts/apply-f8-f9-final-fixes.py
-
       - name: Rebuild lockfile and install dependencies
         run: |
           rm -rf node_modules package-lock.json npm-shrinkwrap.json
           npm install --ignore-scripts
 
-      - name: Format entire repository
+      - name: Format repository
         run: npx prettier --write .
 
-      - name: Commit fixes, lockfile and formatting
+      - name: Commit lockfile and formatting
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           if ! git diff --cached --quiet; then
-            git commit -m 'fix(f8-f9): close accessibility, focus and navigation gates'
+            git commit -m 'chore(f8-f9): lock Cloudflare runtime and format final scope'
             git push origin HEAD:phase/f8-f9-final-quality
           fi
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-
-      - name: Generate Linux visual baselines
-        run: npx playwright test tests/visual.spec.ts --update-snapshots
-
-      - name: Commit visual baselines
-        run: |
-          git add tests/visual.spec.ts-snapshots
-          if ! git diff --cached --quiet; then
-            git commit -m 'test(f9): refresh accessible responsive visual baselines'
-            git push origin HEAD:phase/f8-f9-final-quality
-          fi
 
       - name: Formatting gate
         run: npm run format:check
@@ -78,7 +64,7 @@ jobs:
       - name: Production source audit
         run: npm run audit:source
 
-      - name: Production preview smoke gate
+      - name: Cloudflare Worker smoke gate
         run: npm run smoke:production
 
       - name: Playwright acceptance suite
