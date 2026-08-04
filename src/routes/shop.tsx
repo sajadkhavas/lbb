@@ -28,7 +28,6 @@ import {
   parseFilters,
   serializeFilters,
   stableSearchString,
-  type FilterScope,
   type Filters,
 } from "@/lib/product-filter";
 
@@ -37,7 +36,13 @@ const DESC =
   "فروشگاه آنلاین LBB برای مشاهده مجموعه استریت‌ویر شامل هودی، شلوار، تیشرت، کتونی و جوراب.";
 const PAGE_SIZE = 12;
 
-function createFilterScope(): Required<Pick<FilterScope, "colors" | "sizes" | "priceCeil">> {
+type ShopFilterScope = {
+  colors: string[];
+  sizes: string[];
+  priceCeil: number;
+};
+
+function createFilterScope(): ShopFilterScope {
   return {
     colors: Array.from(new Set(products.flatMap((product) => product.colors))),
     sizes: Array.from(new Set(products.flatMap((product) => product.sizes))),
