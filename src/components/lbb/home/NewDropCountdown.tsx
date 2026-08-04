@@ -1,52 +1,13 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
-import { fmtNum } from "@/lib/products";
 
-function getTargetDate() {
-  const d = new Date();
-  d.setDate(d.getDate() + 5);
-  d.setHours(20, 0, 0, 0);
-  return d;
-}
-
-const ZERO = { days: 0, hours: 0, minutes: 0, seconds: 0 };
-
-function diffToParts(ms: number) {
-  const total = Math.max(0, ms);
-  return {
-    days: Math.floor(total / 86400000),
-    hours: Math.floor((total % 86400000) / 3600000),
-    minutes: Math.floor((total % 3600000) / 60000),
-    seconds: Math.floor((total % 60000) / 1000),
-  };
-}
-
-const UNITS: { key: keyof typeof ZERO; label: string }[] = [
-  { key: "days", label: "روز" },
-  { key: "hours", label: "ساعت" },
-  { key: "minutes", label: "دقیقه" },
-  { key: "seconds", label: "ثانیه" },
-];
-
+/**
+ * Honest upcoming-drop teaser.
+ *
+ * A rolling client-side countdown implied a launch date that did not exist.
+ * This section now communicates the real state without manufacturing urgency.
+ */
 export function NewDropCountdown() {
-  const [target] = useState(getTargetDate);
-  const [parts, setParts] = useState(ZERO);
-  const [mounted, setMounted] = useState(false);
-  const [ended, setEnded] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const tick = () => {
-      const remaining = target.getTime() - Date.now();
-      setParts(diffToParts(remaining));
-      setEnded(remaining <= 0);
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [target]);
-
   return (
     <section
       dir="rtl"
@@ -66,36 +27,45 @@ export function NewDropCountdown() {
         style={{ background: "color-mix(in srgb, var(--lbb-signal) 22%, transparent)" }}
         aria-hidden="true"
       />
-      <div className="relative mx-auto flex max-w-[1000px] flex-col items-center gap-8 text-center">
-        <TechLabel tone="signal">DROP 002</TechLabel>
+
+      <div className="relative mx-auto flex max-w-[900px] flex-col items-center gap-7 text-center">
+        <TechLabel tone="signal">DROP 002 / IN DEVELOPMENT</TechLabel>
         <h2 id="drop-title" className="text-display-2 text-bone">
-          {ended ? "دراپ ۰۰۲ منتشر شد" : "کالکشن بعدی به‌زودی می‌رسد"}
+          دراپ بعدی در حال طراحی است
         </h2>
-        <p className="max-w-md text-lede">
-          {ended
-            ? "زمان‌سنج به پایان رسید — کالکشن جدید LBB هم‌اکنون در فروشگاه در دسترس است."
-            : "دراپ ۰۰۲ در حال آماده‌سازی است. زمان‌سنج زیر رو دنبال کن."}
+        <p className="max-w-xl text-lede">
+          تاریخ انتشار پس از نهایی‌شدن تولید اعلام می‌شود. تا آن زمان، تمام قطعه‌های موجود
+          دراپ ۰۰۱ را می‌توانی در فروشگاه ببینی.
         </p>
 
-        {!ended && (
-          <div className="mt-4 grid grid-cols-4 gap-3 md:gap-6" suppressHydrationWarning>
-            {UNITS.map((u) => (
-              <div
-                key={u.key}
-                className="flex w-[70px] flex-col items-center justify-center rounded-xl border border-hairline bg-carbon py-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition-transform duration-300 hover:-translate-y-0.5 md:w-[110px] md:py-6"
-              >
-                <span className="num text-[26px] font-black text-bone md:text-[42px]">
-                  {fmtNum(mounted ? parts[u.key] : 0).padStart(2, "۰")}
-                </span>
-                <span className="mt-1 tech text-mute">{u.label}</span>
-              </div>
-            ))}
+        <div className="grid w-full max-w-2xl gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-hairline bg-carbon px-4 py-5">
+            <p className="tech text-mute">STATUS</p>
+            <p className="mt-2 text-sm font-bold text-bone">در حال توسعه</p>
           </div>
-        )}
+          <div className="rounded-xl border border-hairline bg-carbon px-4 py-5">
+            <p className="tech text-mute">CURRENT DROP</p>
+            <p className="mt-2 text-sm font-bold text-bone">DROP 001</p>
+          </div>
+          <div className="rounded-xl border border-hairline bg-carbon px-4 py-5">
+            <p className="tech text-mute">ANNOUNCEMENT</p>
+            <p className="mt-2 text-sm font-bold text-bone">فقط از کانال رسمی LBB</p>
+          </div>
+        </div>
 
-        <Link to="/shop" className={`${CtaClasses("signal")} rounded-xl`}>
-          {ended ? "مشاهده کالکشن جدید" : "مشاهده فروشگاه"}
-        </Link>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link to="/shop" className={`${CtaClasses("signal")} rounded-xl`}>
+            مشاهده دراپ ۰۰۱
+          </Link>
+          <a
+            href="https://www.instagram.com/lbbclo"
+            target="_blank"
+            rel="noreferrer"
+            className={`${CtaClasses("line")} rounded-xl`}
+          >
+            اینستاگرام رسمی
+          </a>
+        </div>
       </div>
     </section>
   );
