@@ -6,7 +6,7 @@ on:
       - validation/f8-f9-final
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   VITE_SITE_URL: https://lbb.example.test
@@ -32,8 +32,8 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Verify clean input worktree
-        run: git diff --exit-code && test -z "$(git status --porcelain=v1)"
+      - name: Verify clean tracked input
+        run: git diff --exit-code
 
       - name: Formatting gate
         run: npm run format:check
@@ -44,15 +44,8 @@ jobs:
       - name: Production build and route generation gate
         run: npm run build
 
-      - name: Register generated route tree
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/routeTree.gen.ts
-          if ! git diff --cached --quiet; then
-            git commit -m 'chore(f9): register generated route tree'
-            git push origin HEAD:phase/f8-f9-final-quality
-          fi
+      - name: Verify deterministic route generation
+        run: git diff --exit-code -- src/routeTree.gen.ts
 
       - name: TypeScript gate
         run: npm run typecheck
