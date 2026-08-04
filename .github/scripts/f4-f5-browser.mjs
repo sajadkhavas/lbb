@@ -20,14 +20,20 @@ const knownRootDocumentErrors = [
 
 const checkPage = async (page, route, width) => {
   const errors = [];
+  const failedResources = new Set();
   page.on("console", (message) => {
     if (message.type() !== "error") return;
     const text = message.text();
+    if (text.startsWith("Failed to load resource:")) return;
     if (!knownRootDocumentErrors.some((known) => text.includes(known))) {
       errors.push(`console: ${text}`);
     }
   });
   page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
+  page.on("response", (response) => {
+    if (response.status() < 400 || response.request().resourceType() === "document") return;
+    failedResources.add(`${response.status()} ${response.url()}`);
+  });
   const response = await page.goto(origin + route, { waitUntil: "networkidle" });
   if (!response || response.status() >= 400) {
     failures.push(`${width}px ${route}: status ${response?.status() ?? "none"}`);
@@ -39,6 +45,9 @@ const checkPage = async (page, route, width) => {
   );
   if (overflow > 2) failures.push(`${width}px ${route}: horizontal overflow ${overflow}px`);
   if (errors.length) failures.push(`${width}px ${route}: ${errors.join(" | ")}`);
+  if (failedResources.size) {
+    failures.push(`${width}px ${route}: resources ${Array.from(failedResources).join(" | ")}`);
+  }
 };
 
 for (const width of widths) {
