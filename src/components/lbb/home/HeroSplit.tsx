@@ -20,8 +20,12 @@ export function HeroSplit() {
     let cleanup = () => {};
 
     void (async () => {
-      const { gsap } = await import("gsap");
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
       if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
 
       const context = gsap.context(() => {
         const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
