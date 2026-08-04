@@ -72,6 +72,7 @@ jobs:
             'src/components/lbb/home/Newsletter.tsx'
             'src/components/lbb/ui/primitives.tsx'
           )
+          cp .github/scripts/f0-f3-reviewed-browser.mjs /tmp/f0-f3-reviewed-browser.mjs
           if git diff --quiet -- "${paths[@]}"; then
             exit 0
           fi
@@ -83,8 +84,10 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- "${paths[@]}"
-          git commit -m 'style(f0-f3): format reviewed scope'
-          git push origin HEAD:integration/f0-f3-reviewed
+          if ! git diff --cached --quiet; then
+            git commit -m 'style(f0-f3): format reviewed scope'
+            git push origin HEAD:integration/f0-f3-reviewed
+          fi
 
       - name: Typecheck
         run: npm run typecheck
@@ -138,4 +141,4 @@ jobs:
           exit 1
 
       - name: Browser and shell behavior
-        run: node .github/scripts/f0-f3-reviewed-browser.mjs
+        run: node /tmp/f0-f3-reviewed-browser.mjs
