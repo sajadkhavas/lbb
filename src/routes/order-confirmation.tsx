@@ -4,15 +4,10 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { DemoNotice, EmptyState, CtaClasses } from "@/components/lbb/ui/primitives";
-import { findDemoOrder, type DemoOrderSummary } from "@/lib/commerce";
+import { latestDemoOrder, type DemoOrderSummary } from "@/lib/commerce";
 import { fmtToman } from "@/lib/products";
 
-type Search = { ref?: string };
-
 export const Route = createFileRoute("/order-confirmation")({
-  validateSearch: (search: Record<string, unknown>): Search => ({
-    ref: typeof search.ref === "string" && /^\d{6}$/.test(search.ref) ? search.ref : undefined,
-  }),
   head: () => ({
     meta: [
       { title: "پیش‌نمایش سفارش | LBB" },
@@ -27,12 +22,11 @@ export const Route = createFileRoute("/order-confirmation")({
 });
 
 function OrderConfirmation() {
-  const { ref } = Route.useSearch();
   const [order, setOrder] = useState<DemoOrderSummary | null | undefined>(undefined);
 
   useEffect(() => {
-    setOrder(ref ? (findDemoOrder(ref) ?? null) : null);
-  }, [ref]);
+    setOrder(latestDemoOrder() ?? null);
+  }, []);
 
   return (
     <>
@@ -85,7 +79,7 @@ function OrderConfirmation() {
         ) : (
           <EmptyState
             title="پیش‌نمایشی برای نمایش نیست"
-            body="این کد در sessionStorage همین تب پیدا نشد؛ ممکن است صفحه در تب دیگری باز شده یا داده‌های مرورگر پاک شده باشند."
+            body="هیچ خلاصه‌ای در sessionStorage همین تب پیدا نشد؛ ممکن است صفحه در تب دیگری باز شده یا داده‌های مرورگر پاک شده باشند."
             action={
               <Link to="/shop" className={CtaClasses("signal")}>
                 رفتن به فروشگاه
