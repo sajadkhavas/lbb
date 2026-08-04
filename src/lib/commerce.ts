@@ -75,6 +75,10 @@ export function saveDemoOrder(order: DemoOrderSummary): boolean {
   }
 }
 
+export function latestDemoOrder(): DemoOrderSummary | undefined {
+  return readDemoOrders()[0];
+}
+
 export function findDemoOrder(ref: string): DemoOrderSummary | undefined {
   if (!/^\d{6}$/.test(ref)) return undefined;
   return readDemoOrders().find((order) => order.ref === ref);
