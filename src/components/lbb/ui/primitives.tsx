@@ -1,11 +1,17 @@
+import { LoaderCircle } from "lucide-react";
+import {
+  forwardRef,
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  type ReactNode,
+} from "react";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
 
 /* =========================================================================
-   LBB primitives — every page composes these instead of ad-hoc markup.
+   LBB Design System 2.0 primitives
+   Components expose semantic states; pages must not recreate them ad hoc.
    ========================================================================= */
 
-/** Max-width page container with responsive gutters. */
 export function Shell({
   children,
   className,
@@ -18,32 +24,69 @@ export function Shell({
   return <Tag className={cn("lbb-shell", className)}>{children}</Tag>;
 }
 
-/** Full-bleed editorial band with consistent vertical rhythm. */
 export function Band({
   children,
   className,
   hairline = true,
   id,
   label,
+  major = false,
 }: {
   children: ReactNode;
   className?: string;
   hairline?: boolean;
   id?: string;
   label?: string;
+  major?: boolean;
 }) {
   return (
     <section
       id={id}
       aria-label={label}
-      className={cn("relative lbb-rhythm", hairline && "hairline-t", className)}
+      className={cn(
+        "relative",
+        major ? "lbb-section-major" : "lbb-rhythm",
+        hairline && "hairline-t",
+        className,
+      )}
     >
       {children}
     </section>
   );
 }
 
-/** Latin technical label, e.g. `LBB / DROP 001 / TEHRAN`. */
+type SurfaceTone = "canvas" | "subtle" | "raised" | "elevated" | "inverse" | "signal";
+
+export function Surface({
+  as: Tag = "div",
+  tone = "subtle",
+  className,
+  children,
+  ...props
+}: HTMLAttributes<HTMLElement> & {
+  as?: "div" | "section" | "article" | "aside";
+  tone?: SurfaceTone;
+}) {
+  return (
+    <Tag
+      className={cn(
+        "border",
+        tone === "canvas" && "border-hairline bg-obsidian text-bone",
+        tone === "subtle" && "border-hairline bg-carbon text-bone",
+        tone === "raised" && "border-hairline bg-carbon-2 text-bone shadow-raised",
+        tone === "elevated" &&
+          "border-hairline-strong bg-graphite text-bone shadow-overlay",
+        tone === "inverse" && "border-hairline-ink bg-bone text-obsidian",
+        tone === "signal" && "border-signal bg-signal text-obsidian",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </Tag>
+  );
+}
+
 export function TechLabel({
   children,
   className,
@@ -51,7 +94,7 @@ export function TechLabel({
 }: {
   children: ReactNode;
   className?: string;
-  tone?: "metal" | "signal" | "bone";
+  tone?: "metal" | "signal" | "bone" | "inverse";
 }) {
   return (
     <span
@@ -60,6 +103,7 @@ export function TechLabel({
         tone === "signal" && "text-signal",
         tone === "metal" && "text-metal",
         tone === "bone" && "text-bone",
+        tone === "inverse" && "text-obsidian",
         className,
       )}
     >
@@ -68,7 +112,6 @@ export function TechLabel({
   );
 }
 
-/** Section header: index mark + technical label + editorial heading. */
 export function SectionHead({
   index,
   label,
@@ -86,7 +129,7 @@ export function SectionHead({
   className?: string;
   level?: 2 | 3;
 }) {
-  const H = level === 2 ? "h2" : "h3";
+  const Heading = level === 2 ? "h2" : "h3";
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       {(index || label) && (
@@ -97,15 +140,14 @@ export function SectionHead({
         </div>
       )}
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-        <H className="text-display-2 min-w-0 text-bone">{title}</H>
+        <Heading className="text-display-2 min-w-0 text-bone">{title}</Heading>
         {action}
       </div>
-      {lede && <p className="text-lede max-w-[54ch]">{lede}</p>}
+      {lede && <p className="text-lede">{lede}</p>}
     </div>
   );
 }
 
-/** Hairline rule with an optional technical caption. */
 export function Rule({ caption, className }: { caption?: string; className?: string }) {
   return (
     <div className={cn("flex items-center gap-4", className)}>
@@ -116,7 +158,6 @@ export function Rule({ caption, className }: { caption?: string; className?: str
   );
 }
 
-/** Fixed-ratio image frame: zero CLS, slow hover zoom, skeleton ground. */
 export function Frame({
   src,
   alt,
@@ -167,44 +208,142 @@ export function Frame({
   );
 }
 
-const CTA_BASE =
-  "inline-flex items-center justify-center gap-2 tap-target px-6 text-xs font-bold uppercase tracking-[0.14em] transition-[background-color,color,border-color,transform] duration-[220ms] ease-[var(--ease-lbb)] active:translate-y-px disabled:pointer-events-none disabled:opacity-40";
+export type CtaVariant = "signal" | "bone" | "ghost" | "line" | "danger";
+export type CtaSize = "sm" | "md" | "lg";
 
-/** Signal-red primary action. Use sparingly — one per view where possible. */
-export function CtaClasses(variant: "signal" | "bone" | "ghost" | "line" = "signal") {
-  switch (variant) {
-    case "bone":
-      return cn(CTA_BASE, "bg-bone text-obsidian hover:bg-signal hover:text-obsidian");
-    case "ghost":
-      return cn(CTA_BASE, "bg-transparent text-bone hover:bg-carbon-2");
-    case "line":
-      return cn(
-        CTA_BASE,
-        "border border-hairline bg-transparent text-bone hover:border-signal hover:text-signal",
-      );
-    default:
-      return cn(CTA_BASE, "bg-signal text-obsidian hover:bg-bone hover:text-obsidian");
-  }
+const CTA_BASE =
+  "inline-flex items-center justify-center gap-2 tap-target font-bold transition-[background-color,color,border-color,transform,box-shadow] ease-[var(--ease-lbb-standard)] active:translate-y-px disabled:pointer-events-none disabled:opacity-40 aria-busy:cursor-wait";
+
+const CTA_SIZE: Record<CtaSize, string> = {
+  sm: "min-h-10 px-4 text-[11px] tracking-[0.1em]",
+  md: "min-h-11 px-6 text-xs tracking-[0.12em]",
+  lg: "min-h-12 px-8 text-sm tracking-[0.1em]",
+};
+
+export function CtaClasses(variant: CtaVariant = "signal", size: CtaSize = "md") {
+  const variantClass =
+    variant === "bone"
+      ? "border border-bone bg-bone text-obsidian hover:border-signal hover:bg-signal"
+      : variant === "ghost"
+        ? "border border-transparent bg-transparent text-bone hover:border-hairline hover:bg-carbon-2"
+        : variant === "line"
+          ? "border border-hairline-strong bg-transparent text-bone hover:border-signal hover:text-signal"
+          : variant === "danger"
+            ? "border border-danger bg-danger text-obsidian hover:border-bone hover:bg-bone"
+            : "border border-signal bg-signal text-obsidian hover:border-bone hover:bg-bone";
+
+  return cn(CTA_BASE, CTA_SIZE[size], variantClass);
 }
 
-/** Availability / status pill built from real product state. */
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: CtaVariant;
+  size?: CtaSize;
+  loading?: boolean;
+  loadingLabel?: string;
+};
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    variant = "signal",
+    size = "md",
+    loading = false,
+    loadingLabel = "در حال انجام",
+    className,
+    children,
+    disabled,
+    ...props
+  },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={cn(CtaClasses(variant, size), className)}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...props}
+    >
+      {loading ? <LoaderCircle size={16} className="animate-spin" aria-hidden="true" /> : null}
+      <span>{loading ? loadingLabel : children}</span>
+    </button>
+  );
+});
+
+export const IconButton = forwardRef<
+  HTMLButtonElement,
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    label: string;
+    pressed?: boolean;
+    size?: "md" | "lg";
+  }
+>(function IconButton(
+  { label, pressed, size = "md", className, children, type = "button", ...props },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      type={type}
+      aria-label={label}
+      aria-pressed={pressed}
+      className={cn(
+        "grid place-items-center border border-hairline bg-carbon text-bone transition-colors hover:border-signal hover:text-signal disabled:pointer-events-none disabled:opacity-40",
+        size === "md" ? "h-11 w-11" : "h-12 w-12",
+        pressed && "border-signal bg-signal text-obsidian",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+});
+
+export function ChoiceChip({
+  selected,
+  children,
+  className,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { selected: boolean }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      className={cn(
+        "min-h-11 border px-4 text-xs font-semibold transition-colors",
+        selected
+          ? "border-signal bg-signal text-obsidian"
+          : "border-hairline bg-carbon text-bone hover:border-hairline-strong",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function StatusTag({
   tone = "neutral",
   children,
   className,
 }: {
-  tone?: "signal" | "neutral" | "out" | "bone";
+  tone?: "signal" | "neutral" | "out" | "bone" | "success" | "warning" | "info";
   children: ReactNode;
   className?: string;
 }) {
   return (
     <span
       className={cn(
-        "tech inline-flex items-center gap-1.5 px-2 py-1 leading-none",
-        tone === "signal" && "bg-signal text-obsidian",
-        tone === "bone" && "bg-bone text-obsidian",
-        tone === "out" && "border border-hairline bg-obsidian/80 text-mute",
-        tone === "neutral" && "border border-hairline bg-obsidian/80 text-bone",
+        "tech inline-flex items-center gap-1.5 border px-2 py-1 leading-none",
+        tone === "signal" && "border-signal bg-signal text-obsidian",
+        tone === "bone" && "border-bone bg-bone text-obsidian",
+        tone === "success" && "border-success/50 bg-success/10 text-success",
+        tone === "warning" && "border-warning/50 bg-warning/10 text-warning",
+        tone === "info" && "border-info/50 bg-info/10 text-info",
+        tone === "out" && "border-hairline bg-obsidian/80 text-mute",
+        tone === "neutral" && "border-hairline bg-obsidian/80 text-bone",
         className,
       )}
     >
@@ -213,7 +352,71 @@ export function StatusTag({
   );
 }
 
-/** Loading skeleton block. */
+type StateTone = "neutral" | "success" | "warning" | "danger" | "info";
+
+export function StatePanel({
+  title,
+  children,
+  tone = "neutral",
+  action,
+  className,
+}: {
+  title: string;
+  children: ReactNode;
+  tone?: StateTone;
+  action?: ReactNode;
+  className?: string;
+}) {
+  const role = tone === "danger" ? "alert" : "status";
+  return (
+    <div
+      role={role}
+      className={cn(
+        "border p-5",
+        tone === "neutral" && "border-hairline bg-carbon",
+        tone === "success" && "border-success/50 bg-success/[0.07]",
+        tone === "warning" && "border-warning/50 bg-warning/[0.07]",
+        tone === "danger" && "border-danger/50 bg-danger/[0.07]",
+        tone === "info" && "border-info/50 bg-info/[0.07]",
+        className,
+      )}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-bold text-bone">{title}</p>
+          <div className="mt-2 text-xs leading-6 text-metal">{children}</div>
+        </div>
+        {action}
+      </div>
+    </div>
+  );
+}
+
+export function FieldMessage({
+  id,
+  tone = "help",
+  children,
+}: {
+  id?: string;
+  tone?: "help" | "error" | "success";
+  children: ReactNode;
+}) {
+  return (
+    <p
+      id={id}
+      role={tone === "error" ? "alert" : undefined}
+      className={cn(
+        "mt-2 text-xs leading-6",
+        tone === "help" && "text-mute",
+        tone === "error" && "font-semibold text-danger",
+        tone === "success" && "font-semibold text-success",
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
 export function Skeleton({ className, ratio }: { className?: string; ratio?: string }) {
   return (
     <div
@@ -224,7 +427,6 @@ export function Skeleton({ className, ratio }: { className?: string; ratio?: str
   );
 }
 
-/** Product-grid loading state. */
 export function GridSkeleton({ count = 8 }: { count?: number }) {
   return (
     <div
@@ -232,8 +434,8 @@ export function GridSkeleton({ count = 8 }: { count?: number }) {
       aria-label="در حال بارگذاری محصولات"
       className="grid grid-cols-2 gap-px bg-hairline md:grid-cols-3 xl:grid-cols-4"
     >
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="bg-obsidian p-px">
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="bg-obsidian p-px">
           <Skeleton ratio="4/5" />
           <div className="flex flex-col gap-2 p-3">
             <Skeleton className="h-3 w-2/3" />
@@ -245,7 +447,6 @@ export function GridSkeleton({ count = 8 }: { count?: number }) {
   );
 }
 
-/** Designed empty state. */
 export function EmptyState({
   icon,
   title,
@@ -274,7 +475,6 @@ export function EmptyState({
   );
 }
 
-/** Honest, clearly-labelled demo notice for unconnected backend flows. */
 export function DemoNotice({
   title = "حالت نمایشی",
   children,
@@ -295,7 +495,6 @@ export function DemoNotice({
   );
 }
 
-/** Visually hidden text that stays available to screen readers. */
 export function SrOnly({ children }: { children: ReactNode }) {
   return <span className="sr-only">{children}</span>;
 }
