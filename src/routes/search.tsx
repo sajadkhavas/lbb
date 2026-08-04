@@ -8,7 +8,7 @@ import { ProductCard } from "@/components/lbb/ProductCard";
 import { ProductFilters } from "@/components/lbb/ProductFilters";
 import { ProductGridControls } from "@/components/lbb/ProductGridControls";
 import { CtaClasses, EmptyState, GridSkeleton, Shell } from "@/components/lbb/ui/primitives";
-import { products } from "@/lib/products";
+import { products } from "@/lib/product-catalog";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import {
   addRecentSearch,
@@ -30,12 +30,21 @@ import {
   type FilterSearch,
 } from "@/lib/product-filter";
 
-const ALL_COLORS = Array.from(new Set(products.flatMap((product) => product.colors)));
-const ALL_SIZES = Array.from(new Set(products.flatMap((product) => product.sizes)));
-const PRICE_CEIL = Math.max(1, ...products.map((product) => product.price));
-const FILTER_SCOPE = { colors: ALL_COLORS, sizes: ALL_SIZES, priceCeil: PRICE_CEIL } as const;
+type SearchFilterScope = {
+  colors: string[];
+  sizes: string[];
+  priceCeil: number;
+};
 
 type SearchParams = FilterSearch & { q?: string };
+
+function createSearchFilterScope(): SearchFilterScope {
+  return {
+    colors: Array.from(new Set(products.flatMap((product) => product.colors))),
+    sizes: Array.from(new Set(products.flatMap((product) => product.sizes))),
+    priceCeil: Math.max(1, ...products.map((product) => product.price)),
+  };
+}
 
 const queryFrom = (value: unknown) =>
   normalizeSearchTerm(typeof value === "string" ? value : "") || undefined;
@@ -105,13 +114,14 @@ export const Route = createFileRoute("/search")({
 function SearchPage() {
   const routeSearch = Route.useSearch();
   const query = routeSearch.q;
+  const filterScope = useMemo(() => createSearchFilterScope(), []);
   const filters = useMemo(
     () =>
       normalizeFilters(
         parseFilters(routeSearch as unknown as Record<string, unknown>),
-        FILTER_SCOPE,
+        filterScope,
       ),
-    [routeSearch],
+    [filterScope, routeSearch],
   );
   const navigate = useNavigate({ from: "/search" });
   const [draft, setDraft] = useState(query ?? "");
@@ -141,7 +151,7 @@ function SearchPage() {
     if (nextQuery === query) return;
     const timer = window.setTimeout(() => {
       startTransition(() =>
-        navigate({ search: serializeSearch(nextQuery, filters), replace: true }),
+        navigate({ search: serializeSearch(nextQuery, filters), replace: false }),
       );
     }, 350);
     return () => window.clearTimeout(timer);
@@ -156,7 +166,7 @@ function SearchPage() {
   };
 
   const setFilters = (nextFilters: Filters) => {
-    const normalized = normalizeFilters(nextFilters, FILTER_SCOPE);
+    const normalized = normalizeFilters(nextFilters, filterScope);
     startTransition(() => navigate({ search: serializeSearch(query, normalized), replace: false }));
   };
 
@@ -169,9 +179,9 @@ function SearchPage() {
     <ProductFilters
       filters={filters}
       onChange={setFilters}
-      colors={ALL_COLORS}
-      sizes={ALL_SIZES}
-      priceCeil={PRICE_CEIL}
+      colors={filterScope.colors}
+      sizes={filterScope.sizes}
+      priceCeil={filterScope.priceCeil}
       showCategory
     />
   );
