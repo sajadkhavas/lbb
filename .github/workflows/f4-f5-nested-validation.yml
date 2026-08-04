@@ -118,7 +118,18 @@ jobs:
           cat /tmp/lbb-dev.log
           exit 1
       - name: Browser validation against TanStack server
-        run: node .github/scripts/f4-f5-browser.mjs
+        id: browser
+        continue-on-error: true
+        run: node .github/scripts/f4-f5-browser.mjs > /tmp/f4-f5-browser.log 2>&1
+      - name: Report browser validation
+        if: always()
+        shell: bash
+        run: |
+          echo '===== F4/F5 BROWSER RESULT ====='
+          tail -n 160 /tmp/f4-f5-browser.log || true
+          if [ '${{ steps.browser.outcome }}' != 'success' ]; then
+            exit 1
+          fi
       - name: Report full lint blocker
         if: always() && steps.full_lint.outcome != 'success'
         run: |
