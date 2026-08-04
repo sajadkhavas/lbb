@@ -20,7 +20,7 @@ export function BrandStatement() {
         </span>
         <span className="block text-[9vw] font-bold leading-[0.95] text-bone/50">می‌زنه.</span>
       </div>
-      <span className="tech absolute bottom-8 inset-inline-start-8 rounded-full border border-bone/20 bg-obsidian/10 px-3 py-1.5 text-bone/70 backdrop-blur-sm">
+      <span className="tech absolute bottom-8 inset-inline-start-8 rounded-full border border-obsidian bg-obsidian px-3 py-1.5 text-bone">
         LBB ✦ استریت‌ویر تهران
       </span>
     </section>
