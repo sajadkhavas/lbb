@@ -35,12 +35,6 @@ const routes = [
   "/privacy",
 ];
 
-const ignoredConsoleErrors = [
-  "<html> cannot be a child of <#document>",
-  "<head> cannot be a child of <#document>",
-  "<body> cannot be a child of <#document>",
-];
-
 for (const route of routes) {
   test(`${route} renders without runtime or resource failure`, async ({ page }) => {
     const errors: string[] = [];
@@ -51,7 +45,7 @@ for (const route of routes) {
       if (message.type() !== "error") return;
       const text = message.text();
       if (text.startsWith("Failed to load resource:")) return;
-      if (!ignoredConsoleErrors.some((known) => text.includes(known))) errors.push(text);
+      errors.push(text);
     });
     page.on("response", (response) => {
       if (response.status() < 400 || response.request().resourceType() === "document") return;
