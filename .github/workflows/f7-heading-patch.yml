@@ -1,0 +1,95 @@
+name: F7 heading patch
+
+on:
+  pull_request:
+    branches:
+      - validation/f7-heading-patch
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase/f7-content-editorial
+          fetch-depth: 0
+
+      - name: Apply page-level headings
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          replacements = [
+              (
+                  Path("src/routes/collections.$slug.tsx"),
+                  '''            <EmptyState
+              icon={<Layers3 aria-hidden="true" size={34} />}
+              title="این کالکشن پیدا نشد"
+              body="آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد."
+              action={
+                <Link to="/collections" className={CtaClasses("signal")}>
+                  بازگشت به کالکشن‌ها
+                </Link>
+              }
+            />''',
+                  '''            <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
+              <span className="text-mute">
+                <Layers3 aria-hidden="true" size={34} />
+              </span>
+              <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
+              <p className="max-w-[42ch] text-sm leading-7 text-metal">
+                آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.
+              </p>
+              <Link to="/collections" className={CtaClasses("signal")}>
+                بازگشت به کالکشن‌ها
+              </Link>
+            </div>''',
+              ),
+              (
+                  Path("src/routes/journal.$slug.tsx"),
+                  '''            <EmptyState
+              icon={<BookOpenText aria-hidden="true" size={34} />}
+              title="این مقاله پیدا نشد"
+              body="آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد."
+              action={
+                <Link to="/journal" className={CtaClasses("signal")}>
+                  بازگشت به ژورنال
+                </Link>
+              }
+            />''',
+                  '''            <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
+              <span className="text-mute">
+                <BookOpenText aria-hidden="true" size={34} />
+              </span>
+              <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
+              <p className="max-w-[42ch] text-sm leading-7 text-metal">
+                آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
+              </p>
+              <Link to="/journal" className={CtaClasses("signal")}>
+                بازگشت به ژورنال
+              </Link>
+            </div>''',
+              ),
+          ]
+
+          for path, old, new in replacements:
+              text = path.read_text()
+              if old not in text:
+                  raise SystemExit(f"target block not found: {path}")
+              text = text.replace(old, new)
+              if path.name == "journal.$slug.tsx":
+                  text = text.replace("  EmptyState,\n", "")
+              path.write_text(text)
+          PY
+
+      - name: Format, commit and push
+        run: |
+          npx prettier --write 'src/routes/collections.$slug.tsx' 'src/routes/journal.$slug.tsx'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'src/routes/collections.$slug.tsx' 'src/routes/journal.$slug.tsx'
+          git commit -m "fix(f7): use page-level headings for invalid slugs"
+          git push origin HEAD:phase/f7-content-editorial
