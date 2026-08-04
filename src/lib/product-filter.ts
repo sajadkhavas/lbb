@@ -4,7 +4,7 @@ import {
   products,
   type CategorySlug,
   type Product,
-} from "./products";
+} from "./product-catalog";
 
 export type SortKey = "newest" | "best" | "price-asc" | "price-desc" | "discount";
 
