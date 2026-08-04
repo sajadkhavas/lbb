@@ -35,10 +35,17 @@ test("fonts are self-hosted, loaded and free of external font requests", async (
   request,
 }) => {
   const externalFonts: string[] = [];
+  const localFonts: string[] = [];
+
   page.on("request", (requestEvent) => {
     const url = requestEvent.url();
-    if (/fonts\.googleapis|fonts\.gstatic|use\.typekit|fontshare/i.test(url))
+    if (/fonts\.googleapis|fonts\.gstatic|use\.typekit|fontshare/i.test(url)) {
       externalFonts.push(url);
+      return;
+    }
+    if (requestEvent.resourceType() === "font" || /\.woff2(?:\?|$)/i.test(url)) {
+      localFonts.push(url);
+    }
   });
 
   await page.goto("/", { waitUntil: "networkidle" });
@@ -47,21 +54,12 @@ test("fonts are self-hosted, loaded and free of external font requests", async (
   expect(await page.evaluate(() => document.fonts.check('16px "JetBrains Mono"'))).toBe(true);
   expect(externalFonts).toEqual([]);
 
-  const stylesheets = await page
-    .locator('link[rel="stylesheet"]')
-    .evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
-  const fontUrls: string[] = [];
-  for (const stylesheet of stylesheets) {
-    const response = await request.get(stylesheet);
-    if (!response.ok()) continue;
-    const css = await response.text();
-    for (const match of css.matchAll(/url\(([^)]+\.woff2)\)/g)) {
-      fontUrls.push(new URL(match[1].replace(/["']/g, ""), stylesheet).href);
-    }
+  const uniqueFonts = Array.from(new Set(localFonts));
+  expect(uniqueFonts.length).toBeGreaterThan(0);
+  expect(uniqueFonts.every((url) => new URL(url).origin === origin)).toBe(true);
+  for (const fontUrl of uniqueFonts.slice(0, 2)) {
+    expect((await request.get(fontUrl)).ok()).toBe(true);
   }
-  expect(fontUrls.length).toBeGreaterThan(0);
-  expect(fontUrls.every((url) => new URL(url).origin === origin)).toBe(true);
-  expect((await request.get(fontUrls[0])).ok()).toBe(true);
 });
 
 test("PWA files are valid and navigation is not cached with a stale-first strategy", async ({
@@ -70,8 +68,12 @@ test("PWA files are valid and navigation is not cached with a stale-first strate
   const manifest = await request.get(`${origin}/manifest.webmanifest`);
   expect(manifest.ok()).toBe(true);
   const data = await manifest.json();
-  expect(data.name).toBe("LBB — لباس برای بیرون");
+  expect(data.name).toBe("LBB — فروشگاه استریت‌ویر");
+  expect(data.short_name).toBe("LBB");
+  expect(data.lang).toBe("fa");
+  expect(data.dir).toBe("rtl");
   expect(data.start_url).toBe("/");
+  expect(data.icons).toHaveLength(3);
 
   const worker = await request.get(`${origin}/sw.js`);
   expect(worker.ok()).toBe(true);
