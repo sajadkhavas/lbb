@@ -12,7 +12,11 @@ import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 
 type NavLink =
-  | { label: string; latin: string; to: "/" | "/shop" | "/lookbook" | "/collections" | "/journal" | "/about" | "/contact" }
+  | {
+      label: string;
+      latin: string;
+      to: "/" | "/shop" | "/lookbook" | "/collections" | "/journal" | "/about" | "/contact";
+    }
   | { label: string; latin: string; to: "/$category"; category: string };
 
 const PRIMARY: NavLink[] = [
@@ -164,7 +168,6 @@ export function Navbar({
             </span>
           </Link>
 
-
           {/* desktop links */}
           <ul className="hidden min-w-0 items-center justify-center gap-8 lg:flex">
             {PRIMARY.map((l) => {
@@ -262,7 +265,10 @@ export function Navbar({
               </button>
             </div>
 
-            <form onSubmit={submit} className="mt-3 flex items-center gap-3 border-b border-hairline pb-3">
+            <form
+              onSubmit={submit}
+              className="mt-3 flex items-center gap-3 border-b border-hairline pb-3"
+            >
               <Search size={20} className="shrink-0 text-mute" aria-hidden="true" />
               <input
                 autoFocus
@@ -274,7 +280,11 @@ export function Navbar({
                 aria-label="عبارت جست‌وجو"
                 className="h-11 w-full min-w-0 bg-transparent text-base text-bone outline-none placeholder:text-mute"
               />
-              <button type="submit" className="tech shrink-0 text-signal disabled:opacity-40" disabled={!term}>
+              <button
+                type="submit"
+                className="tech shrink-0 text-signal disabled:opacity-40"
+                disabled={!term}
+              >
                 برو
               </button>
             </form>
@@ -303,8 +313,12 @@ export function Navbar({
                         className="h-[55px] w-11 shrink-0 object-cover"
                       />
                       <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate text-[13px] font-semibold text-bone">{s.name}</span>
-                        <span className="num mt-0.5 text-[11px] text-metal">{fmtToman(s.price)}</span>
+                        <span className="truncate text-[13px] font-semibold text-bone">
+                          {s.name}
+                        </span>
+                        <span className="num mt-0.5 text-[11px] text-metal">
+                          {fmtToman(s.price)}
+                        </span>
                       </span>
                       <ArrowUpLeft
                         size={15}
@@ -334,7 +348,9 @@ export function Navbar({
             className="lbb-shell sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-hairline bg-obsidian/95 backdrop-blur"
             style={{ height: "var(--lbb-nav-h)" }}
           >
-            <span className="font-display text-[22px] font-black tracking-[-0.06em] text-signal">LBB</span>
+            <span className="font-display text-[22px] font-black tracking-[-0.06em] text-signal">
+              LBB
+            </span>
             <button
               type="button"
               aria-label="بستن منو"
@@ -422,8 +438,7 @@ export function Navbar({
                         aria-hidden="true"
                         className="absolute inset-0"
                         style={{
-                          background:
-                            "linear-gradient(to top, rgba(5,5,5,0.9), rgba(5,5,5,0.05))",
+                          background: "linear-gradient(to top, rgba(5,5,5,0.9), rgba(5,5,5,0.05))",
                         }}
                       />
                       <span className="absolute bottom-2.5 right-3 text-sm font-bold text-bone">

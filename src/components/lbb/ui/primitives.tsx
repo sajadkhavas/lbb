@@ -285,10 +285,7 @@ export function DemoNotice({
   className?: string;
 }) {
   return (
-    <div
-      role="note"
-      className={cn("border border-signal/50 bg-signal/[0.07] p-4", className)}
-    >
+    <div role="note" className={cn("border border-signal/50 bg-signal/[0.07] p-4", className)}>
       <p className="flex items-center gap-2">
         <span aria-hidden="true" className="h-2 w-2 shrink-0 bg-signal" />
         <span className="text-xs font-bold text-bone">{title}</span>

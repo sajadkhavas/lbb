@@ -28,7 +28,6 @@ const BRAND: Item[] = [
  * existing call sites keep compiling, but it no longer changes the skin.
  */
 export function Footer(_props: { theme?: "dark" | "light" } = {}) {
-
   return (
     <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
       {/* oversized wordmark band */}
@@ -110,7 +109,10 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
             <ul className="mt-4 flex flex-col gap-2.5">
               {BRAND.map((i) => (
                 <li key={String(i.to)}>
-                  <Link to={i.to} className="text-sm text-metal transition-colors hover:text-signal">
+                  <Link
+                    to={i.to}
+                    className="text-sm text-metal transition-colors hover:text-signal"
+                  >
                     {i.label}
                   </Link>
                 </li>

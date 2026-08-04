@@ -9,10 +9,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     (async () => {
-      const [{ default: Lenis }, { gsap }] = await Promise.all([
-        import("lenis"),
-        import("gsap"),
-      ]);
+      const [{ default: Lenis }, { gsap }] = await Promise.all([import("lenis"), import("gsap")]);
       if (cancelled) return;
       const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
       const raf = (time: number) => lenis.raf(time * 1000);
