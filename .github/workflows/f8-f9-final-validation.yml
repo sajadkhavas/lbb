@@ -29,7 +29,6 @@ jobs:
         run: |
           rm -rf node_modules package-lock.json npm-shrinkwrap.json
           npm install --ignore-scripts
-          npm install --no-save --package-lock=false @typescript/native-preview
 
       - name: Format entire repository
         run: npx prettier --write .
