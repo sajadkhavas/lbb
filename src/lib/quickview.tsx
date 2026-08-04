@@ -47,6 +47,13 @@ export function QuickViewProvider({ children }: { children: ReactNode }) {
 
     const firstFrame = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        // A cart drawer or another modal may open immediately after Quick View.
+        // In that hand-off, let the new dialog own focus instead of stealing it
+        // back to the product-card trigger.
+        const activeModal = document.querySelector<HTMLElement>(
+          '[role="dialog"][aria-modal="true"]',
+        );
+        if (activeModal) return;
         if (target.isConnected) target.focus({ preventScroll: true });
       });
     });
