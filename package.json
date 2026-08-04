@@ -18,10 +18,11 @@
     "typecheck": "tsc --noEmit",
     "audit:production": "node scripts/audit-production.mjs",
     "audit:source": "node scripts/audit-source.mjs",
+    "smoke:production": "node scripts/smoke-production.mjs",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/accessibility.spec.ts",
     "test:visual": "playwright test tests/visual.spec.ts",
-    "quality": "npm run format:check && npm run typecheck && npm run lint && npm run build && npm run audit:production && npm run audit:source && npm run test:e2e"
+    "quality": "npm run format:check && npm run typecheck && npm run lint && npm run build && npm run audit:production && npm run audit:source && npm run smoke:production && npm run test:e2e"
   },
   "dependencies": {
     "@fontsource-variable/estedad": "^5.2.8",
