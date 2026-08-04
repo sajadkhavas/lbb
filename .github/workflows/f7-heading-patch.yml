@@ -22,67 +22,57 @@ jobs:
           python <<'PY'
           from pathlib import Path
 
-          replacements = [
-              (
-                  Path("src/routes/collections.$slug.tsx"),
-                  '''            <EmptyState
-              icon={<Layers3 aria-hidden="true" size={34} />}
-              title="این کالکشن پیدا نشد"
-              body="آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد."
-              action={
-                <Link to="/collections" className={CtaClasses("signal")}>
-                  بازگشت به کالکشن‌ها
-                </Link>
-              }
-            />''',
-                  '''            <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
-              <span className="text-mute">
-                <Layers3 aria-hidden="true" size={34} />
-              </span>
-              <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
-              <p className="max-w-[42ch] text-sm leading-7 text-metal">
-                آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.
-              </p>
-              <Link to="/collections" className={CtaClasses("signal")}>
-                بازگشت به کالکشن‌ها
-              </Link>
-            </div>''',
-              ),
-              (
-                  Path("src/routes/journal.$slug.tsx"),
-                  '''            <EmptyState
-              icon={<BookOpenText aria-hidden="true" size={34} />}
-              title="این مقاله پیدا نشد"
-              body="آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد."
-              action={
-                <Link to="/journal" className={CtaClasses("signal")}>
-                  بازگشت به ژورنال
-                </Link>
-              }
-            />''',
-                  '''            <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
-              <span className="text-mute">
-                <BookOpenText aria-hidden="true" size={34} />
-              </span>
-              <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
-              <p className="max-w-[42ch] text-sm leading-7 text-metal">
-                آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
-              </p>
-              <Link to="/journal" className={CtaClasses("signal")}>
-                بازگشت به ژورنال
-              </Link>
-            </div>''',
-              ),
-          ]
-
-          for path, old, new in replacements:
+          def replace_empty_state(path: Path, title: str, replacement: str) -> None:
               text = path.read_text()
-              if old not in text:
-                  raise SystemExit(f"target block not found: {path}")
-              text = text.replace(old, new)
-              if path.name == "journal.$slug.tsx":
-                  text = text.replace("  EmptyState,\n", "")
-              path.write_text(text)
+              if f'<h1 className="text-display-3 text-bone">{title}</h1>' in text:
+                  return
+
+              marker_index = text.index(f'title="{title}"')
+              start = text.rfind("<EmptyState", 0, marker_index)
+              end = text.index("/>", marker_index) + 2
+              if start < 0:
+                  raise RuntimeError(f"EmptyState start not found in {path}")
+
+              line_start = text.rfind("\n", 0, start) + 1
+              indent = text[line_start:start]
+              rendered = "\n".join(indent + line for line in replacement.splitlines())
+              path.write_text(text[:line_start] + rendered + text[end:])
+
+          replace_empty_state(
+              Path("src/routes/collections.$slug.tsx"),
+              "این کالکشن پیدا نشد",
+              '''<div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
+  <span className="text-mute">
+    <Layers3 aria-hidden="true" size={34} />
+  </span>
+  <h1 className="text-display-3 text-bone">این کالکشن پیدا نشد</h1>
+  <p className="max-w-[42ch] text-sm leading-7 text-metal">
+    آدرس کالکشن معتبر نیست یا این صفحه دیگر در فهرست کالکشن‌های LBB قرار ندارد.
+  </p>
+  <Link to="/collections" className={CtaClasses("signal")}>
+    بازگشت به کالکشن‌ها
+  </Link>
+</div>''',
+          )
+
+          journal = Path("src/routes/journal.$slug.tsx")
+          replace_empty_state(
+              journal,
+              "این مقاله پیدا نشد",
+              '''<div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
+  <span className="text-mute">
+    <BookOpenText aria-hidden="true" size={34} />
+  </span>
+  <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
+  <p className="max-w-[42ch] text-sm leading-7 text-metal">
+    آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
+  </p>
+  <Link to="/journal" className={CtaClasses("signal")}>
+    بازگشت به ژورنال
+  </Link>
+</div>''',
+          )
+          journal.write_text(journal.read_text().replace("  EmptyState,\n", ""))
           PY
 
       - name: Format, commit and push
@@ -91,5 +81,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add 'src/routes/collections.$slug.tsx' 'src/routes/journal.$slug.tsx'
+          if git diff --cached --quiet; then
+            echo "Heading patch already present."
+            exit 0
+          fi
           git commit -m "fix(f7): use page-level headings for invalid slugs"
           git push origin HEAD:phase/f7-content-editorial
