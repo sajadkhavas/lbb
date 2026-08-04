@@ -26,6 +26,8 @@ jobs:
           rm -rf node_modules
       - name: npm ci
         run: npm ci
+      - name: Apply optional search typing migration
+        run: node .github/scripts/f4-f5-fix-search-types.mjs
       - name: Format owned files
         run: >-
           npx prettier --write
@@ -43,7 +45,7 @@ jobs:
           'src/lib/quickview.tsx'
           'src/lib/recent-searches.ts'
           'src/lib/recently-viewed.ts'
-      - name: Commit formatting to temporary validation base
+      - name: Commit migration and formatting to temporary validation base
         shell: bash
         run: |
           paths=(
@@ -72,7 +74,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- "${paths[@]}"
-          git commit -m 'style(f4-f5): format owned files'
+          git commit -m 'fix(f4): keep catalogue search parameters optional'
           git push origin HEAD:tmp/f4-f5-validation-20260804
       - name: Install tsgo runtime without modifying project manifests
         run: npm install --no-save --package-lock=false @typescript/native-preview
