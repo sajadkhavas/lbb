@@ -18,6 +18,17 @@ export type Filters = {
   sort: SortKey;
 };
 
+/** Optional URL representation. Keeping every key optional prevents catalogue links elsewhere from requiring search props. */
+export type FilterSearch = {
+  cats?: string;
+  colors?: string;
+  sizes?: string;
+  max?: number;
+  instock?: true;
+  sale?: true;
+  sort?: SortKey;
+};
+
 export type FilterScope = {
   categories?: readonly string[] | false;
   colors?: readonly string[];
@@ -37,9 +48,9 @@ export const EMPTY_FILTERS: Filters = {
 
 const SORTS: readonly SortKey[] = ["newest", "best", "price-asc", "price-desc", "discount"];
 const CATEGORY_ORDER: readonly CategorySlug[] = ["hoodies", "pants", "tshirts", "shoes", "socks"];
-const GLOBAL_COLORS = Array.from(new Set(products.flatMap((p) => p.colors)));
-const GLOBAL_SIZES = Array.from(new Set(products.flatMap((p) => p.sizes)));
-const GLOBAL_PRICE_CEIL = Math.max(1, ...products.map((p) => p.price));
+const GLOBAL_COLORS = Array.from(new Set(products.flatMap((product) => product.colors)));
+const GLOBAL_SIZES = Array.from(new Set(products.flatMap((product) => product.sizes)));
+const GLOBAL_PRICE_CEIL = Math.max(1, ...products.map((product) => product.price));
 
 export const SORT_LABELS: Record<SortKey, string> = {
   newest: "جدیدترین",
@@ -109,7 +120,7 @@ export function normalizeFilters(filters: Filters, scope: FilterScope = {}): Fil
   };
 }
 
-/** Parses raw URL search into a safe and deterministic Filters object. */
+/** Parses raw URL search into a safe and deterministic internal Filters object. */
 export function parseFilters(search: Record<string, unknown>): Filters {
   const rawSort = scalar(search.sort);
   const maxValue = Number(scalar(search.max));
@@ -125,17 +136,22 @@ export function parseFilters(search: Record<string, unknown>): Filters {
 }
 
 /** Strips defaults and serializes arrays as sorted comma-separated values. */
-export function serializeFilters(filters: Filters): Record<string, string | number | boolean> {
-  const f = normalizeFilters(filters);
-  const out: Record<string, string | number | boolean> = {};
-  if (f.cats.length) out.cats = f.cats.join(",");
-  if (f.colors.length) out.colors = f.colors.join(",");
-  if (f.sizes.length) out.sizes = f.sizes.join(",");
-  if (f.max > 0) out.max = f.max;
-  if (f.instock) out.instock = true;
-  if (f.sale) out.sale = true;
-  if (f.sort !== "newest") out.sort = f.sort;
-  return out;
+export function serializeFilters(filters: Filters): FilterSearch {
+  const normalized = normalizeFilters(filters);
+  const output: FilterSearch = {};
+  if (normalized.cats.length) output.cats = normalized.cats.join(",");
+  if (normalized.colors.length) output.colors = normalized.colors.join(",");
+  if (normalized.sizes.length) output.sizes = normalized.sizes.join(",");
+  if (normalized.max > 0) output.max = normalized.max;
+  if (normalized.instock) output.instock = true;
+  if (normalized.sale) output.sale = true;
+  if (normalized.sort !== "newest") output.sort = normalized.sort;
+  return output;
+}
+
+/** Safe optional URL shape used directly by TanStack validateSearch. */
+export function parseFilterSearch(search: Record<string, unknown>): FilterSearch {
+  return serializeFilters(parseFilters(search));
 }
 
 /** Stable query string used to clean direct/deep links without changing semantics. */
@@ -182,28 +198,38 @@ export function clearFilters(filters: Filters): Filters {
 }
 
 export function applyFilters(list: Product[], filters: Filters): Product[] {
-  const f = normalizeFilters(filters);
-  const out = list.filter((product) => {
-    if (f.cats.length && !f.cats.includes(product.category)) return false;
-    if (f.colors.length && !product.colors.some((color) => f.colors.includes(color))) return false;
-    if (f.sizes.length && !f.sizes.some((size) => isSizeAvailable(product, size))) return false;
-    if (f.max > 0 && product.price > f.max) return false;
-    if (f.instock && !product.inStock) return false;
-    if (f.sale && discountPercent(product) === 0) return false;
+  const normalized = normalizeFilters(filters);
+  const output = list.filter((product) => {
+    if (normalized.cats.length && !normalized.cats.includes(product.category)) return false;
+    if (
+      normalized.colors.length &&
+      !product.colors.some((color) => normalized.colors.includes(color))
+    )
+      return false;
+    if (
+      normalized.sizes.length &&
+      !normalized.sizes.some((size) => isSizeAvailable(product, size))
+    )
+      return false;
+    if (normalized.max > 0 && product.price > normalized.max) return false;
+    if (normalized.instock && !product.inStock) return false;
+    if (normalized.sale && discountPercent(product) === 0) return false;
     return true;
   });
 
-  switch (f.sort) {
+  switch (normalized.sort) {
     case "best":
-      return [...out].sort((a, b) => a.rank - b.rank || a.slug.localeCompare(b.slug, "en"));
+      return [...output].sort((a, b) => a.rank - b.rank || a.slug.localeCompare(b.slug, "en"));
     case "price-asc":
-      return [...out].sort((a, b) => a.price - b.price || a.rank - b.rank);
+      return [...output].sort((a, b) => a.price - b.price || a.rank - b.rank);
     case "price-desc":
-      return [...out].sort((a, b) => b.price - a.price || a.rank - b.rank);
+      return [...output].sort((a, b) => b.price - a.price || a.rank - b.rank);
     case "discount":
-      return [...out].sort((a, b) => discountPercent(b) - discountPercent(a) || a.rank - b.rank);
+      return [...output].sort(
+        (a, b) => discountPercent(b) - discountPercent(a) || a.rank - b.rank,
+      );
     default:
-      return [...out].sort(
+      return [...output].sort(
         (a, b) =>
           Number(Boolean(b.isNew)) - Number(Boolean(a.isNew)) ||
           a.rank - b.rank ||
