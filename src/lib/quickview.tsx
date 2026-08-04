@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- provider and hook intentionally share one context module. */
 import {
   createContext,
   useCallback,
