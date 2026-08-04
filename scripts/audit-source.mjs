@@ -45,6 +45,29 @@ if (
   failures.push("Unused vite-plugin-pwa dependency remains.");
 }
 
+const catalogue = await readFile(path.join(root, "src/lib/product-catalog.ts"), "utf8").catch(
+  () => "",
+);
+const productsFacade = await readFile(path.join(root, "src/lib/products.ts"), "utf8").catch(
+  () => "",
+);
+const productFilter = await readFile(path.join(root, "src/lib/product-filter.ts"), "utf8");
+
+if (!catalogue) {
+  failures.push("Pure product catalogue module is missing.");
+} else if (/^\s*import\s/m.test(catalogue) || /\bimport\s*\(/.test(catalogue)) {
+  failures.push("Product catalogue must remain a zero-import data module.");
+}
+if (productsFacade.trim() !== 'export * from "./product-catalog";') {
+  failures.push("products.ts must remain a compatibility facade over product-catalog.ts.");
+}
+if (!productFilter.includes('from "./product-catalog"')) {
+  failures.push("product-filter.ts must import catalogue data directly from product-catalog.ts.");
+}
+if (productFilter.includes('from "./products"')) {
+  failures.push("Circular product-filter → products facade dependency has returned.");
+}
+
 if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);
