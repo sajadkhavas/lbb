@@ -1,0 +1,107 @@
+name: F6 commerce trust validation
+
+on:
+  pull_request:
+    branches:
+      - validation/f6-commerce-trust
+
+permissions:
+  contents: read
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install clean dependency tree
+        run: |
+          rm -rf node_modules package-lock.json npm-shrinkwrap.json
+          npm install --ignore-scripts
+          rm -rf node_modules
+          npm ci
+          npm install --no-save --package-lock=false @typescript/native-preview
+
+      - name: Check formatting
+        run: >-
+          npx prettier --check
+          'src/components/lbb/AnnouncementBar.tsx'
+          'src/components/lbb/CartDrawer.tsx'
+          'src/components/lbb/home/TrustStrip.tsx'
+          'src/lib/cart.tsx'
+          'src/lib/commerce.ts'
+          'src/routes/cart.tsx'
+          'src/routes/checkout.tsx'
+          'src/routes/contact.tsx'
+          'src/routes/order-confirmation.tsx'
+          'src/routes/privacy.tsx'
+          'src/routes/product.$slug.tsx'
+          'src/routes/shipping-returns.tsx'
+          'src/routes/terms.tsx'
+          'src/routes/track-order.tsx'
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint F6 ownership
+        run: >-
+          npx eslint
+          'src/components/lbb/AnnouncementBar.tsx'
+          'src/components/lbb/CartDrawer.tsx'
+          'src/components/lbb/home/TrustStrip.tsx'
+          'src/lib/cart.tsx'
+          'src/lib/commerce.ts'
+          'src/routes/cart.tsx'
+          'src/routes/checkout.tsx'
+          'src/routes/contact.tsx'
+          'src/routes/order-confirmation.tsx'
+          'src/routes/privacy.tsx'
+          'src/routes/product.$slug.tsx'
+          'src/routes/shipping-returns.tsx'
+          'src/routes/terms.tsx'
+          'src/routes/track-order.tsx'
+
+      - name: Check unsupported claims
+        run: |
+          files=(
+            src/components/lbb/AnnouncementBar.tsx
+            src/components/lbb/CartDrawer.tsx
+            src/components/lbb/home/TrustStrip.tsx
+            src/routes/checkout.tsx
+            src/routes/contact.tsx
+            'src/routes/product.$slug.tsx'
+            src/routes/shipping-returns.tsx
+            src/routes/terms.tsx
+          )
+          if grep -En 'زرین.?پال|ایدی.?پی|پیام شما ارسال شد|پرداخت در محل تهران|ارسال به سراسر ایران، معمولاً ۲ تا ۵ روز کاری|امکان مرجوعی و تعویض تا ۷ روز' "${files[@]}"; then
+            echo 'Unsupported commerce claim remains.'
+            exit 1
+          fi
+
+      - name: Production build
+        run: npm run build
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2
+          npx playwright install chromium
+
+      - name: Start app
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/f6-server.log 2>&1 &
+          for attempt in {1..90}; do
+            if curl --fail --silent http://127.0.0.1:4173/cart > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/f6-server.log
+          exit 1
+
+      - name: Browser commerce flow
+        run: node .github/scripts/f6-commerce-browser.mjs
