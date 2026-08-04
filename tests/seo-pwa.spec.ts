@@ -49,9 +49,20 @@ test("fonts are self-hosted, loaded and free of external font requests", async (
   });
 
   await page.goto("/", { waitUntil: "networkidle" });
-  await page.evaluate(() => document.fonts.ready);
-  expect(await page.evaluate(() => document.fonts.check('16px "Estedad"'))).toBe(true);
-  expect(await page.evaluate(() => document.fonts.check('16px "JetBrains Mono"'))).toBe(true);
+  await page.evaluate(async () => {
+    await Promise.all([
+      document.fonts.load('400 16px "Estedad Variable"', "فروشگاه لباس"),
+      document.fonts.load('600 16px "JetBrains Mono Variable"', "LBB 001"),
+      document.fonts.ready,
+    ]);
+  });
+
+  expect(await page.evaluate(() => document.fonts.check('400 16px "Estedad Variable"'))).toBe(
+    true,
+  );
+  expect(
+    await page.evaluate(() => document.fonts.check('600 16px "JetBrains Mono Variable"')),
+  ).toBe(true);
   expect(externalFonts).toEqual([]);
 
   const uniqueFonts = Array.from(new Set(localFonts));
