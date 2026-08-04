@@ -69,8 +69,26 @@ jobs:
             git push origin HEAD:phase/f8-f9-final-quality
           fi
 
-      - name: Run full quality suite
-        run: npm run quality
+      - name: Formatting gate
+        run: npm run format:check
+
+      - name: TypeScript gate
+        run: npm run typecheck
+
+      - name: ESLint gate
+        run: npm run lint
+
+      - name: Production build gate
+        run: npm run build
+
+      - name: Deployment output audit
+        run: npm run audit:production
+
+      - name: Production source audit
+        run: npm run audit:source
+
+      - name: Playwright acceptance suite
+        run: npm run test:e2e
 
       - name: Upload browser report on failure
         if: failure()
