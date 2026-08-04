@@ -155,7 +155,7 @@ export function parseFilterSearch(search: Record<string, unknown>): FilterSearch
 }
 
 /** Stable query string used to clean direct/deep links without changing semantics. */
-export function stableSearchString(params: Record<string, unknown>): string {
+export function stableSearchString(params: object): string {
   const search = new URLSearchParams();
   Object.entries(params)
     .sort(([a], [b]) => a.localeCompare(b, "en"))
@@ -166,7 +166,7 @@ export function stableSearchString(params: Record<string, unknown>): string {
   return search.toString();
 }
 
-export function isCanonicalSearch(current: string, expected: Record<string, unknown>): boolean {
+export function isCanonicalSearch(current: string, expected: object): boolean {
   const actual = new URLSearchParams(current.startsWith("?") ? current.slice(1) : current);
   const sortedActual = new URLSearchParams();
   Array.from(actual.entries())
@@ -206,10 +206,7 @@ export function applyFilters(list: Product[], filters: Filters): Product[] {
       !product.colors.some((color) => normalized.colors.includes(color))
     )
       return false;
-    if (
-      normalized.sizes.length &&
-      !normalized.sizes.some((size) => isSizeAvailable(product, size))
-    )
+    if (normalized.sizes.length && !normalized.sizes.some((size) => isSizeAvailable(product, size)))
       return false;
     if (normalized.max > 0 && product.price > normalized.max) return false;
     if (normalized.instock && !product.inStock) return false;
@@ -225,9 +222,7 @@ export function applyFilters(list: Product[], filters: Filters): Product[] {
     case "price-desc":
       return [...output].sort((a, b) => b.price - a.price || a.rank - b.rank);
     case "discount":
-      return [...output].sort(
-        (a, b) => discountPercent(b) - discountPercent(a) || a.rank - b.rank,
-      );
+      return [...output].sort((a, b) => discountPercent(b) - discountPercent(a) || a.rank - b.rank);
     default:
       return [...output].sort(
         (a, b) =>

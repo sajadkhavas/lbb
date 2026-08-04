@@ -24,6 +24,7 @@ import {
   hasSearchModifiers,
   isCanonicalSearch,
   normalizeFilters,
+  parseFilterSearch,
   parseFilters,
   serializeFilters,
   stableSearchString,
@@ -52,9 +53,9 @@ const itemListLd = {
 };
 
 export const Route = createFileRoute("/shop")({
-  validateSearch: (search: Record<string, unknown>): Filters => parseFilters(search),
+  validateSearch: (search: Record<string, unknown>) => parseFilterSearch(search),
   head: ({ match }) => {
-    const filters = match.search as Filters;
+    const filters = parseFilters(match.search as unknown as Record<string, unknown>);
     return {
       meta: pageMeta({
         title: TITLE,
@@ -83,7 +84,14 @@ export const Route = createFileRoute("/shop")({
 
 function ShopPage() {
   const routeFilters = Route.useSearch();
-  const filters = useMemo(() => normalizeFilters(routeFilters, FILTER_SCOPE), [routeFilters]);
+  const filters = useMemo(
+    () =>
+      normalizeFilters(
+        parseFilters(routeFilters as unknown as Record<string, unknown>),
+        FILTER_SCOPE,
+      ),
+    [routeFilters],
+  );
   const navigate = useNavigate({ from: "/shop" });
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [isPending, startTransition] = useTransition();

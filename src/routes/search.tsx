@@ -22,10 +22,12 @@ import {
   applyFilters,
   isCanonicalSearch,
   normalizeFilters,
+  parseFilterSearch,
   parseFilters,
   serializeFilters,
   stableSearchString,
   type Filters,
+  type FilterSearch,
 } from "@/lib/product-filter";
 
 const ALL_COLORS = Array.from(new Set(products.flatMap((product) => product.colors)));
@@ -33,11 +35,11 @@ const ALL_SIZES = Array.from(new Set(products.flatMap((product) => product.sizes
 const PRICE_CEIL = Math.max(1, ...products.map((product) => product.price));
 const FILTER_SCOPE = { colors: ALL_COLORS, sizes: ALL_SIZES, priceCeil: PRICE_CEIL } as const;
 
-type SearchParams = Filters & { q?: string };
+type SearchParams = FilterSearch & { q?: string };
 
 const queryFrom = (value: unknown) =>
   normalizeSearchTerm(typeof value === "string" ? value : "") || undefined;
-const serializeSearch = (query: string | undefined, filters: Filters) => ({
+const serializeSearch = (query: string | undefined, filters: Filters): SearchParams => ({
   ...(query ? { q: query } : {}),
   ...serializeFilters(filters),
 });
@@ -83,7 +85,7 @@ function highlight(text: string, query: string) {
 
 export const Route = createFileRoute("/search")({
   validateSearch: (search: Record<string, unknown>): SearchParams => ({
-    ...parseFilters(search),
+    ...parseFilterSearch(search),
     q: queryFrom(search.q),
   }),
   head: ({ match }) => {
@@ -103,7 +105,14 @@ export const Route = createFileRoute("/search")({
 function SearchPage() {
   const routeSearch = Route.useSearch();
   const query = routeSearch.q;
-  const filters = useMemo(() => normalizeFilters(routeSearch, FILTER_SCOPE), [routeSearch]);
+  const filters = useMemo(
+    () =>
+      normalizeFilters(
+        parseFilters(routeSearch as unknown as Record<string, unknown>),
+        FILTER_SCOPE,
+      ),
+    [routeSearch],
+  );
   const navigate = useNavigate({ from: "/search" });
   const [draft, setDraft] = useState(query ?? "");
   const [recent, setRecent] = useState<string[]>([]);

@@ -25,6 +25,7 @@ import {
   hasSearchModifiers,
   isCanonicalSearch,
   normalizeFilters,
+  parseFilterSearch,
   parseFilters,
   serializeFilters,
   stableSearchString,
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/$category")({
   beforeLoad: ({ params }) => {
     if (!isValidCategory(params.category)) throw notFound();
   },
-  validateSearch: (search: Record<string, unknown>): Filters => parseFilters(search),
+  validateSearch: (search: Record<string, unknown>) => parseFilterSearch(search),
   loader: ({ params }) => {
     const cat = CATEGORIES[params.category as keyof typeof CATEGORIES];
     return { cat, items: productsByCategory(cat.slug) };
@@ -46,7 +47,7 @@ export const Route = createFileRoute("/$category")({
     if (!loaderData)
       return { meta: [{ title: "پیدا نشد" }, { name: "robots", content: "noindex" }] };
     const { cat, items } = loaderData;
-    const filters = match.search as Filters;
+    const filters = parseFilters(match.search as unknown as Record<string, unknown>);
     const collectionLd = {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
@@ -128,7 +129,10 @@ function CategoryPage() {
     () => ({ categories: false as const, colors, sizes, priceCeil }),
     [colors, sizes, priceCeil],
   );
-  const filters = useMemo(() => normalizeFilters(routeFilters, scope), [routeFilters, scope]);
+  const filters = useMemo(
+    () => normalizeFilters(parseFilters(routeFilters as unknown as Record<string, unknown>), scope),
+    [routeFilters, scope],
+  );
   const searchKey = stableSearchString(serializeFilters(filters));
 
   useEffect(() => setVisible(PAGE_SIZE), [searchKey, cat.slug]);
