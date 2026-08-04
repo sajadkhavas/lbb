@@ -18,7 +18,7 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/products";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
-import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";
+import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
   applyFilters,
   hasSearchModifiers,
@@ -47,7 +47,7 @@ const itemListLd = {
   itemListElement: products.slice(0, 20).map((product, index) => ({
     "@type": "ListItem",
     position: index + 1,
-    url: `/product/${product.slug}`,
+    url: absUrl(`/product/${product.slug}`),
     name: product.name,
   })),
 };
