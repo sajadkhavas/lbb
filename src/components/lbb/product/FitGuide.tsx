@@ -32,22 +32,14 @@ export function FitGuide({ product: p }: { product: Product }) {
       </div>
 
       <p className="text-xs leading-6 text-mute">
-        نظرات مشتریان زمانی نمایش داده می‌شود که سیستم ثبت نظر واقعی به سایت اضافه شود. هیچ امتیاز یا
-        نظری در این صفحه ساختگی نیست.
+        نظرات مشتریان زمانی نمایش داده می‌شود که سیستم ثبت نظر واقعی به سایت اضافه شود. هیچ امتیاز
+        یا نظری در این صفحه ساختگی نیست.
       </p>
     </div>
   );
 }
 
-function Cell({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function Cell({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="bg-carbon p-4">
       <span className="flex items-center gap-1.5 text-metal">

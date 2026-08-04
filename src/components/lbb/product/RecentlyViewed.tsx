@@ -11,7 +11,9 @@ export function RecentlyViewed({ excludeSlug }: { excludeSlug: string }) {
     setSlugs(getRecentlyViewed(excludeSlug));
   }, [excludeSlug]);
 
-  const items = slugs.map((s) => productBySlug(s)).filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const items = slugs
+    .map((s) => productBySlug(s))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
   if (items.length === 0) return null;
 

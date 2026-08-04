@@ -242,12 +242,10 @@ export const PRODUCT_COUNT = products.length;
 
 export const productBySlug = (slug: string) => products.find((p) => p.slug === slug);
 
-export const productsByCategory = (cat: CategorySlug) =>
-  products.filter((p) => p.category === cat);
+export const productsByCategory = (cat: CategorySlug) => products.filter((p) => p.category === cat);
 
 /** Curated bestsellers (merchandising order, not fabricated sales data). */
-export const bestSellers = (n = 4) =>
-  [...products].sort((a, b) => a.rank - b.rank).slice(0, n);
+export const bestSellers = (n = 4) => [...products].sort((a, b) => a.rank - b.rank).slice(0, n);
 
 export const isSizeAvailable = (p: Product, size: string) =>
   p.inStock && !(p.soldOutSizes ?? []).includes(size);

@@ -65,7 +65,11 @@ for (const route of routes) {
     expect(response?.status(), `document status for ${route}`).toBeLessThan(400);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
     await expect(page.locator("h1")).toHaveCount(1);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      ),
+    ).toBeLessThanOrEqual(2);
     expect(errors).toEqual([]);
     expect(failedResources).toEqual([]);
 

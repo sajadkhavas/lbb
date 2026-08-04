@@ -16,7 +16,9 @@ function normalizeSiteUrl(value: string | undefined): string {
     throw new Error("VITE_SITE_URL must use https in production.");
   }
   if (url.username || url.password || url.pathname !== "/" || url.search || url.hash) {
-    throw new Error("VITE_SITE_URL must be a clean origin without path, credentials, query or hash.");
+    throw new Error(
+      "VITE_SITE_URL must be a clean origin without path, credentials, query or hash.",
+    );
   }
   return url.origin;
 }
@@ -28,9 +30,7 @@ export const SITE_LOCALE = "fa_IR";
 /** `/shop` → `https://site/shop` in production and `/shop` during unconfigured development. */
 export function absUrl(path = "/"): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return SITE_URL
-    ? `${SITE_URL}${normalizedPath === "/" ? "/" : normalizedPath}`
-    : normalizedPath;
+  return SITE_URL ? `${SITE_URL}${normalizedPath === "/" ? "/" : normalizedPath}` : normalizedPath;
 }
 
 export function absAsset(assetUrl: string): string {
@@ -42,9 +42,7 @@ export const OG_IMAGE = absUrl("/icons/icon-512.png");
 export const NOINDEX = { name: "robots", content: "noindex, nofollow" } as const;
 
 type MetaEntry =
-  | { title: string }
-  | { name: string; content: string }
-  | { property: string; content: string };
+  { title: string } | { name: string; content: string } | { property: string; content: string };
 
 export function pageMeta(opts: {
   title: string;

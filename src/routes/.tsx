@@ -8,7 +8,15 @@ import { ProductCard } from "@/components/lbb/ProductCard";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { ProductFilters } from "@/components/lbb/ProductFilters";
 import { ProductGridControls } from "@/components/lbb/ProductGridControls";
-import { Shell, Band, TechLabel, GridSkeleton, EmptyState, CtaClasses, Frame } from "@/components/lbb/ui/primitives";
+import {
+  Shell,
+  Band,
+  TechLabel,
+  GridSkeleton,
+  EmptyState,
+  CtaClasses,
+  Frame,
+} from "@/components/lbb/ui/primitives";
 import { CATEGORIES, CATEGORY_SLUGS, isValidCategory } from "@/lib/categories";
 import { productsByCategory, type Product } from "@/lib/products";
 import { productImage } from "@/lib/product-images";
@@ -60,7 +68,13 @@ export const Route = createFileRoute("/$category")({
       })),
     };
     return {
-      meta: pageMeta({ title: cat.metaTitle, description: cat.metaDesc, path: `/${cat.slug}`, type: "website", noindex: filtered }),
+      meta: pageMeta({
+        title: cat.metaTitle,
+        description: cat.metaDesc,
+        path: `/${cat.slug}`,
+        type: "website",
+        noindex: filtered,
+      }),
       links: canonical(`/${cat.slug}`),
       scripts: [
         {
@@ -95,31 +109,56 @@ function CategoryPage() {
     });
   };
 
-  const colors = useMemo(() => Array.from(new Set<string>(items.flatMap((p: Product) => p.colors))), [items]);
-  const sizes = useMemo(() => Array.from(new Set<string>(items.flatMap((p: Product) => p.sizes))), [items]);
+  const colors = useMemo(
+    () => Array.from(new Set<string>(items.flatMap((p: Product) => p.colors))),
+    [items],
+  );
+  const sizes = useMemo(
+    () => Array.from(new Set<string>(items.flatMap((p: Product) => p.sizes))),
+    [items],
+  );
   const priceCeil = useMemo(() => Math.max(1, ...items.map((p: Product) => p.price)), [items]);
 
   const filtered = useMemo(() => applyFilters(items, filters), [items, filters]);
   const shown = filtered.slice(0, visible);
 
   const filterUi = (
-    <ProductFilters filters={filters} onChange={setFilters} colors={colors} sizes={sizes} priceCeil={priceCeil} />
+    <ProductFilters
+      filters={filters}
+      onChange={setFilters}
+      colors={colors}
+      sizes={sizes}
+      priceCeil={priceCeil}
+    />
   );
 
   return (
     <>
       <Navbar theme="dark" />
-      <main dir="rtl" className="min-h-screen bg-obsidian pt-[var(--lbb-nav-h)] pb-bottombar md:pb-0">
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian pt-[var(--lbb-nav-h)] pb-bottombar md:pb-0"
+      >
         <Shell className="border-b border-hairline py-4">
           <Breadcrumb
-            items={[{ label: "خانه", to: "/" }, { label: "فروشگاه", to: "/shop" }, { label: cat.nameFa }]}
+            items={[
+              { label: "خانه", to: "/" },
+              { label: "فروشگاه", to: "/shop" },
+              { label: cat.nameFa },
+            ]}
           />
         </Shell>
 
         {/* Hero */}
         <section className="border-b border-hairline">
           <Shell className="grid grid-cols-1 gap-6 py-10 md:grid-cols-[40%_60%] md:py-14">
-            <Frame src={categoryImage(cat.slug)} alt={`دستهٔ ${cat.nameFa}`} ratio="4/3" width={800} height={600} />
+            <Frame
+              src={categoryImage(cat.slug)}
+              alt={`دستهٔ ${cat.nameFa}`}
+              ratio="4/3"
+              width={800}
+              height={600}
+            />
             <div className="flex flex-col justify-center gap-3">
               <TechLabel tone="signal">{cat.nameFa.toUpperCase()}</TechLabel>
               <h1 className="text-display-2 text-bone">{cat.h1}</h1>
@@ -132,7 +171,9 @@ function CategoryPage() {
         {/* SEO text */}
         <section className="border-b border-hairline">
           <div className="lbb-read py-8">
-            <h2 className="mb-3 text-sm font-semibold text-bone">{cat.nameFaPlural} استریت‌ویر LBB</h2>
+            <h2 className="mb-3 text-sm font-semibold text-bone">
+              {cat.nameFaPlural} استریت‌ویر LBB
+            </h2>
             <p className="text-sm leading-8 text-metal">{cat.seoText}</p>
           </div>
         </section>
@@ -167,7 +208,16 @@ function CategoryPage() {
                     action={
                       <button
                         type="button"
-                        onClick={() => setFilters({ ...filters, colors: [], sizes: [], max: 0, instock: false, sale: false })}
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            colors: [],
+                            sizes: [],
+                            max: 0,
+                            instock: false,
+                            sale: false,
+                          })
+                        }
                         className={CtaClasses("signal")}
                       >
                         پاک کردن فیلترها
@@ -183,7 +233,11 @@ function CategoryPage() {
                     </div>
                     {visible < filtered.length ? (
                       <div className="mt-10 flex justify-center">
-                        <button type="button" onClick={() => setVisible((v) => v + PAGE_SIZE)} className={CtaClasses("line")}>
+                        <button
+                          type="button"
+                          onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                          className={CtaClasses("line")}
+                        >
                           نمایش بیشتر
                         </button>
                       </div>
@@ -202,17 +256,28 @@ function CategoryPage() {
           <Shell>
             <TechLabel>دسته‌بندی‌های مرتبط</TechLabel>
             <div className="mt-4 grid grid-cols-2 gap-px bg-hairline md:grid-cols-4">
-              {CATEGORY_SLUGS.filter((s) => s !== cat.slug).slice(0, 4).map((s) => (
-                <Link
-                  key={s}
-                  to="/$category"
-                  params={{ category: s }}
-                  className="group relative block overflow-hidden bg-obsidian"
-                >
-                  <Frame src={categoryImage(s)} alt={`دستهٔ ${CATEGORIES[s].nameFa}`} ratio="4/3" width={800} height={600} imgClassName="opacity-70 group-hover:opacity-100" />
-                  <span className="absolute bottom-2.5 end-3 text-sm font-bold text-bone">{CATEGORIES[s].nameFa}</span>
-                </Link>
-              ))}
+              {CATEGORY_SLUGS.filter((s) => s !== cat.slug)
+                .slice(0, 4)
+                .map((s) => (
+                  <Link
+                    key={s}
+                    to="/$category"
+                    params={{ category: s }}
+                    className="group relative block overflow-hidden bg-obsidian"
+                  >
+                    <Frame
+                      src={categoryImage(s)}
+                      alt={`دستهٔ ${CATEGORIES[s].nameFa}`}
+                      ratio="4/3"
+                      width={800}
+                      height={600}
+                      imgClassName="opacity-70 group-hover:opacity-100"
+                    />
+                    <span className="absolute bottom-2.5 end-3 text-sm font-bold text-bone">
+                      {CATEGORIES[s].nameFa}
+                    </span>
+                  </Link>
+                ))}
             </div>
           </Shell>
         </section>

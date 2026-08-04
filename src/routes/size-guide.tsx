@@ -7,7 +7,8 @@ import { Shell } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical } from "@/lib/site";
 
 const TITLE = "راهنمای سایز LBB | جدول سایزبندی هودی، شلوار، کتونی";
-const DESC = "برای انتخاب سایز مناسب در LBB این راهنما رو ببین. جدول سایزبندی کامل برای هودی، تیشرت، شلوار و کتونی.";
+const DESC =
+  "برای انتخاب سایز مناسب در LBB این راهنما رو ببین. جدول سایزبندی کامل برای هودی، تیشرت، شلوار و کتونی.";
 
 const howToLd = {
   "@context": "https://schema.org",
@@ -56,8 +57,9 @@ function SizeGuide() {
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "راهنمای سایز" }]} />
           <h1 className="mt-4 text-display-2 text-bone">راهنمای سایز</h1>
           <p className="mt-3 text-sm leading-8 text-metal">
-            انتخاب سایز مناسب کار سختی نیست. یه متر خیاطی بردار، سینه و کمرت رو اندازه بگیر، و با جدول‌های پایین مقایسه کن.
-            اگه بین دو سایز بودی، سایز بزرگ‌تر رو انتخاب کن — LBB معمولاً برش اورسایز داره.
+            انتخاب سایز مناسب کار سختی نیست. یه متر خیاطی بردار، سینه و کمرت رو اندازه بگیر، و با
+            جدول‌های پایین مقایسه کن. اگه بین دو سایز بودی، سایز بزرگ‌تر رو انتخاب کن — LBB معمولاً
+            برش اورسایز داره.
           </p>
 
           <Table title="هودی و تیشرت" rows={topsSizes} />
@@ -65,8 +67,14 @@ function SizeGuide() {
 
           <div className="mt-10">
             <h2 className="text-xl font-bold text-bone">سوالات رایج</h2>
-            <FAQ q="اگه سایزم درست نبود چیکار کنم؟" a="تا ۷ روز فرصت داری کالا رو با کالای دیگه در همون سایز جایگزین کنی. برای اطلاعات بیشتر به صفحه تماس مراجعه کن." />
-            <FAQ q="سایزبندی LBB به سایز جهانی نزدیکه؟" a="بله، برش‌های LBB بر اساس استانداردهای بین‌المللی طراحی شدن اما تمایل به اورسایز دارن." />
+            <FAQ
+              q="اگه سایزم درست نبود چیکار کنم؟"
+              a="تا ۷ روز فرصت داری کالا رو با کالای دیگه در همون سایز جایگزین کنی. برای اطلاعات بیشتر به صفحه تماس مراجعه کن."
+            />
+            <FAQ
+              q="سایزبندی LBB به سایز جهانی نزدیکه؟"
+              a="بله، برش‌های LBB بر اساس استانداردهای بین‌المللی طراحی شدن اما تمایل به اورسایز دارن."
+            />
           </div>
         </Shell>
       </main>
@@ -84,13 +92,21 @@ function Table({ title, rows }: { title: string; rows: string[][] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-carbon text-metal">
-              {rows[0].map((h) => <th key={h} className="p-3 text-start font-semibold">{h}</th>)}
+              {rows[0].map((h) => (
+                <th key={h} className="p-3 text-start font-semibold">
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {rows.slice(1).map((r, i) => (
               <tr key={i} className="border-t border-hairline text-bone">
-                {r.map((c, j) => <td key={j} className="p-3">{c}</td>)}
+                {r.map((c, j) => (
+                  <td key={j} className="p-3">
+                    {c}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>

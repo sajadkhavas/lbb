@@ -1,4 +1,10 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 
 const topsSizes = [
@@ -62,13 +68,16 @@ export function SizeGuideDialog({ trigger }: { trigger: React.ReactNode }) {
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent dir="rtl" className="max-h-[85vh] max-w-[520px] overflow-y-auto border-hairline bg-obsidian text-bone">
+      <DialogContent
+        dir="rtl"
+        className="max-h-[85vh] max-w-[520px] overflow-y-auto border-hairline bg-obsidian text-bone"
+      >
         <DialogHeader>
           <DialogTitle className="text-display-3 text-bone">راهنمای سایز</DialogTitle>
         </DialogHeader>
         <p className="text-sm leading-7 text-metal">
-          یک متر خیاطی بردارید، سینه و کمرتان را اندازه بگیرید و با جدول‌های زیر مقایسه کنید. اگر بین دو سایز
-          بودید، سایز بزرگ‌تر را انتخاب کنید — برش‌های LBB معمولاً اورسایز هستند.
+          یک متر خیاطی بردارید، سینه و کمرتان را اندازه بگیرید و با جدول‌های زیر مقایسه کنید. اگر
+          بین دو سایز بودید، سایز بزرگ‌تر را انتخاب کنید — برش‌های LBB معمولاً اورسایز هستند.
         </p>
         <div className="flex flex-col gap-6">
           <Table title="هودی و تیشرت" rows={topsSizes} />

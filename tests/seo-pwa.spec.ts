@@ -24,18 +24,37 @@ test("sitemap and robots expose absolute production URLs", async ({ request }) =
 });
 
 test("indexable pages have absolute canonical and social metadata", async ({ page }) => {
-  for (const route of ["/", "/shop", "/hoodies", "/product/lbb-classic-hoodie", "/collections", "/journal"]) {
+  for (const route of [
+    "/",
+    "/shop",
+    "/hoodies",
+    "/product/lbb-classic-hoodie",
+    "/collections",
+    "/journal",
+  ]) {
     await page.goto(route, { waitUntil: "networkidle" });
     const canonical = page.locator('link[rel="canonical"]');
     await expect(canonical).toHaveCount(1);
-    await expect(canonical).toHaveAttribute("href", new RegExp(`^${productionOrigin.replaceAll(".", "\\.")}/`));
+    await expect(canonical).toHaveAttribute(
+      "href",
+      new RegExp(`^${productionOrigin.replaceAll(".", "\\.")}/`),
+    );
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
-    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", new RegExp(`^${productionOrigin.replaceAll(".", "\\.")}/`));
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+      "content",
+      new RegExp(`^${productionOrigin.replaceAll(".", "\\.")}/`),
+    );
   }
 });
 
 test("private and generated states are noindex", async ({ page }) => {
-  for (const route of ["/search?q=hoodie", "/cart", "/checkout", "/order-confirmation", "/track-order"]) {
+  for (const route of [
+    "/search?q=hoodie",
+    "/cart",
+    "/checkout",
+    "/order-confirmation",
+    "/track-order",
+  ]) {
     await page.goto(route, { waitUntil: "networkidle" });
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   }
@@ -43,15 +62,16 @@ test("private and generated states are noindex", async ({ page }) => {
 
 test("fonts, manifest and service worker are deployment-safe", async ({ page, request }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  const stylesheetUrls = await page.locator('link[rel="stylesheet"]').evaluateAll((links) =>
-    links.map((link) => (link as HTMLLinkElement).href),
-  );
+  const stylesheetUrls = await page
+    .locator('link[rel="stylesheet"]')
+    .evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
   expect(stylesheetUrls.some((url) => url.includes("fonts.googleapis.com"))).toBe(false);
   expect(stylesheetUrls.some((url) => url.includes("fonts.gstatic.com"))).toBe(false);
 
   const fontResponses: string[] = [];
   page.on("response", (response) => {
-    if (/\.(?:woff2?|ttf|otf)(?:\?|$)/.test(response.url()) && response.ok()) fontResponses.push(response.url());
+    if (/\.(?:woff2?|ttf|otf)(?:\?|$)/.test(response.url()) && response.ok())
+      fontResponses.push(response.url());
   });
   await page.reload({ waitUntil: "networkidle" });
   expect(fontResponses.some((url) => url.startsWith("http://127.0.0.1:4173/"))).toBe(true);
@@ -66,8 +86,8 @@ test("fonts, manifest and service worker are deployment-safe", async ({ page, re
   const swResponse = await request.get("/sw.js");
   expect(swResponse.ok()).toBe(true);
   const serviceWorker = await swResponse.text();
-  expect(serviceWorker).toContain('/api/');
-  expect(serviceWorker).toContain('/~oauth');
-  expect(serviceWorker).toContain('/sitemap.xml');
+  expect(serviceWorker).toContain("/api/");
+  expect(serviceWorker).toContain("/~oauth");
+  expect(serviceWorker).toContain("/sitemap.xml");
   expect(serviceWorker).not.toContain("checkout");
 });

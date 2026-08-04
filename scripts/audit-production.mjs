@@ -51,7 +51,8 @@ if (fontFiles.length < 2) failures.push("Self-hosted font assets were not emitte
 for (const required of ["sw.js", "manifest.webmanifest"]) {
   const file = path.join(publicDir, required);
   const fileStat = await stat(file).catch(() => null);
-  if (!fileStat?.isFile() || fileStat.size === 0) failures.push(`${required} is missing from output.`);
+  if (!fileStat?.isFile() || fileStat.size === 0)
+    failures.push(`${required} is missing from output.`);
 }
 
 const textFiles = files.filter((file) => /\.(?:js|css|html|json|txt|xml|mjs)$/.test(file));
@@ -64,13 +65,18 @@ for (const file of textFiles) {
 }
 
 const manifest = JSON.parse(await readFile(path.join(publicDir, "manifest.webmanifest"), "utf8"));
-if (manifest.display !== "standalone" || !Array.isArray(manifest.icons) || manifest.icons.length < 3) {
+if (
+  manifest.display !== "standalone" ||
+  !Array.isArray(manifest.icons) ||
+  manifest.icons.length < 3
+) {
   failures.push("Manifest is missing required standalone/icon fields.");
 }
 
 const serviceWorker = await readFile(path.join(publicDir, "sw.js"), "utf8");
 for (const excluded of ["/api/", "/~oauth", "/sitemap.xml", "/sw.js"]) {
-  if (!serviceWorker.includes(excluded)) failures.push(`Service worker exclusion missing: ${excluded}`);
+  if (!serviceWorker.includes(excluded))
+    failures.push(`Service worker exclusion missing: ${excluded}`);
 }
 
 console.log(

@@ -27,7 +27,5 @@ export default defineConfig({
         timeout: 120_000,
         env: { VITE_SITE_URL: "https://lbb.example.test" },
       },
-  projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-  ],
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });

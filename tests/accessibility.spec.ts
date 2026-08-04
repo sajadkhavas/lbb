@@ -42,7 +42,9 @@ test("menu and search dialogs preserve accessible focus behavior", async ({ page
   await page.getByRole("button", { name: "منو" }).click();
   const menu = page.getByRole("dialog", { name: "منوی اصلی" });
   await expect(menu).toBeVisible();
-  expect(await page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null)).toBe(true);
+  expect(
+    await page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null),
+  ).toBe(true);
   await page.keyboard.press("Escape");
   await expect(menu).toBeHidden();
 

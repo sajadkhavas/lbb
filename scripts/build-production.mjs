@@ -14,7 +14,9 @@ function normalizeSiteUrl(value) {
   const url = new URL(value);
   if (url.protocol !== "https:") throw new Error("VITE_SITE_URL must use https in production.");
   if (url.username || url.password || url.pathname !== "/" || url.search || url.hash) {
-    throw new Error("VITE_SITE_URL must be a clean origin without path, credentials, query or hash.");
+    throw new Error(
+      "VITE_SITE_URL must be a clean origin without path, credentials, query or hash.",
+    );
   }
   return url.origin;
 }

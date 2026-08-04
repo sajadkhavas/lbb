@@ -28,7 +28,8 @@ for (const file of repositoryFiles) {
   if (!/\.(?:ts|tsx|js|mjs|css|json|txt|webmanifest)$/.test(file)) continue;
   const content = await readFile(file, "utf8").catch(() => "");
   if (content.includes("/__l5e/")) failures.push(`Lovable preview path remains: ${relative}`);
-  if (/\b(?:TODO|FIXME)\b/.test(content)) failures.push(`Unresolved TODO/FIXME remains: ${relative}`);
+  if (/\b(?:TODO|FIXME)\b/.test(content))
+    failures.push(`Unresolved TODO/FIXME remains: ${relative}`);
 }
 
 const pwaConfig = await readFile(path.join(root, "vite.config.ts"), "utf8");
@@ -37,7 +38,10 @@ if (pwaConfig.includes("VitePWA") || pwaConfig.includes("vite-plugin-pwa")) {
 }
 
 const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
-if (packageJson.dependencies?.["vite-plugin-pwa"] || packageJson.devDependencies?.["vite-plugin-pwa"]) {
+if (
+  packageJson.dependencies?.["vite-plugin-pwa"] ||
+  packageJson.devDependencies?.["vite-plugin-pwa"]
+) {
   failures.push("Unused vite-plugin-pwa dependency remains.");
 }
 
