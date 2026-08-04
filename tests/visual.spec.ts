@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const homeViewports = [
   { name: "mobile-390", width: 390, height: 844 },
@@ -7,7 +7,7 @@ const homeViewports = [
   { name: "wide-1920", width: 1920, height: 1080 },
 ];
 
-async function stabilize(page: Parameters<typeof test>[0] extends never ? never : any) {
+async function stabilize(page: Page) {
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
