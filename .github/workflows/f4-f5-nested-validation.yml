@@ -11,16 +11,17 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Generate clean ephemeral lockfile
+      - name: Resolve a clean dependency tree
         run: |
-          rm -f package-lock.json npm-shrinkwrap.json
-          npm install --package-lock-only --ignore-scripts
+          rm -rf node_modules package-lock.json npm-shrinkwrap.json
+          npm install --ignore-scripts
+          rm -rf node_modules
       - name: npm ci
         run: npm ci
       - name: Prettier check owned files
