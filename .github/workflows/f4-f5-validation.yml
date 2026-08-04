@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - tmp/f4-f5-validation-20260804
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
