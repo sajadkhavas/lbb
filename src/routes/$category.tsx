@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { PackageSearch } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
@@ -8,16 +8,27 @@ import { ProductCard } from "@/components/lbb/ProductCard";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { ProductFilters } from "@/components/lbb/ProductFilters";
 import { ProductGridControls } from "@/components/lbb/ProductGridControls";
-import { Button } from "@/components/ui/button";
+import {
+  Band,
+  CtaClasses,
+  EmptyState,
+  GridSkeleton,
+  Shell,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import { CATEGORIES, CATEGORY_SLUGS, isValidCategory } from "@/lib/categories";
 import { categoryImage } from "@/lib/category-images";
 import { productsByCategory, type Product } from "@/lib/products";
-import { pageMeta, canonical, breadcrumbLd, absUrl, absAsset } from "@/lib/site";
+import { absAsset, absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
-  activeCount,
   applyFilters,
+  hasSearchModifiers,
+  isCanonicalSearch,
+  normalizeFilters,
+  parseFilterSearch,
   parseFilters,
   serializeFilters,
+  stableSearchString,
   type Filters,
 } from "@/lib/product-filter";
 
@@ -27,22 +38,16 @@ export const Route = createFileRoute("/$category")({
   beforeLoad: ({ params }) => {
     if (!isValidCategory(params.category)) throw notFound();
   },
-  validateSearch: (s: Record<string, unknown>): Filters => parseFilters(s),
+  validateSearch: (search: Record<string, unknown>) => parseFilterSearch(search),
   loader: ({ params }) => {
     const cat = CATEGORIES[params.category as keyof typeof CATEGORIES];
     return { cat, items: productsByCategory(cat.slug) };
   },
-  head: ({ loaderData, match: m }) => {
-    if (!loaderData) return { meta: [{ title: "پیدا نشد" }, { name: "robots", content: "noindex" }] };
+  head: ({ loaderData, match }) => {
+    if (!loaderData)
+      return { meta: [{ title: "پیدا نشد" }, { name: "robots", content: "noindex" }] };
     const { cat, items } = loaderData;
-    const filters = m.search as Filters;
-    const filtered = activeCount(filters) > 0;
-
-    const crumbLd = breadcrumbLd([
-      { name: "خانه", path: "/" },
-      { name: "فروشگاه", path: "/shop" },
-      { name: cat.nameFa, path: `/${cat.slug}` },
-    ]);
+    const filters = parseFilters(match.search as unknown as Record<string, unknown>);
     const collectionLd = {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
@@ -55,20 +60,20 @@ export const Route = createFileRoute("/$category")({
       "@type": "ItemList",
       name: cat.h1,
       numberOfItems: items.length,
-      itemListElement: items.slice(0, 20).map((p, i) => ({
+      itemListElement: items.slice(0, 20).map((product, index) => ({
         "@type": "ListItem",
-        position: i + 1,
-        url: absUrl(`/product/${p.slug}`),
-        name: p.name,
+        position: index + 1,
+        url: absUrl(`/product/${product.slug}`),
+        name: product.name,
       })),
     };
     const faqLd = {
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      mainEntity: cat.faqs.map((f: { q: string; a: string }) => ({
+      mainEntity: cat.faqs.map((faq: { q: string; a: string }) => ({
         "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
+        name: faq.q,
+        acceptedAnswer: { "@type": "Answer", text: faq.a },
       })),
     };
 
@@ -78,11 +83,20 @@ export const Route = createFileRoute("/$category")({
         description: cat.metaDesc,
         path: `/${cat.slug}`,
         image: absAsset(categoryImage(cat.slug)),
-        noindex: filtered,
+        noindex: hasSearchModifiers(filters),
       }),
       links: canonical(`/${cat.slug}`),
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(crumbLd) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: "فروشگاه", path: "/shop" },
+              { name: cat.nameFa, path: `/${cat.slug}` },
+            ]),
+          ),
+        },
         { type: "application/ld+json", children: JSON.stringify(collectionLd) },
         { type: "application/ld+json", children: JSON.stringify(itemListLd) },
         { type: "application/ld+json", children: JSON.stringify(faqLd) },
@@ -94,22 +108,50 @@ export const Route = createFileRoute("/$category")({
 
 function CategoryPage() {
   const { cat, items } = Route.useLoaderData();
-  const filters = Route.useSearch();
+  const routeFilters = Route.useSearch();
   const navigate = useNavigate({ from: "/$category" });
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [isPending, startTransition] = useTransition();
 
-  const setFilters = (f: Filters) => {
-    setVisible(PAGE_SIZE);
-    navigate({ search: serializeFilters(f), replace: true });
+  const colors = useMemo(
+    () => Array.from(new Set<string>(items.flatMap((product: Product) => product.colors))),
+    [items],
+  );
+  const sizes = useMemo(
+    () => Array.from(new Set<string>(items.flatMap((product: Product) => product.sizes))),
+    [items],
+  );
+  const priceCeil = useMemo(
+    () => Math.max(1, ...items.map((product: Product) => product.price)),
+    [items],
+  );
+  const scope = useMemo(
+    () => ({ categories: false as const, colors, sizes, priceCeil }),
+    [colors, sizes, priceCeil],
+  );
+  const filters = useMemo(
+    () => normalizeFilters(parseFilters(routeFilters as unknown as Record<string, unknown>), scope),
+    [routeFilters, scope],
+  );
+  const searchKey = stableSearchString(serializeFilters(filters));
+
+  useEffect(() => setVisible(PAGE_SIZE), [searchKey, cat.slug]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const expected = serializeFilters(filters);
+    if (!isCanonicalSearch(window.location.search, expected)) {
+      navigate({ search: expected, replace: true });
+    }
+  }, [filters, navigate]);
+
+  const setFilters = (nextFilters: Filters) => {
+    const normalized = normalizeFilters(nextFilters, scope);
+    startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
   };
-
-  const colors = useMemo(() => Array.from(new Set<string>(items.flatMap((p: Product) => p.colors))), [items]);
-  const sizes = useMemo(() => Array.from(new Set<string>(items.flatMap((p: Product) => p.sizes))), [items]);
-  const priceCeil = useMemo(() => Math.max(1, ...items.map((p: Product) => p.price)), [items]);
 
   const filtered = useMemo(() => applyFilters(items, filters), [items, filters]);
   const shown = filtered.slice(0, visible);
-
   const filterUi = (
     <ProductFilters
       filters={filters}
@@ -122,158 +164,171 @@ function CategoryPage() {
 
   return (
     <>
-      <Navbar theme="light" />
+      <Navbar theme="dark" />
       <main
         dir="rtl"
-        className="min-h-screen bg-white pt-16 text-black"
-        style={{ paddingBottom: "80px", fontFamily: "var(--font-body)" }}
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
       >
-        <div className="border-b border-black/[0.06]">
-          <div className="mx-auto max-w-[1280px] px-4 py-3 md:px-8">
-            <Breadcrumb
-              items={[
-                { label: "خانه", href: "/" },
-                { label: "فروشگاه", href: "/shop" },
-                { label: cat.nameFa },
-              ]}
-            />
-          </div>
-        </div>
+        <Shell className="border-b border-hairline py-4">
+          <Breadcrumb
+            items={[
+              { label: "خانه", to: "/" },
+              { label: "فروشگاه", to: "/shop" },
+              { label: cat.nameFa },
+            ]}
+          />
+        </Shell>
 
-        {/* Hero */}
-        <section className="border-b border-black/[0.06]">
-          <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[40%_60%] md:px-8 md:py-10">
-            <div className="overflow-hidden rounded-2xl bg-gray-50">
+        <section className="border-b border-hairline">
+          <Shell className="grid grid-cols-1 gap-7 py-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:items-center md:py-12">
+            <div className="overflow-hidden rounded-2xl border border-hairline bg-carbon">
               <img
                 src={categoryImage(cat.slug)}
                 alt={`مدل در حال پوشیدن ${cat.nameFaPlural} استریت‌ویر LBB`}
-                width={640}
-                height={480}
+                width={720}
+                height={540}
                 loading="eager"
                 fetchPriority="high"
-                className="aspect-[4/3] h-full w-full object-cover md:aspect-auto"
+                className="aspect-[4/3] h-full w-full object-cover"
               />
             </div>
-            <div className="flex flex-col justify-center gap-3">
-              <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
-                {cat.h1}
-              </h1>
-              <p className="text-base text-gray-600">{cat.heroTagline}</p>
-              <p className="text-sm font-semibold text-[var(--lbb-red)]">
+            <div>
+              <TechLabel tone="signal">CATEGORY / {cat.slug.toUpperCase()}</TechLabel>
+              <h1 className="text-display-2 mt-3 text-bone">{cat.h1}</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">{cat.heroTagline}</p>
+              <p className="tech mt-4 text-signal">
                 {items.length.toLocaleString("fa-IR")} محصول موجود
               </p>
-              <ul className="mt-2 flex flex-col gap-2 text-sm text-gray-700">
-                {cat.bullets.map((b: string) => (
-                  <li key={b} className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--lbb-red)]" />
-                    <span>{b}</span>
+              <ul className="mt-5 grid gap-2 text-sm text-metal sm:grid-cols-2">
+                {cat.bullets.map((bullet: string) => (
+                  <li key={bullet} className="flex items-start gap-2">
+                    <span
+                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-signal"
+                      aria-hidden="true"
+                    />
+                    <span>{bullet}</span>
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
+          </Shell>
         </section>
 
-        {/* Grid */}
-        <section className="mx-auto max-w-[1280px] px-4 pb-16 pt-8 md:px-8">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
-            <aside className="hidden lg:block">
-              <div className="sticky top-24">{filterUi}</div>
-            </aside>
-
-            <div>
-              <ProductGridControls
-                filters={filters}
-                onChange={setFilters}
-                resultCount={filtered.length}
-                filterSlot={filterUi}
-                lockedCategory
-              />
-
-              {filtered.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-24 text-center">
-                  <PackageSearch size={48} className="text-black/15" />
-                  <p className="text-base font-semibold text-black">محصولی با این فیلترها پیدا نشد</p>
-                  <p className="text-sm text-gray-500">فیلترها را تغییر بده یا همه را پاک کن.</p>
-                  <Button
-                    onClick={() => setFilters({ ...filters, colors: [], sizes: [], max: 0, instock: false, sale: false })}
-                    className="mt-2 bg-[var(--lbb-red)] text-white hover:bg-[var(--lbb-red)]/90"
-                  >
-                    پاک کردن فیلترها
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
-                    {shown.map((p) => <ProductCard key={p.id} p={p} />)}
+        <Band hairline={false} className="!py-10 md:!py-14">
+          <Shell>
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
+              <aside className="hidden lg:block" aria-label="فیلتر محصولات">
+                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{filterUi}</div>
+              </aside>
+              <div>
+                <ProductGridControls
+                  filters={filters}
+                  onChange={setFilters}
+                  resultCount={filtered.length}
+                  filterSlot={filterUi}
+                  lockedCategory
+                />
+                {isPending ? (
+                  <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی محصولات">
+                    <GridSkeleton count={8} />
                   </div>
-                  {visible < filtered.length && (
-                    <div className="mt-8 flex justify-center">
-                      <Button
-                        variant="outline"
-                        onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                        className="h-11 rounded-lg border-black/15 px-8 text-sm font-semibold"
+                ) : filtered.length === 0 ? (
+                  <EmptyState
+                    className="mt-6"
+                    icon={<PackageSearch size={40} aria-hidden="true" />}
+                    title="محصولی با این فیلترها پیدا نشد"
+                    body="فیلترهای این دسته را تغییر بده یا پاک کن."
+                    action={
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            colors: [],
+                            sizes: [],
+                            max: 0,
+                            instock: false,
+                            sale: false,
+                          })
+                        }
+                        className={CtaClasses("signal")}
                       >
-                        نمایش بیشتر
-                      </Button>
+                        پاک کردن فیلترها
+                      </button>
+                    }
+                  />
+                ) : (
+                  <>
+                    <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3">
+                      {shown.map((product, index) => (
+                        <ProductCard key={product.id} p={product} priority={index < 2} />
+                      ))}
                     </div>
-                  )}
-                </>
-              )}
+                    {visible < filtered.length ? (
+                      <div className="mt-10 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() => setVisible((value) => value + PAGE_SIZE)}
+                          className={CtaClasses("line")}
+                        >
+                          نمایش بیشتر
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="tech mt-10 text-center text-mute">پایان نتایج</p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
+          </Shell>
+        </Band>
 
-        {/* SEO / AEO content */}
-        <section className="border-t border-black/[0.06] bg-gray-50/60 py-10">
-          <div className="mx-auto max-w-[900px] px-4 md:px-8">
-            <h2 className="mb-3 text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+        <Band label="CATEGORY GUIDE">
+          <Shell className="max-w-[900px]">
+            <h2 className="text-display-3 text-bone">
               {cat.nameFaPlural} استریت‌ویر LBB چه ویژگی‌هایی دارن؟
             </h2>
-            <p className="text-sm leading-8 text-gray-700">{cat.seoText}</p>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="py-10">
-          <div className="mx-auto max-w-[900px] px-4 md:px-8">
-            <h2 className="mb-4 text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
-              سوالات متداول درباره {cat.nameFaPlural}
-            </h2>
-            <div className="divide-y divide-black/[0.06] border-t border-black/[0.06]">
-              {cat.faqs.map((f: { q: string; a: string }) => (
-                <details key={f.q} className="group py-4">
-                  <summary className="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold">
-                    {f.q}
-                    <span className="shrink-0 transition-transform group-open:rotate-180">▾</span>
+            <p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>
+            <div className="mt-8 divide-y divide-hairline border-t border-hairline">
+              {cat.faqs.map((faq: { q: string; a: string }) => (
+                <details key={faq.q} className="group py-4">
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-4 text-sm font-semibold text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal">
+                    {faq.q}
+                    <span
+                      className="shrink-0 transition-transform group-open:rotate-180"
+                      aria-hidden="true"
+                    >
+                      ▾
+                    </span>
                   </summary>
-                  <p className="mt-3 text-sm leading-8 text-gray-600">{f.a}</p>
+                  <p className="mt-3 text-sm leading-8 text-metal">{faq.a}</p>
                 </details>
               ))}
             </div>
-          </div>
-        </section>
+          </Shell>
+        </Band>
 
-        {/* Related categories */}
-        <section className="border-t border-black/[0.06] py-10">
-          <div className="mx-auto max-w-[1280px] px-4 md:px-8">
-            <h3 className="mb-4 text-sm font-semibold">دسته‌بندی‌های مرتبط</h3>
+        <Band label="MORE CATEGORIES">
+          <Shell>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {CATEGORY_SLUGS.filter((s) => s !== cat.slug).slice(0, 4).map((s) => (
-                <Link
-                  key={s}
-                  to="/$category"
-                  params={{ category: s }}
-                  className="grid h-24 place-items-center rounded-xl bg-gray-50 text-sm font-semibold hover:bg-gray-100"
-                >
-                  {CATEGORIES[s].nameFa}
-                </Link>
-              ))}
+              {CATEGORY_SLUGS.filter((slug) => slug !== cat.slug)
+                .slice(0, 4)
+                .map((slug) => (
+                  <Link
+                    key={slug}
+                    to="/$category"
+                    params={{ category: slug }}
+                    className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  >
+                    {CATEGORIES[slug].nameFa}
+                  </Link>
+                ))}
             </div>
-          </div>
-        </section>
+          </Shell>
+        </Band>
       </main>
-      <Footer theme="light" />
+      <Footer theme="dark" />
       <MobileBottomBar />
     </>
   );

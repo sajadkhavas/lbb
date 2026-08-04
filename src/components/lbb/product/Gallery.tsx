@@ -1,76 +1,107 @@
-import { useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { productGallery } from "@/lib/product-images";
 
-/**
- * Accessible product gallery: thumbnail buttons with aria-selected semantics,
- * keyboard arrow navigation, mobile swipe (native scroll-snap) and a fixed
- * aspect ratio to guarantee zero layout shift.
- */
 export function Gallery({ slug, name }: { slug: string; name: string }) {
   const images = productGallery(slug);
   const [active, setActive] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const id = useId();
 
-  const scrollToIndex = (i: number) => {
-    const clamped = (i + images.length) % images.length;
+  useEffect(() => {
+    setActive(0);
+    trackRef.current?.scrollTo({ left: 0, behavior: "auto" });
+  }, [slug]);
+
+  const scrollToIndex = (index: number, behavior: ScrollBehavior = "smooth") => {
+    const clamped = Math.min(images.length - 1, Math.max(0, index));
     setActive(clamped);
     const track = trackRef.current;
-    const child = track?.children[clamped] as HTMLElement | undefined;
-    child?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    const child = track?.children.item(clamped) as HTMLElement | null;
+    if (track && child) track.scrollTo({ left: child.offsetLeft, behavior });
   };
 
   const onScroll = () => {
     const track = trackRef.current;
-    if (!track) return;
-    const { scrollLeft, clientWidth } = track;
-    const idx = Math.round(Math.abs(scrollLeft) / clientWidth);
-    if (idx !== active) setActive(idx);
+    if (!track || track.clientWidth <= 0) return;
+    const index = Math.min(
+      images.length - 1,
+      Math.max(0, Math.round(track.scrollLeft / track.clientWidth)),
+    );
+    setActive((current) => (current === index ? current : index));
   };
 
-  const onThumbKeyDown = (e: React.KeyboardEvent, i: number) => {
-    if (e.key === "ArrowDown" || e.key === "ArrowLeft") {
-      e.preventDefault();
-      scrollToIndex(i + 1);
-      thumbRefs.current[(i + 1) % images.length]?.focus();
-    } else if (e.key === "ArrowUp" || e.key === "ArrowRight") {
-      e.preventDefault();
-      scrollToIndex(i - 1);
-      thumbRefs.current[(i - 1 + images.length) % images.length]?.focus();
+  const focusThumbnail = (index: number) => {
+    const clamped = Math.min(images.length - 1, Math.max(0, index));
+    scrollToIndex(clamped);
+    thumbRefs.current[clamped]?.focus();
+  };
+
+  const onThumbKeyDown = (event: React.KeyboardEvent, index: number) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
+      event.preventDefault();
+      focusThumbnail(Math.min(images.length - 1, index + 1));
+    } else if (event.key === "ArrowUp" || event.key === "ArrowRight") {
+      event.preventDefault();
+      focusThumbnail(Math.max(0, index - 1));
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      focusThumbnail(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      focusThumbnail(images.length - 1);
     }
   };
 
-  const onMainKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      scrollToIndex(active + 1);
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault();
+  const onMainKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
       scrollToIndex(active - 1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      scrollToIndex(active + 1);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      scrollToIndex(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      scrollToIndex(images.length - 1);
     }
   };
 
   return (
-    <div dir="rtl" className="flex flex-col-reverse gap-3 md:flex-row md:sticky md:top-20 md:self-start">
-      {/* Vertical thumbnails — desktop only */}
-      <div role="tablist" aria-label="تصاویر محصول" className="hidden md:flex md:w-20 md:flex-col md:gap-3">
-        {images.map((src, i) => (
+    <div
+      dir="rtl"
+      className="flex flex-col-reverse gap-3 md:sticky md:top-20 md:flex-row md:self-start"
+    >
+      <div
+        role="tablist"
+        aria-label="تصاویر محصول"
+        aria-orientation="vertical"
+        className="hidden md:flex md:w-20 md:flex-col md:gap-3"
+      >
+        {images.map((source, index) => (
           <button
-            key={i}
-            ref={(el) => { thumbRefs.current[i] = el; }}
+            key={`${source}-${index}`}
+            id={`${id}-tab-${index}`}
+            ref={(element: HTMLButtonElement | null) => {
+              thumbRefs.current[index] = element;
+            }}
             type="button"
             role="tab"
-            aria-selected={i === active}
-            aria-controls="pdp-gallery-main"
-            tabIndex={i === active ? 0 : -1}
-            onClick={() => scrollToIndex(i)}
-            onKeyDown={(e) => onThumbKeyDown(e, i)}
-            className={`tap-target aspect-square overflow-hidden border bg-carbon transition-colors ${
-              i === active ? "border-signal" : "border-hairline hover:border-metal"
+            aria-selected={index === active}
+            aria-controls={`${id}-panel-${index}`}
+            tabIndex={index === active ? 0 : -1}
+            onClick={() => scrollToIndex(index)}
+            onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) =>
+              onThumbKeyDown(event, index)
+            }
+            className={`tap-target aspect-square overflow-hidden border bg-carbon transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
+              index === active ? "border-signal" : "border-hairline hover:border-metal"
             }`}
           >
             <img
-              src={src}
+              src={source}
               alt=""
               aria-hidden="true"
               width={160}
@@ -83,27 +114,35 @@ export function Gallery({ slug, name }: { slug: string; name: string }) {
         ))}
       </div>
 
-      {/* Main image / mobile swipe carousel */}
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <div
-          id="pdp-gallery-main"
+          id={`${id}-gallery`}
+          dir="ltr"
           ref={trackRef}
           onScroll={onScroll}
           onKeyDown={onMainKeyDown}
           tabIndex={0}
-          role="group"
+          role="region"
+          aria-roledescription="carousel"
           aria-label={`گالری تصاویر ${name}`}
-          className="group relative flex aspect-square snap-x snap-mandatory gap-0 overflow-x-auto overflow-y-hidden border border-hairline bg-carbon [scrollbar-width:none] focus:outline-none focus-visible:ring-1 focus-visible:ring-signal md:overflow-hidden [&::-webkit-scrollbar]:hidden"
+          className="group relative flex aspect-square snap-x snap-mandatory overflow-x-auto overflow-y-hidden border border-hairline bg-carbon [scrollbar-width:none] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal md:overflow-hidden [&::-webkit-scrollbar]:hidden"
         >
-          {images.map((src, i) => (
-            <div key={i} className="relative aspect-square w-full flex-none snap-center overflow-hidden">
+          {images.map((source, index) => (
+            <div
+              key={`${source}-${index}`}
+              id={`${id}-panel-${index}`}
+              role="tabpanel"
+              aria-labelledby={`${id}-tab-${index}`}
+              aria-hidden={index !== active}
+              className="relative aspect-square w-full flex-none snap-center overflow-hidden"
+            >
               <img
-                src={src}
-                alt={i === 0 ? name : `${name} — تصویر ${i + 1}`}
+                src={source}
+                alt={index === 0 ? name : `${name} — تصویر ${index + 1}`}
                 width={1024}
                 height={1024}
-                loading={i === 0 ? "eager" : "lazy"}
-                fetchPriority={i === 0 ? "high" : "auto"}
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "auto"}
                 decoding="async"
                 className="frame-zoom h-full w-full object-cover md:group-hover:scale-110"
               />
@@ -111,17 +150,19 @@ export function Gallery({ slug, name }: { slug: string; name: string }) {
           ))}
         </div>
 
-        {/* Dots — mobile only */}
-        <div className="mt-3 flex justify-center gap-1.5 md:hidden">
-          {images.map((_, i) => (
+        <p className="sr-only" aria-live="polite">
+          تصویر {active + 1} از {images.length}
+        </p>
+        <div className="mt-3 flex justify-center gap-1.5 md:hidden" aria-label="انتخاب تصویر">
+          {images.map((_, index) => (
             <button
-              key={i}
+              key={index}
               type="button"
-              onClick={() => scrollToIndex(i)}
-              aria-label={`رفتن به تصویر ${i + 1}`}
-              aria-current={i === active}
-              className={`h-1.5 rounded-full transition-all ${
-                i === active ? "w-5 bg-signal" : "w-1.5 bg-hairline"
+              onClick={() => scrollToIndex(index)}
+              aria-label={`رفتن به تصویر ${index + 1}`}
+              aria-current={index === active ? "true" : undefined}
+              className={`min-h-6 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
+                index === active ? "w-6 bg-signal" : "w-3 bg-hairline"
               }`}
             />
           ))}

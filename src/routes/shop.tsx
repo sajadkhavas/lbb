@@ -1,4 +1,4 @@
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PackageSearch } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -8,49 +8,73 @@ import { ProductCard } from "@/components/lbb/ProductCard";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { ProductFilters } from "@/components/lbb/ProductFilters";
 import { ProductGridControls } from "@/components/lbb/ProductGridControls";
-import { Shell, Band, TechLabel, GridSkeleton, EmptyState, CtaClasses } from "@/components/lbb/ui/primitives";
+import {
+  Band,
+  CtaClasses,
+  EmptyState,
+  GridSkeleton,
+  Shell,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/products";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
-import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
-  activeCount,
   applyFilters,
+  hasSearchModifiers,
+  isCanonicalSearch,
+  normalizeFilters,
+  parseFilterSearch,
   parseFilters,
   serializeFilters,
+  stableSearchString,
   type Filters,
 } from "@/lib/product-filter";
 
 const TITLE = "فروشگاه | خرید هودی، شلوار، تیشرت و کتونی — LBB";
 const DESC = `فروشگاه آنلاین LBB: ${products.length.toLocaleString("fa-IR")} محصول استریت‌ویر شامل هودی، شلوار، تیشرت، کتونی و جوراب.`;
-
-const ALL_COLORS = Array.from(new Set(products.flatMap((p) => p.colors)));
-const ALL_SIZES = Array.from(new Set(products.flatMap((p) => p.sizes)));
-const PRICE_CEIL = Math.max(...products.map((p) => p.price));
+const ALL_COLORS = Array.from(new Set(products.flatMap((product) => product.colors)));
+const ALL_SIZES = Array.from(new Set(products.flatMap((product) => product.sizes)));
+const PRICE_CEIL = Math.max(1, ...products.map((product) => product.price));
 const PAGE_SIZE = 12;
+const FILTER_SCOPE = { colors: ALL_COLORS, sizes: ALL_SIZES, priceCeil: PRICE_CEIL } as const;
 
 const itemListLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
   name: "محصولات فروشگاه LBB",
   numberOfItems: products.length,
-  itemListElement: products.slice(0, 20).map((p, i) => ({
+  itemListElement: products.slice(0, 20).map((product, index) => ({
     "@type": "ListItem",
-    position: i + 1,
-    url: `/product/${p.slug}`,
-    name: p.name,
+    position: index + 1,
+    url: absUrl(`/product/${product.slug}`),
+    name: product.name,
   })),
 };
 
 export const Route = createFileRoute("/shop")({
-  validateSearch: (s: Record<string, unknown>): Filters => parseFilters(s),
-  head: ({ match: m }) => {
-    const filters = m.search as Filters;
-    const filtered = activeCount(filters) > 0;
+  validateSearch: (search: Record<string, unknown>) => parseFilterSearch(search),
+  head: ({ match }) => {
+    const filters = parseFilters(match.search as unknown as Record<string, unknown>);
     return {
-      meta: pageMeta({ title: TITLE, description: DESC, path: "/shop", type: "website", noindex: filtered }),
+      meta: pageMeta({
+        title: TITLE,
+        description: DESC,
+        path: "/shop",
+        type: "website",
+        noindex: hasSearchModifiers(filters),
+      }),
       links: canonical("/shop"),
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(breadcrumbLd([{ name: "خانه", path: "/" }, { name: "فروشگاه", path: "/shop" }])) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: "فروشگاه", path: "/shop" },
+            ]),
+          ),
+        },
         { type: "application/ld+json", children: JSON.stringify(itemListLd) },
       ],
     };
@@ -59,21 +83,37 @@ export const Route = createFileRoute("/shop")({
 });
 
 function ShopPage() {
-  const filters = Route.useSearch();
+  const routeFilters = Route.useSearch();
+  const filters = useMemo(
+    () =>
+      normalizeFilters(
+        parseFilters(routeFilters as unknown as Record<string, unknown>),
+        FILTER_SCOPE,
+      ),
+    [routeFilters],
+  );
   const navigate = useNavigate({ from: "/shop" });
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [isPending, startTransition] = useTransition();
+  const searchKey = stableSearchString(serializeFilters(filters));
 
-  const setFilters = (f: Filters) => {
-    startTransition(() => {
-      setVisible(PAGE_SIZE);
-      navigate({ search: serializeFilters(f), replace: true });
-    });
+  useEffect(() => setVisible(PAGE_SIZE), [searchKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const expected = serializeFilters(filters);
+    if (!isCanonicalSearch(window.location.search, expected)) {
+      navigate({ search: expected, replace: true });
+    }
+  }, [filters, navigate]);
+
+  const setFilters = (nextFilters: Filters) => {
+    const normalized = normalizeFilters(nextFilters, FILTER_SCOPE);
+    startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
   };
 
   const filtered = useMemo(() => applyFilters(products, filters), [filters]);
   const shown = filtered.slice(0, visible);
-
   const filterUi = (
     <ProductFilters
       filters={filters}
@@ -88,7 +128,10 @@ function ShopPage() {
   return (
     <>
       <Navbar theme="dark" />
-      <main dir="rtl" className="min-h-screen bg-obsidian pt-[var(--lbb-nav-h)] pb-bottombar md:pb-0">
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
+      >
         <Shell className="border-b border-hairline py-4">
           <Breadcrumb items={[{ label: "خانه", to: "/" }, { label: "فروشگاه" }]} />
         </Shell>
@@ -97,20 +140,25 @@ function ShopPage() {
           <Shell className="py-10 md:py-14">
             <TechLabel tone="signal">SHOP ALL</TechLabel>
             <h1 className="text-display-2 mt-3 text-bone">فروشگاه</h1>
-            <p className="tech mt-3 text-metal">{products.length.toLocaleString("fa-IR")} محصول موجود</p>
+            <p className="tech mt-3 text-metal">
+              {products.length.toLocaleString("fa-IR")} محصول موجود
+            </p>
           </Shell>
-          <Shell className="flex gap-1 overflow-x-auto pb-1">
-            <Link to="/shop" className="tech whitespace-nowrap border-b-2 border-signal px-4 py-3 text-signal">
+          <Shell className="flex snap-x gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Link
+              to="/shop"
+              className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-signal px-4 py-3 text-signal"
+            >
               همه
             </Link>
-            {CATEGORY_SLUGS.map((s) => (
+            {CATEGORY_SLUGS.map((slug) => (
               <Link
-                key={s}
+                key={slug}
                 to="/$category"
-                params={{ category: s }}
-                className="tech whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-metal transition-colors hover:text-bone"
+                params={{ category: slug }}
+                className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-metal transition-colors hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
               >
-                {CATEGORIES[s].nameFa}
+                {CATEGORIES[slug].nameFa}
               </Link>
             ))}
           </Shell>
@@ -119,7 +167,7 @@ function ShopPage() {
         <Band hairline={false} className="!py-10 md:!py-14">
           <Shell>
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
-              <aside className="hidden lg:block">
+              <aside className="hidden lg:block" aria-label="فیلتر محصولات">
                 <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{filterUi}</div>
               </aside>
 
@@ -132,7 +180,7 @@ function ShopPage() {
                 />
 
                 {isPending ? (
-                  <div className="mt-6">
+                  <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی محصولات">
                     <GridSkeleton count={8} />
                   </div>
                 ) : filtered.length === 0 ? (
@@ -144,7 +192,17 @@ function ShopPage() {
                     action={
                       <button
                         type="button"
-                        onClick={() => setFilters({ ...filters, cats: [], colors: [], sizes: [], max: 0, instock: false, sale: false })}
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            cats: [],
+                            colors: [],
+                            sizes: [],
+                            max: 0,
+                            instock: false,
+                            sale: false,
+                          })
+                        }
                         className={CtaClasses("signal")}
                       >
                         پاک کردن فیلترها
@@ -154,15 +212,15 @@ function ShopPage() {
                 ) : (
                   <>
                     <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
-                      {shown.map((p) => (
-                        <ProductCard key={p.id} p={p} />
+                      {shown.map((product, index) => (
+                        <ProductCard key={product.id} p={product} priority={index < 2} />
                       ))}
                     </div>
                     {visible < filtered.length ? (
                       <div className="mt-10 flex justify-center">
                         <button
                           type="button"
-                          onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                          onClick={() => setVisible((value) => value + PAGE_SIZE)}
                           className={CtaClasses("line")}
                         >
                           نمایش بیشتر
