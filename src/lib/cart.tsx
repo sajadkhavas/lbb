@@ -83,8 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines((previous) => {
       if (!isValidLine(line)) return previous;
       const index = previous.findIndex(
-        (item) =>
-          item.slug === line.slug && item.color === line.color && item.size === line.size,
+        (item) => item.slug === line.slug && item.color === line.color && item.size === line.size,
       );
       if (index >= 0) {
         const copy = [...previous];

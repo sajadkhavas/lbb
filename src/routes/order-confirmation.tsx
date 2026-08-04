@@ -31,7 +31,7 @@ function OrderConfirmation() {
   const [order, setOrder] = useState<DemoOrderSummary | null | undefined>(undefined);
 
   useEffect(() => {
-    setOrder(ref ? findDemoOrder(ref) ?? null : null);
+    setOrder(ref ? (findDemoOrder(ref) ?? null) : null);
   }, [ref]);
 
   return (
@@ -49,9 +49,7 @@ function OrderConfirmation() {
           <div className="w-full max-w-[460px]">
             <p className="tech text-signal">DEMO ORDER PREVIEW</p>
             <h1 className="mt-3 text-display-2 text-bone">پیش‌نمایش سفارش ساخته شد</h1>
-            <p className="mt-3 text-sm font-semibold text-signal">
-              کد مرجع نمایشی: #{order.ref}
-            </p>
+            <p className="mt-3 text-sm font-semibold text-signal">کد مرجع نمایشی: #{order.ref}</p>
             <div className="mt-5 rounded-xl border border-hairline bg-carbon p-4 text-start text-sm">
               <div className="flex justify-between gap-4 py-1 text-metal">
                 <span>تعداد کالا</span>

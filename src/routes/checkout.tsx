@@ -127,9 +127,7 @@ function Checkout() {
               <ol className="mb-8 mt-7 flex items-center justify-between text-xs">
                 <li className="font-bold text-signal">۱. سبد خرید</li>
                 <li className="font-bold text-signal">۲. اطلاعات نمایشی</li>
-                <li className={step === 2 ? "font-bold text-signal" : "text-mute"}>
-                  ۳. خلاصه
-                </li>
+                <li className={step === 2 ? "font-bold text-signal" : "text-mute"}>۳. خلاصه</li>
               </ol>
 
               {step === 1 ? (
@@ -141,8 +139,8 @@ function Checkout() {
                   }}
                 >
                   <DemoNotice className="rounded-xl">
-                    این اطلاعات فقط برای بررسی رابط کاربری در حافظه همین صفحه نگه داشته می‌شوند؛
-                    به سرور ارسال یا برای سفارش واقعی ذخیره نخواهند شد.
+                    این اطلاعات فقط برای بررسی رابط کاربری در حافظه همین صفحه نگه داشته می‌شوند؛ به
+                    سرور ارسال یا برای سفارش واقعی ذخیره نخواهند شد.
                   </DemoNotice>
                   <Field id="co-name" label="نام و نام‌خانوادگی" error={errors.name}>
                     <input

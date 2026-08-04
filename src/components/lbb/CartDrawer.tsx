@@ -50,7 +50,10 @@ export function CartDrawer() {
         </header>
 
         {!hydrated ? (
-          <div className="flex flex-1 items-center justify-center text-sm text-gray-500" role="status">
+          <div
+            className="flex flex-1 items-center justify-center text-sm text-gray-500"
+            role="status"
+          >
             در حال خواندن سبد…
           </div>
         ) : lines.length === 0 ? (
@@ -70,7 +73,10 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto px-5 py-4">
               <ul className="flex flex-col gap-4">
                 {lines.map((line, index) => (
-                  <li key={`${line.slug}-${line.color ?? ""}-${line.size ?? ""}`} className="flex gap-3">
+                  <li
+                    key={`${line.slug}-${line.color ?? ""}-${line.size ?? ""}`}
+                    className="flex gap-3"
+                  >
                     <Link
                       to="/product/$slug"
                       params={{ slug: line.slug }}

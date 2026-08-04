@@ -116,7 +116,8 @@ function TrackOrderPage() {
             </div>
           ) : result === null ? (
             <p className="mt-5 text-sm leading-7 text-metal" role="status">
-              این کد در sessionStorage همین تب پیدا نشد. کدهای تب یا دستگاه دیگر قابل بازیابی نیستند.
+              این کد در sessionStorage همین تب پیدا نشد. کدهای تب یا دستگاه دیگر قابل بازیابی
+              نیستند.
             </p>
           ) : null}
         </section>
