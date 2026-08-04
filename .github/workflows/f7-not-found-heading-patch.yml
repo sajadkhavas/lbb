@@ -82,7 +82,7 @@ jobs:
       - name: Format and commit production patch
         run: |
           npx prettier --write 'src/routes/collections.$slug.tsx' 'src/routes/journal.$slug.tsx'
-          git rm .github/workflows/f7-not-found-heading-patch.yml
+          git rm .github/workflows/f7-not-found-heading-patch.yml .f7-not-found-heading-trigger
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add 'src/routes/collections.$slug.tsx' 'src/routes/journal.$slug.tsx'
