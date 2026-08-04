@@ -46,6 +46,8 @@ const templates = [
   { name: "product-desktop", route: "/product/lbb-classic-hoodie", width: 1440, height: 1000 },
   { name: "collections-desktop", route: "/collections", width: 1440, height: 1000 },
   { name: "checkout-empty-mobile", route: "/checkout", width: 390, height: 844 },
+  { name: "design-system-mobile", route: "/design-system", width: 390, height: 844 },
+  { name: "design-system-desktop", route: "/design-system", width: 1440, height: 1000 },
 ];
 
 for (const template of templates) {
