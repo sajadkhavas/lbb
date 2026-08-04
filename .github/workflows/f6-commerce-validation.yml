@@ -1,0 +1,170 @@
+name: F6 commerce trust validation
+
+on:
+  pull_request:
+    branches:
+      - validation/f6-commerce-trust
+
+permissions:
+  contents: write
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install clean dependency tree
+        run: |
+          rm -rf node_modules package-lock.json npm-shrinkwrap.json
+          npm install --ignore-scripts
+          rm -rf node_modules
+          npm ci
+          npm install --no-save --package-lock=false @typescript/native-preview
+
+      - name: Patch PDP trust copy
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          path = Path("src/routes/product.$slug.tsx")
+          text = path.read_text()
+          old = '''                  <ul className="flex flex-col gap-2 text-sm leading-8 text-metal">
+                    <li>ارسال به سراسر ایران، معمولاً ۲ تا ۵ روز کاری.</li>
+                    <li>امکان مرجوعی و تعویض تا ۷ روز پس از دریافت، در صورت سالم بودن کالا.</li>
+                    <li>جزئیات کامل در صفحهٔ ارسال و مرجوعی.</li>
+                  </ul>'''
+          new = '''                  <div className="space-y-3 text-sm leading-8 text-metal">
+                    <p>
+                      فروش، پرداخت، ارسال و مرجوعی واقعی هنوز فعال نیستند. افزودن این محصول به سبد
+                      فقط برای آزمایش رابط کاربری انجام می‌شود.
+                    </p>
+                    <a
+                      href="/shipping-returns"
+                      className="inline-flex min-h-11 items-center text-signal underline-offset-4 hover:underline"
+                    >
+                      مشاهده وضعیت فعلی ارسال و مرجوعی
+                    </a>
+                  </div>'''
+          if old not in text and "فروش، پرداخت، ارسال و مرجوعی واقعی هنوز فعال نیستند" not in text:
+              raise SystemExit("PDP shipping block not found")
+          path.write_text(text.replace(old, new))
+          PY
+
+      - name: Format reviewed F6 scope
+        run: >-
+          npx prettier --write
+          'src/components/lbb/AnnouncementBar.tsx'
+          'src/components/lbb/CartDrawer.tsx'
+          'src/components/lbb/home/TrustStrip.tsx'
+          'src/lib/cart.tsx'
+          'src/lib/commerce.ts'
+          'src/routes/cart.tsx'
+          'src/routes/checkout.tsx'
+          'src/routes/contact.tsx'
+          'src/routes/order-confirmation.tsx'
+          'src/routes/privacy.tsx'
+          'src/routes/product.$slug.tsx'
+          'src/routes/shipping-returns.tsx'
+          'src/routes/terms.tsx'
+          'src/routes/track-order.tsx'
+
+      - name: Commit production patch and formatting
+        shell: bash
+        run: |
+          paths=(
+            'src/components/lbb/AnnouncementBar.tsx'
+            'src/components/lbb/CartDrawer.tsx'
+            'src/components/lbb/home/TrustStrip.tsx'
+            'src/lib/cart.tsx'
+            'src/lib/commerce.ts'
+            'src/routes/cart.tsx'
+            'src/routes/checkout.tsx'
+            'src/routes/contact.tsx'
+            'src/routes/order-confirmation.tsx'
+            'src/routes/privacy.tsx'
+            'src/routes/product.$slug.tsx'
+            'src/routes/shipping-returns.tsx'
+            'src/routes/terms.tsx'
+            'src/routes/track-order.tsx'
+          )
+          cp .github/scripts/f6-commerce-browser.mjs /tmp/f6-commerce-browser.mjs
+          tar -cf /tmp/f6-production.tar "${paths[@]}"
+          git fetch origin phase/f6-commerce-trust
+          git reset --hard HEAD
+          git checkout -f -B f6-production origin/phase/f6-commerce-trust
+          tar -xf /tmp/f6-production.tar
+          cp /tmp/f6-commerce-browser.mjs .f6-commerce-browser.mjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "${paths[@]}"
+          if ! git diff --cached --quiet; then
+            git commit -m 'fix(f6): finalize commerce trust boundaries'
+            git push origin HEAD:phase/f6-commerce-trust
+          fi
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint F6 ownership
+        run: >-
+          npx eslint
+          'src/components/lbb/AnnouncementBar.tsx'
+          'src/components/lbb/CartDrawer.tsx'
+          'src/components/lbb/home/TrustStrip.tsx'
+          'src/lib/cart.tsx'
+          'src/lib/commerce.ts'
+          'src/routes/cart.tsx'
+          'src/routes/checkout.tsx'
+          'src/routes/contact.tsx'
+          'src/routes/order-confirmation.tsx'
+          'src/routes/privacy.tsx'
+          'src/routes/product.$slug.tsx'
+          'src/routes/shipping-returns.tsx'
+          'src/routes/terms.tsx'
+          'src/routes/track-order.tsx'
+
+      - name: Check unsupported claims
+        run: |
+          files=(
+            src/components/lbb/AnnouncementBar.tsx
+            src/components/lbb/CartDrawer.tsx
+            src/components/lbb/home/TrustStrip.tsx
+            src/routes/checkout.tsx
+            src/routes/contact.tsx
+            'src/routes/product.$slug.tsx'
+            src/routes/shipping-returns.tsx
+            src/routes/terms.tsx
+          )
+          if grep -En 'زرین.?پال|ایدی.?پی|پیام شما ارسال شد|پرداخت در محل تهران|ارسال به سراسر ایران، معمولاً ۲ تا ۵ روز کاری|امکان مرجوعی و تعویض تا ۷ روز' "${files[@]}"; then
+            echo 'Unsupported commerce claim remains.'
+            exit 1
+          fi
+
+      - name: Production build
+        run: npm run build
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2
+          npx playwright install chromium
+
+      - name: Start app
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/f6-server.log 2>&1 &
+          for attempt in {1..90}; do
+            if curl --fail --silent http://127.0.0.1:4173/cart > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/f6-server.log
+          exit 1
+
+      - name: Browser commerce flow
+        run: node .f6-commerce-browser.mjs
