@@ -4,9 +4,9 @@ export function TickerStrip() {
   const row = (
     <div className="flex shrink-0 items-center">
       {ITEMS.map((t, i) => (
-        <span key={i} className="tech flex items-center gap-6 whitespace-nowrap px-6 text-bone">
+        <span key={i} className="tech flex items-center gap-6 whitespace-nowrap px-6 text-obsidian">
           {t}
-          <span aria-hidden="true" className="text-bone/60">
+          <span aria-hidden="true" className="text-obsidian/70">
             ✦
           </span>
         </span>
