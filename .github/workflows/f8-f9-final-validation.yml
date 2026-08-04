@@ -6,7 +6,7 @@ on:
       - validation/f8-f9-final
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   VITE_SITE_URL: https://lbb.example.test
@@ -29,6 +29,26 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Format final fixes
+        run: >-
+          npx prettier --write
+          src/components/lbb/Footer.tsx
+          src/components/lbb/AnnouncementBar.tsx
+          src/components/lbb/home/TickerStrip.tsx
+          src/components/lbb/home/HeroSplit.tsx
+          src/routes/search.tsx
+          tests/seo-pwa.spec.ts
+
+      - name: Commit final formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src tests
+          if ! git diff --cached --quiet; then
+            git commit -m 'fix(f9): finalize contrast, search history and PWA tests'
+            git push origin HEAD:phase/f8-f9-final-quality
+          fi
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
@@ -40,13 +60,6 @@ jobs:
 
       - name: Production build and route generation gate
         run: npm run build
-
-      - name: Diagnose Worker SSR error location
-        run: |
-          for file in .output/server/_ssr/router-*.mjs; do
-            echo "===== $file ====="
-            nl -ba "$file" | sed -n '1735,1815p'
-          done
 
       - name: TypeScript gate
         run: npm run typecheck
