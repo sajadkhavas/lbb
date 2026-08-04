@@ -48,12 +48,14 @@ for (const width of widths) {
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(350);
-    const imagesOkay = await page.locator("main img").evaluateAll((images) =>
-      images.every(
-        (image) => image.complete && image.naturalWidth > 0 && image.hasAttribute("alt"),
-      ),
-    );
-    if (!imagesOkay) failures.push(`${width}px ${route}: image failed or alt attribute missing`);
+    const imagesOkay = await page
+      .locator('main img:not([aria-hidden="true"])')
+      .evaluateAll((images) =>
+        images.every(
+          (image) => image.complete && image.naturalWidth > 0 && image.hasAttribute("alt"),
+        ),
+      );
+    if (!imagesOkay) failures.push(`${width}px ${route}: content image failed or alt attribute missing`);
 
     await page.reload({ waitUntil: "networkidle" });
     if ((await page.locator("h1").count()) !== 1) failures.push(`${width}px ${route}: refresh lost heading`);
