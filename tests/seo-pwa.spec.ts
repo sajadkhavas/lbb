@@ -57,9 +57,7 @@ test("fonts are self-hosted, loaded and free of external font requests", async (
     ]);
   });
 
-  expect(await page.evaluate(() => document.fonts.check('400 16px "Estedad Variable"'))).toBe(
-    true,
-  );
+  expect(await page.evaluate(() => document.fonts.check('400 16px "Estedad Variable"'))).toBe(true);
   expect(
     await page.evaluate(() => document.fonts.check('600 16px "JetBrains Mono Variable"')),
   ).toBe(true);
