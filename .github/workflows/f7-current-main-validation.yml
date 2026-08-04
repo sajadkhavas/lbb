@@ -1,0 +1,80 @@
+name: F7 current-main validation
+
+on:
+  pull_request:
+    branches:
+      - validation/f7-current-main
+
+permissions:
+  contents: read
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install clean dependency tree
+        run: |
+          rm -rf node_modules package-lock.json npm-shrinkwrap.json
+          npm install --ignore-scripts
+          rm -rf node_modules
+          npm ci
+          npm install --no-save --package-lock=false @typescript/native-preview
+
+      - name: Check formatting
+        run: >-
+          npx prettier --check
+          'src/lib/collections.ts'
+          'src/lib/journal.ts'
+          'src/routes/about.tsx'
+          'src/routes/collections.$slug.tsx'
+          'src/routes/collections.index.tsx'
+          'src/routes/faq.tsx'
+          'src/routes/journal.$slug.tsx'
+          'src/routes/journal.index.tsx'
+          'src/routes/lookbook.tsx'
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint F7 ownership
+        run: >-
+          npx eslint
+          'src/lib/collections.ts'
+          'src/lib/journal.ts'
+          'src/routes/about.tsx'
+          'src/routes/collections.$slug.tsx'
+          'src/routes/collections.index.tsx'
+          'src/routes/faq.tsx'
+          'src/routes/journal.$slug.tsx'
+          'src/routes/journal.index.tsx'
+          'src/routes/lookbook.tsx'
+
+      - name: Production build
+        run: npm run build
+
+      - name: Install browser runtime
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2
+          npx playwright install chromium
+
+      - name: Start app
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/f7-server.log 2>&1 &
+          for attempt in {1..90}; do
+            if curl --fail --silent http://127.0.0.1:4173/collections > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/f7-server.log
+          exit 1
+
+      - name: Responsive browser suite
+        run: node .github/scripts/f7-current-main-browser.mjs
