@@ -1,0 +1,82 @@
+name: Reviewed F4 F5 validation
+
+on:
+  push:
+    branches:
+      - integration/f4-f5-reviewed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Resolve dependency tree
+        run: |
+          rm -rf node_modules package-lock.json npm-shrinkwrap.json
+          npm install --ignore-scripts
+          rm -rf node_modules
+          npm ci
+      - name: Install TypeScript native preview
+        run: npm install --no-save --package-lock=false @typescript/native-preview
+      - name: Check formatting in F4/F5 scope
+        run: >-
+          npx prettier --check
+          'src/routes/shop.tsx'
+          'src/routes/$category.tsx'
+          'src/routes/search.tsx'
+          'src/routes/product.$slug.tsx'
+          'src/components/lbb/ProductCard.tsx'
+          'src/components/lbb/ProductFilters.tsx'
+          'src/components/lbb/ProductGridControls.tsx'
+          'src/components/lbb/ProductQuickView.tsx'
+          'src/components/lbb/product/Gallery.tsx'
+          'src/components/lbb/product/StickyBuyBar.tsx'
+          'src/lib/product-filter.ts'
+          'src/lib/quickview.tsx'
+          'src/lib/recent-searches.ts'
+          'src/lib/recently-viewed.ts'
+          '.github/scripts/f4-f5-reviewed-browser.mjs'
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint owned F4/F5 files
+        run: >-
+          npx eslint
+          'src/routes/shop.tsx'
+          'src/routes/$category.tsx'
+          'src/routes/search.tsx'
+          'src/routes/product.$slug.tsx'
+          'src/components/lbb/ProductCard.tsx'
+          'src/components/lbb/ProductFilters.tsx'
+          'src/components/lbb/ProductGridControls.tsx'
+          'src/components/lbb/ProductQuickView.tsx'
+          'src/components/lbb/product/Gallery.tsx'
+          'src/components/lbb/product/StickyBuyBar.tsx'
+          'src/lib/product-filter.ts'
+          'src/lib/quickview.tsx'
+          'src/lib/recent-searches.ts'
+          'src/lib/recently-viewed.ts'
+      - name: Build
+        run: npm run build
+      - name: Install Playwright
+        run: |
+          npm install --no-save --package-lock=false playwright@1.54.2
+          npx playwright install chromium
+      - name: Start TanStack server
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/lbb-dev.log 2>&1 &
+          for attempt in {1..90}; do
+            if curl --fail --silent http://127.0.0.1:4173/shop > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/lbb-dev.log
+          exit 1
+      - name: Browser behavior
+        run: node .github/scripts/f4-f5-reviewed-browser.mjs
