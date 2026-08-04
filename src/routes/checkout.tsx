@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
@@ -48,7 +48,6 @@ export const Route = createFileRoute("/checkout")({
 });
 
 function Checkout() {
-  const navigate = useNavigate();
   const { lines, subtotal, clear, hydrated } = useCart();
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState({
@@ -97,7 +96,7 @@ function Checkout() {
       return;
     }
     clear();
-    navigate({ to: "/order-confirmation", search: { ref } });
+    window.location.assign(`/order-confirmation?ref=${encodeURIComponent(ref)}`);
   };
 
   return (
