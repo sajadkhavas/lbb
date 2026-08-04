@@ -37,7 +37,6 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
         src={productImage(p.slug)}
         alt={p.name}
         ratio="4/5"
-        priority={priority}
         width={1024}
         height={1280}
         className="bg-carbon"
@@ -50,6 +49,8 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
           alt=""
           aria-hidden="true"
           className="hidden"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
         />
