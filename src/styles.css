@@ -340,7 +340,9 @@ img {
   background: var(--lbb-carbon);
 }
 .product-card__media img {
-  transition: opacity 420ms var(--ease-lbb), transform 700ms var(--ease-lbb);
+  transition:
+    opacity 420ms var(--ease-lbb),
+    transform 700ms var(--ease-lbb);
 }
 @media (hover: hover) {
   .product-card:hover .product-card__media img {
