@@ -9,7 +9,6 @@ import { heroMain, lifestyle1, lifestyle2 } from "@/lib/product-images";
 import {
   Band,
   CtaClasses,
-  EmptyState,
   Frame,
   SectionHead,
   Shell,
@@ -100,16 +99,18 @@ function JournalNotFound() {
         </Shell>
         <Band hairline={false}>
           <Shell>
-            <EmptyState
-              icon={<BookOpenText aria-hidden="true" size={34} />}
-              title="این مقاله پیدا نشد"
-              body="آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد."
-              action={
-                <Link to="/journal" className={CtaClasses("signal")}>
-                  بازگشت به ژورنال
-                </Link>
-              }
-            />
+            <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
+              <span className="text-mute">
+                <BookOpenText aria-hidden="true" size={34} />
+              </span>
+              <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
+              <p className="max-w-[42ch] text-sm leading-7 text-metal">
+                آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
+              </p>
+              <Link to="/journal" className={CtaClasses("signal")}>
+                بازگشت به ژورنال
+              </Link>
+            </div>
           </Shell>
         </Band>
       </main>
