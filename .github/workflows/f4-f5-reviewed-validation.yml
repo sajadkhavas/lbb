@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+env:
+  VITE_SITE_URL: https://lbb.test
+
 jobs:
   validate:
     runs-on: ubuntu-latest
