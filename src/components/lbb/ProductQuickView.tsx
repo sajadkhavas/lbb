@@ -147,7 +147,13 @@ export function ProductQuickView() {
                     index === img ? "border-signal" : "border-bone/40 opacity-70"
                   }`}
                 >
-                  <img src={source} alt="" aria-hidden="true" className="h-full w-full object-cover" loading="lazy" />
+                  <img
+                    src={source}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
                 </button>
               ))}
             </div>
@@ -163,7 +169,11 @@ export function ProductQuickView() {
 
           <div className="mt-3 flex items-baseline gap-2">
             <span className="num text-xl font-bold text-bone">{fmtToman(p.price)}</span>
-            {p.originalPrice ? <span className="num text-xs text-mute line-through">{fmtToman(p.originalPrice)}</span> : null}
+            {p.originalPrice ? (
+              <span className="num text-xs text-mute line-through">
+                {fmtToman(p.originalPrice)}
+              </span>
+            ) : null}
           </div>
 
           {p.colors.length > 0 ? (
@@ -218,25 +228,51 @@ export function ProductQuickView() {
                   );
                 })}
               </div>
-              {sizeError ? <p role="alert" className="mt-2 text-xs font-semibold text-signal">لطفاً یک سایز موجود را انتخاب کنید.</p> : null}
+              {sizeError ? (
+                <p role="alert" className="mt-2 text-xs font-semibold text-signal">
+                  لطفاً یک سایز موجود را انتخاب کنید.
+                </p>
+              ) : null}
             </fieldset>
           ) : null}
 
           <div className="mt-4 flex items-center gap-3">
             <p className="text-xs font-semibold text-bone">تعداد</p>
             <div className="flex items-center gap-1 border border-hairline">
-              <button type="button" onClick={() => setQty((value) => Math.max(1, value - 1))} disabled={qty <= 1} aria-label="کاهش تعداد" className="tap-target grid place-items-center text-bone disabled:opacity-35">
+              <button
+                type="button"
+                onClick={() => setQty((value) => Math.max(1, value - 1))}
+                disabled={qty <= 1}
+                aria-label="کاهش تعداد"
+                className="tap-target grid place-items-center text-bone disabled:opacity-35"
+              >
                 <Minus size={15} aria-hidden="true" />
               </button>
-              <output className="num w-6 text-center text-sm font-bold text-bone" aria-live="polite">{qty}</output>
-              <button type="button" onClick={() => setQty((value) => Math.min(MAX_QTY, value + 1))} disabled={qty >= MAX_QTY} aria-label="افزایش تعداد" className="tap-target grid place-items-center text-bone disabled:opacity-35">
+              <output
+                className="num w-6 text-center text-sm font-bold text-bone"
+                aria-live="polite"
+              >
+                {qty}
+              </output>
+              <button
+                type="button"
+                onClick={() => setQty((value) => Math.min(MAX_QTY, value + 1))}
+                disabled={qty >= MAX_QTY}
+                aria-label="افزایش تعداد"
+                className="tap-target grid place-items-center text-bone disabled:opacity-35"
+              >
                 <Plus size={15} aria-hidden="true" />
               </button>
             </div>
           </div>
 
           <div className="mt-5 flex items-center gap-2">
-            <button type="button" onClick={addToCart} disabled={!p.inStock} className={`${CtaClasses("signal")} h-12 flex-1`}>
+            <button
+              type="button"
+              onClick={addToCart}
+              disabled={!p.inStock}
+              className={`${CtaClasses("signal")} h-12 flex-1`}
+            >
               <ShoppingBag size={17} aria-hidden="true" />
               {p.inStock ? "افزودن به سبد خرید" : "ناموجود"}
             </button>
@@ -244,17 +280,28 @@ export function ProductQuickView() {
               type="button"
               onClick={() => {
                 toggle(p.slug);
-                toast(liked ? "از علاقه‌مندی‌ها حذف شد" : "به علاقه‌مندی‌ها اضافه شد", { description: p.name });
+                toast(liked ? "از علاقه‌مندی‌ها حذف شد" : "به علاقه‌مندی‌ها اضافه شد", {
+                  description: p.name,
+                });
               }}
               aria-label={liked ? "حذف از علاقه‌مندی" : "افزودن به علاقه‌مندی"}
               aria-pressed={liked}
               className="tap-target grid h-12 w-12 shrink-0 place-items-center border border-hairline transition hover:border-metal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
             >
-              <Heart size={18} aria-hidden="true" className={liked ? "fill-signal text-signal" : "text-metal"} />
+              <Heart
+                size={18}
+                aria-hidden="true"
+                className={liked ? "fill-signal text-signal" : "text-metal"}
+              />
             </button>
           </div>
 
-          <Link to="/product/$slug" params={{ slug: p.slug }} onClick={close} className={`${CtaClasses("line")} mt-3 w-full`}>
+          <Link
+            to="/product/$slug"
+            params={{ slug: p.slug }}
+            onClick={close}
+            className={`${CtaClasses("line")} mt-3 w-full`}
+          >
             توضیحات بیشتر و جزئیات کامل
           </Link>
 

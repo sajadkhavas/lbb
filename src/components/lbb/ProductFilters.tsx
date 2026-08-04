@@ -54,7 +54,10 @@ export function ProductFilters({
         <fieldset className="flex flex-col gap-3">
           <legend className="tech mb-1 text-metal">دسته‌بندی</legend>
           {CATEGORY_SLUGS.map((slug: CategorySlug) => (
-            <label key={slug} className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
+            <label
+              key={slug}
+              className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone"
+            >
               <Checkbox
                 checked={filters.cats.includes(slug)}
                 onCheckedChange={() =>
@@ -114,9 +117,7 @@ export function ProductFilters({
                   type="button"
                   aria-pressed={active}
                   aria-label={`${active ? "حذف" : "انتخاب"} فیلتر سایز ${size}`}
-                  onClick={() =>
-                    onChange({ ...filters, sizes: toggleValue(filters.sizes, size) })
-                  }
+                  onClick={() => onChange({ ...filters, sizes: toggleValue(filters.sizes, size) })}
                   className={`size-chip focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
                     active ? "border-signal bg-signal text-bone" : "hover:border-bone"
                   }`}

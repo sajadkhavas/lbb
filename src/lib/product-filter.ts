@@ -88,7 +88,9 @@ const parseBoolean = (value: unknown) => {
 /** Normalizes filters for a page-specific catalogue scope. */
 export function normalizeFilters(filters: Filters, scope: FilterScope = {}): Filters {
   const categories =
-    scope.categories === false ? [] : normalizeList(filters.cats, scope.categories ?? CATEGORY_ORDER);
+    scope.categories === false
+      ? []
+      : normalizeList(filters.cats, scope.categories ?? CATEGORY_ORDER);
   const colors = normalizeList(filters.colors, scope.colors ?? GLOBAL_COLORS);
   const sizes = normalizeList(filters.sizes, scope.sizes ?? GLOBAL_SIZES);
   const priceCeil = Math.max(1, Math.floor(scope.priceCeil ?? GLOBAL_PRICE_CEIL));
@@ -199,9 +201,7 @@ export function applyFilters(list: Product[], filters: Filters): Product[] {
     case "price-desc":
       return [...out].sort((a, b) => b.price - a.price || a.rank - b.rank);
     case "discount":
-      return [...out].sort(
-        (a, b) => discountPercent(b) - discountPercent(a) || a.rank - b.rank,
-      );
+      return [...out].sort((a, b) => discountPercent(b) - discountPercent(a) || a.rank - b.rank);
     default:
       return [...out].sort(
         (a, b) =>

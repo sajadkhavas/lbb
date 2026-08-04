@@ -36,7 +36,10 @@ export function addRecentSearch(query: string) {
   if (!term) return;
   try {
     const key = identity(term);
-    const next = [term, ...getRecentSearches().filter((item) => identity(item) !== key)].slice(0, MAX);
+    const next = [term, ...getRecentSearches().filter((item) => identity(item) !== key)].slice(
+      0,
+      MAX,
+    );
     window.localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
     // Storage can be unavailable in private or restricted browser contexts.

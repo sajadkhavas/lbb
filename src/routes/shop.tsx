@@ -8,7 +8,14 @@ import { ProductCard } from "@/components/lbb/ProductCard";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { ProductFilters } from "@/components/lbb/ProductFilters";
 import { ProductGridControls } from "@/components/lbb/ProductGridControls";
-import { Band, CtaClasses, EmptyState, GridSkeleton, Shell, TechLabel } from "@/components/lbb/ui/primitives";
+import {
+  Band,
+  CtaClasses,
+  EmptyState,
+  GridSkeleton,
+  Shell,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/products";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";
@@ -113,7 +120,10 @@ function ShopPage() {
   return (
     <>
       <Navbar theme="dark" />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0">
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
+      >
         <Shell className="border-b border-hairline py-4">
           <Breadcrumb items={[{ label: "خانه", to: "/" }, { label: "فروشگاه" }]} />
         </Shell>
@@ -122,10 +132,15 @@ function ShopPage() {
           <Shell className="py-10 md:py-14">
             <TechLabel tone="signal">SHOP ALL</TechLabel>
             <h1 className="text-display-2 mt-3 text-bone">فروشگاه</h1>
-            <p className="tech mt-3 text-metal">{products.length.toLocaleString("fa-IR")} محصول موجود</p>
+            <p className="tech mt-3 text-metal">
+              {products.length.toLocaleString("fa-IR")} محصول موجود
+            </p>
           </Shell>
           <Shell className="flex snap-x gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <Link to="/shop" className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-signal px-4 py-3 text-signal">
+            <Link
+              to="/shop"
+              className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-signal px-4 py-3 text-signal"
+            >
               همه
             </Link>
             {CATEGORY_SLUGS.map((slug) => (
@@ -149,7 +164,12 @@ function ShopPage() {
               </aside>
 
               <div>
-                <ProductGridControls filters={filters} onChange={setFilters} resultCount={filtered.length} filterSlot={filterUi} />
+                <ProductGridControls
+                  filters={filters}
+                  onChange={setFilters}
+                  resultCount={filtered.length}
+                  filterSlot={filterUi}
+                />
 
                 {isPending ? (
                   <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی محصولات">
@@ -164,7 +184,17 @@ function ShopPage() {
                     action={
                       <button
                         type="button"
-                        onClick={() => setFilters({ ...filters, cats: [], colors: [], sizes: [], max: 0, instock: false, sale: false })}
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            cats: [],
+                            colors: [],
+                            sizes: [],
+                            max: 0,
+                            instock: false,
+                            sale: false,
+                          })
+                        }
                         className={CtaClasses("signal")}
                       >
                         پاک کردن فیلترها
@@ -174,11 +204,17 @@ function ShopPage() {
                 ) : (
                   <>
                     <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
-                      {shown.map((product, index) => <ProductCard key={product.id} p={product} priority={index < 2} />)}
+                      {shown.map((product, index) => (
+                        <ProductCard key={product.id} p={product} priority={index < 2} />
+                      ))}
                     </div>
                     {visible < filtered.length ? (
                       <div className="mt-10 flex justify-center">
-                        <button type="button" onClick={() => setVisible((value) => value + PAGE_SIZE)} className={CtaClasses("line")}>
+                        <button
+                          type="button"
+                          onClick={() => setVisible((value) => value + PAGE_SIZE)}
+                          className={CtaClasses("line")}
+                        >
                           نمایش بیشتر
                         </button>
                       </div>

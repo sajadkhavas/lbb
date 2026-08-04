@@ -8,7 +8,9 @@ function readList(): string[] {
     const parsed: unknown = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
     return Array.from(
-      new Set(parsed.filter((slug): slug is string => typeof slug === "string" && slug.trim().length > 0)),
+      new Set(
+        parsed.filter((slug): slug is string => typeof slug === "string" && slug.trim().length > 0),
+      ),
     ).slice(0, MAX);
   } catch {
     return [];

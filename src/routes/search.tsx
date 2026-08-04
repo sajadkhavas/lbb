@@ -35,7 +35,8 @@ const FILTER_SCOPE = { colors: ALL_COLORS, sizes: ALL_SIZES, priceCeil: PRICE_CE
 
 type SearchParams = Filters & { q?: string };
 
-const queryFrom = (value: unknown) => normalizeSearchTerm(typeof value === "string" ? value : "") || undefined;
+const queryFrom = (value: unknown) =>
+  normalizeSearchTerm(typeof value === "string" ? value : "") || undefined;
 const serializeSearch = (query: string | undefined, filters: Filters) => ({
   ...(query ? { q: query } : {}),
   ...serializeFilters(filters),
@@ -72,7 +73,9 @@ function highlight(text: string, query: string) {
   return (
     <>
       {text.slice(0, index)}
-      <mark className="rounded bg-signal/15 text-signal">{text.slice(index, index + token.length)}</mark>
+      <mark className="rounded bg-signal/15 text-signal">
+        {text.slice(index, index + token.length)}
+      </mark>
       {text.slice(index + token.length)}
     </>
   );
@@ -129,16 +132,12 @@ function SearchPage() {
 
   const commitQuery = (nextValue: string, replace = false) => {
     const nextQuery = normalizeSearchTerm(nextValue) || undefined;
-    startTransition(() =>
-      navigate({ search: serializeSearch(nextQuery, filters), replace }),
-    );
+    startTransition(() => navigate({ search: serializeSearch(nextQuery, filters), replace }));
   };
 
   const setFilters = (nextFilters: Filters) => {
     const normalized = normalizeFilters(nextFilters, FILTER_SCOPE);
-    startTransition(() =>
-      navigate({ search: serializeSearch(query, normalized), replace: false }),
-    );
+    startTransition(() => navigate({ search: serializeSearch(query, normalized), replace: false }));
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -165,16 +164,24 @@ function SearchPage() {
           <h1 className="text-display-2 text-bone">جستجو</h1>
 
           <form onSubmit={submit} className="relative mt-5" role="search">
-            <label htmlFor="site-search" className="sr-only">جستجو در محصولات</label>
+            <label htmlFor="site-search" className="sr-only">
+              جستجو در محصولات
+            </label>
             <input
               id="site-search"
               value={draft}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDraft(event.target.value)}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setDraft(event.target.value)
+              }
               placeholder="جستجو در محصولات LBB..."
               autoComplete="off"
               className="h-14 w-full rounded-xl border border-hairline bg-carbon ps-14 pe-28 text-sm text-bone outline-none tap-target placeholder:text-mute focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/40"
             />
-            <SearchIcon size={18} className="pointer-events-none absolute start-5 top-1/2 -translate-y-1/2 text-mute" aria-hidden="true" />
+            <SearchIcon
+              size={18}
+              className="pointer-events-none absolute start-5 top-1/2 -translate-y-1/2 text-mute"
+              aria-hidden="true"
+            />
             {draft ? (
               <button
                 type="button"
@@ -188,7 +195,10 @@ function SearchPage() {
                 <X size={18} aria-hidden="true" />
               </button>
             ) : null}
-            <button type="submit" className={`${CtaClasses("signal")} absolute end-1.5 top-1.5 h-11 px-4`}>
+            <button
+              type="submit"
+              className={`${CtaClasses("signal")} absolute end-1.5 top-1.5 h-11 px-4`}
+            >
               جستجو
             </button>
           </form>
@@ -196,7 +206,10 @@ function SearchPage() {
           {!query && recent.length > 0 ? (
             <section className="mt-6" aria-labelledby="recent-searches-title">
               <div className="flex items-center justify-between gap-3">
-                <h2 id="recent-searches-title" className="flex items-center gap-1.5 text-[13px] font-semibold text-metal">
+                <h2
+                  id="recent-searches-title"
+                  className="flex items-center gap-1.5 text-[13px] font-semibold text-metal"
+                >
                   <Clock size={14} aria-hidden="true" /> جستجوهای اخیر
                 </h2>
                 <button
@@ -212,8 +225,17 @@ function SearchPage() {
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {recent.map((item) => (
-                  <span key={item} className="flex min-h-11 items-center gap-1.5 rounded-full border border-hairline bg-carbon px-3 text-xs text-bone">
-                    <button type="button" onClick={() => commitQuery(item)} className="min-h-9 hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal">{item}</button>
+                  <span
+                    key={item}
+                    className="flex min-h-11 items-center gap-1.5 rounded-full border border-hairline bg-carbon px-3 text-xs text-bone"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => commitQuery(item)}
+                      className="min-h-9 hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    >
+                      {item}
+                    </button>
                     <button
                       type="button"
                       aria-label={`حذف ${item}`}
@@ -233,10 +255,17 @@ function SearchPage() {
 
           {!query ? (
             <section className="mt-8" aria-labelledby="popular-categories-title">
-              <h2 id="popular-categories-title" className="text-[13px] font-semibold text-metal">دسته‌بندی‌های پرطرفدار</h2>
+              <h2 id="popular-categories-title" className="text-[13px] font-semibold text-metal">
+                دسته‌بندی‌های پرطرفدار
+              </h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {CATEGORY_SLUGS.map((category) => (
-                  <Link key={category} to="/$category" params={{ category }} className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal">
+                  <Link
+                    key={category}
+                    to="/$category"
+                    params={{ category }}
+                    className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  >
                     {CATEGORIES[category].nameFa}
                   </Link>
                 ))}
@@ -250,27 +279,68 @@ function SearchPage() {
                 <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{filterUi}</div>
               </aside>
               <section aria-labelledby="search-results-title">
-                <h2 id="search-results-title" className="sr-only">نتایج جستجو برای {query}</h2>
-                <ProductGridControls filters={filters} onChange={setFilters} resultCount={results.length} filterSlot={filterUi} />
-                <p className="mt-4 text-[13px] text-metal" role="status" aria-live="polite" key={searchKey}>
+                <h2 id="search-results-title" className="sr-only">
+                  نتایج جستجو برای {query}
+                </h2>
+                <ProductGridControls
+                  filters={filters}
+                  onChange={setFilters}
+                  resultCount={results.length}
+                  filterSlot={filterUi}
+                />
+                <p
+                  className="mt-4 text-[13px] text-metal"
+                  role="status"
+                  aria-live="polite"
+                  key={searchKey}
+                >
                   نتایج برای «{query}»: {results.length.toLocaleString("fa-IR")} محصول
                 </p>
 
                 {isPending ? (
-                  <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی نتایج"><GridSkeleton count={6} /></div>
+                  <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی نتایج">
+                    <GridSkeleton count={6} />
+                  </div>
                 ) : results.length === 0 ? (
                   <EmptyState
                     className="mt-6"
                     icon={<PackageSearch size={40} aria-hidden="true" />}
                     title={`محصولی برای «${query}» پیدا نشد`}
-                    body={baseResults.length > 0 ? "نتیجه‌ای با فیلترهای انتخاب‌شده باقی نمانده است." : "املای عبارت را بررسی کن یا یکی از دسته‌بندی‌ها را ببین."}
+                    body={
+                      baseResults.length > 0
+                        ? "نتیجه‌ای با فیلترهای انتخاب‌شده باقی نمانده است."
+                        : "املای عبارت را بررسی کن یا یکی از دسته‌بندی‌ها را ببین."
+                    }
                     action={
                       baseResults.length > 0 ? (
-                        <button type="button" onClick={() => setFilters({ ...filters, cats: [], colors: [], sizes: [], max: 0, instock: false, sale: false })} className={CtaClasses("signal")}>پاک کردن فیلترها</button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFilters({
+                              ...filters,
+                              cats: [],
+                              colors: [],
+                              sizes: [],
+                              max: 0,
+                              instock: false,
+                              sale: false,
+                            })
+                          }
+                          className={CtaClasses("signal")}
+                        >
+                          پاک کردن فیلترها
+                        </button>
                       ) : (
                         <div className="flex flex-wrap justify-center gap-2">
                           {(["hoodies", "pants", "shoes"] as const).map((category) => (
-                            <Link key={category} to="/$category" params={{ category }} className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal">{CATEGORIES[category].nameFa}</Link>
+                            <Link
+                              key={category}
+                              to="/$category"
+                              params={{ category }}
+                              className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal"
+                            >
+                              {CATEGORIES[category].nameFa}
+                            </Link>
                           ))}
                         </div>
                       )
@@ -281,7 +351,9 @@ function SearchPage() {
                     {results.map((product, index) => (
                       <div key={product.id}>
                         <ProductCard p={product} priority={index < 2} />
-                        <p className="mt-2 line-clamp-1 px-1 text-[11px] text-metal">{highlight(product.name, query)}</p>
+                        <p className="mt-2 line-clamp-1 px-1 text-[11px] text-metal">
+                          {highlight(product.name, query)}
+                        </p>
                       </div>
                     ))}
                   </div>

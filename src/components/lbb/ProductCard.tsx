@@ -86,7 +86,9 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
               description: p.name,
             });
           }}
-          aria-label={liked ? `حذف ${p.name} از علاقه‌مندی‌ها` : `افزودن ${p.name} به علاقه‌مندی‌ها`}
+          aria-label={
+            liked ? `حذف ${p.name} از علاقه‌مندی‌ها` : `افزودن ${p.name} به علاقه‌مندی‌ها`
+          }
           aria-pressed={liked}
           className="tap-target absolute end-1 top-1 z-20 grid place-items-center bg-obsidian/75 text-bone backdrop-blur transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
         >
@@ -165,7 +167,9 @@ export function ProductCard({ p, priority = false }: { p: Product; priority?: bo
         </div>
         <button
           type="button"
-          onClick={(event: React.MouseEvent<HTMLButtonElement>) => openQuickView(p, event.currentTarget)}
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
+            openQuickView(p, event.currentTarget)
+          }
           className="mt-2 inline-flex min-h-11 items-center justify-center gap-2 border border-hairline text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:hidden"
         >
           <Eye size={15} aria-hidden="true" />

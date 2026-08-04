@@ -28,7 +28,11 @@ export function StickyBuyBar({
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs text-metal">{name}</p>
           <p className="num text-sm font-bold text-bone">{fmtToman(price)}</p>
-          {inStock ? <p className={`text-[10px] ${selectedSize ? "text-metal" : "text-signal"}`}>{selectedSize ? `سایز ${selectedSize}` : "ابتدا سایز را انتخاب کنید"}</p> : null}
+          {inStock ? (
+            <p className={`text-[10px] ${selectedSize ? "text-metal" : "text-signal"}`}>
+              {selectedSize ? `سایز ${selectedSize}` : "ابتدا سایز را انتخاب کنید"}
+            </p>
+          ) : null}
         </div>
         <button
           type="button"

@@ -70,8 +70,16 @@ export function Gallery({ slug, name }: { slug: string; name: string }) {
   };
 
   return (
-    <div dir="rtl" className="flex flex-col-reverse gap-3 md:sticky md:top-20 md:flex-row md:self-start">
-      <div role="tablist" aria-label="تصاویر محصول" aria-orientation="vertical" className="hidden md:flex md:w-20 md:flex-col md:gap-3">
+    <div
+      dir="rtl"
+      className="flex flex-col-reverse gap-3 md:sticky md:top-20 md:flex-row md:self-start"
+    >
+      <div
+        role="tablist"
+        aria-label="تصاویر محصول"
+        aria-orientation="vertical"
+        className="hidden md:flex md:w-20 md:flex-col md:gap-3"
+      >
         {images.map((source, index) => (
           <button
             key={`${source}-${index}`}
@@ -85,12 +93,23 @@ export function Gallery({ slug, name }: { slug: string; name: string }) {
             aria-controls={`${id}-panel-${index}`}
             tabIndex={index === active ? 0 : -1}
             onClick={() => scrollToIndex(index)}
-            onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) => onThumbKeyDown(event, index)}
+            onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) =>
+              onThumbKeyDown(event, index)
+            }
             className={`tap-target aspect-square overflow-hidden border bg-carbon transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
               index === active ? "border-signal" : "border-hairline hover:border-metal"
             }`}
           >
-            <img src={source} alt="" aria-hidden="true" width={160} height={160} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            <img
+              src={source}
+              alt=""
+              aria-hidden="true"
+              width={160}
+              height={160}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
           </button>
         ))}
       </div>
@@ -131,7 +150,9 @@ export function Gallery({ slug, name }: { slug: string; name: string }) {
           ))}
         </div>
 
-        <p className="sr-only" aria-live="polite">تصویر {active + 1} از {images.length}</p>
+        <p className="sr-only" aria-live="polite">
+          تصویر {active + 1} از {images.length}
+        </p>
         <div className="mt-3 flex justify-center gap-1.5 md:hidden" aria-label="انتخاب تصویر">
           {images.map((_, index) => (
             <button
