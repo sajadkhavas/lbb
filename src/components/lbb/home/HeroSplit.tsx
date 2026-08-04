@@ -1,13 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
+import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 import { heroMain } from "@/lib/product-images";
 import { PRODUCT_COUNT, fmtNum } from "@/lib/products";
-import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 
 /**
- * Full-viewport asymmetric 60/40 editorial hero. Fixed image dimensions
- * (no CLS). Entrance sequence: scanline → wordmark → image mask →
- * headline → metadata → CTA. Respects prefers-reduced-motion.
+ * Full-viewport asymmetric editorial hero with fixed media dimensions.
+ * Motion is progressively enhanced and disabled for reduced-motion users.
  */
 export function HeroSplit() {
   const rootRef = useRef<HTMLElement>(null);
@@ -20,14 +19,18 @@ export function HeroSplit() {
     let cancelled = false;
     let cleanup = () => {};
 
-    (async () => {
-      const { gsap } = await import("gsap");
+    void (async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import("gsap"),
+        import("gsap/ScrollTrigger"),
+      ]);
       if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
 
-      const ctx = gsap.context(() => {
-        const ease = "cubic-bezier(0.16,1,0.3,1)";
-        const tl = gsap.timeline({ defaults: { ease } });
-        tl.fromTo(".hero-scanline", { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 0.5 })
+      const context = gsap.context(() => {
+        const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+        timeline
+          .fromTo(".hero-scanline", { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 0.5 })
           .to(".hero-scanline", { opacity: 0, duration: 0.3 }, "-=0.05")
           .from(".hero-wordmark", { yPercent: 110, duration: 0.7 }, "-=0.35")
           .fromTo(
@@ -49,7 +52,7 @@ export function HeroSplit() {
         }
       }, root);
 
-      cleanup = () => ctx.revert();
+      cleanup = () => context.revert();
     })();
 
     return () => {
@@ -64,7 +67,7 @@ export function HeroSplit() {
       dir="rtl"
       className="relative w-full overflow-hidden bg-obsidian grid-marks"
       style={{ minHeight: "100svh" }}
-      aria-label="LBB — درپ ۰۰۱"
+      aria-label="LBB — دراپ ۰۰۱"
     >
       <span
         aria-hidden="true"
@@ -72,7 +75,6 @@ export function HeroSplit() {
       />
 
       <div className="flex min-h-[100svh] flex-col md:flex-row">
-        {/* Text panel — 60% */}
         <div className="relative order-2 flex w-full flex-col justify-center gap-8 px-5 py-16 md:order-1 md:w-[60%] md:px-14 md:py-10">
           <div className="overflow-hidden">
             <TechLabel tone="signal" className="hero-wordmark block">
@@ -100,8 +102,8 @@ export function HeroSplit() {
             <Link to="/shop" className={`hero-cta ${CtaClasses("signal")} rounded-xl`}>
               خرید کالکشن جدید
             </Link>
-            <Link to="/shop" className={`hero-cta ${CtaClasses("line")} rounded-xl`}>
-              مشاهده فروشگاه
+            <Link to="/lookbook" className={`hero-cta ${CtaClasses("line")} rounded-xl`}>
+              مشاهده لوک‌بوک
             </Link>
           </div>
 
@@ -121,7 +123,6 @@ export function HeroSplit() {
           </dl>
         </div>
 
-        {/* Media panel — 40% */}
         <div className="relative order-1 h-[46svh] w-full overflow-hidden bg-carbon md:order-2 md:h-auto md:min-h-[100svh] md:w-[40%]">
           <div className="hero-media absolute inset-0 overflow-hidden">
             <img
@@ -137,11 +138,7 @@ export function HeroSplit() {
           </div>
           <div
             aria-hidden="true"
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to inline-end, rgba(5,5,5,0.65) 0%, transparent 45%)",
-            }}
+            className="absolute inset-0 bg-gradient-to-l from-obsidian/65 via-transparent to-transparent"
           />
         </div>
       </div>

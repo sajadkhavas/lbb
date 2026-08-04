@@ -1,8 +1,8 @@
 /**
  * Guarded service-worker registration.
- * Never registers in dev, inside an iframe, in any Lovable preview host,
- * or when the URL carries `?sw=off`. In every refused context it also
- * unregisters a previously installed `/sw.js` so stale caches can't linger.
+ *
+ * The worker is a static public asset so Nitro/Cloudflare always publishes it
+ * at `/sw.js`; registration stays disabled in development and preview frames.
  */
 const SW_URL = "/sw.js";
 
@@ -12,21 +12,26 @@ function isRefusedContext(): boolean {
   if (window.self !== window.top) return true;
   if (new URL(window.location.href).searchParams.get("sw") === "off") return true;
 
-  const h = window.location.hostname;
-  if (h.startsWith("id-preview--") || h.startsWith("preview--")) return true;
-  if (h === "lovableproject.com" || h.endsWith(".lovableproject.com")) return true;
-  if (h === "lovableproject-dev.com" || h.endsWith(".lovableproject-dev.com")) return true;
-  if (h === "beta.lovable.dev" || h.endsWith(".beta.lovable.dev")) return true;
+  const hostname = window.location.hostname;
+  if (hostname.startsWith("id-preview--") || hostname.startsWith("preview--")) return true;
+  if (hostname === "lovableproject.com" || hostname.endsWith(".lovableproject.com")) return true;
+  if (hostname === "lovableproject-dev.com" || hostname.endsWith(".lovableproject-dev.com"))
+    return true;
+  if (hostname === "beta.lovable.dev" || hostname.endsWith(".beta.lovable.dev")) return true;
   return false;
 }
 
 async function unregisterAppWorker() {
   if (!("serviceWorker" in navigator)) return;
-  const regs = await navigator.serviceWorker.getRegistrations();
+  const registrations = await navigator.serviceWorker.getRegistrations();
   await Promise.allSettled(
-    regs
-      .filter((r) => (r.active?.scriptURL ?? r.installing?.scriptURL ?? "").endsWith(SW_URL))
-      .map((r) => r.unregister()),
+    registrations
+      .filter((registration) =>
+        (registration.active?.scriptURL ?? registration.installing?.scriptURL ?? "").endsWith(
+          SW_URL,
+        ),
+      )
+      .map((registration) => registration.unregister()),
   );
 }
 
@@ -36,10 +41,10 @@ export async function registerPwa() {
     await unregisterAppWorker();
     return;
   }
+
   try {
-    const { registerSW } = await import("virtual:pwa-register");
-    registerSW({ immediate: true });
+    await navigator.serviceWorker.register(SW_URL, { scope: "/", updateViaCache: "none" });
   } catch {
-    /* offline support is optional — never break the app over it */
+    // Offline support is progressive enhancement and must never break the app.
   }
 }

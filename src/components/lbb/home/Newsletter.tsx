@@ -1,30 +1,13 @@
-import { useState } from "react";
-import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import { CtaClasses } from "@/components/lbb/ui/primitives";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+/**
+ * Social announcement CTA.
+ *
+ * Until a real newsletter API and consent storage are connected, this section
+ * must not pretend to subscribe an address or display a false success state.
+ */
 export function Newsletter() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const value = email.trim();
-    if (!EMAIL_RE.test(value)) {
-      toast.error("لطفاً یک ایمیل معتبر وارد کنید");
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setEmail("");
-      toast.success("عضویت با موفقیت انجام شد", {
-        description: "خبر دراپ‌های جدید LBB براتون ایمیل می‌شه.",
-      });
-    }, 600);
-  };
-
   return (
     <section
       dir="rtl"
@@ -37,27 +20,27 @@ export function Newsletter() {
         aria-hidden="true"
       />
       <div className="relative mx-auto flex max-w-[720px] flex-col items-center gap-6 text-center">
+        <p className="tech text-signal">OFFICIAL UPDATES</p>
         <h2 id="newsletter-title" className="text-display-2 text-bone">
-          خبر دراپ‌های بعدی رو زودتر بگیر
+          از دراپ بعدی جا نمونی
         </h2>
-        <p className="max-w-md text-lede">
-          با عضویت در خبرنامه، همزمان با انتشار هر دراپ جدید ایمیل دریافت می‌کنی.
+        <p className="max-w-lg text-lede">
+          زمان انتشار، پشت‌صحنه طراحی و موجودشدن قطعه‌های جدید ابتدا در صفحه رسمی LBB اعلام می‌شود.
         </p>
 
-        <form onSubmit={submit} className="mt-2 flex w-full max-w-md flex-col gap-3 sm:flex-row" noValidate>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="ایمیل خود را وارد کنید"
-            aria-label="ایمیل"
-            dir="ltr"
-            className="h-12 flex-1 rounded-xl border border-hairline bg-obsidian px-4 text-sm text-bone placeholder:text-mute outline-none transition-colors focus:border-signal focus:ring-2 focus:ring-signal/30"
-          />
-          <button type="submit" disabled={loading} className={`${CtaClasses("signal")} rounded-xl`}>
-            {loading ? "در حال ارسال..." : "عضویت"}
-          </button>
-        </form>
+        <div className="mt-2 flex flex-wrap justify-center gap-3">
+          <a
+            href="https://www.instagram.com/lbbclo"
+            target="_blank"
+            rel="noreferrer"
+            className={`${CtaClasses("signal")} rounded-xl`}
+          >
+            دنبال کردن @LBBCLO
+          </a>
+          <Link to="/contact" className={`${CtaClasses("line")} rounded-xl`}>
+            تماس با LBB
+          </Link>
+        </div>
       </div>
     </section>
   );
