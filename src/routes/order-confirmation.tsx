@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
-import { DemoNotice, EmptyState, CtaClasses } from "@/components/lbb/ui/primitives";
+import { DemoNotice, CtaClasses } from "@/components/lbb/ui/primitives";
 import { latestDemoOrder, type DemoOrderSummary } from "@/lib/commerce";
 import { fmtToman } from "@/lib/products";
 
@@ -77,15 +77,17 @@ function OrderConfirmation() {
             </div>
           </div>
         ) : (
-          <EmptyState
-            title="پیش‌نمایشی برای نمایش نیست"
-            body="هیچ خلاصه‌ای در sessionStorage همین تب پیدا نشد؛ ممکن است صفحه در تب دیگری باز شده یا داده‌های مرورگر پاک شده باشند."
-            action={
-              <Link to="/shop" className={CtaClasses("signal")}>
-                رفتن به فروشگاه
-              </Link>
-            }
-          />
+          <div className="flex w-full max-w-[520px] flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-16">
+            <p className="tech text-signal">NO DEMO PREVIEW</p>
+            <h1 className="text-display-3 text-bone">پیش‌نمایشی برای نمایش نیست</h1>
+            <p className="max-w-[46ch] text-sm leading-7 text-metal">
+              هیچ خلاصه‌ای در sessionStorage همین تب پیدا نشد؛ ممکن است صفحه در تب دیگری باز شده یا
+              داده‌های مرورگر پاک شده باشند.
+            </p>
+            <Link to="/shop" className={CtaClasses("signal")}>
+              رفتن به فروشگاه
+            </Link>
+          </div>
         )}
       </main>
       <Footer />
