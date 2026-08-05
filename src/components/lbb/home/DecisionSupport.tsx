@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft, CheckCircle2 } from "lucide-react";
-import { SectionHead, Shell, TechLabel } from "@/components/lbb/ui/primitives";
+import { Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { HOME_DECISION_LINKS } from "@/lib/homepage";
 
 const CHECKS = [
@@ -53,21 +53,22 @@ export function DecisionSupport() {
       className="border-t border-hairline bg-bone py-14 text-obsidian md:py-20"
     >
       <Shell>
-        <SectionHead
-          index="05"
-          label="DECISION SUPPORT"
-          title={
-            <span id="decision-support-title" className="text-obsidian">
+        <header className="grid gap-5 border-b border-hairline-ink pb-7 md:grid-cols-[auto_minmax(0,1fr)] md:items-end md:gap-10">
+          <div className="flex items-center gap-3">
+            <TechLabel tone="inverse">05</TechLabel>
+            <span aria-hidden="true" className="h-px w-8 bg-obsidian/45" />
+            <TechLabel tone="inverse">DECISION SUPPORT</TechLabel>
+          </div>
+          <div className="md:justify-self-end md:text-left">
+            <h2 id="decision-support-title" className="text-display-3 text-obsidian">
               قبل از انتخاب، جواب‌ها را داشته باش
-            </span>
-          }
-          lede={
-            <span className="text-graphite">
+            </h2>
+            <p className="mt-3 max-w-[58ch] text-sm leading-7 text-graphite">
               صفحه اصلی فقط الهام نمی‌دهد؛ مسیر رسیدن به اطلاعاتی که تصمیم خرید را عوض می‌کنند نیز
               مستقیم است.
-            </span>
-          }
-        />
+            </p>
+          </div>
+        </header>
 
         <div className="mt-9 grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
           <div className="border border-hairline-ink bg-obsidian p-5 text-bone md:p-7">
