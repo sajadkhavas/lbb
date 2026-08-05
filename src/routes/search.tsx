@@ -7,9 +7,20 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { ProductFilters } from "@/components/lbb/ProductFilters";
 import { ProductGridControls } from "@/components/lbb/ProductGridControls";
-import { CtaClasses, EmptyState, GridSkeleton, Shell } from "@/components/lbb/ui/primitives";
+import {
+  CtaClasses,
+  EmptyState,
+  GridSkeleton,
+  Shell,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/product-catalog";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
+import {
+  countDiscoveryResults,
+  createDiscoveryScope,
+  createFacetCounts,
+} from "@/lib/catalog-discovery";
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -30,21 +41,7 @@ import {
   type FilterSearch,
 } from "@/lib/product-filter";
 
-type SearchFilterScope = {
-  colors: string[];
-  sizes: string[];
-  priceCeil: number;
-};
-
 type SearchParams = FilterSearch & { q?: string };
-
-function createSearchFilterScope(): SearchFilterScope {
-  return {
-    colors: Array.from(new Set(products.flatMap((product) => product.colors))),
-    sizes: Array.from(new Set(products.flatMap((product) => product.sizes))),
-    priceCeil: Math.max(1, ...products.map((product) => product.price)),
-  };
-}
 
 const queryFrom = (value: unknown) =>
   normalizeSearchTerm(typeof value === "string" ? value : "") || undefined;
@@ -114,7 +111,7 @@ export const Route = createFileRoute("/search")({
 function SearchPage() {
   const routeSearch = Route.useSearch();
   const query = routeSearch.q;
-  const filterScope = useMemo(() => createSearchFilterScope(), []);
+  const filterScope = useMemo(() => createDiscoveryScope(products, true), []);
   const filters = useMemo(
     () =>
       normalizeFilters(
@@ -151,7 +148,7 @@ function SearchPage() {
     if (nextQuery === query) return;
     const timer = window.setTimeout(() => {
       startTransition(() =>
-        navigate({ search: serializeSearch(nextQuery, filters), replace: false }),
+        navigate({ search: serializeSearch(nextQuery, filters), replace: true }),
       );
     }, 350);
     return () => window.clearTimeout(timer);
@@ -175,25 +172,37 @@ function SearchPage() {
     commitQuery(draft);
   };
 
-  const filterUi = (
+  const getResultCount = (candidate: Filters) =>
+    countDiscoveryResults(baseResults, candidate, filterScope);
+  const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
-      filters={filters}
-      onChange={setFilters}
+      filters={candidate}
+      onChange={onChange}
       colors={filterScope.colors}
       sizes={filterScope.sizes}
       priceCeil={filterScope.priceCeil}
       showCategory
+      facetCounts={createFacetCounts(baseResults, candidate, filterScope)}
     />
   );
+  const desktopFilters = renderFilters(filters, setFilters);
 
   return (
     <>
       <Navbar theme="dark" />
-      <main dir="rtl" className="min-h-screen bg-obsidian px-5 pb-28 pt-28 md:px-10">
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian px-5 pb-bottombar pt-[calc(var(--lbb-nav-h)+32px)] md:px-10 md:pb-16"
+      >
         <Shell>
-          <h1 className="text-display-2 text-bone">جستجو</h1>
+          <TechLabel tone="signal">DISCOVERY / SEARCH</TechLabel>
+          <h1 className="text-display-2 mt-3 text-bone">جستجو در کاتالوگ</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">
+            نام، دسته، SKU، توضیح یا ویژگی محصول را بنویس. نتایج و فیلترهای اعمال‌شده در URL قابل
+            اشتراک باقی می‌مانند.
+          </p>
 
-          <form onSubmit={submit} className="relative mt-5" role="search">
+          <form onSubmit={submit} className="relative mt-6" role="search">
             <label htmlFor="site-search" className="sr-only">
               جستجو در محصولات
             </label>
@@ -205,7 +214,7 @@ function SearchPage() {
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 setDraft(event.target.value)
               }
-              placeholder="جستجو در محصولات LBB..."
+              placeholder="مثلاً هودی مشکی، DROP 001 یا LBB-HD-001"
               autoComplete="off"
               className="h-14 w-full rounded-xl border border-hairline bg-carbon ps-14 pe-28 text-sm text-bone outline-none tap-target placeholder:text-mute focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/40"
             />
@@ -286,9 +295,9 @@ function SearchPage() {
           ) : null}
 
           {!query ? (
-            <section className="mt-8" aria-labelledby="popular-categories-title">
-              <h2 id="popular-categories-title" className="text-[13px] font-semibold text-metal">
-                دسته‌بندی‌های پرطرفدار
+            <section className="mt-8" aria-labelledby="catalog-categories-title">
+              <h2 id="catalog-categories-title" className="text-[13px] font-semibold text-metal">
+                دسته‌بندی‌های کاتالوگ
               </h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {CATEGORY_SLUGS.map((category) => (
@@ -306,9 +315,9 @@ function SearchPage() {
           ) : null}
 
           {query ? (
-            <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
+            <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
               <aside className="hidden lg:block" aria-label="فیلتر نتایج جستجو">
-                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{filterUi}</div>
+                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{desktopFilters}</div>
               </aside>
               <section aria-labelledby="search-results-title">
                 <h2 id="search-results-title" className="sr-only">
@@ -318,7 +327,8 @@ function SearchPage() {
                   filters={filters}
                   onChange={setFilters}
                   resultCount={results.length}
-                  filterSlot={filterUi}
+                  filterSlot={renderFilters}
+                  getResultCount={getResultCount}
                 />
                 <p
                   className="mt-4 text-[13px] text-metal"
@@ -326,7 +336,8 @@ function SearchPage() {
                   aria-live="polite"
                   key={searchKey}
                 >
-                  نتایج برای «{query}»: {results.length.toLocaleString("fa-IR")} محصول
+                  «{query}» · {results.length.toLocaleString("fa-IR")} نتیجه از{" "}
+                  {baseResults.length.toLocaleString("fa-IR")} تطابق متنی
                 </p>
 
                 {isPending ? (
@@ -337,11 +348,11 @@ function SearchPage() {
                   <EmptyState
                     className="mt-6"
                     icon={<PackageSearch size={40} aria-hidden="true" />}
-                    title={`محصولی برای «${query}» پیدا نشد`}
+                    title={`نتیجه‌ای برای «${query}» پیدا نشد`}
                     body={
                       baseResults.length > 0
-                        ? "نتیجه‌ای با فیلترهای انتخاب‌شده باقی نمانده است."
-                        : "املای عبارت را بررسی کن یا یکی از دسته‌بندی‌ها را ببین."
+                        ? "تطابق متنی وجود دارد، اما فیلترهای انتخاب‌شده همه نتایج را حذف کرده‌اند."
+                        : "املای عبارت را بررسی کن، از نام کوتاه‌تر استفاده کن یا یکی از دسته‌ها را باز کن."
                     }
                     action={
                       baseResults.length > 0 ? (
@@ -360,7 +371,7 @@ function SearchPage() {
                           }
                           className={CtaClasses("signal")}
                         >
-                          پاک کردن فیلترها
+                          حذف فیلترهای نتایج
                         </button>
                       ) : (
                         <div className="flex flex-wrap justify-center gap-2">
@@ -369,7 +380,7 @@ function SearchPage() {
                               key={category}
                               to="/$category"
                               params={{ category }}
-                              className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal"
+                              className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                             >
                               {CATEGORIES[category].nameFa}
                             </Link>
@@ -379,12 +390,15 @@ function SearchPage() {
                     }
                   />
                 ) : (
-                  <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3">
+                  <div
+                    className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3"
+                    aria-busy={isPending}
+                  >
                     {results.map((product, index) => (
                       <div key={product.id}>
                         <ProductCard p={product} priority={index < 2} />
                         <p className="mt-2 line-clamp-1 px-1 text-[11px] text-metal">
-                          {highlight(product.name, query)}
+                          تطابق: {highlight(product.name, query)}
                         </p>
                       </div>
                     ))}
