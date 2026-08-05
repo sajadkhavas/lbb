@@ -18,7 +18,13 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { CATEGORIES, CATEGORY_SLUGS, isValidCategory } from "@/lib/categories";
 import { categoryImage } from "@/lib/category-images";
-import { productsByCategory, type Product } from "@/lib/products";
+import {
+  catalogueInventorySummary,
+  countDiscoveryResults,
+  createDiscoveryScope,
+  createFacetCounts,
+} from "@/lib/catalog-discovery";
+import { productsByCategory } from "@/lib/products";
 import { absAsset, absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
   applyFilters,
@@ -112,25 +118,10 @@ function CategoryPage() {
   const navigate = useNavigate({ from: "/$category" });
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [isPending, startTransition] = useTransition();
-
-  const colors = useMemo(
-    () => Array.from(new Set<string>(items.flatMap((product: Product) => product.colors))),
-    [items],
-  );
-  const sizes = useMemo(
-    () => Array.from(new Set<string>(items.flatMap((product: Product) => product.sizes))),
-    [items],
-  );
-  const priceCeil = useMemo(
-    () => Math.max(1, ...items.map((product: Product) => product.price)),
-    [items],
-  );
-  const scope = useMemo(
-    () => ({ categories: false as const, colors, sizes, priceCeil }),
-    [colors, sizes, priceCeil],
-  );
+  const scope = useMemo(() => createDiscoveryScope(items, false), [items]);
+  const inventory = useMemo(() => catalogueInventorySummary(items), [items]);
   const filters = useMemo(
-    () => normalizeFilters(parseFilters(routeFilters as unknown as Record<string, unknown>), scope),
+    () => normalizeFilters(parseFilters(routeFilters as Record<string, unknown>), scope),
     [routeFilters, scope],
   );
   const searchKey = stableSearchString(serializeFilters(filters));
@@ -152,15 +143,18 @@ function CategoryPage() {
 
   const filtered = useMemo(() => applyFilters(items, filters), [items, filters]);
   const shown = filtered.slice(0, visible);
-  const filterUi = (
+  const getResultCount = (candidate: Filters) => countDiscoveryResults(items, candidate, scope);
+  const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
-      filters={filters}
-      onChange={setFilters}
-      colors={colors}
-      sizes={sizes}
-      priceCeil={priceCeil}
+      filters={candidate}
+      onChange={onChange}
+      colors={scope.colors}
+      sizes={scope.sizes}
+      priceCeil={scope.priceCeil}
+      facetCounts={createFacetCounts(items, candidate, scope)}
     />
   );
+  const desktopFilters = renderFilters(filters, setFilters);
 
   return (
     <>
@@ -196,9 +190,7 @@ function CategoryPage() {
               <TechLabel tone="signal">CATEGORY / {cat.slug.toUpperCase()}</TechLabel>
               <h1 className="text-display-2 mt-3 text-bone">{cat.h1}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">{cat.heroTagline}</p>
-              <p className="tech mt-4 text-signal">
-                {items.length.toLocaleString("fa-IR")} محصول موجود
-              </p>
+              <p className="tech mt-4 text-signal">{inventory.label}</p>
               <ul className="mt-5 grid gap-2 text-sm text-metal sm:grid-cols-2">
                 {cat.bullets.map((bullet: string) => (
                   <li key={bullet} className="flex items-start gap-2">
@@ -216,16 +208,20 @@ function CategoryPage() {
 
         <Band hairline={false} className="!py-10 md:!py-14">
           <Shell>
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
               <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{filterUi}</div>
+                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{desktopFilters}</div>
               </aside>
-              <div>
+              <section aria-labelledby="category-grid-title">
+                <h2 id="category-grid-title" className="sr-only">
+                  محصولات دسته {cat.nameFa}
+                </h2>
                 <ProductGridControls
                   filters={filters}
                   onChange={setFilters}
                   resultCount={filtered.length}
-                  filterSlot={filterUi}
+                  filterSlot={renderFilters}
+                  getResultCount={getResultCount}
                   lockedCategory
                 />
                 {isPending ? (
@@ -236,8 +232,8 @@ function CategoryPage() {
                   <EmptyState
                     className="mt-6"
                     icon={<PackageSearch size={40} aria-hidden="true" />}
-                    title="محصولی با این فیلترها پیدا نشد"
-                    body="فیلترهای این دسته را تغییر بده یا پاک کن."
+                    title={`قطعه‌ای از ${cat.nameFaPlural} با این فیلترها پیدا نشد`}
+                    body="فیلترهای این دسته را تغییر بده یا به نمای کامل دسته برگرد."
                     action={
                       <button
                         type="button"
@@ -253,7 +249,7 @@ function CategoryPage() {
                         }
                         className={CtaClasses("signal")}
                       >
-                        پاک کردن فیلترها
+                        نمایش همه {cat.nameFaPlural}
                       </button>
                     }
                   />
@@ -271,15 +267,15 @@ function CategoryPage() {
                           onClick={() => setVisible((value) => value + PAGE_SIZE)}
                           className={CtaClasses("line")}
                         >
-                          نمایش بیشتر
+                          نمایش قطعه‌های بیشتر
                         </button>
                       </div>
                     ) : (
-                      <p className="tech mt-10 text-center text-mute">پایان نتایج</p>
+                      <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>
                     )}
                   </>
                 )}
-              </div>
+              </section>
             </div>
           </Shell>
         </Band>
