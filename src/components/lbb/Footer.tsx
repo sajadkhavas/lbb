@@ -1,141 +1,121 @@
-import { Link, type LinkProps } from "@tanstack/react-router";
-import { Instagram, ArrowUpLeft } from "lucide-react";
-import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
-import { TechLabel } from "@/components/lbb/ui/primitives";
+import { Link } from "@tanstack/react-router";
+import { ArrowUpLeft, Instagram } from "lucide-react";
+import {
+  BRAND_NAVIGATION,
+  EDITORIAL_NAVIGATION,
+  PERSONAL_NAVIGATION,
+  SERVICE_NAVIGATION,
+  SHOP_NAVIGATION,
+} from "@/lib/navigation";
+import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
 import { Logo } from "@/components/lbb/Logo";
+import { TechLabel } from "@/components/lbb/ui/primitives";
 
-type Item = { label: string; to: LinkProps["to"]; params?: LinkProps["params"] };
+function FooterList({
+  title,
+  items,
+}: {
+  title: string;
+  items: typeof SHOP_NAVIGATION;
+}) {
+  const id = `footer-${title.replace(/\s+/g, "-")}`;
+  return (
+    <nav aria-labelledby={id}>
+      <h2 id={id} className="tech text-bone">
+        {title}
+      </h2>
+      <ul className="mt-4 space-y-2.5">
+        {items.map((item) => (
+          <li key={`${String(item.to)}-${item.label}`}>
+            <NavigationLink
+              item={item}
+              className="text-sm leading-7 text-metal transition-colors hover:text-signal"
+            />
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
-const HELP: Item[] = [
-  { label: "راهنمای سایز", to: "/size-guide" },
-  { label: "ارسال و مرجوعی", to: "/shipping-returns" },
-  { label: "پیگیری سفارش", to: "/track-order" },
-  { label: "سوالات متداول", to: "/faq" },
-  { label: "تماس با ما", to: "/contact" },
-];
-
-const BRAND: Item[] = [
-  { label: "درباره LBB", to: "/about" },
-  { label: "کالکشن‌ها", to: "/collections" },
-  { label: "ژورنال", to: "/journal" },
-  { label: "لوک‌بوک", to: "/lookbook" },
-  { label: "قوانین و مقررات", to: "/terms" },
-  { label: "حریم خصوصی", to: "/privacy" },
-];
-
-/**
- * The footer is dark-only in the new identity; `theme` is still accepted so
- * existing call sites keep compiling, but it no longer changes the skin.
- */
+/** Global dark footer. The theme prop remains for compatibility with existing routes. */
 export function Footer(_props: { theme?: "dark" | "light" } = {}) {
   return (
     <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
-      <div className="lbb-shell overflow-hidden pt-14 md:pt-20">
-        <p
-          aria-hidden="true"
-          className="font-display font-black leading-[0.8] tracking-[-0.06em] text-metal select-none"
-          style={{ fontSize: "clamp(4.5rem, 16vw, 15rem)" }}
-        >
-          LBB
-        </p>
-      </div>
-
-      <div className="lbb-shell grid gap-10 pt-10 md:grid-cols-2 lg:grid-cols-4">
-        <div className="min-w-0">
-          <Logo size={44} withWordmark />
-          <div className="mt-4">
-            <TechLabel tone="signal">LBB / TEHRAN</TechLabel>
+      <div className="lbb-shell py-12 md:py-16">
+        <div className="grid gap-8 border-b border-hairline pb-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:items-end">
+          <div>
+            <TechLabel tone="signal">LBB / GLOBAL INDEX</TechLabel>
+            <p className="mt-3 max-w-[16ch] text-display-2 text-bone">
+              پیدا کن. بفهم. انتخاب کن.
+            </p>
+            <p className="mt-4 max-w-[54ch] text-sm leading-8 text-metal">
+              Navigation در LBB برای رسیدن سریع به محصول ساخته شده است؛ روایت ادیتوریال مسیر را غنی می‌کند، اما جای اطلاعات تصمیم‌ساز را نمی‌گیرد.
+            </p>
           </div>
-          <p className="mt-4 max-w-xs text-sm leading-7 text-metal">
-            استریت‌ویر ایرانی با برش‌های واقعی و جنس ماندگار. طراحی و تولید در تهران.
-          </p>
-
-          <a
-            href="https://www.instagram.com/lbbclo"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-6 inline-flex items-center gap-2 border border-hairline px-3 py-2 text-metal transition-colors hover:border-signal hover:text-signal"
-          >
-            <Instagram size={15} aria-hidden="true" />
-            <span className="tech">@LBBCLO</span>
-          </a>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Link
+              to="/shop"
+              className="group flex min-h-14 items-center justify-between bg-signal px-5 text-sm font-black text-obsidian"
+            >
+              مشاهده فروشگاه
+              <ArrowUpLeft size={18} aria-hidden="true" />
+            </Link>
+            <Link
+              to="/account"
+              className="group flex min-h-14 items-center justify-between border border-hairline px-5 text-sm font-black text-bone transition-colors hover:border-signal"
+            >
+              مرکز حساب
+              <ArrowUpLeft size={18} aria-hidden="true" className="text-mute group-hover:text-signal" />
+            </Link>
+          </div>
         </div>
 
-        <nav aria-labelledby="ft-shop" className="min-w-0">
-          <h2 id="ft-shop" className="tech text-bone">
-            خرید
-          </h2>
-          <ul className="mt-4 flex flex-col gap-2.5">
-            {CATEGORY_SLUGS.map((s) => (
-              <li key={s}>
-                <Link
-                  to="/$category"
-                  params={{ category: s }}
-                  className="text-sm text-metal transition-colors hover:text-signal"
-                >
-                  {CATEGORIES[s].nameFa}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link to="/shop" className="text-sm text-bone transition-colors hover:text-signal">
-                همهٔ محصولات
-              </Link>
-            </li>
-          </ul>
-        </nav>
+        <div className="grid gap-10 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
+          <div className="min-w-0">
+            <Logo size={48} withWordmark />
+            <p className="mt-4 max-w-xs text-sm leading-7 text-metal">
+              زبان بصری استریت‌ویر ایرانی با تمرکز بر وضوح محصول، تایپوگرافی فارسی و تجربه RTL.
+            </p>
+            <a
+              href="https://www.instagram.com/lbbclo"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-6 inline-flex min-h-11 items-center gap-2 border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal"
+            >
+              <Instagram size={16} aria-hidden="true" />
+              <span className="tech">@LBBCLO</span>
+            </a>
+          </div>
 
-        <nav aria-labelledby="ft-help" className="min-w-0">
-          <h2 id="ft-help" className="tech text-bone">
-            پشتیبانی
-          </h2>
-          <ul className="mt-4 flex flex-col gap-2.5">
-            {HELP.map((i) => (
-              <li key={String(i.to)}>
-                <Link to={i.to} className="text-sm text-metal transition-colors hover:text-signal">
-                  {i.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="min-w-0">
-          <nav aria-labelledby="ft-brand">
-            <h2 id="ft-brand" className="tech text-bone">
-              برند
-            </h2>
-            <ul className="mt-4 flex flex-col gap-2.5">
-              {BRAND.map((i) => (
-                <li key={String(i.to)}>
-                  <Link
-                    to={i.to}
-                    className="text-sm text-metal transition-colors hover:text-signal"
-                  >
-                    {i.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          <Link
-            to="/shop"
-            className="group mt-8 flex items-center justify-between gap-3 border border-hairline px-4 py-3 transition-colors hover:border-signal"
-          >
-            <span className="text-sm font-bold text-bone">شروع خرید</span>
-            <ArrowUpLeft
-              size={16}
-              aria-hidden="true"
-              className="text-metal transition-colors group-hover:text-signal"
-            />
-          </Link>
+          <FooterList title="خرید" items={SHOP_NAVIGATION} />
+          <FooterList title="کالکشن و محتوا" items={EDITORIAL_NAVIGATION} />
+          <FooterList title="پشتیبانی" items={SERVICE_NAVIGATION} />
+          <div className="grid grid-cols-2 gap-6 sm:col-span-2 lg:col-span-1 lg:grid-cols-1">
+            <FooterList title="شخصی" items={PERSONAL_NAVIGATION} />
+            <FooterList title="برند" items={BRAND_NAVIGATION} />
+          </div>
         </div>
-      </div>
 
-      <div className="lbb-shell mt-14 flex flex-col gap-2 border-t border-hairline py-6 text-mute md:flex-row md:items-center md:justify-between">
-        <span className="tech">© 2026 LBB — ALL RIGHTS RESERVED</span>
-        <span className="text-xs">طراحی و ساخت در تهران</span>
+        <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="tech">© 2026 LBB — FRONTEND EXPERIENCE</p>
+            <p className="mt-2 text-[11px] leading-6">
+              این نسخه نمایشی است؛ پرداخت، ثبت سفارش و ارسال واقعی فعال نیست.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <Link to="/terms" className="text-xs transition-colors hover:text-bone">
+              قوانین
+            </Link>
+            <Link to="/privacy" className="text-xs transition-colors hover:text-bone">
+              حریم خصوصی
+            </Link>
+            <Link to="/contact" className="text-xs transition-colors hover:text-bone">
+              تماس
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );
