@@ -7,7 +7,9 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("desktop mega menu is category-first, keyboard reachable and history-backed", async ({ page }) => {
+test("desktop mega menu is category-first, keyboard reachable and history-backed", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "networkidle" });
 
@@ -48,7 +50,9 @@ test("search supports Arrow navigation, Enter and shareable destination URLs", a
   await expect(page).toHaveURL(/\/search\?q=/);
 });
 
-test("mobile navigation exposes product categories and independent account destination", async ({ page }) => {
+test("mobile navigation exposes product categories and independent account destination", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
 

@@ -40,7 +40,9 @@ for (const route of templates) {
   });
 }
 
-test("desktop mega menu, mobile menu and search preserve focus and Axe quality", async ({ page }) => {
+test("desktop mega menu, mobile menu and search preserve focus and Axe quality", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "networkidle" });
 
@@ -48,7 +50,9 @@ test("desktop mega menu, mobile menu and search preserve focus and Axe quality",
   await shopTrigger.click();
   const mega = page.getByRole("dialog", { name: "منوی فروشگاه" });
   await expect(mega).toBeVisible();
-  expect(await page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null)).toBe(true);
+  expect(
+    await page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null),
+  ).toBe(true);
   await expectNoBlockingAxe(page);
   await page.keyboard.press("Escape");
   await expect(mega).toBeHidden();

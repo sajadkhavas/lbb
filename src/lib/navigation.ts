@@ -21,7 +21,12 @@ export const SHOP_NAVIGATION: NavigationItem[] = [
 ];
 
 export const EDITORIAL_NAVIGATION: NavigationItem[] = [
-  { label: "کالکشن‌ها", latin: "COLLECTIONS", description: "دراپ‌ها و فصل‌های LBB", to: "/collections" },
+  {
+    label: "کالکشن‌ها",
+    latin: "COLLECTIONS",
+    description: "دراپ‌ها و فصل‌های LBB",
+    to: "/collections",
+  },
   { label: "لوک‌بوک", latin: "LOOKBOOK", description: "استایل‌ها در بافت شهری", to: "/lookbook" },
   { label: "ژورنال", latin: "JOURNAL", description: "راهنما، فرهنگ و متریال", to: "/journal" },
 ];

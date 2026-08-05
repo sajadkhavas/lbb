@@ -1,21 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  Heart,
-  Menu,
-  Search,
-  ShoppingBag,
-  UserRound,
-  ChevronDown,
-} from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, UserRound, ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { Logo } from "@/components/lbb/Logo";
-import {
-  EDITORIAL_NAVIGATION,
-  SHOP_NAVIGATION,
-  isNavigationItemActive,
-} from "@/lib/navigation";
+import { EDITORIAL_NAVIGATION, SHOP_NAVIGATION, isNavigationItemActive } from "@/lib/navigation";
 import { useNavigationOverlay } from "@/lib/navigation-overlay";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
 import { MegaMenuOverlay } from "@/components/lbb/navigation/MegaMenuOverlay";
@@ -81,11 +70,7 @@ export function Navbar({
             gridTemplateColumns: "auto minmax(0,1fr) auto",
           }}
         >
-          <Link
-            to="/"
-            aria-label="LBB — خانه"
-            className="flex min-w-0 shrink-0 items-center gap-2"
-          >
+          <Link to="/" aria-label="LBB — خانه" className="flex min-w-0 shrink-0 items-center gap-2">
             <Logo size={34} />
             <span className="font-display text-xl font-black leading-none tracking-[-0.05em] text-signal md:text-2xl">
               LBB
@@ -108,7 +93,9 @@ export function Navbar({
                     }
                   }}
                   className={`tech flex min-h-11 items-center gap-1.5 px-4 transition-colors ${
-                    shopActive || active === "mega" ? "text-signal" : `${ink} opacity-75 hover:opacity-100`
+                    shopActive || active === "mega"
+                      ? "text-signal"
+                      : `${ink} opacity-75 hover:opacity-100`
                   }`}
                 >
                   فروشگاه

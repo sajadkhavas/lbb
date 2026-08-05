@@ -67,7 +67,8 @@ function AccountPage() {
               <TechLabel tone="signal">ACCOUNT / FRONTEND ONLY</TechLabel>
               <h1 className="mt-3 text-display-2">مرکز حساب</h1>
               <p className="mt-4 max-w-[54ch] text-sm leading-8 text-metal">
-                یک مقصد مستقل برای مسیرهای شخصی رابط کاربری؛ بدون وانمودکردن به وجود ورود، پروفایل یا Backend فعال.
+                یک مقصد مستقل برای مسیرهای شخصی رابط کاربری؛ بدون وانمودکردن به وجود ورود، پروفایل
+                یا Backend فعال.
               </p>
             </div>
             <div className="grid h-20 w-20 place-items-center border border-hairline bg-carbon text-signal">
@@ -79,7 +80,8 @@ function AccountPage() {
         <Band hairline={false} className="!py-10 md:!py-14">
           <Shell>
             <DemoNotice title="حساب واقعی هنوز متصل نیست">
-              ورود، ثبت‌نام، همگام‌سازی بین دستگاه‌ها و اطلاعات پروفایل در این فاز فعال نیستند. علاقه‌مندی و سبد فقط در مرورگر فعلی نگه‌داری می‌شوند.
+              ورود، ثبت‌نام، همگام‌سازی بین دستگاه‌ها و اطلاعات پروفایل در این فاز فعال نیستند.
+              علاقه‌مندی و سبد فقط در مرورگر فعلی نگه‌داری می‌شوند.
             </DemoNotice>
 
             <div className="mt-8 grid gap-3 md:grid-cols-3">
@@ -87,12 +89,19 @@ function AccountPage() {
                 const Icon = action.icon;
                 return (
                   <Link key={action.to} to={action.to} className="group block">
-                    <Surface tone="raised" className="h-full p-5 transition-colors group-hover:border-signal md:p-7">
+                    <Surface
+                      tone="raised"
+                      className="h-full p-5 transition-colors group-hover:border-signal md:p-7"
+                    >
                       <div className="flex items-start justify-between gap-4">
                         <span className="grid h-11 w-11 place-items-center border border-hairline text-signal">
                           <Icon size={19} aria-hidden="true" />
                         </span>
-                        <ArrowUpLeft size={18} aria-hidden="true" className="text-mute group-hover:text-signal" />
+                        <ArrowUpLeft
+                          size={18}
+                          aria-hidden="true"
+                          className="text-mute group-hover:text-signal"
+                        />
                       </div>
                       <h2 className="mt-7 text-title text-bone">{action.title}</h2>
                       <p className="mt-2 text-sm leading-7 text-metal">{action.body}</p>
@@ -103,7 +112,8 @@ function AccountPage() {
             </div>
 
             <StatePanel title="اصل Product Truth در حساب" tone="info" className="mt-8">
-              تا زمانی که سرویس هویت و سفارش واقعی متصل نشده، این صفحه وضعیت جعلی، امتیاز، آدرس یا تاریخچه خرید ساختگی نمایش نمی‌دهد.
+              تا زمانی که سرویس هویت و سفارش واقعی متصل نشده، این صفحه وضعیت جعلی، امتیاز، آدرس یا
+              تاریخچه خرید ساختگی نمایش نمی‌دهد.
             </StatePanel>
           </Shell>
         </Band>

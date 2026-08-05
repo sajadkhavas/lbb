@@ -5,7 +5,11 @@ export type Crumb = { label: string; href?: string } & Partial<Pick<LinkProps, "
 
 export function Breadcrumb({ items }: { items: Crumb[] }) {
   return (
-    <nav dir="rtl" aria-label="مسیر صفحه" className="min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav
+      dir="rtl"
+      aria-label="مسیر صفحه"
+      className="min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       <ol className="tech flex min-w-max items-center gap-2 whitespace-nowrap text-mute">
         {items.map((item, index) => {
           const last = index === items.length - 1;

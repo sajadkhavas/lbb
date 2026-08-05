@@ -50,7 +50,9 @@ export function MobileBottomBar() {
       </Link>
       <Link
         to="/shop"
-        className={itemClass(pathname === "/shop" || /^\/(hoodies|pants|tshirts|shoes|socks)$/.test(pathname))}
+        className={itemClass(
+          pathname === "/shop" || /^\/(hoodies|pants|tshirts|shoes|socks)$/.test(pathname),
+        )}
         aria-current={pathname === "/shop" ? "page" : undefined}
       >
         <LayoutGrid size={20} strokeWidth={1.5} aria-hidden="true" />

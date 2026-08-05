@@ -81,11 +81,7 @@ export function CartDrawer() {
                 محصول و Variant انتخاب‌شده در همین مرورگر نگه‌داری می‌شود.
               </p>
             </div>
-            <Link
-              to="/shop"
-              onClick={dismissDrawer}
-              className={CtaClasses("signal")}
-            >
+            <Link to="/shop" onClick={dismissDrawer} className={CtaClasses("signal")}>
               شروع خرید
             </Link>
           </div>
@@ -119,7 +115,10 @@ export function CartDrawer() {
                         <div className="min-w-0">
                           <h3 className="line-clamp-2 text-sm font-bold text-bone">{line.name}</h3>
                           <p className="mt-1 text-[11px] text-mute">
-                            {[line.size ? `سایز ${line.size}` : "", line.color ? "رنگ انتخاب‌شده" : ""]
+                            {[
+                              line.size ? `سایز ${line.size}` : "",
+                              line.color ? "رنگ انتخاب‌شده" : "",
+                            ]
                               .filter(Boolean)
                               .join(" / ")}
                           </p>
@@ -174,7 +173,9 @@ export function CartDrawer() {
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <dt>ارسال نمایشی</dt>
-                  <dd className="num text-bone">{shipping === 0 ? "رایگان" : fmtToman(shipping)}</dd>
+                  <dd className="num text-bone">
+                    {shipping === 0 ? "رایگان" : fmtToman(shipping)}
+                  </dd>
                 </div>
                 <div className="flex items-center justify-between gap-4 border-t border-hairline pt-3 text-sm">
                   <dt className="font-bold text-bone">جمع نمایشی</dt>

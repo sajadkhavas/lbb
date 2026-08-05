@@ -56,9 +56,7 @@ export function NavigationOverlayProvider({ children }: { children: ReactNode })
   );
 
   return (
-    <NavigationOverlayContext.Provider value={value}>
-      {children}
-    </NavigationOverlayContext.Provider>
+    <NavigationOverlayContext.Provider value={value}>{children}</NavigationOverlayContext.Provider>
   );
 }
 

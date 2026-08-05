@@ -34,7 +34,10 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
         aria-modal="true"
         aria-label="منوی فروشگاه"
         className="absolute inset-x-0 overflow-y-auto border-b border-hairline bg-obsidian shadow-overlay"
-        style={{ top: `calc(${offsetTop}px + var(--lbb-nav-h))`, maxHeight: `calc(100svh - ${offsetTop}px - var(--lbb-nav-h))` }}
+        style={{
+          top: `calc(${offsetTop}px + var(--lbb-nav-h))`,
+          maxHeight: `calc(100svh - ${offsetTop}px - var(--lbb-nav-h))`,
+        }}
       >
         <div className="lbb-shell py-6 lg:py-9">
           <div className="flex items-start justify-between gap-6">
@@ -42,7 +45,8 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
               <TechLabel tone="signal">SHOP INDEX / F12</TechLabel>
               <h2 className="mt-2 text-display-3 text-bone">انتخاب سریع، بدون حدس</h2>
               <p className="mt-2 max-w-[54ch] text-sm leading-7 text-metal">
-                دسته‌ها در سطح اول قرار گرفته‌اند؛ هر مسیر مستقیماً به صفحه قابل‌اشتراک و قابل‌جست‌وجوی خودش می‌رسد.
+                دسته‌ها در سطح اول قرار گرفته‌اند؛ هر مسیر مستقیماً به صفحه قابل‌اشتراک و
+                قابل‌جست‌وجوی خودش می‌رسد.
               </p>
             </div>
             <button
@@ -99,12 +103,12 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                           className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent"
                         />
                         <span className="absolute inset-x-0 bottom-0 p-3">
-                          <span className={`block text-sm font-black ${active ? "text-signal" : "text-bone"}`}>
+                          <span
+                            className={`block text-sm font-black ${active ? "text-signal" : "text-bone"}`}
+                          >
                             {CATEGORIES[slug].nameFa}
                           </span>
-                          <span className="tech mt-1 block text-metal">
-                            {CATEGORIES[slug].nameEn}
-                          </span>
+                          <span className="tech mt-1 block text-metal">{slug.toUpperCase()}</span>
                         </span>
                       </div>
                     </Link>
@@ -131,9 +135,15 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                           <span className="block text-sm font-bold text-bone transition-colors group-hover:text-signal">
                             {item.label}
                           </span>
-                          <span className="mt-1 block text-[11px] text-mute">{item.description}</span>
+                          <span className="mt-1 block text-[11px] text-mute">
+                            {item.description}
+                          </span>
                         </span>
-                        <ArrowUpLeft size={15} aria-hidden="true" className="text-mute group-hover:text-signal" />
+                        <ArrowUpLeft
+                          size={15}
+                          aria-hidden="true"
+                          className="text-mute group-hover:text-signal"
+                        />
                       </NavigationLink>
                     </li>
                   ))}
@@ -142,7 +152,9 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
 
               <div className="grid grid-cols-2 gap-5">
                 <nav aria-labelledby="mega-service">
-                  <h3 id="mega-service" className="tech text-bone">راهنما</h3>
+                  <h3 id="mega-service" className="tech text-bone">
+                    راهنما
+                  </h3>
                   <ul className="mt-3 space-y-2">
                     {SERVICE_NAVIGATION.slice(0, 4).map((item) => (
                       <li key={String(item.to)}>
@@ -156,7 +168,9 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                   </ul>
                 </nav>
                 <nav aria-labelledby="mega-personal">
-                  <h3 id="mega-personal" className="tech text-bone">شخصی</h3>
+                  <h3 id="mega-personal" className="tech text-bone">
+                    شخصی
+                  </h3>
                   <ul className="mt-3 space-y-2">
                     {PERSONAL_NAVIGATION.map((item) => (
                       <li key={String(item.to)}>

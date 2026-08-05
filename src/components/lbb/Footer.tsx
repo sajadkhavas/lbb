@@ -11,13 +11,7 @@ import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
 import { Logo } from "@/components/lbb/Logo";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 
-function FooterList({
-  title,
-  items,
-}: {
-  title: string;
-  items: typeof SHOP_NAVIGATION;
-}) {
+function FooterList({ title, items }: { title: string; items: typeof SHOP_NAVIGATION }) {
   const id = `footer-${title.replace(/\s+/g, "-")}`;
   return (
     <nav aria-labelledby={id}>
@@ -46,11 +40,10 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
         <div className="grid gap-8 border-b border-hairline pb-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:items-end">
           <div>
             <TechLabel tone="signal">LBB / GLOBAL INDEX</TechLabel>
-            <p className="mt-3 max-w-[16ch] text-display-2 text-bone">
-              پیدا کن. بفهم. انتخاب کن.
-            </p>
+            <p className="mt-3 max-w-[16ch] text-display-2 text-bone">پیدا کن. بفهم. انتخاب کن.</p>
             <p className="mt-4 max-w-[54ch] text-sm leading-8 text-metal">
-              Navigation در LBB برای رسیدن سریع به محصول ساخته شده است؛ روایت ادیتوریال مسیر را غنی می‌کند، اما جای اطلاعات تصمیم‌ساز را نمی‌گیرد.
+              Navigation در LBB برای رسیدن سریع به محصول ساخته شده است؛ روایت ادیتوریال مسیر را غنی
+              می‌کند، اما جای اطلاعات تصمیم‌ساز را نمی‌گیرد.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -66,7 +59,11 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
               className="group flex min-h-14 items-center justify-between border border-hairline px-5 text-sm font-black text-bone transition-colors hover:border-signal"
             >
               مرکز حساب
-              <ArrowUpLeft size={18} aria-hidden="true" className="text-mute group-hover:text-signal" />
+              <ArrowUpLeft
+                size={18}
+                aria-hidden="true"
+                className="text-mute group-hover:text-signal"
+              />
             </Link>
           </div>
         </div>

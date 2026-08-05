@@ -84,10 +84,12 @@ export function MobileMenuOverlay() {
                       className="group grid min-h-[72px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 border-b border-hairline-soft"
                     >
                       <span className="num text-xs text-mute">0{index + 1}</span>
-                      <span className={`text-2xl font-black transition-colors md:text-4xl ${active ? "text-signal" : "text-bone group-hover:text-signal"}`}>
+                      <span
+                        className={`text-2xl font-black transition-colors md:text-4xl ${active ? "text-signal" : "text-bone group-hover:text-signal"}`}
+                      >
                         {CATEGORIES[slug].nameFa}
                       </span>
-                      <span className="tech text-mute">{CATEGORIES[slug].nameEn}</span>
+                      <span className="tech text-mute">{slug.toUpperCase()}</span>
                     </Link>
                   </li>
                 );
@@ -115,7 +117,11 @@ export function MobileMenuOverlay() {
                         </span>
                         <span className="mt-1 block text-[11px] text-mute">{item.description}</span>
                       </span>
-                      <ArrowUpLeft size={15} aria-hidden="true" className="text-mute group-hover:text-signal" />
+                      <ArrowUpLeft
+                        size={15}
+                        aria-hidden="true"
+                        className="text-mute group-hover:text-signal"
+                      />
                     </NavigationLink>
                   </li>
                 ))}
@@ -124,7 +130,9 @@ export function MobileMenuOverlay() {
 
             <div className="grid grid-cols-2 gap-6">
               <nav aria-labelledby="mobile-personal">
-                <h2 id="mobile-personal" className="tech text-bone">شخصی</h2>
+                <h2 id="mobile-personal" className="tech text-bone">
+                  شخصی
+                </h2>
                 <ul className="mt-3 space-y-2.5">
                   {PERSONAL_NAVIGATION.map((item) => (
                     <li key={String(item.to)}>
@@ -138,7 +146,9 @@ export function MobileMenuOverlay() {
                 </ul>
               </nav>
               <nav aria-labelledby="mobile-service">
-                <h2 id="mobile-service" className="tech text-bone">راهنما</h2>
+                <h2 id="mobile-service" className="tech text-bone">
+                  راهنما
+                </h2>
                 <ul className="mt-3 space-y-2.5">
                   {SERVICE_NAVIGATION.map((item) => (
                     <li key={String(item.to)}>
@@ -154,7 +164,9 @@ export function MobileMenuOverlay() {
             </div>
 
             <nav aria-labelledby="mobile-brand" className="border-t border-hairline pt-6">
-              <h2 id="mobile-brand" className="sr-only">برند</h2>
+              <h2 id="mobile-brand" className="sr-only">
+                برند
+              </h2>
               <ul className="flex flex-wrap gap-x-5 gap-y-2">
                 {BRAND_NAVIGATION.map((item) => (
                   <li key={String(item.to)}>

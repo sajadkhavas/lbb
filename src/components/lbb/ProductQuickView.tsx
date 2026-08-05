@@ -15,7 +15,7 @@ import { CtaClasses, StatusTag, TechLabel } from "@/components/lbb/ui/primitives
 const MAX_QTY = 10;
 
 export function ProductQuickView() {
-  const { product, close } = useQuickView();
+  const { product, close, dismissForNavigation } = useQuickView();
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -53,7 +53,7 @@ export function ProductQuickView() {
     }
     add({ slug: p.slug, name: p.name, price: p.price, color, size, qty });
     toast.success("به سبد خرید اضافه شد", { description: p.name });
-    close();
+    dismissForNavigation();
     requestAnimationFrame(() => openDrawer());
   };
 
@@ -299,7 +299,7 @@ export function ProductQuickView() {
           <Link
             to="/product/$slug"
             params={{ slug: p.slug }}
-            onClick={close}
+            onClick={dismissForNavigation}
             className={`${CtaClasses("line")} mt-3 w-full`}
           >
             توضیحات بیشتر و جزئیات کامل

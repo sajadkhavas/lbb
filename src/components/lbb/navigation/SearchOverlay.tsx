@@ -34,7 +34,9 @@ function readRecent(): string[] {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is string => typeof item === "string" && item.trim().length > 0).slice(0, MAX_RECENT);
+    return parsed
+      .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+      .slice(0, MAX_RECENT);
   } catch {
     return [];
   }
@@ -43,7 +45,10 @@ function readRecent(): string[] {
 function saveRecent(term: string): string[] {
   const normalized = term.trim();
   if (!normalized) return readRecent();
-  const next = [normalized, ...readRecent().filter((item) => item !== normalized)].slice(0, MAX_RECENT);
+  const next = [normalized, ...readRecent().filter((item) => item !== normalized)].slice(
+    0,
+    MAX_RECENT,
+  );
   try {
     localStorage.setItem(RECENT_KEY, JSON.stringify(next));
   } catch {
@@ -75,7 +80,7 @@ export function SearchOverlay() {
     const needle = term.toLocaleLowerCase("fa-IR");
     const categories: Suggestion[] = CATEGORY_SLUGS.filter((slug) => {
       const category = CATEGORIES[slug];
-      return `${category.nameFa} ${category.nameEn} ${category.description}`
+      return `${category.nameFa} ${category.nameFaPlural} ${category.heroTagline}`
         .toLocaleLowerCase("fa-IR")
         .includes(needle);
     })
@@ -332,7 +337,11 @@ export function SearchOverlay() {
                   className="group flex min-h-12 items-center justify-between border border-hairline px-4 text-sm font-bold text-bone transition-colors hover:border-signal"
                 >
                   کالکشن‌های فعلی
-                  <ArrowUpLeft size={16} aria-hidden="true" className="text-mute group-hover:text-signal" />
+                  <ArrowUpLeft
+                    size={16}
+                    aria-hidden="true"
+                    className="text-mute group-hover:text-signal"
+                  />
                 </Link>
                 <Link
                   to="/journal"
@@ -340,7 +349,11 @@ export function SearchOverlay() {
                   className="group flex min-h-12 items-center justify-between border border-hairline px-4 text-sm font-bold text-bone transition-colors hover:border-signal"
                 >
                   راهنما و ژورنال
-                  <ArrowUpLeft size={16} aria-hidden="true" className="text-mute group-hover:text-signal" />
+                  <ArrowUpLeft
+                    size={16}
+                    aria-hidden="true"
+                    className="text-mute group-hover:text-signal"
+                  />
                 </Link>
                 <Link
                   to="/search"
