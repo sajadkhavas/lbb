@@ -81,9 +81,7 @@ test("filtered shop deep links canonicalize, survive refresh and stay noindex", 
 
   await page.reload({ waitUntil: "networkidle" });
   await expect(page.getByRole("button", { name: "حذف فیلتر فقط موجود" })).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "حذف فیلتر سایز M", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "حذف فیلتر سایز M", exact: true })).toBeVisible();
 });
 
 test("empty catalogue state resets to the complete result set", async ({ page }) => {
