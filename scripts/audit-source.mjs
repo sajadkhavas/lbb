@@ -78,6 +78,43 @@ if (/products\.(?:flatMap|map)\s*\(/.test(productFilter)) {
   failures.push("Catalogue-derived filter defaults must not run at module initialization.");
 }
 
+const homepageRoute = await readFile(path.join(root, "src/routes/index.tsx"), "utf8");
+const homepageHero = await readFile(
+  path.join(root, "src/components/lbb/home/HeroNarrative.tsx"),
+  "utf8",
+).catch(() => "");
+
+for (const forbidden of [
+  "SmoothScroll",
+  "CustomCursor",
+  "HeroSplit",
+  "NewDropCountdown",
+  "CategoryTakeover",
+  "FeaturedPinned",
+  "BestSellers",
+  "EditorialSplit",
+]) {
+  if (homepageRoute.includes(forbidden)) {
+    failures.push(`F13 homepage must not restore the superseded ${forbidden} composition.`);
+  }
+}
+if (!homepageHero) {
+  failures.push("F13 product-first HeroNarrative is missing.");
+} else {
+  if (/\buseEffect\b|\bgsap\b|\bScrollTrigger\b|\blenis\b/i.test(homepageHero)) {
+    failures.push("Homepage hero must remain JavaScript-motion-free above the fold.");
+  }
+  if (!/loading="eager"/.test(homepageHero) || !/fetchPriority="high"/.test(homepageHero)) {
+    failures.push("Homepage LCP image must remain eager and high priority.");
+  }
+  if (!/width=\{1200\}/.test(homepageHero) || !/height=\{1500\}/.test(homepageHero)) {
+    failures.push("Homepage LCP image must retain explicit intrinsic dimensions.");
+  }
+}
+if (!/rel:\s*"preload"[\s\S]*as:\s*"image"[\s\S]*href:\s*heroMain/.test(homepageRoute)) {
+  failures.push("Homepage route must preload the hero LCP image.");
+}
+
 if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);

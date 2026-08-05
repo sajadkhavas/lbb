@@ -1,5 +1,4 @@
 import { Database, ShieldCheck, WalletCards } from "lucide-react";
-import { useReveal } from "@/hooks/use-reveal";
 
 const ITEMS = [
   {
@@ -20,22 +19,16 @@ const ITEMS = [
 ];
 
 export function TrustStrip() {
-  const ref = useReveal<HTMLElement>({ selector: ".trust-item", y: 16 });
-
   return (
     <section
-      ref={ref}
       dir="rtl"
-      className="hairline-t bg-obsidian px-5 py-10 md:px-10"
+      className="border-t border-hairline bg-obsidian px-[var(--lbb-gutter)] py-8"
       aria-label="وضعیت فعلی فروشگاه نمایشی"
     >
-      <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 md:grid-cols-3 md:divide-x md:divide-hairline-soft">
+      <div className="mx-auto grid max-w-[var(--lbb-shell-max)] grid-cols-1 gap-4 md:grid-cols-3 md:divide-x md:divide-x-reverse md:divide-hairline-soft">
         {ITEMS.map(({ Icon, title, sub }) => (
-          <div
-            key={title}
-            className="trust-item flex items-start gap-3 rounded-xl px-3 py-2 transition-colors hover:bg-carbon/60"
-          >
-            <Icon size={22} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
+          <div key={title} className="flex items-start gap-3 px-2 py-2 md:px-5">
+            <Icon size={21} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
             <div>
               <p className="text-sm font-semibold text-bone">{title}</p>
               <p className="mt-1 text-xs leading-6 text-metal">{sub}</p>
