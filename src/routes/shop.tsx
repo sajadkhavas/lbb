@@ -18,6 +18,12 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/product-catalog";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
+import {
+  catalogueInventorySummary,
+  countDiscoveryResults,
+  createDiscoveryScope,
+  createFacetCounts,
+} from "@/lib/catalog-discovery";
 import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
   applyFilters,
@@ -33,22 +39,8 @@ import {
 
 const TITLE = "فروشگاه | خرید هودی، شلوار، تیشرت و کتونی — LBB";
 const DESC =
-  "فروشگاه آنلاین LBB برای مشاهده مجموعه استریت‌ویر شامل هودی، شلوار، تیشرت، کتونی و جوراب.";
+  "کاتالوگ استریت‌ویر LBB شامل هودی، شلوار، تیشرت، کتونی و جوراب با فیلترهای قابل اشتراک و اطلاعات شفاف موجودی.";
 const PAGE_SIZE = 12;
-
-type ShopFilterScope = {
-  colors: string[];
-  sizes: string[];
-  priceCeil: number;
-};
-
-function createFilterScope(): ShopFilterScope {
-  return {
-    colors: Array.from(new Set(products.flatMap((product) => product.colors))),
-    sizes: Array.from(new Set(products.flatMap((product) => product.sizes))),
-    priceCeil: Math.max(1, ...products.map((product) => product.price)),
-  };
-}
 
 function createItemListLd() {
   return {
@@ -97,7 +89,8 @@ export const Route = createFileRoute("/shop")({
 
 function ShopPage() {
   const routeFilters = Route.useSearch();
-  const filterScope = useMemo(() => createFilterScope(), []);
+  const filterScope = useMemo(() => createDiscoveryScope(products, true), []);
+  const inventory = useMemo(() => catalogueInventorySummary(products), []);
   const filters = useMemo(
     () =>
       normalizeFilters(
@@ -128,16 +121,20 @@ function ShopPage() {
 
   const filtered = useMemo(() => applyFilters(products, filters), [filters]);
   const shown = filtered.slice(0, visible);
-  const filterUi = (
+  const getResultCount = (candidate: Filters) =>
+    countDiscoveryResults(products, candidate, filterScope);
+  const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
-      filters={filters}
-      onChange={setFilters}
+      filters={candidate}
+      onChange={onChange}
       colors={filterScope.colors}
       sizes={filterScope.sizes}
       priceCeil={filterScope.priceCeil}
       showCategory
+      facetCounts={createFacetCounts(products, candidate, filterScope)}
     />
   );
+  const desktopFilters = renderFilters(filters, setFilters);
 
   return (
     <>
@@ -151,19 +148,29 @@ function ShopPage() {
         </Shell>
 
         <header className="border-b border-hairline">
-          <Shell className="py-10 md:py-14">
-            <TechLabel tone="signal">SHOP ALL</TechLabel>
-            <h1 className="text-display-2 mt-3 text-bone">فروشگاه</h1>
-            <p className="tech mt-3 text-metal">
-              {products.length.toLocaleString("fa-IR")} محصول موجود
-            </p>
+          <Shell className="grid gap-6 py-10 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.45fr)] md:items-end md:py-14">
+            <div>
+              <TechLabel tone="signal">CATALOG / ALL PIECES</TechLabel>
+              <h1 className="text-display-2 mt-3 text-bone">همه قطعه‌ها</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-metal">
+                از دسته شروع کن یا با رنگ، سایز، قیمت و وضعیت موجودی به نتیجه دقیق برس. هر تغییر
+                در URL ثبت می‌شود و لینک قابل اشتراک باقی می‌ماند.
+              </p>
+            </div>
+            <div className="border-s border-hairline ps-5">
+              <p className="tech text-signal">CATALOG STATUS</p>
+              <p className="mt-2 text-sm leading-7 text-bone">{inventory.label}</p>
+              <p className="mt-1 text-xs leading-6 text-mute">
+                پرداخت و ارسال واقعی در این نسخه فعال نیست.
+              </p>
+            </div>
           </Shell>
           <Shell className="flex snap-x gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Link
               to="/shop"
               className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-signal px-4 py-3 text-signal"
             >
-              همه
+              همه قطعه‌ها
             </Link>
             {CATEGORY_SLUGS.map((slug) => (
               <Link
@@ -180,17 +187,21 @@ function ShopPage() {
 
         <Band hairline={false} className="!py-10 md:!py-14">
           <Shell>
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
               <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{filterUi}</div>
+                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{desktopFilters}</div>
               </aside>
 
-              <div>
+              <section aria-labelledby="shop-grid-title">
+                <h2 id="shop-grid-title" className="sr-only">
+                  نتایج کاتالوگ LBB
+                </h2>
                 <ProductGridControls
                   filters={filters}
                   onChange={setFilters}
                   resultCount={filtered.length}
-                  filterSlot={filterUi}
+                  filterSlot={renderFilters}
+                  getResultCount={getResultCount}
                 />
 
                 {isPending ? (
@@ -201,8 +212,8 @@ function ShopPage() {
                   <EmptyState
                     className="mt-6"
                     icon={<PackageSearch size={40} aria-hidden="true" />}
-                    title="محصولی با این فیلترها پیدا نشد"
-                    body="فیلترها را تغییر بده یا همه را پاک کن."
+                    title="محصولی با این ترکیب فیلتر پیدا نشد"
+                    body="یکی از فیلترها را حذف کن یا کاتالوگ را به حالت پایه برگردان."
                     action={
                       <button
                         type="button"
@@ -219,13 +230,16 @@ function ShopPage() {
                         }
                         className={CtaClasses("signal")}
                       >
-                        پاک کردن فیلترها
+                        بازگشت به همه قطعه‌ها
                       </button>
                     }
                   />
                 ) : (
                   <>
-                    <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
+                    <div
+                      className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4"
+                      aria-busy={isPending}
+                    >
                       {shown.map((product, index) => (
                         <ProductCard key={product.id} p={product} priority={index < 2} />
                       ))}
@@ -237,15 +251,15 @@ function ShopPage() {
                           onClick={() => setVisible((value) => value + PAGE_SIZE)}
                           className={CtaClasses("line")}
                         >
-                          نمایش بیشتر
+                          نمایش قطعه‌های بیشتر
                         </button>
                       </div>
                     ) : (
-                      <p className="tech mt-10 text-center text-mute">پایان نتایج</p>
+                      <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>
                     )}
                   </>
                 )}
-              </div>
+              </section>
             </div>
           </Shell>
         </Band>
