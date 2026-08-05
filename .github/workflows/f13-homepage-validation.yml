@@ -1,0 +1,104 @@
+name: F13 homepage artifact validation
+
+on:
+  pull_request:
+    branches:
+      - validation/f13-homepage-narrative-2
+
+permissions:
+  contents: write
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase/f13-homepage-narrative-2
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Format F13 scope
+        run: |
+          npx prettier --write \
+            src/routes/index.tsx \
+            src/lib/homepage.ts \
+            src/components/lbb/home/HeroNarrative.tsx \
+            src/components/lbb/home/CategoryGateway.tsx \
+            src/components/lbb/home/ProductMoments.tsx \
+            src/components/lbb/home/DropStory.tsx \
+            src/components/lbb/home/ShopTheLook.tsx \
+            src/components/lbb/home/DecisionSupport.tsx \
+            src/components/lbb/home/EditorialGateway.tsx \
+            src/components/lbb/home/BrandStatement.tsx \
+            src/components/lbb/home/TrustStrip.tsx \
+            scripts/audit-source.mjs \
+            tests/homepage-narrative.spec.ts \
+            tests/homepage-visual.spec.ts \
+            tests/visual.spec.ts \
+            docs/f13
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate Linux visual baselines
+        run: npx playwright test tests/visual.spec.ts tests/homepage-visual.spec.ts --update-snapshots
+
+      - name: Commit generated F13 artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            src/routes/index.tsx \
+            src/lib/homepage.ts \
+            src/components/lbb/home/HeroNarrative.tsx \
+            src/components/lbb/home/CategoryGateway.tsx \
+            src/components/lbb/home/ProductMoments.tsx \
+            src/components/lbb/home/DropStory.tsx \
+            src/components/lbb/home/ShopTheLook.tsx \
+            src/components/lbb/home/DecisionSupport.tsx \
+            src/components/lbb/home/EditorialGateway.tsx \
+            src/components/lbb/home/BrandStatement.tsx \
+            src/components/lbb/home/TrustStrip.tsx \
+            scripts/audit-source.mjs \
+            tests/homepage-narrative.spec.ts \
+            tests/homepage-visual.spec.ts \
+            tests/visual.spec.ts \
+            tests/visual.spec.ts-snapshots \
+            tests/homepage-visual.spec.ts-snapshots \
+            docs/f13
+          if ! git diff --cached --quiet; then
+            git commit -m 'test(f13): register homepage narrative artifacts'
+            git push origin HEAD:phase/f13-homepage-narrative-2
+          fi
+
+      - name: Run complete immutable quality suite
+        run: npm run quality
+
+      - name: Verify tracked files remain stable
+        run: git diff --exit-code -- . ':(exclude)playwright-report' ':(exclude)test-results'
+
+      - name: Upload browser report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f13-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
