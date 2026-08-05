@@ -15,4 +15,7 @@
 
 ## Validation
 
-The pull request remains in draft until formatting, lint, build, type checking, audits and browser tests all pass.
+- Diagnostic checkout confirmed the exact F14A branch revision.
+- Playwright currently discovers 119 tests across 11 files.
+- No stale `home.spec.ts`, old Tehran hero contract or obsolete hero claim exists in the branch.
+- The pull request remains in draft until the fresh full quality run passes.
