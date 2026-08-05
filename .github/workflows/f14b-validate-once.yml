@@ -1,0 +1,76 @@
+name: F14B validate once
+
+on:
+  push:
+    branches:
+      - phase/f14b-store-settings-architecture
+    paths:
+      - .github/workflows/f14b-validate-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    env:
+      VITE_SITE_URL: https://lbb.example
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: phase/f14b-store-settings-architecture
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Register settings audit
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          pkg.scripts["audit:store-settings"] = "node scripts/audit-store-settings.mjs";
+          pkg.scripts.quality = pkg.scripts.quality.replace(
+            "npm run audit:brand && npm run audit:source",
+            "npm run audit:brand && npm run audit:store-settings && npm run audit:source",
+          );
+          fs.writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
+          NODE
+
+      - name: Format F14B files
+        run: npx prettier --write package.json docs/F14B_STORE_SETTINGS_CONTRACT.md scripts/audit-store-settings.mjs src/lib/store-settings.ts src/lib/launch-readiness.ts src/components/lbb/TrustMarks.tsx src/components/lbb/Footer.tsx
+
+      - name: Validate architecture
+        run: |
+          npm run format:check
+          npm run lint
+          npm run build
+          npm run typecheck
+          npm run audit:brand
+          npm run audit:store-settings
+          npm run audit:source
+
+      - name: Remove one-time workflow
+        run: rm .github/workflows/f14b-validate-once.yml
+
+      - name: Commit validated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json \
+            docs/F14B_STORE_SETTINGS_CONTRACT.md \
+            scripts/audit-store-settings.mjs \
+            src/lib/store-settings.ts \
+            src/lib/launch-readiness.ts \
+            src/components/lbb/TrustMarks.tsx \
+            src/components/lbb/Footer.tsx \
+            .github/workflows/f14b-validate-once.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "F14B: validate admin-ready store settings"
+          git push origin HEAD:phase/f14b-store-settings-architecture
