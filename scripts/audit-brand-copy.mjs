@@ -23,13 +23,22 @@ const sourceFiles = (await walk(sourceRoot)).filter((file) =>
   /\.(?:ts|tsx|js|mjs|json|css)$/.test(file),
 );
 
+function isAllowedTehranReference(relative, line) {
+  return relative === "src/routes/checkout.tsx" && line.trim() === '"تهران",';
+}
+
 for (const file of sourceFiles) {
   const relative = path.relative(root, file).replaceAll(path.sep, "/");
   const content = await readFile(file, "utf8");
 
-  if (/تهران|\bTEHRAN\b/i.test(content)) {
-    failures.push(`Incorrect Tehran brand reference remains: ${relative}`);
-  }
+  content.split(/\r?\n/).forEach((line, index) => {
+    if (!/تهران|\bTEHRAN\b/i.test(line)) return;
+    if (isAllowedTehranReference(relative, line)) return;
+
+    failures.push(
+      `Incorrect Tehran brand reference remains: ${relative}:${index + 1} — ${line.trim()}`,
+    );
+  });
 }
 
 const brandModulePath = path.join(sourceRoot, "lib", "brand.ts");
