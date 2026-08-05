@@ -12,12 +12,16 @@ export function BrandStatement() {
       <span aria-hidden="true" className="absolute inset-0 grid-marks opacity-20" />
       <div className="relative mx-auto w-full max-w-[var(--lbb-shell-max)]">
         <TechLabel tone="inverse">LBB / TEHRAN STREETWEAR</TechLabel>
-        <h2 id="brand-statement-title" className="mt-6 max-w-[12ch] text-[clamp(3.25rem,10vw,10rem)] font-black leading-[0.82] tracking-[-0.06em]">
+        <h2
+          id="brand-statement-title"
+          className="mt-6 max-w-[12ch] text-[clamp(3.25rem,10vw,10rem)] font-black leading-[0.82] tracking-[-0.06em]"
+        >
           پوشاک فقط دیده نمی‌شه؛ موضع می‌گیره.
         </h2>
         <div className="mt-10 grid gap-7 border-t border-obsidian/35 pt-7 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           <p className="max-w-[58ch] text-sm font-semibold leading-8 text-obsidian/80">
-            LBB زبان بصری خودش را از فرم آزاد، پالت تیره، جزئیات قرمز و شرایط واقعی خیابان‌های تهران می‌سازد. برای شروع لازم نیست همه‌چیز را انتخاب کنی؛ یک قطعه درست کافی است.
+            LBB زبان بصری خودش را از فرم آزاد، پالت تیره، جزئیات قرمز و شرایط واقعی خیابان‌های تهران
+            می‌سازد. برای شروع لازم نیست همه‌چیز را انتخاب کنی؛ یک قطعه درست کافی است.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link to="/shop" className={CtaClasses("bone", "lg")}>

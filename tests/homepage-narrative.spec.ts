@@ -14,14 +14,20 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 });
 
-test("homepage communicates identity, catalog and primary action above the fold", async ({ page }) => {
+test("homepage communicates identity, catalog and primary action above the fold", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "networkidle" });
 
   await expect(page).toHaveTitle(/LBB \| استریت‌ویر تهران — دراپ ۰۰۱/);
-  await expect(page.getByRole("heading", { level: 1, name: /تهران را.*با فرم.*خودت بپوش/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: /تهران را.*با فرم.*خودت بپوش/ }),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: /خرید DROP 001/ })).toBeVisible();
-  await expect(page.getByText("8", { exact: true }).or(page.getByText("۸", { exact: true }))).toBeVisible();
+  await expect(
+    page.getByText("8", { exact: true }).or(page.getByText("۸", { exact: true })),
+  ).toBeVisible();
   await expect(page.getByText("پرداخت و ارسال واقعی در این نسخه فعال نیست")).toBeVisible();
 });
 
@@ -40,7 +46,7 @@ test("hero LCP image is preloaded, eager and dimensioned", async ({ page }) => {
   expect(source).toBeTruthy();
   const preload = page.locator('link[rel="preload"][as="image"]');
   await expect(preload).toHaveCount(1);
-  expect(new URL(await preload.getAttribute("href") ?? "", page.url()).pathname).toBe(
+  expect(new URL((await preload.getAttribute("href")) ?? "", page.url()).pathname).toBe(
     new URL(source ?? "", page.url()).pathname,
   );
 
@@ -129,7 +135,9 @@ for (const viewport of [
   { width: 1440, height: 1000 },
   { width: 1920, height: 1080 },
 ]) {
-  test(`homepage remains usable without horizontal overflow at ${viewport.width}px`, async ({ page }) => {
+  test(`homepage remains usable without horizontal overflow at ${viewport.width}px`, async ({
+    page,
+  }) => {
     await page.setViewportSize(viewport);
     await page.goto("/", { waitUntil: "networkidle" });
     expect(

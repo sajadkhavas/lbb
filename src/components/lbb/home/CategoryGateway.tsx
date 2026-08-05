@@ -21,10 +21,7 @@ export function CategoryGateway() {
           title={<span id="home-categories-title">از چیزی که می‌خوای شروع کن</span>}
           lede="هر دسته یک صفحه مستقل با فیلتر، Sort، فیت، متریال و موجودی واقعی همان محصولات دارد."
           action={
-            <Link
-              to="/shop"
-              className="tech inline-flex min-h-11 items-center gap-2 text-signal"
-            >
+            <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
               همه محصولات
               <ArrowUpLeft size={15} aria-hidden="true" />
             </Link>
@@ -57,7 +54,11 @@ export function CategoryGateway() {
                   ratio={ratio}
                   width={index === 0 ? 1000 : 900}
                   height={index === 0 ? 1250 : 720}
-                  sizes={index === 0 ? "(max-width: 767px) 100vw, 50vw" : "(max-width: 767px) 100vw, 33vw"}
+                  sizes={
+                    index === 0
+                      ? "(max-width: 767px) 100vw, 50vw"
+                      : "(max-width: 767px) 100vw, 33vw"
+                  }
                   className="h-full min-h-[280px] w-full"
                   imgClassName="opacity-80 transition-[transform,opacity] duration-500 group-hover:scale-[1.035] group-hover:opacity-100"
                   zoom={false}
@@ -73,7 +74,9 @@ export function CategoryGateway() {
                           <TechLabel tone="signal">0{index + 1}</TechLabel>
                           <TechLabel tone="bone">{slug.toUpperCase()}</TechLabel>
                         </div>
-                        <h3 className={`mt-2 font-black text-bone ${index === 0 ? "text-display-2" : "text-display-3"}`}>
+                        <h3
+                          className={`mt-2 font-black text-bone ${index === 0 ? "text-display-2" : "text-display-3"}`}
+                        >
                           {category.nameFaPlural}
                         </h3>
                         <p className="mt-2 line-clamp-2 max-w-[42ch] text-xs leading-6 text-metal">
@@ -81,7 +84,9 @@ export function CategoryGateway() {
                         </p>
                       </div>
                       <span className="shrink-0 border border-hairline-strong bg-obsidian/90 px-3 py-2 text-left backdrop-blur">
-                        <span className="num block text-sm font-black text-bone">{fmtNum(count)}</span>
+                        <span className="num block text-sm font-black text-bone">
+                          {fmtNum(count)}
+                        </span>
                         <span className="tech mt-1 block text-mute">PRODUCTS</span>
                       </span>
                     </div>

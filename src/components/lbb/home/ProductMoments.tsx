@@ -38,10 +38,7 @@ export function ProductMoments() {
           title={<span id="home-products-title">چهار نقطه شروع برای دراپ ۰۰۱</span>}
           lede="منتخب‌ها بر اساس جایگاه Merchandising در کاتالوگ نمایش داده می‌شوند؛ نه فروش ساختگی یا شمارنده اجتماعی."
           action={
-            <Link
-              to="/shop"
-              className="tech inline-flex min-h-11 items-center gap-2 text-signal"
-            >
+            <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
               کاتالوگ کامل
               <ArrowUpLeft size={15} aria-hidden="true" />
             </Link>
@@ -61,7 +58,10 @@ export function ProductMoments() {
 
         <div className="mt-12 grid border-y border-hairline md:grid-cols-3 md:divide-x md:divide-x-reverse md:divide-hairline">
           {DECISION_POINTS.map(({ icon: Icon, title, body }, index) => (
-            <article key={title} className="border-b border-hairline p-5 last:border-b-0 md:border-b-0 md:p-6">
+            <article
+              key={title}
+              className="border-b border-hairline p-5 last:border-b-0 md:border-b-0 md:p-6"
+            >
               <div className="flex items-start gap-4">
                 <span className="grid h-11 w-11 shrink-0 place-items-center border border-hairline text-signal">
                   <Icon size={18} aria-hidden="true" />

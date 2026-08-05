@@ -39,9 +39,7 @@ export function DropStory() {
           />
           <div className="absolute inset-x-0 bottom-0 p-5 md:p-8">
             <TechLabel tone="signal">{collection.latinName}</TechLabel>
-            <p className="mt-3 max-w-[38ch] text-sm leading-7 text-bone">
-              {collection.tagline}
-            </p>
+            <p className="mt-3 max-w-[38ch] text-sm leading-7 text-bone">{collection.tagline}</p>
           </div>
         </div>
 
@@ -121,7 +119,8 @@ export function DropStory() {
             <div className="grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
               <TechLabel tone="signal">DROP 002</TechLabel>
               <p className="text-xs leading-6 text-mute">
-                دراپ بعدی هنوز در حال توسعه است و تاریخ انتشار تاییدشده ندارد؛ اطلاع‌رسانی فقط از کانال رسمی انجام می‌شود.
+                دراپ بعدی هنوز در حال توسعه است و تاریخ انتشار تاییدشده ندارد؛ اطلاع‌رسانی فقط از
+                کانال رسمی انجام می‌شود.
               </p>
             </div>
           </aside>

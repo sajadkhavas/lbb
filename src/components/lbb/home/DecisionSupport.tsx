@@ -21,8 +21,17 @@ export function DecisionSupport() {
         <SectionHead
           index="05"
           label="DECISION SUPPORT"
-          title={<span id="decision-support-title" className="text-obsidian">قبل از انتخاب، جواب‌ها را داشته باش</span>}
-          lede={<span className="text-graphite">صفحه اصلی فقط الهام نمی‌دهد؛ مسیر رسیدن به اطلاعاتی که تصمیم خرید را عوض می‌کنند نیز مستقیم است.</span>}
+          title={
+            <span id="decision-support-title" className="text-obsidian">
+              قبل از انتخاب، جواب‌ها را داشته باش
+            </span>
+          }
+          lede={
+            <span className="text-graphite">
+              صفحه اصلی فقط الهام نمی‌دهد؛ مسیر رسیدن به اطلاعاتی که تصمیم خرید را عوض می‌کنند نیز
+              مستقیم است.
+            </span>
+          }
         />
 
         <div className="mt-9 grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
@@ -31,7 +40,11 @@ export function DecisionSupport() {
             <ul className="mt-5 space-y-4">
               {CHECKS.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm leading-7 text-metal">
-                  <CheckCircle2 size={18} aria-hidden="true" className="mt-1 shrink-0 text-signal" />
+                  <CheckCircle2
+                    size={18}
+                    aria-hidden="true"
+                    className="mt-1 shrink-0 text-signal"
+                  />
                   <span>{item}</span>
                 </li>
               ))}
@@ -46,7 +59,9 @@ export function DecisionSupport() {
                 className="group flex min-h-[250px] flex-col justify-between border border-hairline-ink bg-bone p-5 transition-colors hover:bg-steam md:p-6"
               >
                 <div>
-                  <TechLabel tone="inverse">0{index + 1} / {item.latin}</TechLabel>
+                  <TechLabel tone="inverse">
+                    0{index + 1} / {item.latin}
+                  </TechLabel>
                   <h3 className="mt-5 text-title text-obsidian">{item.label}</h3>
                   <p className="mt-3 text-sm leading-7 text-graphite">{item.description}</p>
                 </div>

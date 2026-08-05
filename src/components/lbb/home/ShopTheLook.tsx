@@ -32,10 +32,7 @@ export function ShopTheLook() {
           title={<span id="shop-look-title">ست را ببین، قطعه را جدا انتخاب کن</span>}
           lede="Hotspotها فقط راه میانبرند؛ نام، قیمت و مقصد هر قطعه همیشه کنار تصویر قابل مشاهده است."
           action={
-            <Link
-              to="/shop"
-              className="tech inline-flex min-h-11 items-center gap-2 text-signal"
-            >
+            <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
               مشاهده فروشگاه
               <ArrowUpLeft size={15} aria-hidden="true" />
             </Link>
@@ -54,7 +51,10 @@ export function ShopTheLook() {
               sizes="(max-width: 1023px) 100vw, 58vw"
               className="border border-hairline"
             >
-              <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-obsidian/35 to-transparent" />
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-t from-obsidian/35 to-transparent"
+              />
               {HOTSPOTS.map((hotspot, index) => {
                 const product = productBySlug(hotspot.slug);
                 if (!product) return null;
@@ -77,7 +77,11 @@ export function ShopTheLook() {
                       transform: "translate(-50%, -50%)",
                     }}
                   >
-                    {selected ? <X size={15} aria-hidden="true" /> : <Plus size={15} aria-hidden="true" />}
+                    {selected ? (
+                      <X size={15} aria-hidden="true" />
+                    ) : (
+                      <Plus size={15} aria-hidden="true" />
+                    )}
                     <span className="sr-only">نقطه {index + 1}</span>
                   </button>
                 );
@@ -103,7 +107,9 @@ export function ShopTheLook() {
                       onFocus={() => setActive(product.slug)}
                       aria-current={selected ? "true" : undefined}
                       className={`group grid min-h-[92px] grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 border p-2 transition-colors ${
-                        selected ? "border-signal bg-obsidian" : "border-hairline bg-carbon hover:border-hairline-strong"
+                        selected
+                          ? "border-signal bg-obsidian"
+                          : "border-hairline bg-carbon hover:border-hairline-strong"
                       }`}
                     >
                       <img
@@ -116,7 +122,9 @@ export function ShopTheLook() {
                         className="h-20 w-16 object-cover"
                       />
                       <span className="min-w-0">
-                        <TechLabel tone={selected ? "signal" : "metal"}>0{index + 1} / {product.sku}</TechLabel>
+                        <TechLabel tone={selected ? "signal" : "metal"}>
+                          0{index + 1} / {product.sku}
+                        </TechLabel>
                         <span className="mt-1 block truncate text-sm font-black text-bone">
                           {product.name}
                         </span>
@@ -136,7 +144,8 @@ export function ShopTheLook() {
             </ol>
 
             <p className="mt-auto border-t border-hairline pt-5 text-xs leading-6 text-mute">
-              تصویر برای نمایش ترکیب است؛ تناسب رنگ و فیت نهایی به Variant انتخاب‌شده در صفحه محصول وابسته است.
+              تصویر برای نمایش ترکیب است؛ تناسب رنگ و فیت نهایی به Variant انتخاب‌شده در صفحه محصول
+              وابسته است.
             </p>
           </aside>
         </div>
