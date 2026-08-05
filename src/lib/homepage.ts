@@ -10,22 +10,26 @@ export const HOME_CATEGORY_ORDER: CategorySlug[] = [
 
 export const HOME_DECISION_LINKS = [
   {
+    kind: "static" as const,
     label: "راهنمای انتخاب سایز",
     latin: "SIZE / FIT",
     description: "قبل از خرید، فیت و اندازه مناسب را مقایسه کن.",
     to: "/size-guide" as const,
   },
   {
+    kind: "static" as const,
     label: "ارسال و مرجوعی",
     latin: "DELIVERY / RETURNS",
     description: "شرایط نسخه نمایشی، هزینه و محدودیت‌ها را شفاف ببین.",
     to: "/shipping-returns" as const,
   },
   {
+    kind: "journal" as const,
     label: "پارچه و نگهداری",
     latin: "MATERIAL / CARE",
     description: "گرماژ، ترکیب پارچه و روش شست‌وشوی هر قطعه.",
-    to: "/journal/materials-101-parche-shenasi" as const,
+    to: "/journal/$slug" as const,
+    params: { slug: "materials-101-parche-shenasi" },
   },
 ];
 
