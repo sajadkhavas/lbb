@@ -7,22 +7,23 @@ import { Footer } from "@/components/lbb/Footer";
 import { InstagramStrip } from "@/components/lbb/InstagramStrip";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Navbar } from "@/components/lbb/Navbar";
-import { BestSellers } from "@/components/lbb/home/BestSellers";
 import { BrandStatement } from "@/components/lbb/home/BrandStatement";
-import { CategoryTakeover } from "@/components/lbb/home/CategoryTakeover";
-import { EditorialSplit } from "@/components/lbb/home/EditorialSplit";
-import { FeaturedPinned } from "@/components/lbb/home/FeaturedPinned";
-import { HeroSplit } from "@/components/lbb/home/HeroSplit";
-import { NewDropCountdown } from "@/components/lbb/home/NewDropCountdown";
+import { CategoryGateway } from "@/components/lbb/home/CategoryGateway";
+import { DecisionSupport } from "@/components/lbb/home/DecisionSupport";
+import { DropStory } from "@/components/lbb/home/DropStory";
+import { EditorialGateway } from "@/components/lbb/home/EditorialGateway";
+import { HeroNarrative } from "@/components/lbb/home/HeroNarrative";
 import { Newsletter } from "@/components/lbb/home/Newsletter";
+import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { ShopTheLook } from "@/components/lbb/home/ShopTheLook";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
+import { heroMain } from "@/lib/product-images";
 import { absUrl, canonical, pageMeta } from "@/lib/site";
 
-const TITLE = "LBB | استریت‌ویر تهران — هودی، شلوار، کتونی، تیشرت";
+const TITLE = "LBB | استریت‌ویر تهران — دراپ ۰۰۱";
 const DESC =
-  "LBB، برند استریت‌ویر تهران. دراپ ۰۰۱ شامل هودی، شلوار، تیشرت، کتونی و جوراب. ارسال از تهران.";
+  "دراپ ۰۰۱ استریت‌ویر LBB؛ هودی اورسایز، شلوار بگی و کارگو، تیشرت سنگین، کتونی و جوراب با مسیر شفاف فیت، متریال و موجودی.";
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -46,7 +47,7 @@ const storeJsonLd = {
   alternateName: "ال‌بی‌بی",
   url: absUrl("/"),
   logo: absUrl("/icons/icon-512.png"),
-  description: "فروشگاه آنلاین پوشاک استریت‌ویر LBB؛ هودی، شلوار، تیشرت، کتونی و جوراب.",
+  description: "کاتالوگ آنلاین پوشاک استریت‌ویر LBB؛ هودی، شلوار، تیشرت، کتونی و جوراب.",
   priceRange: "$$",
   currenciesAccepted: "IRR",
   address: { "@type": "PostalAddress", addressCountry: "IR" },
@@ -59,11 +60,11 @@ export const Route = createFileRoute("/")({
       ...pageMeta({ title: TITLE, description: DESC, path: "/", type: "website" }),
       {
         name: "keywords",
-        content: "خرید هودی، خرید شلوار استریت‌ویر، LBB، فروشگاه لباس ایران، خرید کتونی",
+        content: "استریت‌ویر تهران، خرید هودی اورسایز، شلوار بگی، شلوار کارگو، LBB",
       },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: canonical("/"),
+    links: [...canonical("/"), { rel: "preload", as: "image", href: heroMain }],
     scripts: [
       { type: "application/ld+json", children: JSON.stringify(websiteJsonLd) },
       { type: "application/ld+json", children: JSON.stringify(storeJsonLd) },
@@ -89,16 +90,16 @@ function Home() {
         className="bg-obsidian pb-bottombar text-bone transition-[padding] duration-300 md:pb-0"
         style={{ paddingTop: offsetTop }}
       >
-        <HeroSplit />
+        <HeroNarrative />
         <TickerStrip />
-        <CategoryTakeover />
-        <NewDropCountdown />
-        <FeaturedPinned />
-        <ShopTheLook />
-        <BrandStatement />
-        <EditorialSplit />
-        <BestSellers />
         <TrustStrip />
+        <CategoryGateway />
+        <ProductMoments />
+        <DropStory />
+        <ShopTheLook />
+        <DecisionSupport />
+        <EditorialGateway />
+        <BrandStatement />
         <Newsletter />
         <InstagramStrip />
       </main>
