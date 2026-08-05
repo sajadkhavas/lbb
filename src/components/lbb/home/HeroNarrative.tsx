@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
+import { BRAND_COPY } from "@/lib/brand";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { heroMain, productImage } from "@/lib/product-images";
@@ -25,39 +26,31 @@ export function HeroNarrative() {
         <div className="order-2 flex min-w-0 flex-col justify-between border-t border-hairline px-[var(--lbb-gutter)] py-10 lg:order-1 lg:border-l lg:border-t-0 lg:py-12 xl:py-16">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <TechLabel tone="signal">LBB / TEHRAN / DROP 001</TechLabel>
+              <TechLabel tone="signal">{BRAND_COPY.heroEyebrow}</TechLabel>
               <span aria-hidden="true" className="h-px w-10 bg-hairline" />
-              <TechLabel>STREETWEAR CATALOG</TechLabel>
+              <TechLabel>URBAN CLOTHING</TechLabel>
             </div>
 
             <h1 id="home-hero-title" className="mt-7 max-w-[10ch] text-hero leading-[0.88]">
-              <span className="block text-bone">تهران را</span>
-              <span className="block text-signal">با فرم</span>
-              <span className="block text-metal">خودت بپوش.</span>
+              <span className="block text-bone">از مهستان،</span>
+              <span className="block text-signal">برای</span>
+              <span className="block text-metal">خیابان.</span>
             </h1>
 
-            <p className="mt-7 max-w-[58ch] text-lede">
-              هشت قطعه از اولین دراپ LBB؛ هودی اورسایز، شلوار بگی و کارگو، تیشرت سنگین، کتونی و
-              جوراب. مسیر خرید از دسته تا فیت و موجودی شفاف است.
-            </p>
+            <p className="mt-7 max-w-[58ch] text-lede">{BRAND_COPY.heroBody}</p>
 
             <div className="mt-7 flex flex-wrap gap-3">
               <Link to="/shop" className={CtaClasses("signal", "lg")}>
-                خرید DROP 001
+                {BRAND_COPY.primaryCta}
                 <ArrowUpLeft size={17} aria-hidden="true" />
               </Link>
-              <Link
-                to="/$category"
-                params={{ category: "hoodies" }}
-                className={CtaClasses("line", "lg")}
-              >
-                دیدن هودی‌ها
+              <Link to="/size-guide" className={CtaClasses("line", "lg")}>
+                {BRAND_COPY.secondaryCta}
               </Link>
             </div>
 
             <p className="mt-4 max-w-[55ch] text-xs leading-6 text-mute">
-              قیمت، سایزهای ناموجود و وضعیت موجودی هر قطعه مستقیماً در صفحه محصول نمایش داده می‌شود.
-              پرداخت و ارسال واقعی در این نسخه فعال نیست.
+              قیمت، رنگ، اندازه‌های موجود و توضیح تن‌خور هر قطعه در صفحهٔ محصول نمایش داده می‌شود.
             </p>
           </div>
 
@@ -100,7 +93,7 @@ export function HeroNarrative() {
         <div className="relative order-1 min-h-[58svh] overflow-hidden bg-carbon lg:order-2 lg:min-h-full">
           <img
             src={heroMain}
-            alt="استایل شبانه LBB از دراپ ۰۰۱ در فضای شهری"
+            alt="استایل پوشاک شهری LBB از دراپ ۰۰۱"
             width={1200}
             height={1500}
             sizes="(max-width: 1023px) 100vw, 48vw"
@@ -149,7 +142,7 @@ export function HeroNarrative() {
             href="#home-categories"
             className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 border border-hairline-strong bg-obsidian/85 px-3 text-xs font-bold text-bone backdrop-blur transition-colors hover:border-signal hover:text-signal md:left-8 md:top-8"
           >
-            مسیر خرید
+            مسیر انتخاب
             <ArrowDownLeft size={15} aria-hidden="true" />
           </a>
         </div>

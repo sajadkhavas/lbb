@@ -78,7 +78,7 @@ export function HeroSplit() {
         <div className="relative order-2 flex w-full flex-col justify-center gap-8 px-5 py-16 md:order-1 md:w-[60%] md:px-14 md:py-10">
           <div className="overflow-hidden">
             <TechLabel tone="signal" className="hero-wordmark block">
-              LBB / DROP 001 / TEHRAN
+              LBB / DROP 001 / KARAJ
             </TechLabel>
           </div>
 
@@ -95,7 +95,7 @@ export function HeroSplit() {
           </h1>
 
           <p className="hero-meta-item max-w-md text-lede">
-            هودی، شلوار، تیشرت، کتونی و جوراب از اولین دراپ LBB — طراحی‌شده برای خیابان‌های تهران.
+            هودی، شلوار، تیشرت، کتونی و جوراب از اولین دراپ LBB — طراحی‌شده برای خیابان‌های کرج.
           </p>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -110,7 +110,7 @@ export function HeroSplit() {
           <dl className="hero-meta-item mt-4 flex flex-wrap items-center gap-x-8 gap-y-3 hairline-t pt-6">
             <div>
               <dt className="tech text-mute">مبدا</dt>
-              <dd className="num text-sm text-bone">تهران</dd>
+              <dd className="num text-sm text-bone">کرج</dd>
             </div>
             <div>
               <dt className="tech text-mute">دراپ</dt>

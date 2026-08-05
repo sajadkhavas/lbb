@@ -335,7 +335,7 @@ function PhotographySection() {
     },
     {
       src: lifestyle1,
-      title: "TEHRAN CONTEXT",
+      title: "KARAJ CONTEXT",
       body: "مکان و نور بخشی از داستان، نه پوشاننده محصول",
     },
     {
@@ -352,7 +352,7 @@ function PhotographySection() {
           index="05"
           label="PHOTOGRAPHY"
           title="تصویر برای تصمیم و روایت"
-          lede="تصویر Product بدون Grade شدید و تصویر Campaign با زمینه تهران استفاده می‌شود؛ این دو نقش نباید با هم مخلوط شوند."
+          lede="تصویر Product بدون Grade شدید و تصویر Campaign با زمینه کرج استفاده می‌شود؛ این دو نقش نباید با هم مخلوط شوند."
         />
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {frames.map((item, index) => (
@@ -418,7 +418,7 @@ function CompositionSection() {
           >
             <img
               src={heroMain}
-              alt="نمونه روایت تصویری شب تهران"
+              alt="نمونه روایت تصویری شب کرج"
               className="absolute inset-0 h-full w-full object-cover opacity-65"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/25 to-transparent" />
@@ -469,7 +469,7 @@ function DesignSystemPage() {
             <div className="lbb-grid items-end">
               <div className="col-span-4 md:col-span-6 lg:col-span-8">
                 <TechLabel tone="signal">LBB / DESIGN SYSTEM / {DESIGN_SYSTEM_VERSION}</TechLabel>
-                <h1 className="text-display-1 mt-5 max-w-[12ch] text-bone">Tehran After Dark</h1>
+                <h1 className="text-display-1 mt-5 max-w-[12ch] text-bone">Karaj After Dark</h1>
                 <p className="text-lede mt-6">
                   {EXPERIENCE_NORTH_STAR} یک زبان واحد برای Utility، روایت و خواندن می‌سازد.
                 </p>

@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/commerce";
-import { fmtToman } from "@/lib/products";
+import { BRAND, BRAND_COPY } from "@/lib/brand";
 
 const MESSAGES = [
-  { text: "نسخه نمایشی — پرداخت و ارسال واقعی غیرفعال است", to: "/shipping-returns" as const },
-  { text: "DROP 001 — کاتالوگ و تجربه محصول فعال است", to: "/collections" as const },
-  { text: `ارسال رایگان نمایشی از ${fmtToman(FREE_SHIPPING_THRESHOLD)}`, to: "/cart" as const },
+  { text: BRAND.slogan, to: "/shop" as const },
+  { text: BRAND_COPY.storeLocationLabel, to: "/contact" as const },
+  { text: "تن‌خور، جنس و اندازه؛ پیش از انتخاب روشن ببینید", to: "/size-guide" as const },
 ];
 
-const STORAGE_KEY = "lbb-announcement-f12-v1-dismissed";
+const STORAGE_KEY = "lbb-announcement-f14a-v1-dismissed";
 export const ANNOUNCEMENT_HEIGHT = 32;
 
 export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {

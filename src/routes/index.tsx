@@ -16,18 +16,17 @@ import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { ShopTheLook } from "@/components/lbb/home/ShopTheLook";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
+import { BRAND, BRAND_COPY } from "@/lib/brand";
 import { heroMain } from "@/lib/product-images";
 import { absUrl, canonical, pageMeta } from "@/lib/site";
-
-const TITLE = "LBB | استریت‌ویر تهران — دراپ ۰۰۱";
-const DESC =
-  "دراپ ۰۰۱ استریت‌ویر LBB؛ هودی اورسایز، شلوار بگی و کارگو، تیشرت سنگین، کتونی و جوراب با مسیر شفاف فیت، متریال و موجودی.";
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "LBB",
+  name: BRAND.name,
+  alternateName: BRAND.nameFa,
   url: absUrl("/"),
+  inLanguage: "fa-IR",
   potentialAction: {
     "@type": "SearchAction",
     target: {
@@ -41,24 +40,35 @@ const websiteJsonLd = {
 const storeJsonLd = {
   "@context": "https://schema.org",
   "@type": "ClothingStore",
-  name: "LBB",
-  alternateName: "ال‌بی‌بی",
+  name: BRAND.name,
+  alternateName: BRAND.nameFa,
   url: absUrl("/"),
   logo: absUrl("/icons/icon-512.png"),
-  description: "کاتالوگ آنلاین پوشاک استریت‌ویر LBB؛ هودی، شلوار، تیشرت، کتونی و جوراب.",
+  description: BRAND.shortIntroduction,
   priceRange: "$$",
   currenciesAccepted: "IRR",
-  address: { "@type": "PostalAddress", addressCountry: "IR" },
-  sameAs: ["https://www.instagram.com/lbbclo"],
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: BRAND.physicalLocation,
+    addressLocality: BRAND.city,
+    addressRegion: BRAND.province,
+    addressCountry: "IR",
+  },
+  sameAs: [BRAND.instagramUrl],
 };
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      ...pageMeta({ title: TITLE, description: DESC, path: "/", type: "website" }),
+      ...pageMeta({
+        title: BRAND_COPY.homepageTitle,
+        description: BRAND_COPY.homepageDescription,
+        path: "/",
+        type: "website",
+      }),
       {
         name: "keywords",
-        content: "استریت‌ویر تهران، خرید هودی اورسایز، شلوار بگی، شلوار کارگو، LBB",
+        content: BRAND_COPY.homepageKeywords.join("، "),
       },
       { name: "twitter:card", content: "summary_large_image" },
     ],
