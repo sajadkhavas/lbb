@@ -56,7 +56,10 @@ test("F14 search results mobile visual contract", async ({ page }) => {
 test("F14 staged mobile filter drawer visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: /فیلترها/ }).first().click();
+  await page
+    .getByRole("button", { name: /فیلترها/ })
+    .first()
+    .click();
   const dialog = page.getByRole("dialog", { name: /فیلتر محصولات/ });
   await dialog.getByRole("checkbox", { name: "فقط کالاهای موجود" }).click();
   await stabilize(page);

@@ -7,7 +7,13 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { ProductFilters } from "@/components/lbb/ProductFilters";
 import { ProductGridControls } from "@/components/lbb/ProductGridControls";
-import { CtaClasses, EmptyState, GridSkeleton, Shell, TechLabel } from "@/components/lbb/ui/primitives";
+import {
+  CtaClasses,
+  EmptyState,
+  GridSkeleton,
+  Shell,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/product-catalog";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import {
@@ -192,8 +198,8 @@ function SearchPage() {
           <TechLabel tone="signal">DISCOVERY / SEARCH</TechLabel>
           <h1 className="text-display-2 mt-3 text-bone">جستجو در کاتالوگ</h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">
-            نام، دسته، SKU، توضیح یا ویژگی محصول را بنویس. نتایج و فیلترهای اعمال‌شده در URL
-            قابل اشتراک باقی می‌مانند.
+            نام، دسته، SKU، توضیح یا ویژگی محصول را بنویس. نتایج و فیلترهای اعمال‌شده در URL قابل
+            اشتراک باقی می‌مانند.
           </p>
 
           <form onSubmit={submit} className="relative mt-6" role="search">
@@ -330,8 +336,7 @@ function SearchPage() {
                   aria-live="polite"
                   key={searchKey}
                 >
-                  «{query}» · {results.length.toLocaleString("fa-IR")} نتیجه از
-                  {" "}
+                  «{query}» · {results.length.toLocaleString("fa-IR")} نتیجه از{" "}
                   {baseResults.length.toLocaleString("fa-IR")} تطابق متنی
                 </p>
 

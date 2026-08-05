@@ -153,8 +153,8 @@ function ShopPage() {
               <TechLabel tone="signal">CATALOG / ALL PIECES</TechLabel>
               <h1 className="text-display-2 mt-3 text-bone">همه قطعه‌ها</h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-metal">
-                از دسته شروع کن یا با رنگ، سایز، قیمت و وضعیت موجودی به نتیجه دقیق برس. هر تغییر
-                در URL ثبت می‌شود و لینک قابل اشتراک باقی می‌ماند.
+                از دسته شروع کن یا با رنگ، سایز، قیمت و وضعیت موجودی به نتیجه دقیق برس. هر تغییر در
+                URL ثبت می‌شود و لینک قابل اشتراک باقی می‌ماند.
               </p>
             </div>
             <div className="border-s border-hairline ps-5">

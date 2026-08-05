@@ -1,10 +1,5 @@
 import { CATEGORY_SLUGS } from "./categories";
-import {
-  applyFilters,
-  normalizeFilters,
-  type FilterScope,
-  type Filters,
-} from "./product-filter";
+import { applyFilters, normalizeFilters, type FilterScope, type Filters } from "./product-filter";
 import type { Product } from "./product-catalog";
 
 export type FacetCounts = {

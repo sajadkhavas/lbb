@@ -131,7 +131,10 @@ const shopRoute = await readFile(path.join(root, "src/routes/shop.tsx"), "utf8")
 const categoryRoute = await readFile(path.join(root, "src/routes/$category.tsx"), "utf8");
 const searchRoute = await readFile(path.join(root, "src/routes/search.tsx"), "utf8");
 
-if (!discoveryModule.includes("createDiscoveryScope") || !discoveryModule.includes("createFacetCounts")) {
+if (
+  !discoveryModule.includes("createDiscoveryScope") ||
+  !discoveryModule.includes("createFacetCounts")
+) {
   failures.push("F14 shared catalogue discovery utilities are missing.");
 }
 if (!productFilters.includes("facetCounts") || !productFilters.includes("isUnavailable")) {
@@ -145,7 +148,9 @@ if (
 ) {
   failures.push("F14 mobile filters must stage, cancel and explicitly apply changes.");
 }
-if (/پرفروش‌ترین|پرطرفدار/.test(`${gridControls}\n${shopRoute}\n${categoryRoute}\n${searchRoute}`)) {
+if (
+  /پرفروش‌ترین|پرطرفدار/.test(`${gridControls}\n${shopRoute}\n${categoryRoute}\n${searchRoute}`)
+) {
   failures.push("F14 listing surfaces must not make unsupported popularity or sales claims.");
 }
 for (const [name, content] of [

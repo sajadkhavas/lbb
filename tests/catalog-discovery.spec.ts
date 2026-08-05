@@ -16,9 +16,7 @@ test("catalogue inventory and merchandising labels stay evidence-safe", async ({
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/shop", { waitUntil: "networkidle" });
 
-  await expect(
-    page.getByText(/۸ قطعه در کاتالوگ.*۷ موجود.*۱ ناموجود/),
-  ).toBeVisible();
+  await expect(page.getByText(/۸ قطعه در کاتالوگ.*۷ موجود.*۱ ناموجود/)).toBeVisible();
   await expect(page.getByText("پرفروش‌ترین", { exact: true })).toHaveCount(0);
 
   const sort = page.getByRole("combobox", { name: "مرتب‌سازی محصولات" });
@@ -67,7 +65,9 @@ test("mobile filter drawer stages, cancels and applies URL changes", async ({ pa
   await expect(page).not.toHaveURL(/instock/);
 });
 
-test("filtered shop deep links canonicalize, survive refresh and stay noindex", async ({ page }) => {
+test("filtered shop deep links canonicalize, survive refresh and stay noindex", async ({
+  page,
+}) => {
   await page.goto("/shop?sizes=XL,M&sort=price-asc&instock=1", {
     waitUntil: "networkidle",
   });
@@ -95,7 +95,9 @@ test("empty catalogue state resets to the complete result set", async ({ page })
   await expect(page.getByText("۸ نتیجه", { exact: true })).toBeVisible();
 });
 
-test("search typing replaces the current history entry and remains refresh-safe", async ({ page }) => {
+test("search typing replaces the current history entry and remains refresh-safe", async ({
+  page,
+}) => {
   await page.goto("/shop", { waitUntil: "networkidle" });
   await page.goto("/search?q=%D9%87%D9%88%D8%AF%DB%8C", { waitUntil: "networkidle" });
 
