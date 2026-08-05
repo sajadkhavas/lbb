@@ -1,0 +1,59 @@
+name: F14A diagnose tests once
+
+on:
+  push:
+    branches:
+      - phase/f14a-brand-commerce-constitution
+    paths:
+      - .github/workflows/f14a-diagnose-tests-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: phase/f14a-brand-commerce-constitution
+          fetch-depth: 0
+
+      - name: Report checked-out revision
+        run: |
+          echo "HEAD=$(git rev-parse HEAD)"
+          echo "BRANCH=$(git branch --show-current)"
+          git status --short --branch
+          echo "===== TEST FILES ====="
+          find tests -maxdepth 3 -type f -print | sort
+          echo "===== STALE HOME CONTRACT SEARCH ====="
+          grep -RInE "PRIMARY_HERO_CLAIM|هودی اورسایز و استریت‌ویر LBB|homepage preserves the F13 narrative contract|primary hero CTA enters the shop" . \
+            --exclude-dir=node_modules \
+            --exclude-dir=.git \
+            --exclude-dir=.output \
+            --exclude-dir=dist || true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Report Playwright discovery
+        run: npx playwright test --list
+
+      - name: Remove one-time workflow
+        run: rm .github/workflows/f14a-diagnose-tests-once.yml
+
+      - name: Commit workflow removal
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/f14a-diagnose-tests-once.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "F14A: remove test diagnostic workflow"
+          git push origin HEAD:phase/f14a-brand-commerce-constitution
