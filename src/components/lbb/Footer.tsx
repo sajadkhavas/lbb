@@ -10,6 +10,7 @@ import {
 import { BRAND, BRAND_COPY } from "@/lib/brand";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
 import { Logo } from "@/components/lbb/Logo";
+import { TrustMarks } from "@/components/lbb/TrustMarks";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 
 function FooterList({ title, items }: { title: string; items: typeof SHOP_NAVIGATION }) {
@@ -86,6 +87,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
               <Instagram size={16} aria-hidden="true" />
               <span className="tech">{BRAND.instagramHandle.toUpperCase()}</span>
             </a>
+            <TrustMarks />
           </div>
 
           <FooterList title="خرید" items={SHOP_NAVIGATION} />
