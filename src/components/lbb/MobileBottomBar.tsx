@@ -2,33 +2,41 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Heart, Home, LayoutGrid, Search, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
+import { useNavigationOverlay } from "@/lib/navigation-overlay";
 
 const ITEM =
-  "flex flex-1 flex-col items-center justify-center gap-1 tap-target transition-colors duration-[220ms] ease-[var(--ease-lbb)]";
+  "relative flex flex-1 flex-col items-center justify-center gap-1 tap-target transition-colors duration-[var(--dur-micro)] ease-[var(--ease-lbb-standard)]";
 
-function Badge({ n }: { n: number }) {
-  if (n <= 0) return null;
+function Badge({ count }: { count: number }) {
+  if (count <= 0) return null;
   return (
-    <span className="num absolute -left-2 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-signal px-1 text-[9px] font-bold text-bone">
-      {n.toLocaleString("fa-IR")}
+    <span className="num absolute -left-2 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-signal px-1 text-[9px] font-bold text-obsidian">
+      {count.toLocaleString("fa-IR")}
     </span>
   );
 }
 
 export function MobileBottomBar() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const { active, open, dismissForNavigation } = useNavigationOverlay();
   const { count, openDrawer } = useCart();
-  const { count: wishCount } = useWishlist();
+  const { count: wishlistCount } = useWishlist();
 
-  const itemClass = (active: boolean) => `${ITEM} ${active ? "text-signal" : "text-metal"}`;
+  const itemClass = (activeItem: boolean) =>
+    `${ITEM} ${activeItem ? "text-signal" : "text-metal hover:text-bone"}`;
+
+  const openCart = () => {
+    dismissForNavigation();
+    openDrawer();
+  };
 
   return (
     <nav
       dir="rtl"
       aria-label="ناوبری موبایل"
-      className="fixed inset-x-0 bottom-0 z-[150] flex border-t border-hairline bg-obsidian/95 backdrop-blur-xl md:hidden"
+      className="fixed inset-x-0 bottom-0 z-[var(--z-nav)] flex border-t border-hairline bg-[var(--lbb-surface-glass)] shadow-raised backdrop-blur-xl md:hidden"
       style={{
-        height: "calc(60px + env(safe-area-inset-bottom))",
+        height: "calc(64px + env(safe-area-inset-bottom))",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
@@ -38,24 +46,29 @@ export function MobileBottomBar() {
         aria-current={pathname === "/" ? "page" : undefined}
       >
         <Home size={20} strokeWidth={1.5} aria-hidden="true" />
-        <span className="text-[10px]">خانه</span>
+        <span className="text-[10px] font-semibold">خانه</span>
       </Link>
       <Link
         to="/shop"
-        className={itemClass(pathname === "/shop")}
+        className={itemClass(
+          pathname === "/shop" || /^\/(hoodies|pants|tshirts|shoes|socks)$/.test(pathname),
+        )}
         aria-current={pathname === "/shop" ? "page" : undefined}
       >
         <LayoutGrid size={20} strokeWidth={1.5} aria-hidden="true" />
-        <span className="text-[10px]">فروشگاه</span>
+        <span className="text-[10px] font-semibold">فروشگاه</span>
       </Link>
-      <Link
-        to="/search"
-        className={itemClass(pathname === "/search")}
-        aria-current={pathname === "/search" ? "page" : undefined}
+      <button
+        type="button"
+        onClick={() => open("search")}
+        aria-label="باز کردن جست‌وجو"
+        aria-haspopup="dialog"
+        aria-expanded={active === "search"}
+        className={itemClass(active === "search" || pathname === "/search")}
       >
         <Search size={20} strokeWidth={1.5} aria-hidden="true" />
-        <span className="text-[10px]">جست‌وجو</span>
-      </Link>
+        <span className="text-[10px] font-semibold">جست‌وجو</span>
+      </button>
       <Link
         to="/wishlist"
         className={itemClass(pathname === "/wishlist")}
@@ -63,21 +76,22 @@ export function MobileBottomBar() {
       >
         <span className="relative">
           <Heart size={20} strokeWidth={1.5} aria-hidden="true" />
-          <Badge n={wishCount} />
+          <Badge count={wishlistCount} />
         </span>
-        <span className="text-[10px]">علاقه‌مندی</span>
+        <span className="text-[10px] font-semibold">علاقه‌مندی</span>
       </Link>
       <button
         type="button"
-        onClick={openDrawer}
+        onClick={openCart}
         aria-label={`باز کردن سبد خرید (${count.toLocaleString("fa-IR")})`}
+        aria-haspopup="dialog"
         className={itemClass(false)}
       >
         <span className="relative" aria-hidden="true">
           <ShoppingBag size={20} strokeWidth={1.5} />
-          <Badge n={count} />
+          <Badge count={count} />
         </span>
-        <span className="text-[10px]">سبد</span>
+        <span className="text-[10px] font-semibold">سبد</span>
       </button>
     </nav>
   );

@@ -16,6 +16,7 @@ import { CartDrawer } from "@/components/lbb/CartDrawer";
 import { ProductQuickView } from "@/components/lbb/ProductQuickView";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/lib/cart";
+import { NavigationOverlayProvider } from "@/lib/navigation-overlay";
 import { registerPwa } from "@/lib/pwa";
 import { QuickViewProvider } from "@/lib/quickview";
 import { absUrl } from "@/lib/site";
@@ -167,16 +168,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <WishlistProvider>
-        <CartProvider>
-          <QuickViewProvider>
-            <Outlet />
-            <CartDrawer />
-            <ProductQuickView />
-            <Toaster position="bottom-left" dir="rtl" richColors closeButton />
-          </QuickViewProvider>
-        </CartProvider>
-      </WishlistProvider>
+      <NavigationOverlayProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <QuickViewProvider>
+              <Outlet />
+              <CartDrawer />
+              <ProductQuickView />
+              <Toaster position="bottom-left" dir="rtl" richColors closeButton />
+            </QuickViewProvider>
+          </CartProvider>
+        </WishlistProvider>
+      </NavigationOverlayProvider>
     </QueryClientProvider>
   );
 }

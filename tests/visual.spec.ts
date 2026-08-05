@@ -25,6 +25,7 @@ async function stabilize(page: Page) {
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("lbb-announcement-dismissed", "1");
+    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
 });
@@ -48,6 +49,8 @@ const templates = [
   { name: "checkout-empty-mobile", route: "/checkout", width: 390, height: 844 },
   { name: "design-system-mobile", route: "/design-system", width: 390, height: 844 },
   { name: "design-system-desktop", route: "/design-system", width: 1440, height: 1000 },
+  { name: "account-mobile", route: "/account", width: 390, height: 844 },
+  { name: "account-desktop", route: "/account", width: 1440, height: 1000 },
 ];
 
 for (const template of templates) {
@@ -61,3 +64,44 @@ for (const template of templates) {
     });
   });
 }
+
+test("desktop mega menu visual baseline", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "فروشگاه" }).click();
+  await stabilize(page);
+  await expect(page).toHaveScreenshot("navigation-mega-desktop.png", {
+    animations: "disabled",
+  });
+});
+
+test("desktop search overlay visual baseline", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "جست‌وجو" }).first().click();
+  await page.getByRole("searchbox", { name: "عبارت جست‌وجو" }).fill("هودی");
+  await stabilize(page);
+  await expect(page).toHaveScreenshot("navigation-search-desktop.png", {
+    animations: "disabled",
+  });
+});
+
+test("mobile main menu visual baseline", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "منوی اصلی" }).click();
+  await stabilize(page);
+  await expect(page).toHaveScreenshot("navigation-menu-mobile.png", {
+    animations: "disabled",
+  });
+});
+
+test("mobile empty cart drawer visual baseline", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: /باز کردن سبد خرید/ }).click();
+  await stabilize(page);
+  await expect(page).toHaveScreenshot("navigation-cart-mobile.png", {
+    animations: "disabled",
+  });
+});

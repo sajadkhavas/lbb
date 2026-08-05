@@ -10,11 +10,17 @@ import {
   type ReactNode,
 } from "react";
 import type { Product } from "./products";
+import {
+  closeOverlayHistory,
+  dismissOverlayHistory,
+  openOverlayHistory,
+} from "@/lib/overlay-history";
 
 type QuickViewCtx = {
   product: Product | null;
   open: (product: Product, trigger?: HTMLElement | null) => void;
   close: () => void;
+  dismissForNavigation: () => void;
 };
 
 const Ctx = createContext<QuickViewCtx | null>(null);
@@ -31,11 +37,23 @@ export function QuickViewProvider({ children }: { children: ReactNode }) {
         ? document.activeElement
         : null);
     wasOpenRef.current = true;
+    openOverlayHistory("quickview");
     setProduct(nextProduct);
   }, []);
 
   const close = useCallback(() => {
+    closeOverlayHistory("quickview", () => setProduct(null));
+  }, []);
+
+  const dismissForNavigation = useCallback(() => {
+    dismissOverlayHistory("quickview");
     setProduct(null);
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => setProduct(null);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
   useEffect(() => {
@@ -47,9 +65,6 @@ export function QuickViewProvider({ children }: { children: ReactNode }) {
 
     const firstFrame = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // A cart drawer or another modal may open immediately after Quick View.
-        // In that hand-off, let the new dialog own focus instead of stealing it
-        // back to the product-card trigger.
         const activeModal = document.querySelector<HTMLElement>(
           '[role="dialog"][aria-modal="true"]',
         );
@@ -61,7 +76,10 @@ export function QuickViewProvider({ children }: { children: ReactNode }) {
     return () => cancelAnimationFrame(firstFrame);
   }, [product]);
 
-  const value = useMemo(() => ({ product, open, close }), [product, open, close]);
+  const value = useMemo(
+    () => ({ product, open, close, dismissForNavigation }),
+    [product, open, close, dismissForNavigation],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
