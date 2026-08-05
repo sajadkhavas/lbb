@@ -19,7 +19,7 @@ export function DecisionSupport() {
     >
       <Shell>
         <SectionHead
-          index="04"
+          index="05"
           label="DECISION SUPPORT"
           title={<span id="decision-support-title" className="text-obsidian">قبل از انتخاب، جواب‌ها را داشته باش</span>}
           lede={<span className="text-graphite">صفحه اصلی فقط الهام نمی‌دهد؛ مسیر رسیدن به اطلاعاتی که تصمیم خرید را عوض می‌کنند نیز مستقیم است.</span>}
