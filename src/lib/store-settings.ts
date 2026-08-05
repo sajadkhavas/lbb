@@ -279,9 +279,7 @@ export function getVisibleTrustClaims(settings = STORE_SETTINGS): TrustClaim[] {
   );
 }
 
-export function getPublicStoreLocation(
-  settings = STORE_SETTINGS,
-): StoreLocationSettings | null {
+export function getPublicStoreLocation(settings = STORE_SETTINGS): StoreLocationSettings | null {
   return settings.location.isPublic && settings.location.verification === "verified"
     ? settings.location
     : null;
@@ -291,10 +289,10 @@ export function canDisplayEnamad(settings = STORE_SETTINGS): boolean {
   const { enamad } = settings;
   return Boolean(
     enamad.isEnabled &&
-      enamad.verification === "verified" &&
-      enamad.identifier &&
-      enamad.verificationUrl &&
-      enamad.badgeImageUrl,
+    enamad.verification === "verified" &&
+    enamad.identifier &&
+    enamad.verificationUrl &&
+    enamad.badgeImageUrl,
   );
 }
 
@@ -302,9 +300,9 @@ export function canOfferPayment(settings = STORE_SETTINGS): boolean {
   const { payment } = settings;
   return Boolean(
     payment.isEnabled &&
-      payment.verification === "verified" &&
-      payment.provider &&
-      payment.displayName &&
-      payment.paymentMethods.length,
+    payment.verification === "verified" &&
+    payment.provider &&
+    payment.displayName &&
+    payment.paymentMethods.length,
   );
 }

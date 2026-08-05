@@ -71,7 +71,9 @@ export function evaluateLaunchReadiness(
       area: "location",
       label: "نشانی مراجعه شامل طبقه یا واحد و ساعت کاری تکمیل شده است",
       severity: "recommended",
-      passed: Boolean(location && (location.floor || location.unit) && location.openingHours.length),
+      passed: Boolean(
+        location && (location.floor || location.unit) && location.openingHours.length,
+      ),
       adminField: "location.floor, location.unit, location.openingHours",
     },
     {
@@ -167,9 +169,7 @@ export function evaluateLaunchReadiness(
   ];
 
   const blockers = checks.filter((check) => check.severity === "blocker" && !check.passed);
-  const requiredMissing = checks.filter(
-    (check) => check.severity === "required" && !check.passed,
-  );
+  const requiredMissing = checks.filter((check) => check.severity === "required" && !check.passed);
   const recommendedMissing = checks.filter(
     (check) => check.severity === "recommended" && !check.passed,
   );
