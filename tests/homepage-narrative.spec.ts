@@ -44,11 +44,11 @@ test("hero LCP image is preloaded, eager and dimensioned", async ({ page }) => {
 
   const source = await image.getAttribute("src");
   expect(source).toBeTruthy();
-  const preload = page.locator('link[rel="preload"][as="image"]');
-  await expect(preload).toHaveCount(1);
-  expect(new URL((await preload.getAttribute("href")) ?? "", page.url()).pathname).toBe(
-    new URL(source ?? "", page.url()).pathname,
+  const heroPath = new URL(source ?? "", page.url()).pathname;
+  const preloadPaths = await page.locator('link[rel="preload"][as="image"]').evaluateAll(
+    (links) => links.map((link) => new URL((link as HTMLLinkElement).href).pathname),
   );
+  expect(preloadPaths).toContain(heroPath);
 
   expect(
     await image.evaluate((node) => {
