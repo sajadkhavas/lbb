@@ -115,6 +115,63 @@ if (!/rel:\s*"preload"[\s\S]*as:\s*"image"[\s\S]*href:\s*heroMain/.test(homepage
   failures.push("Homepage route must preload the hero LCP image.");
 }
 
+const discoveryModule = await readFile(
+  path.join(root, "src/lib/catalog-discovery.ts"),
+  "utf8",
+).catch(() => "");
+const productFilters = await readFile(
+  path.join(root, "src/components/lbb/ProductFilters.tsx"),
+  "utf8",
+).catch(() => "");
+const gridControls = await readFile(
+  path.join(root, "src/components/lbb/ProductGridControls.tsx"),
+  "utf8",
+).catch(() => "");
+const shopRoute = await readFile(path.join(root, "src/routes/shop.tsx"), "utf8");
+const categoryRoute = await readFile(path.join(root, "src/routes/$category.tsx"), "utf8");
+const searchRoute = await readFile(path.join(root, "src/routes/search.tsx"), "utf8");
+
+if (
+  !discoveryModule.includes("createDiscoveryScope") ||
+  !discoveryModule.includes("createFacetCounts")
+) {
+  failures.push("F14 shared catalogue discovery utilities are missing.");
+}
+if (!productFilters.includes("facetCounts") || !productFilters.includes("isUnavailable")) {
+  failures.push("F14 filters must expose facet counts and unavailable states.");
+}
+if (
+  !gridControls.includes("draftFilters") ||
+  !gridControls.includes("applyDraft") ||
+  !gridControls.includes("اعمال فیلترها") ||
+  !gridControls.includes("بستن فیلترها بدون اعمال تغییرات")
+) {
+  failures.push("F14 mobile filters must stage, cancel and explicitly apply changes.");
+}
+if (
+  /پرفروش‌ترین|پرطرفدار/.test(`${gridControls}\n${shopRoute}\n${categoryRoute}\n${searchRoute}`)
+) {
+  failures.push("F14 listing surfaces must not make unsupported popularity or sales claims.");
+}
+for (const [name, content] of [
+  ["shop", shopRoute],
+  ["category", categoryRoute],
+  ["search", searchRoute],
+]) {
+  if (!content.includes("createDiscoveryScope") || !content.includes("createFacetCounts")) {
+    failures.push(`F14 ${name} route must use the shared discovery contract.`);
+  }
+  if (!content.includes("getResultCount") || !content.includes("filterSlot={renderFilters}")) {
+    failures.push(`F14 ${name} route must provide staged mobile result previews.`);
+  }
+}
+if (!searchRoute.includes("replace: true") || searchRoute.includes("دسته‌بندی‌های پرطرفدار")) {
+  failures.push("F14 search must replace live-typing history and use evidence-safe category copy.");
+}
+if (/\{items\.length\.toLocaleString\("fa-IR"\)\} محصول موجود/.test(categoryRoute)) {
+  failures.push("F14 category inventory copy must distinguish catalogue total from availability.");
+}
+
 if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);

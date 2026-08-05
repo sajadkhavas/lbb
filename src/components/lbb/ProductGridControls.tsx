@@ -24,7 +24,8 @@ type Props = {
   filters: Filters;
   onChange: (filters: Filters) => void;
   resultCount: number;
-  filterSlot: ReactNode;
+  filterSlot: (filters: Filters, onChange: (filters: Filters) => void) => ReactNode;
+  getResultCount: (filters: Filters) => number;
   lockedCategory?: boolean;
 };
 
@@ -33,14 +34,32 @@ export function ProductGridControls({
   onChange,
   resultCount,
   filterSlot,
+  getResultCount,
   lockedCategory,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [draftFilters, setDraftFilters] = useState(filters);
   const sheetRef = useRef<HTMLDivElement>(null);
   const sheetId = useId();
   const close = useCallback(() => setOpen(false), []);
   useFocusTrap(open, sheetRef, close);
   const count = activeCount(filters);
+  const draftCount = activeCount(draftFilters);
+  const draftResultCount = getResultCount(draftFilters);
+
+  const openFilters = () => {
+    setDraftFilters(filters);
+    setOpen(true);
+  };
+
+  const applyDraft = () => {
+    onChange(draftFilters);
+    close();
+  };
+
+  const resetDraft = () => {
+    setDraftFilters({ ...EMPTY_FILTERS, sort: draftFilters.sort });
+  };
 
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
   if (!lockedCategory) {
@@ -95,12 +114,12 @@ export function ProductGridControls({
     <div dir="rtl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p aria-live="polite" aria-atomic="true" className="tech text-metal">
-          {resultCount.toLocaleString("fa-IR")} محصول
+          {resultCount.toLocaleString("fa-IR")} نتیجه
         </p>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={openFilters}
             aria-haspopup="dialog"
             aria-expanded={open}
             aria-controls={sheetId}
@@ -121,14 +140,14 @@ export function ProductGridControls({
           >
             <SelectTrigger
               aria-label="مرتب‌سازی محصولات"
-              className="h-11 w-[150px] rounded-none border-hairline bg-transparent text-xs text-bone"
+              className="h-11 w-[158px] rounded-none border-hairline bg-transparent text-xs text-bone"
             >
               <SelectValue />
             </SelectTrigger>
             <SelectContent dir="rtl">
               {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
                 <SelectItem key={key} value={key} className="text-xs">
-                  {SORT_LABELS[key]}
+                  {key === "best" ? "منتخب LBB" : SORT_LABELS[key]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -174,25 +193,53 @@ export function ProductGridControls({
             role="dialog"
             aria-modal="true"
             aria-labelledby={`${sheetId}-title`}
-            className="absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto border-t border-hairline bg-obsidian p-5 pb-8 safe-bottom"
+            aria-describedby={`${sheetId}-description`}
+            className="absolute inset-x-0 bottom-0 max-h-[88svh] overflow-y-auto border-t border-hairline bg-obsidian p-5 pb-8 safe-bottom"
           >
-            <div className="flex items-center justify-between border-b border-hairline pb-4">
-              <div id={`${sheetId}-title`}>
-                <TechLabel tone="signal">فیلترها</TechLabel>
+            <div className="flex items-center justify-between gap-3 border-b border-hairline pb-4">
+              <div>
+                <div id={`${sheetId}-title`}>
+                  <TechLabel tone="signal">فیلتر محصولات</TechLabel>
+                </div>
+                <p id={`${sheetId}-description`} className="mt-1 text-xs text-metal">
+                  تغییرات پس از انتخاب «اعمال فیلترها» ثبت می‌شوند.
+                </p>
               </div>
               <button
                 type="button"
                 onClick={close}
-                aria-label="بستن فیلترها"
-                className="tap-target grid place-items-center text-metal hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                aria-label="بستن فیلترها بدون اعمال تغییرات"
+                className="tap-target grid shrink-0 place-items-center text-metal hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
               >
                 <X size={18} aria-hidden="true" />
               </button>
             </div>
-            <div className="mt-5">{filterSlot}</div>
-            <button type="button" onClick={close} className={`${CtaClasses("signal")} mt-6 w-full`}>
-              نمایش {resultCount.toLocaleString("fa-IR")} محصول
-            </button>
+
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <p className="tech text-metal">
+                {draftResultCount.toLocaleString("fa-IR")} نتیجه پیش‌نمایش
+              </p>
+              {draftCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={resetDraft}
+                  className="min-h-10 text-xs text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                >
+                  پاک کردن فیلترها
+                </button>
+              ) : null}
+            </div>
+
+            <div className="mt-5">{filterSlot(draftFilters, setDraftFilters)}</div>
+            <div className="sticky bottom-0 mt-6 border-t border-hairline bg-obsidian pt-4">
+              <button
+                type="button"
+                onClick={applyDraft}
+                className={`${CtaClasses("signal")} w-full`}
+              >
+                اعمال فیلترها · {draftResultCount.toLocaleString("fa-IR")} نتیجه
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

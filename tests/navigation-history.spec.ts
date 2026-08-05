@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("search URL, refresh and browser history stay synchronized", async ({ page }) => {
+test("search URL and refresh stay synchronized without per-keystroke history", async ({ page }) => {
+  await page.goto("/shop", { waitUntil: "networkidle" });
   await page.goto("/search?q=%D9%87%D9%88%D8%AF%DB%8C", { waitUntil: "networkidle" });
-  const searchbox = page.getByRole("searchbox").first();
+  const searchbox = page.locator("#site-search");
   await expect(searchbox).toHaveValue("هودی");
 
   await searchbox.fill("شلوار");
@@ -11,10 +12,7 @@ test("search URL, refresh and browser history stay synchronized", async ({ page 
   await expect(searchbox).toHaveValue("شلوار");
 
   await page.goBack({ waitUntil: "networkidle" });
-  await expect(page).toHaveURL(/\/search\?q=%D9%87%D9%88%D8%AF%DB%8C/);
-  await expect(searchbox).toHaveValue("هودی");
-  await page.goForward({ waitUntil: "networkidle" });
-  await expect(searchbox).toHaveValue("شلوار");
+  await expect(page).toHaveURL(/\/shop$/);
 });
 
 test("filtered category deep links survive refresh", async ({ page }) => {
