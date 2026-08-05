@@ -10,6 +10,41 @@ const CHECKS = [
   "این نسخه سفارش یا پرداخت واقعی را شبیه‌سازی نمی‌کند",
 ];
 
+function DecisionCard({
+  index,
+  label,
+  latin,
+  description,
+}: {
+  index: number;
+  label: string;
+  latin: string;
+  description: string;
+}) {
+  return (
+    <>
+      <div>
+        <TechLabel tone="inverse">
+          0{index + 1} / {latin}
+        </TechLabel>
+        <h3 className="mt-5 text-title text-obsidian">{label}</h3>
+        <p className="mt-3 text-sm leading-7 text-graphite">{description}</p>
+      </div>
+      <span className="mt-8 flex items-center justify-between border-t border-hairline-ink pt-4 text-xs font-black text-obsidian">
+        بازکردن راهنما
+        <ArrowUpLeft
+          size={17}
+          aria-hidden="true"
+          className="transition-transform group-hover:-translate-x-1 group-hover:translate-y-1"
+        />
+      </span>
+    </>
+  );
+}
+
+const CARD_CLASS =
+  "group flex min-h-[250px] flex-col justify-between border border-hairline-ink bg-bone p-5 transition-colors hover:bg-steam md:p-6";
+
 export function DecisionSupport() {
   return (
     <section
@@ -52,29 +87,22 @@ export function DecisionSupport() {
           </div>
 
           <nav aria-label="راهنماهای تصمیم خرید" className="grid gap-3 md:grid-cols-3">
-            {HOME_DECISION_LINKS.map((item, index) => (
-              <Link
-                key={item.label}
-                to={item.to}
-                className="group flex min-h-[250px] flex-col justify-between border border-hairline-ink bg-bone p-5 transition-colors hover:bg-steam md:p-6"
-              >
-                <div>
-                  <TechLabel tone="inverse">
-                    0{index + 1} / {item.latin}
-                  </TechLabel>
-                  <h3 className="mt-5 text-title text-obsidian">{item.label}</h3>
-                  <p className="mt-3 text-sm leading-7 text-graphite">{item.description}</p>
-                </div>
-                <span className="mt-8 flex items-center justify-between border-t border-hairline-ink pt-4 text-xs font-black text-obsidian">
-                  بازکردن راهنما
-                  <ArrowUpLeft
-                    size={17}
-                    aria-hidden="true"
-                    className="transition-transform group-hover:-translate-x-1 group-hover:translate-y-1"
-                  />
-                </span>
-              </Link>
-            ))}
+            {HOME_DECISION_LINKS.map((item, index) =>
+              item.kind === "journal" ? (
+                <Link
+                  key={item.label}
+                  to="/journal/$slug"
+                  params={item.params}
+                  className={CARD_CLASS}
+                >
+                  <DecisionCard index={index} {...item} />
+                </Link>
+              ) : (
+                <Link key={item.label} to={item.to} className={CARD_CLASS}>
+                  <DecisionCard index={index} {...item} />
+                </Link>
+              ),
+            )}
           </nav>
         </div>
       </Shell>
