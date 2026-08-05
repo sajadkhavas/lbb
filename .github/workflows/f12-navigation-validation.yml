@@ -59,26 +59,15 @@ jobs:
               'const { product, close } = useQuickView();',
               'const { product, close, dismissForNavigation } = useQuickView();',
           )
-          old_handoff = '''    close();
-              requestAnimationFrame(() => openDrawer());'''
-          if old_handoff not in source:
-              old_handoff = '''    close();
-    requestAnimationFrame(() => openDrawer());'''
+          old_handoff = '    close();\n    requestAnimationFrame(() => openDrawer());'
           if old_handoff not in source:
               raise SystemExit('Expected Quick View cart handoff marker was not found')
           source = source.replace(
               old_handoff,
-              '''    dismissForNavigation();
-    requestAnimationFrame(() => openDrawer());''',
+              '    dismissForNavigation();\n    requestAnimationFrame(() => openDrawer());',
           )
-          old_link = '''          <Link
-            to="/product/$slug"
-            params={{ slug: p.slug }}
-            onClick={close}'''
-          new_link = '''          <Link
-            to="/product/$slug"
-            params={{ slug: p.slug }}
-            onClick={dismissForNavigation}'''
+          old_link = '          <Link\n            to="/product/$slug"\n            params={{ slug: p.slug }}\n            onClick={close}'
+          new_link = '          <Link\n            to="/product/$slug"\n            params={{ slug: p.slug }}\n            onClick={dismissForNavigation}'
           if old_link not in source:
               raise SystemExit('Expected Quick View product link marker was not found')
           quick.write_text(source.replace(old_link, new_link))
