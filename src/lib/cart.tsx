@@ -1,4 +1,16 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  closeOverlayHistory,
+  dismissOverlayHistory,
+  openOverlayHistory,
+} from "@/lib/overlay-history";
 
 export type CartLine = {
   slug: string;
@@ -21,13 +33,13 @@ type CartCtx = {
   drawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
+  dismissDrawer: () => void;
 };
 
 const Ctx = createContext<CartCtx | null>(null);
 const KEY = "lbb-cart-v1";
 const MAX_QTY = 20;
 
-/** Runtime shape check — persisted browser data is never trusted blindly. */
 function isValidLine(value: unknown): value is CartLine {
   if (!value || typeof value !== "object") return false;
   const line = value as Record<string, unknown>;
@@ -79,6 +91,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [lines, hydrated]);
 
+  useEffect(() => {
+    const onPopState = () => setDrawerOpen(false);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   const add = (line: CartLine) =>
     setLines((previous) => {
       if (!isValidLine(line)) return previous;
@@ -112,6 +130,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const count = lines.reduce((sum, line) => sum + line.qty, 0);
   const subtotal = lines.reduce((sum, line) => sum + line.price * line.qty, 0);
 
+  const openDrawer = useCallback(() => {
+    openOverlayHistory("cart");
+    setDrawerOpen(true);
+  }, []);
+
+  const closeDrawer = useCallback(() => {
+    closeOverlayHistory("cart", () => setDrawerOpen(false));
+  }, []);
+
+  const dismissDrawer = useCallback(() => {
+    dismissOverlayHistory("cart");
+    setDrawerOpen(false);
+  }, []);
+
   return (
     <Ctx.Provider
       value={{
@@ -124,8 +156,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         subtotal,
         hydrated,
         drawerOpen,
-        openDrawer: () => setDrawerOpen(true),
-        closeDrawer: () => setDrawerOpen(false),
+        openDrawer,
+        closeDrawer,
+        dismissDrawer,
       }}
     >
       {children}
