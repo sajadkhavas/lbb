@@ -1,20 +1,21 @@
-import { Database, ShieldCheck, WalletCards } from "lucide-react";
+import { MapPin, Ruler, ScanText } from "lucide-react";
+import { BRAND_COPY } from "@/lib/brand";
 
 const ITEMS = [
   {
-    Icon: ShieldCheck,
-    title: "نسخه نمایشی شفاف",
-    sub: "هیچ سفارش، ارسال یا مرجوعی واقعی در این نسخه انجام نمی‌شود",
+    Icon: ScanText,
+    title: "جزئیات روشن محصول",
+    sub: "جنس، تن‌خور، رنگ و ویژگی‌های هر قطعه پیش از انتخاب در دسترس است",
   },
   {
-    Icon: Database,
-    title: "ذخیره محلی سبد",
-    sub: "سبد و علاقه‌مندی فقط در مرورگر همین دستگاه نگه‌داری می‌شوند",
+    Icon: Ruler,
+    title: "انتخاب آگاهانه اندازه",
+    sub: "راهنمای اندازه و توضیح تن‌خور برای مقایسه و انتخاب دقیق‌تر",
   },
   {
-    Icon: WalletCards,
-    title: "پرداخت غیرفعال",
-    sub: "هیچ درگاه بانکی یا پرداخت در محل به سایت متصل نیست",
+    Icon: MapPin,
+    title: "حضور در کرج",
+    sub: BRAND_COPY.storeLocationLabel,
   },
 ];
 
@@ -23,7 +24,7 @@ export function TrustStrip() {
     <section
       dir="rtl"
       className="border-t border-hairline bg-obsidian px-[var(--lbb-gutter)] py-8"
-      aria-label="وضعیت فعلی فروشگاه نمایشی"
+      aria-label="ویژگی‌های تجربه خرید از LBB"
     >
       <div className="mx-auto grid max-w-[var(--lbb-shell-max)] grid-cols-1 gap-4 md:grid-cols-3 md:divide-x md:divide-x-reverse md:divide-hairline-soft">
         {ITEMS.map(({ Icon, title, sub }) => (
