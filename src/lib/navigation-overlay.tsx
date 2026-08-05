@@ -35,19 +35,14 @@ export function NavigationOverlayProvider({ children }: { children: ReactNode })
   }, []);
 
   const close = useCallback(() => {
-    setActive((current) => {
-      if (!current) return null;
-      closeOverlayHistory(current, () => setActive(null));
-      return current;
-    });
-  }, []);
+    if (!active) return;
+    closeOverlayHistory(active, () => setActive(null));
+  }, [active]);
 
   const dismissForNavigation = useCallback(() => {
-    setActive((current) => {
-      if (current) dismissOverlayHistory(current);
-      return null;
-    });
-  }, []);
+    if (active) dismissOverlayHistory(active);
+    setActive(null);
+  }, [active]);
 
   useEffect(() => {
     const onPopState = () => setActive(null);
