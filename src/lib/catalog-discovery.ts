@@ -5,7 +5,7 @@ import {
   type FilterScope,
   type Filters,
 } from "./product-filter";
-import { isSizeAvailable, type Product } from "./product-catalog";
+import type { Product } from "./product-catalog";
 
 export type FacetCounts = {
   categories: Record<string, number>;
@@ -72,11 +72,7 @@ export function createFacetCounts(
   const sizes = Object.fromEntries(
     scope.sizes.map((size) => [
       size,
-      applyFilters(
-        [...list],
-        normalizeFilters({ ...normalized, sizes: addOption(normalized.sizes, size) }, scope),
-      ).filter((product) => isSizeAvailable(product, size) || normalized.sizes.includes(size))
-        .length,
+      count({ ...normalized, sizes: addOption(normalized.sizes, size) }),
     ]),
   );
 
