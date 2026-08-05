@@ -612,3 +612,28 @@ img {
     padding-bottom: 0;
   }
 }
+
+/* =========================================================================
+   Skip link — visually hidden until focused
+   ========================================================================= */
+.sr-focusable {
+  position: absolute;
+  inset-inline-start: -9999px;
+  top: 0;
+  z-index: 100;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+}
+.sr-focusable:focus-visible,
+.sr-focusable:focus {
+  inset-inline-start: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  border-radius: 0.75rem;
+  background: var(--color-signal, #e30613);
+  color: #0a0a0a;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+}
