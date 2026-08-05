@@ -86,9 +86,7 @@ test("filtered shop deep links canonicalize, survive refresh and stay noindex", 
 
 test("empty catalogue state resets to the complete result set", async ({ page }) => {
   await page.goto("/shop?max=150000", { waitUntil: "networkidle" });
-  await expect(
-    page.getByRole("heading", { name: "محصولی با این ترکیب فیلتر پیدا نشد" }),
-  ).toBeVisible();
+  await expect(page.getByText("محصولی با این ترکیب فیلتر پیدا نشد", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "بازگشت به همه قطعه‌ها" }).click();
   await expect(page).toHaveURL(/\/shop$/);
