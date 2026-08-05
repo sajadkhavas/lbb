@@ -13,8 +13,8 @@ export const SHOP_NAVIGATION: NavigationItem[] = [
   { label: "همه محصولات", latin: "SHOP ALL", description: "مشاهده کامل کاتالوگ", to: "/shop" },
   ...CATEGORY_SLUGS.map((slug) => ({
     label: CATEGORIES[slug].nameFa,
-    latin: CATEGORIES[slug].nameEn.toUpperCase(),
-    description: CATEGORIES[slug].description,
+    latin: slug.toUpperCase(),
+    description: CATEGORIES[slug].heroTagline,
     to: "/$category" as const,
     params: { category: slug },
   })),
