@@ -57,6 +57,21 @@ Required widths:
 
 At every width, `/shop`, `/hoodies` and `/search?q=هودی` must avoid horizontal overflow.
 
+## Merge-context visual validation
+
+Visual artifacts must be generated from a branch tree that already contains the current `main` commit. This prevents a Pull Request synthetic merge commit from producing a different global-shell height than the reviewed branch snapshots.
+
+The merge-context visual run must regenerate and review:
+
+- four full Homepage baselines
+- the affected global Shop mobile baseline
+- Shop desktop
+- Category desktop
+- Search results mobile
+- the staged Mobile Filter Drawer
+
+After artifact registration, the same tree must pass the immutable Quality suite without modifying tracked files.
+
 ## Quality Gates
 
 - Prettier
