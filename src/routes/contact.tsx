@@ -71,13 +71,13 @@ function ContactPage() {
               <TechLabel tone="signal">CONTACT / KARAJ / MAHESTAN</TechLabel>
               <h1 className="mt-4 max-w-[14ch] text-display-1 text-bone">ارتباط با LBB</h1>
               <p className="text-lede mt-5 max-w-[58ch]">
-                برای دیدن محصولات از نزدیک به فروشگاه LBB در پاساژ مهستان کرج مراجعه کنید یا از
-                طریق صفحهٔ رسمی اینستاگرام پیام بفرستید.
+                برای دیدن محصولات از نزدیک به فروشگاه LBB در پاساژ مهستان کرج مراجعه کنید یا از طریق
+                صفحهٔ رسمی اینستاگرام پیام بفرستید.
               </p>
               <p className="mt-5 max-w-[64ch] text-sm leading-8 text-metal">
-                برای پرسش دربارهٔ محصول، اندازه، تن‌خور یا همکاری، پیام شما از طریق شناسهٔ رسمی
-                LBB پیگیری می‌شود. شمارهٔ واحد، طبقه، ساعت کاری و راه‌های ارتباطی دیگر پس از تأیید
-                رسمی در همین صفحه درج خواهند شد.
+                برای پرسش دربارهٔ محصول، اندازه، تن‌خور یا همکاری، پیام شما از طریق شناسهٔ رسمی LBB
+                پیگیری می‌شود. شمارهٔ واحد، طبقه، ساعت کاری و راه‌های ارتباطی دیگر پس از تأیید رسمی
+                در همین صفحه درج خواهند شد.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -130,7 +130,11 @@ function ContactPage() {
 
               <div className="mt-7 rounded-xl border border-hairline bg-obsidian p-4">
                 <div className="flex items-start gap-3">
-                  <MessageCircleMore size={18} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
+                  <MessageCircleMore
+                    size={18}
+                    className="mt-1 shrink-0 text-signal"
+                    aria-hidden="true"
+                  />
                   <p className="text-sm leading-7 text-metal">
                     {BRAND_COPY.storeLocationLabel}. برای دریافت جزئیات مراجعه، پیش از حرکت از طریق
                     صفحهٔ رسمی LBB پیام بفرستید.
