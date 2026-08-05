@@ -47,7 +47,7 @@ export function EditorialGateway() {
     >
       <Shell>
         <SectionHead
-          index="05"
+          index="06"
           label="EDITORIAL PATHS"
           title={<span id="editorial-gateway-title">محصول را در زمینه واقعی ببین</span>}
           lede="کالکشن، لوک‌بوک و ژورنال برای توضیح فرم، ترکیب و نگهداری‌اند؛ نه جایگزین اطلاعات محصول."
