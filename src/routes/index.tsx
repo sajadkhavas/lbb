@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { SmoothScroll } from "@/components/SmoothScroll";
 import { AnnouncementBar, ANNOUNCEMENT_HEIGHT } from "@/components/lbb/AnnouncementBar";
-import { CustomCursor } from "@/components/lbb/CustomCursor";
 import { Footer } from "@/components/lbb/Footer";
 import { InstagramStrip } from "@/components/lbb/InstagramStrip";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
@@ -78,11 +76,10 @@ function Home() {
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
 
   return (
-    <SmoothScroll>
+    <>
       <a href="#main" className="sr-focusable">
         رفتن به محتوای اصلی
       </a>
-      <CustomCursor />
       <AnnouncementBar onDismiss={() => setBarVisible(false)} />
       <Navbar theme="dark" offsetTop={offsetTop} />
       <main
@@ -105,6 +102,6 @@ function Home() {
       </main>
       <Footer theme="dark" />
       <MobileBottomBar />
-    </SmoothScroll>
+    </>
   );
 }
