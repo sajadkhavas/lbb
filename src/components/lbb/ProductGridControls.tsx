@@ -153,7 +153,7 @@ export function ProductGridControls({
             <SelectContent dir="rtl">
               {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
                 <SelectItem key={key} value={key} className="text-xs">
-                  {SORT_LABELS[key]}
+                  {key === "best" ? "منتخب LBB" : SORT_LABELS[key]}
                 </SelectItem>
               ))}
             </SelectContent>
