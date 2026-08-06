@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("reference route exposes the F11 token contract and stays noindex", async ({ page }) => {
-  await expect(page.getByRole("heading", { level: 1, name: "Tehran After Dark" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Karaj After Dark" })).toBeVisible();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   await expect(page.locator("[data-token]")).toHaveCount(12);
 

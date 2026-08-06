@@ -20,21 +20,19 @@ test("homepage communicates identity, catalog and primary action above the fold"
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "networkidle" });
 
-  await expect(page).toHaveTitle(/LBB \| استریت‌ویر تهران — دراپ ۰۰۱/);
+  await expect(page).toHaveTitle(/LBB \| فروشگاه پوشاک شهری در کرج، پاساژ مهستان/);
   await expect(
-    page.getByRole("heading", { level: 1, name: /تهران را.*با فرم.*خودت بپوش/ }),
+    page.getByRole("heading", { level: 1, name: /از مهستان،.*برای.*خیابان/ }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: /خرید DROP 001/ })).toBeVisible();
-  await expect(
-    page.getByText("8", { exact: true }).or(page.getByText("۸", { exact: true })),
-  ).toBeVisible();
-  await expect(page.getByText("پرداخت و ارسال واقعی در این نسخه فعال نیست")).toBeVisible();
+  const hero = page.locator('section[aria-labelledby="home-hero-title"]');
+  await expect(hero.getByRole("link", { name: "مشاهده فروشگاه" })).toBeVisible();
+  await expect(page.getByText("فروشگاه حضوری LBB — کرج، پاساژ مهستان").first()).toBeVisible();
 });
 
 test("hero LCP image is preloaded, eager and dimensioned", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
-  const image = page.getByRole("img", { name: "استایل شبانه LBB از دراپ ۰۰۱ در فضای شهری" });
+  const image = page.getByRole("img", { name: "استایل پوشاک شهری LBB از دراپ ۰۰۱" });
   await expect(image).toBeVisible();
   await expect(image).toHaveAttribute("loading", "eager");
   await expect(image).toHaveAttribute("fetchpriority", "high");

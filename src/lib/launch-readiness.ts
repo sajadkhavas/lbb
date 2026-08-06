@@ -1,3 +1,4 @@
+import { evaluateCatalogEvidence } from "./product-evidence";
 import { products } from "./products";
 import {
   STORE_SETTINGS,
@@ -48,6 +49,7 @@ export function evaluateLaunchReadiness(
 ): LaunchReadinessReport {
   const location = getPublicStoreLocation(settings);
   const publicContacts = getPublicContactChannels(settings);
+  const catalogEvidence = evaluateCatalogEvidence(products);
 
   const checks: ReadinessCheck[] = [
     {
@@ -85,22 +87,29 @@ export function evaluateLaunchReadiness(
       adminField: "contacts",
     },
     {
-      id: "catalog.products",
+      id: "catalog.structure",
       area: "catalog",
-      label: "کاتالوگ محصول دارای کالا، قیمت، شناسه و اطلاعات تصمیم‌ساز است",
+      label: "کاتالوگ دارای شناسه، نام و ساختار کامل اطلاعات محصول است",
       severity: "blocker",
       passed:
         products.length > 0 &&
         products.every(
           (product) =>
+            hasText(product.slug) &&
             hasText(product.name) &&
             hasText(product.sku) &&
             product.price > 0 &&
-            product.sizes.length > 0 &&
-            hasText(product.material) &&
-            hasText(product.fitNote),
+            product.sizes.length > 0,
         ),
       adminField: "products",
+    },
+    {
+      id: "catalog.evidence",
+      area: "catalog",
+      label: "قیمت، موجودی، جنس، اندازه و توضیحات همهٔ کالاها منبع و تاریخ بازبینی دارند",
+      severity: "blocker",
+      passed: catalogEvidence.ready,
+      adminField: "products[].evidence, products[].publication",
     },
     {
       id: "shipping.active",
@@ -137,7 +146,7 @@ export function evaluateLaunchReadiness(
     {
       id: "payment.server",
       area: "payment",
-      label: "ایجاد تراکنش، Callback و Verify سمت سرور پیاده‌سازی شده است",
+      label: "ایجاد تراکنش، بازگشت از درگاه و تأیید پرداخت سمت سرور پیاده‌سازی شده است",
       severity: "blocker",
       passed: false,
       adminField: "backend.paymentIntegration",
@@ -161,7 +170,7 @@ export function evaluateLaunchReadiness(
     {
       id: "seo.origin",
       area: "seo",
-      label: "دامنهٔ Production برای Canonical و Schema تنظیم شده است",
+      label: "دامنهٔ اصلی برای نشانی معیار و داده‌های ساختاریافته تنظیم شده است",
       severity: "blocker",
       passed: Boolean(import.meta.env["VITE_SITE_URL"]),
       adminField: "deployment.VITE_SITE_URL",
@@ -189,4 +198,5 @@ export function evaluateLaunchReadiness(
   };
 }
 
+export const CATALOG_EVIDENCE_REPORT = evaluateCatalogEvidence(products);
 export const LAUNCH_READINESS = evaluateLaunchReadiness();
