@@ -21,10 +21,14 @@ const duplicates = catalogSlugs.filter((slug, index) => catalogSlugs.indexOf(slu
 const missingEvidence = catalogSlugs.filter((slug) => !evidenceSlugs.includes(slug));
 const orphanEvidence = evidenceSlugs.filter((slug) => !catalogSlugs.includes(slug));
 
-if (catalogSlugs.length === 0) problems.push("No product slugs were discovered in product-catalog.ts.");
-if (duplicates.length) problems.push(`Duplicate catalogue slugs: ${[...new Set(duplicates)].join(", ")}`);
-if (missingEvidence.length) problems.push(`Products without evidence records: ${missingEvidence.join(", ")}`);
-if (orphanEvidence.length) problems.push(`Evidence records without products: ${orphanEvidence.join(", ")}`);
+if (catalogSlugs.length === 0)
+  problems.push("No product slugs were discovered in product-catalog.ts.");
+if (duplicates.length)
+  problems.push(`Duplicate catalogue slugs: ${[...new Set(duplicates)].join(", ")}`);
+if (missingEvidence.length)
+  problems.push(`Products without evidence records: ${missingEvidence.join(", ")}`);
+if (orphanEvidence.length)
+  problems.push(`Evidence records without products: ${orphanEvidence.join(", ")}`);
 
 for (const field of [
   "name",
@@ -60,7 +64,9 @@ if (!readiness.includes("catalog.evidence")) {
 }
 
 if (problems.length) {
-  console.error("Product evidence audit failed:\n" + problems.map((item) => `- ${item}`).join("\n"));
+  console.error(
+    "Product evidence audit failed:\n" + problems.map((item) => `- ${item}`).join("\n"),
+  );
   process.exit(1);
 }
 
