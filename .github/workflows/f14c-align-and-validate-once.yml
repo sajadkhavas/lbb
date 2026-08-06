@@ -66,8 +66,8 @@ jobs:
             'page.getByRole("heading", { level: 1, name: /از مهستان،.*برای.*خیابان/ }),',
           );
           home = home.replace(
-            'page.getByRole("link", { name: /خرید DROP 001/ })',
-            'page.getByRole("link", { name: "مشاهده فروشگاه" })',
+            '  await expect(page.getByRole("link", { name: /خرید DROP 001/ })).toBeVisible();',
+            '  const hero = page.locator(\'section[aria-labelledby="home-hero-title"]\');\n  await expect(hero.getByRole("link", { name: "مشاهده فروشگاه" })).toBeVisible();',
           );
           home = home.replace(
             /  await expect\(\n    page\.getByText\("8", \{ exact: true \}\)\.or\(page\.getByText\("۸", \{ exact: true \}\)\),\n  \)\.toBeVisible\(\);\n  await expect\(page\.getByText\("پرداخت و ارسال واقعی در این نسخه فعال نیست"\)\)\.toBeVisible\(\);/,
