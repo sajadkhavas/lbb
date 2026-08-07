@@ -5,6 +5,7 @@ const host = "127.0.0.1";
 const port = 4287;
 const origin = `http://${host}:${port}`;
 const productionOrigin = process.env.VITE_SITE_URL;
+const workerCompatibilityDate = "2026-08-06";
 
 if (!productionOrigin) {
   throw new Error("VITE_SITE_URL is required for the production smoke test.");
@@ -19,6 +20,8 @@ const server = spawn(
     "dev",
     "--config",
     ".output/server/wrangler.json",
+    "--compatibility-date",
+    workerCompatibilityDate,
     "--ip",
     host,
     "--port",
