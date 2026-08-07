@@ -1,0 +1,59 @@
+name: F20-A bootstrap
+
+on:
+  push:
+    branches:
+      - phase/f20a-seo-ia-contract
+    paths:
+      - scripts/f20a-bootstrap.mjs
+      - .github/workflows/f20a-bootstrap.yml
+
+permissions:
+  contents: write
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Apply deterministic F20-A patches
+        run: node scripts/f20a-bootstrap.mjs
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Format branch changes
+        run: npx prettier --write docs/f20 package.json src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx src/routes/product.\$slug.tsx src/routes/\$category.tsx src/routes/shop.tsx src/routes/collections.\$slug.tsx 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
+
+      - name: Run dedicated SEO regressions
+        run: npm run test:seo
+
+      - name: Run complete quality suite
+        run: npm run quality
+
+      - name: Commit verified F20-A changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/f20 package.json src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx 'src/routes/product.$slug.tsx' 'src/routes/$category.tsx' src/routes/shop.tsx 'src/routes/collections.$slug.tsx' 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+          git commit -m "feat(seo): establish F20-A contracts and regression gates"
+          git push origin HEAD:phase/f20a-seo-ia-contract
