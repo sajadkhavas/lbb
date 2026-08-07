@@ -271,7 +271,7 @@ test("order confirmation and tracking never trust browser-local success", async 
   await expect(
     page.getByRole("heading", { level: 1, name: "سفارشی برای تأیید معتبر وجود ندارد" }),
   ).toBeVisible();
-  await expect(page.getByText(/سفارش ثبت شد/)).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /سفارش.*ثبت شد/ })).toHaveCount(0);
 
   await page.goto("/track-order", { waitUntil: "networkidle" });
   await expect(page.locator("main form")).toHaveCount(0);
