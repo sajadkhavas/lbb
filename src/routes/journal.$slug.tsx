@@ -4,11 +4,14 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
+import { EditorialCommerceBridge } from "@/components/lbb/editorial/EditorialCommerceBridge";
 import { journalBySlug, JOURNAL_ARTICLES, type JournalArticle } from "@/lib/journal";
+import { getJournalCommerceView } from "@/lib/editorial-commerce";
 import { heroMain, lifestyle1, lifestyle2 } from "@/lib/product-images";
 import {
   Band,
   CtaClasses,
+  EmptyState,
   Frame,
   SectionHead,
   Shell,
@@ -87,7 +90,10 @@ function JournalNotFound() {
   return (
     <>
       <Navbar theme="light" />
-      <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="journal-not-found"
+      >
         <Shell className="py-3">
           <Breadcrumb
             items={[
@@ -99,18 +105,17 @@ function JournalNotFound() {
         </Shell>
         <Band hairline={false}>
           <Shell>
-            <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
-              <span className="text-mute">
-                <BookOpenText aria-hidden="true" size={34} />
-              </span>
-              <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
-              <p className="max-w-[42ch] text-sm leading-7 text-metal">
-                آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
-              </p>
-              <Link to="/journal" className={CtaClasses("signal")}>
-                بازگشت به ژورنال
-              </Link>
-            </div>
+            <h1 className="sr-only">این مقاله پیدا نشد</h1>
+            <EmptyState
+              icon={<BookOpenText aria-hidden="true" size={34} />}
+              title="این مقاله پیدا نشد"
+              body="آدرس مقاله معتبر نیست یا این مطلب در فهرست عمومی ژورنال قرار ندارد."
+              action={
+                <Link to="/journal" className={CtaClasses("signal")}>
+                  بازگشت به ژورنال
+                </Link>
+              }
+            />
           </Shell>
         </Band>
       </main>
@@ -123,11 +128,12 @@ function JournalNotFound() {
 function JournalDetailPage() {
   const { article, related }: { article: JournalArticle; related: JournalArticle[] } =
     Route.useLoaderData();
+  const commerce = getJournalCommerceView(article);
 
   return (
     <>
       <Navbar theme="light" />
-      <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
+      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="journal-detail">
         <Shell className="py-3">
           <Breadcrumb
             items={[
@@ -209,6 +215,19 @@ function JournalDetailPage() {
                 </section>
               ))}
             </article>
+          </Shell>
+        </Band>
+
+        <Band label="مسیرهای مرتبط با مقاله">
+          <Shell>
+            <EditorialCommerceBridge
+              title="اگر این موضوع به انتخاب بعدی شما کمک می‌کند"
+              lede="ارتباط‌های فروش فقط در همان زمینه‌ای نشان داده می‌شوند که با موضوع مقاله هم‌راستا باشد؛ خود مقاله به آگهی محصول تبدیل نمی‌شود."
+              publicProducts={commerce.publicProducts}
+              referencedProductCount={commerce.productReferences.length}
+              collections={commerce.collections}
+              categories={commerce.categories}
+            />
           </Shell>
         </Band>
 
