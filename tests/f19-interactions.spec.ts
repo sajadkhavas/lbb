@@ -151,12 +151,13 @@ test("FAQ disclosures work with Enter and Space", async ({ page }) => {
   await expect(details).not.toHaveAttribute("open", "");
 });
 
-test("checkout controls have labels, required state and valid autocomplete tokens", async ({
+test("checkout either exposes accessible form controls or fails closed before collecting PII", async ({
   page,
 }) => {
   await addProductToCart(page);
   await page.goto("/checkout", { waitUntil: "networkidle" });
 
+  const form = page.locator("form");
   const expectations = [
     ["نام و نام‌خانوادگی", "name"],
     ["شماره موبایل", "tel"],
@@ -166,6 +167,17 @@ test("checkout controls have labels, required state and valid autocomplete token
     ["کد پستی", "postal-code"],
   ] as const;
 
+  if ((await form.count()) === 0) {
+    await expect(page.getByText("ثبت نهایی سفارش هنوز سمت سرور تأیید نشده است")).toBeVisible();
+    await expect(
+      page.getByText(/این صفحه فعلاً نام، تلفن، نشانی یا کدپستی جمع‌آوری نمی‌کند/),
+    ).toBeVisible();
+    for (const [label] of expectations) {
+      await expect(page.getByLabel(label)).toHaveCount(0);
+    }
+    return;
+  }
+
   for (const [label, autocomplete] of expectations) {
     const control = page.getByLabel(label);
     await expect(control).toBeVisible();
@@ -174,18 +186,27 @@ test("checkout controls have labels, required state and valid autocomplete token
   }
 });
 
-test("F19B-P1-002: checkout errors must be programmatically associated and focused", async ({
+test("F19B-P1-002: checkout errors are accessible whenever identity collection is enabled", async ({
   page,
 }) => {
-  test.fail(
-    true,
-    "F19B-P1-002 — custom checkout errors are not wired with aria-invalid/aria-describedby or first-error focus",
-  );
-
   await addProductToCart(page);
   await page.goto("/checkout", { waitUntil: "networkidle" });
-  await page.locator("form").evaluate((form: HTMLFormElement) => {
-    form.noValidate = true;
+
+  const form = page.locator("form");
+  if ((await form.count()) === 0) {
+    await expect(page.getByText("ثبت نهایی سفارش هنوز سمت سرور تأیید نشده است")).toBeVisible();
+    await expect(page.getByRole("button", { name: "مشاهده خلاصه نمایشی" })).toHaveCount(0);
+    await expect(page.locator('[id^="co-"]')).toHaveCount(0);
+    return;
+  }
+
+  test.fail(
+    true,
+    "F19B-P1-002 — when checkout identity collection returns, custom errors must use aria-invalid/aria-describedby and first-error focus",
+  );
+
+  await form.evaluate((element: HTMLFormElement) => {
+    element.noValidate = true;
   });
   await page.getByRole("button", { name: "مشاهده خلاصه نمایشی" }).click();
 
