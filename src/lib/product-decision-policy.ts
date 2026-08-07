@@ -12,6 +12,10 @@ export type VariantLike = {
   availability: VariantAvailability;
 };
 
+export type ExtensionLike<T> =
+  | { state: "verified"; sourceRef: string; reviewedAt: string; value: T }
+  | { state: "pending" | "missing"; value?: never };
+
 export function isEvidenceFieldPublic(
   publication: "draft" | "published" | "archived" | "untracked",
   entry: PublicEvidenceEntry | undefined,
@@ -22,6 +26,12 @@ export function isEvidenceFieldPublic(
     Boolean(entry.source?.trim()) &&
     Boolean(entry.reviewedAt)
   );
+}
+
+export function verifiedExtensionValue<T>(extension: ExtensionLike<T> | undefined): T | null {
+  if (!extension || extension.state !== "verified") return null;
+  if (!extension.sourceRef.trim() || !extension.reviewedAt.trim()) return null;
+  return extension.value;
 }
 
 export function selectedVariantAvailability(
@@ -48,4 +58,13 @@ export function canPurchaseVariant({
   return (
     commerceReady && productAvailability === "available" && variantAvailability === "available"
   );
+}
+
+export function chooseColorMedia<T>(
+  fallback: T[],
+  mediaByColor: Record<string, T[]>,
+  colorId: string | null,
+) {
+  if (colorId && mediaByColor[colorId]?.length) return mediaByColor[colorId];
+  return fallback;
 }
