@@ -7,8 +7,17 @@ import {
   type ProductEvidenceRecord,
 } from "@/lib/product-evidence";
 import { FIT_LABELS, type Product } from "@/lib/products";
+import {
+  canPurchaseVariant,
+  chooseColorMedia,
+  isEvidenceFieldPublic,
+  selectedVariantAvailability,
+  verifiedExtensionValue,
+  type ExtensionLike,
+  type VariantAvailability,
+} from "./product-decision-policy";
 
-export type DecisionAvailability = "available" | "sold-out" | "unavailable" | "unknown";
+export type DecisionAvailability = VariantAvailability;
 
 export type DecisionMedia = {
   id: string;
@@ -60,9 +69,7 @@ export type ModelMeasurements = {
   body?: Record<string, number>;
 };
 
-export type VerifiedExtension<T> =
-  | { state: "verified"; sourceRef: string; reviewedAt: string; value: T }
-  | { state: "pending" | "missing"; value?: never };
+export type VerifiedExtension<T> = ExtensionLike<T>;
 
 export type ProductDecisionEnhancements = {
   variants?: VerifiedExtension<DecisionVariant[]>;
@@ -109,22 +116,6 @@ export type ProductDecisionViewModel = {
   pendingFields: ProductEvidenceField[];
 };
 
-function verifiedField(record: ProductEvidenceRecord | undefined, field: ProductEvidenceField) {
-  if (!record) return false;
-  const evidence = record.fields[field];
-  return (
-    evidence.state === "verified" &&
-    Boolean(evidence.source?.trim()) &&
-    Boolean(evidence.reviewedAt)
-  );
-}
-
-function verifiedExtension<T>(extension: VerifiedExtension<T> | undefined): T | null {
-  if (!extension || extension.state !== "verified") return null;
-  if (!extension.sourceRef.trim() || !extension.reviewedAt.trim()) return null;
-  return extension.value;
-}
-
 function solidSwatch(value: string): DecisionSwatch | undefined {
   return /^#[0-9a-f]{6}$/i.test(value) || /^#[0-9a-f]{3}$/i.test(value)
     ? { type: "solid", value }
@@ -155,8 +146,9 @@ export function buildProductDecisionViewModel(
   enhancements: ProductDecisionEnhancements = {},
 ): ProductDecisionViewModel {
   const record = PRODUCT_EVIDENCE[product.slug];
-  const published = record?.publication === "published";
-  const has = (field: ProductEvidenceField) => published && verifiedField(record, field);
+  const publication = record?.publication ?? "untracked";
+  const has = (field: ProductEvidenceField) =>
+    isEvidenceFieldPublic(publication, record?.fields[field]);
 
   const colors = has("colors")
     ? product.colors.map((value, index) => ({
@@ -171,7 +163,7 @@ export function buildProductDecisionViewModel(
     ? product.sizes.map((label) => ({ id: label, label }))
     : [];
 
-  const extensionVariants = verifiedExtension(enhancements.variants);
+  const extensionVariants = verifiedExtensionValue(enhancements.variants);
   const variants =
     extensionVariants ??
     (has("colors") && has("sizes") && has("stock")
@@ -190,10 +182,10 @@ export function buildProductDecisionViewModel(
       ]
     : [];
 
-  const mediaByColor = verifiedExtension(enhancements.mediaByColor) ?? {};
-  const measurements = verifiedExtension(enhancements.measurements);
-  const model = verifiedExtension(enhancements.model);
-  const completeTheLookSlugs = verifiedExtension(enhancements.completeTheLookSlugs) ?? [];
+  const mediaByColor = verifiedExtensionValue(enhancements.mediaByColor) ?? {};
+  const measurements = verifiedExtensionValue(enhancements.measurements);
+  const model = verifiedExtensionValue(enhancements.model);
+  const completeTheLookSlugs = verifiedExtensionValue(enhancements.completeTheLookSlugs) ?? [];
 
   const requiredForCommerce: ProductEvidenceField[] = [
     "name",
@@ -203,11 +195,11 @@ export function buildProductDecisionViewModel(
     "sizes",
     "stock",
   ];
-  const readyForCommerce = published && requiredForCommerce.every((field) => verifiedField(record, field));
+  const readyForCommerce = requiredForCommerce.every((field) => has(field));
 
   return {
     slug: product.slug,
-    publication: record?.publication ?? "untracked",
+    publication,
     readyForCommerce,
     identity: {
       name: has("name") ? product.name : null,
@@ -248,8 +240,7 @@ export function buildProductDecisionViewModel(
 }
 
 export function mediaForColor(model: ProductDecisionViewModel, colorId: string | null) {
-  if (colorId && model.mediaByColor[colorId]?.length) return model.mediaByColor[colorId];
-  return model.media;
+  return chooseColorMedia(model.media, model.mediaByColor, colorId);
 }
 
 export function variantForSelection(
@@ -268,8 +259,7 @@ export function sizeAvailabilityForColor(
   sizeId: string,
   colorId: string | null,
 ): DecisionAvailability {
-  if (!colorId) return "unknown";
-  return variantForSelection(model, colorId, sizeId)?.availability ?? "unavailable";
+  return selectedVariantAvailability(model.variants, colorId, sizeId);
 }
 
 export function canAddSelection(
@@ -277,9 +267,9 @@ export function canAddSelection(
   colorId: string | null,
   sizeId: string | null,
 ) {
-  return (
-    model.readyForCommerce &&
-    model.stock.availability === "available" &&
-    variantForSelection(model, colorId, sizeId)?.availability === "available"
-  );
+  return canPurchaseVariant({
+    commerceReady: model.readyForCommerce,
+    productAvailability: model.stock.availability,
+    variantAvailability: selectedVariantAvailability(model.variants, colorId, sizeId),
+  });
 }
