@@ -51,7 +51,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const viewport of VIEWPORTS) {
-  test(`RTL route sample reflows without page overflow at ${viewport.width}px`, async ({ page }) => {
+  test(`RTL route sample reflows without page overflow at ${viewport.width}px`, async ({
+    page,
+  }) => {
     await page.setViewportSize(viewport);
     for (const route of RTL_ROUTES) {
       await page.goto(route, { waitUntil: "networkidle" });
@@ -109,7 +111,10 @@ test("F19B-P1-004: Quick View thumbnails must meet the 44px touch contract", asy
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: /انتخاب سایز و خرید/ }).first().click();
+  await page
+    .getByRole("button", { name: /انتخاب سایز و خرید/ })
+    .first()
+    .click();
   await expectTouchTarget(page.getByRole("dialog").getByRole("button", { name: "نمایش تصویر 1" }));
 });
 
@@ -128,7 +133,10 @@ test("F19B-P2-002: active filter chips must meet the 44px touch contract", async
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: /فیلترها/ }).first().click();
+  await page
+    .getByRole("button", { name: /فیلترها/ })
+    .first()
+    .click();
   const filters = page.getByRole("dialog", { name: /فیلتر محصولات/ });
   await filters.getByRole("checkbox", { name: "فقط کالاهای موجود" }).click();
   await filters.getByRole("button", { name: /اعمال فیلترها/ }).click();
@@ -161,7 +169,10 @@ test("reduced motion disables CSS motion and leaves Lenis inactive", async ({ pa
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: /انتخاب سایز و خرید/ }).first().click();
+  await page
+    .getByRole("button", { name: /انتخاب سایز و خرید/ })
+    .first()
+    .click();
   const quickView = page.getByRole("dialog");
   await expect(quickView).toBeVisible();
   await expect(quickView).toHaveCSS("animation-name", "none");
