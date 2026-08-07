@@ -32,14 +32,68 @@ jobs:
       - name: Apply deterministic F20-A patches
         run: node scripts/f20a-bootstrap.mjs
 
-      - name: Refine SEO regression assertions
+      - name: Refine F20-A SEO semantics and assertions
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
-          path = Path("tests/seo-contract.spec.ts")
-          text = path.read_text(encoding="utf-8")
+          def replace_once(path, old, new, label):
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              if text.count(old) != 1:
+                  raise SystemExit(f"{label}: expected one target in {path}, found {text.count(old)}")
+              file.write_text(text.replace(old, new, 1), encoding="utf-8")
 
+          # Keep the established utility/internal-page meaning of noindex=True as nofollow.
+          # Public query states opt into noindex,follow explicitly below.
+          replace_once(
+              "src/lib/site.ts",
+              "robots ?? (noindex ? ROBOTS.NOINDEX_FOLLOW : ROBOTS.INDEX_FOLLOW)",
+              "robots ?? (noindex ? ROBOTS.NOINDEX_NOFOLLOW : ROBOTS.INDEX_FOLLOW)",
+              "pageMeta legacy noindex semantics",
+          )
+
+          replace_once(
+              "src/routes/search.tsx",
+              'meta: pageMeta({ title, description, path: "/search", noindex: true }),',
+              'meta: pageMeta({ title, description, path: "/search", robots: "noindex, follow" }),',
+              "search crawlable noindex",
+          )
+          replace_once(
+              "src/routes/shop.tsx",
+              "noindex: hasSearchModifiers(filters),",
+              'robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined,',
+              "shop faceted crawlable noindex",
+          )
+          replace_once(
+              "src/routes/$category.tsx",
+              "noindex: hasSearchModifiers(filters),",
+              'robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined,',
+              "category faceted crawlable noindex",
+          )
+
+          matrix = Path("docs/f20/route-indexability-matrix.md")
+          matrix_text = matrix.read_text(encoding="utf-8")
+          for route in [
+              "/account",
+              "/wishlist",
+              "/cart",
+              "/checkout",
+              "/order-confirmation",
+              "/track-order",
+              "/design-system",
+          ]:
+              old = f"| `{route}` | `noindex, follow` |"
+              new = f"| `{route}` | `noindex, nofollow` |"
+              if old not in matrix_text:
+                  raise SystemExit(f"route matrix target not found: {route}")
+              matrix_text = matrix_text.replace(old, new, 1)
+          matrix.write_text(matrix_text, encoding="utf-8")
+
+          # Regression assertions: inspect sitemap URLs, not the XML declaration;
+          # on error boundaries duplicate identical robots tags may exist, so inspect the first.
+          test_path = Path("tests/seo-contract.spec.ts")
+          text = test_path.read_text(encoding="utf-8")
           old = '  expect(xml).not.toContain("?");'
           new = '''  const locs = Array.from(xml.matchAll(/<loc>([^<]+)<\\/loc>/g), (match) => match[1]);
           expect(locs.length).toBeGreaterThan(0);
@@ -53,9 +107,8 @@ jobs:
           if locator_count == 0:
               raise SystemExit("robots locator target not found")
           text = text.replace(old_locator, old_locator + ".first()")
-
-          path.write_text(text, encoding="utf-8")
-          print(f"Refined {locator_count} robots assertions.")
+          test_path.write_text(text, encoding="utf-8")
+          print(f"Refined {locator_count} robots assertions and scoped crawl directives.")
           PY
 
       - name: Install locked dependencies
@@ -65,7 +118,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Format branch changes
-        run: npx prettier --write docs/f20 package.json scripts/smoke-production.mjs src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx src/routes/product.\$slug.tsx src/routes/\$category.tsx src/routes/shop.tsx src/routes/collections.\$slug.tsx 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
+        run: npx prettier --write docs/f20 package.json scripts/smoke-production.mjs src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx src/routes/product.\$slug.tsx src/routes/\$category.tsx src/routes/shop.tsx src/routes/search.tsx src/routes/collections.\$slug.tsx 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
 
       - name: Run dedicated SEO regressions
         run: npm run test:seo
@@ -77,7 +130,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/f20 package.json scripts/smoke-production.mjs src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx 'src/routes/product.$slug.tsx' 'src/routes/$category.tsx' src/routes/shop.tsx 'src/routes/collections.$slug.tsx' 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
+          git add docs/f20 package.json scripts/smoke-production.mjs src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx 'src/routes/product.$slug.tsx' 'src/routes/$category.tsx' src/routes/shop.tsx src/routes/search.tsx 'src/routes/collections.$slug.tsx' 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
             exit 0
