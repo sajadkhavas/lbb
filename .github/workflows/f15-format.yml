@@ -1,0 +1,46 @@
+name: F15 format helper
+
+on:
+  push:
+    branches:
+      - phase/f15-product-decision-pdp-2
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: ${{ !contains(github.event.head_commit.message, 'F15 apply Prettier') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase/f15-product-decision-pdp-2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format F15 files
+        run: >-
+          npx prettier --write
+          docs/f15
+          src/lib/product-decision.ts
+          src/routes/product.$slug.tsx
+          src/components/lbb/product/Gallery.tsx
+          src/components/lbb/product/ProductDecisionSelectors.tsx
+          src/components/lbb/product/ProductDiscovery.tsx
+          src/components/lbb/product/ProductFacts.tsx
+          src/components/lbb/product/ProductIdentity.tsx
+          src/components/lbb/product/ProductPurchasePanel.tsx
+          src/components/lbb/product/RecentlyViewed.tsx
+          src/components/lbb/product/SizeGuideDialog.tsx
+          src/components/lbb/product/StickyBuyBar.tsx
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/f15 src/lib/product-decision.ts 'src/routes/product.$slug.tsx' src/components/lbb/product
+          git commit -m 'F15 apply Prettier'
+          git push origin HEAD:phase/f15-product-decision-pdp-2
