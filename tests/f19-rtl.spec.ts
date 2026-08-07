@@ -56,7 +56,10 @@ async function addProductToCart(page: Page) {
       );
     });
     await page.reload({ waitUntil: "networkidle" });
-    await page.getByRole("button", { name: /سبد خرید/ }).first().click();
+    await page
+      .getByRole("button", { name: /سبد خرید/ })
+      .first()
+      .click();
     await expect(page.getByRole("dialog", { name: "سبد خرید" })).toBeVisible();
     return;
   }
@@ -74,7 +77,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const viewport of VIEWPORTS) {
-  test(`RTL route sample reflows without page overflow at ${viewport.width}px`, async ({ page }) => {
+  test(`RTL route sample reflows without page overflow at ${viewport.width}px`, async ({
+    page,
+  }) => {
     await page.setViewportSize(viewport);
     for (const route of RTL_ROUTES) {
       await page.goto(route, { waitUntil: "networkidle" });
@@ -101,7 +106,9 @@ test("RTL pages keep external contact labels readable and directional media isla
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 });
 
-test("critical mobile shell and Quick View controls meet the 44px touch contract", async ({ page }) => {
+test("critical mobile shell and Quick View controls meet the 44px touch contract", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
 
@@ -122,9 +129,7 @@ test("critical mobile shell and Quick View controls meet the 44px touch contract
 test("F19B-P1-003: PDP mobile gallery selectors meet the 44px touch contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  await expectTouchTarget(
-    page.getByRole("button", { name: /رفتن به (?:تصویر|جایگاه رسانه) 1/ }),
-  );
+  await expectTouchTarget(page.getByRole("button", { name: /رفتن به (?:تصویر|جایگاه رسانه) 1/ }));
 });
 
 test("F19B-P1-004: Quick View thumbnails must meet the 44px touch contract", async ({ page }) => {
@@ -168,7 +173,9 @@ test("reduced motion disables CSS motion and leaves Lenis inactive", async ({ pa
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
 
-  expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true);
+  expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(
+    true,
+  );
   expect(
     await page.evaluate(
       () =>

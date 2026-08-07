@@ -60,7 +60,9 @@ test("PDP survives text-spacing override at mobile width", async ({ page }) => {
   await expect(page.getByRole("button", { name: "خرید در دسترس نیست" })).toBeVisible();
 });
 
-test("reduced motion reduces sticky purchase transition to a negligible duration", async ({ page }) => {
+test("reduced motion reduces sticky purchase transition to a negligible duration", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
