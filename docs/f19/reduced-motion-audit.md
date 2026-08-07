@@ -27,7 +27,7 @@ This is a strong global fallback because content does not remain hidden when rev
 `src/components/SmoothScroll.tsx` checks:
 
 ```ts
-window.matchMedia("(prefers-reduced-motion: reduce)").matches
+window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 ```
 
 before dynamically importing Lenis/GSAP/ScrollTrigger. Under reduced motion it returns early, so smooth-scroll interception is not created.
@@ -49,7 +49,7 @@ The global reduced-motion rule turns smooth CSS scrolling into `auto`. Product G
 `tests/f19-rtl.spec.ts` emulates:
 
 ```ts
-page.emulateMedia({ reducedMotion: "reduce" })
+page.emulateMedia({ reducedMotion: "reduce" });
 ```
 
 and verifies:
