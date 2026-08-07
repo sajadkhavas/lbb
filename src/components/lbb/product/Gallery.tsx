@@ -155,7 +155,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
           tabIndex={0}
           role="region"
           aria-roledescription="carousel"
-          aria-label={`گالری ${name}`}
+          aria-label={`گالری تصاویر ${name}`}
           className="group relative flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overflow-y-hidden border border-hairline bg-carbon [scrollbar-width:none] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal md:overflow-hidden [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, index) => (
