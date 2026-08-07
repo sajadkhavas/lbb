@@ -45,11 +45,8 @@ const storeJsonLd = {
   url: absUrl("/"),
   logo: absUrl("/icons/icon-512.png"),
   description: BRAND.shortIntroduction,
-  priceRange: "$$",
-  currenciesAccepted: "IRR",
   address: {
     "@type": "PostalAddress",
-    streetAddress: BRAND.physicalLocation,
     addressLocality: BRAND.city,
     addressRegion: BRAND.province,
     addressCountry: "IR",

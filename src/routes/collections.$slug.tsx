@@ -7,6 +7,7 @@ import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { collectionBySlug, type Collection } from "@/lib/collections";
 import { products, type Product } from "@/lib/products";
+import { evaluateProductEvidence } from "@/lib/product-evidence";
 import { productImage } from "@/lib/product-images";
 import {
   Band,
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/collections/$slug")({
     }
 
     const { collection, items } = loaderData;
+    const publishedItems = items.filter((product) => evaluateProductEvidence(product).publishable);
     const path = `/collections/${collection.slug}`;
     const collectionLd = {
       "@context": "https://schema.org",
@@ -52,8 +54,8 @@ export const Route = createFileRoute("/collections/$slug")({
       "@context": "https://schema.org",
       "@type": "ItemList",
       name: collection.nameFa,
-      numberOfItems: items.length,
-      itemListElement: items.map((product, index) => ({
+      numberOfItems: publishedItems.length,
+      itemListElement: publishedItems.map((product, index) => ({
         "@type": "ListItem",
         position: index + 1,
         url: absUrl(`/product/${product.slug}`),

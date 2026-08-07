@@ -73,9 +73,7 @@ export function ProductFilters({
               <label
                 key={slug}
                 className={`flex min-h-11 items-center gap-2.5 text-sm ${
-                  unavailable
-                    ? "cursor-not-allowed text-mute opacity-55"
-                    : "cursor-pointer text-bone"
+                  unavailable ? "cursor-not-allowed text-metal" : "cursor-pointer text-bone"
                 }`}
               >
                 <Checkbox

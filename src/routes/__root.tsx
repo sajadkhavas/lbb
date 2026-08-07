@@ -24,50 +24,54 @@ import { WishlistProvider } from "@/lib/wishlist";
 
 function NotFoundComponent() {
   return (
-    <main
-      id="main"
-      dir="rtl"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-obsidian px-4 text-bone"
-    >
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 grid select-none place-items-center font-display text-[30vw] font-black text-carbon-2"
+    <>
+      <title>صفحه پیدا نشد | LBB</title>
+      <meta name="robots" content="noindex, nofollow" />
+      <main
+        id="main"
+        dir="rtl"
+        className="relative flex min-h-screen items-center justify-center overflow-hidden bg-obsidian px-4 text-bone"
       >
-        404
-      </span>
-      <div className="relative z-10 max-w-md text-center">
-        <p className="tech text-signal">PAGE NOT FOUND</p>
-        <h1 className="mt-3 text-display-3">این صفحه وجود ندارد</h1>
-        <p className="mt-3 text-sm leading-7 text-metal">شاید مقصد موردنظر جابه‌جا شده باشد.</p>
-        <nav aria-label="مسیرهای پیشنهادی" className="mt-6 flex flex-wrap justify-center gap-2">
-          <Link
-            to="/shop"
-            className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
-          >
-            فروشگاه
-          </Link>
-          <Link
-            to="/$category"
-            params={{ category: "hoodies" }}
-            className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
-          >
-            هودی
-          </Link>
-          <Link
-            to="/contact"
-            className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
-          >
-            تماس
-          </Link>
-        </nav>
-        <Link
-          to="/"
-          className="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-signal px-6 text-xs font-bold text-bone transition-colors hover:bg-bone hover:text-obsidian"
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 grid select-none place-items-center font-display text-[30vw] font-black text-carbon-2"
         >
-          بازگشت به خانه
-        </Link>
-      </div>
-    </main>
+          404
+        </span>
+        <div className="relative z-10 max-w-md text-center">
+          <p className="tech text-signal">PAGE NOT FOUND</p>
+          <h1 className="mt-3 text-display-3">این صفحه وجود ندارد</h1>
+          <p className="mt-3 text-sm leading-7 text-metal">شاید مقصد موردنظر جابه‌جا شده باشد.</p>
+          <nav aria-label="مسیرهای پیشنهادی" className="mt-6 flex flex-wrap justify-center gap-2">
+            <Link
+              to="/shop"
+              className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
+            >
+              فروشگاه
+            </Link>
+            <Link
+              to="/$category"
+              params={{ category: "hoodies" }}
+              className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
+            >
+              هودی
+            </Link>
+            <Link
+              to="/contact"
+              className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
+            >
+              تماس
+            </Link>
+          </nav>
+          <Link
+            to="/"
+            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-signal px-6 text-xs font-bold text-bone transition-colors hover:bg-bone hover:text-obsidian"
+          >
+            بازگشت به خانه
+          </Link>
+        </div>
+      </main>
+    </>
   );
 }
 

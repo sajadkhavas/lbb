@@ -17,6 +17,7 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/product-catalog";
+import { evaluateProductEvidence } from "@/lib/product-evidence";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import {
   catalogueInventorySummary,
@@ -43,12 +44,15 @@ const DESC =
 const PAGE_SIZE = 12;
 
 function createItemListLd() {
+  const publishedProducts = products.filter(
+    (product) => evaluateProductEvidence(product).publishable,
+  );
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "محصولات فروشگاه LBB",
-    numberOfItems: products.length,
-    itemListElement: products.slice(0, 20).map((product, index) => ({
+    numberOfItems: publishedProducts.length,
+    itemListElement: publishedProducts.slice(0, 20).map((product, index) => ({
       "@type": "ListItem",
       position: index + 1,
       url: absUrl(`/product/${product.slug}`),
@@ -67,7 +71,7 @@ export const Route = createFileRoute("/shop")({
         description: DESC,
         path: "/shop",
         type: "website",
-        noindex: hasSearchModifiers(filters),
+        robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined,
       }),
       links: canonical("/shop"),
       scripts: [

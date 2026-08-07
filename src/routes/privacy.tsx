@@ -1,14 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { DemoNotice, Shell } from "@/components/lbb/ui/primitives";
+import {
+  CtaClasses,
+  Shell,
+  StatePanel,
+  StatusTag,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
+import { STORE_SETTINGS, getPublicContactChannels } from "@/lib/store-settings";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 
-const TITLE = "حریم خصوصی نسخه نمایشی | LBB";
+const TITLE = "حریم خصوصی | LBB";
 const DESC =
-  "توضیح داده‌های ذخیره‌شده در مرورگر نسخه نمایشی LBB؛ اطلاعات Checkout به سرور ارسال یا ذخیره نمی‌شوند.";
+  "وضعیت فعلی پردازش داده در فرانت‌اند LBB؛ داده‌های محلی مرورگر و سرویس‌های منتشرنشده بدون ادعای ساختگی توضیح داده می‌شوند.";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -31,100 +38,141 @@ export const Route = createFileRoute("/privacy")({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-9">
-      <h2 className="mb-3 text-xl font-bold text-bone">{title}</h2>
-      <div className="text-sm leading-8 text-metal">{children}</div>
+    <section className="border-t border-hairline pt-7">
+      <h2 className="text-xl font-bold text-bone">{title}</h2>
+      <div className="mt-3 space-y-3 text-sm leading-8 text-metal">{children}</div>
     </section>
   );
 }
 
 function PrivacyPage() {
+  const { legal } = STORE_SETTINGS;
+  const publicContacts = getPublicContactChannels();
+
   return (
     <>
       <Navbar />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-28 pt-16">
+      <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16">
         <div className="hairline-b">
           <Shell className="py-3">
             <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "حریم خصوصی" }]} />
           </Shell>
         </div>
 
-        <header className="mx-auto max-w-[820px] px-4 py-10 md:px-8">
-          <p className="tech text-signal">CURRENT DATA PRACTICES</p>
-          <h1 className="mt-3 text-display-2 text-bone">حریم خصوصی</h1>
-          <p className="mt-3 text-sm leading-7 text-metal">
-            این صفحه رفتار فعلی فرانت‌اند نمایشی را توضیح می‌دهد؛ نه سامانه فروش یا حساب کاربری
-            آینده.
+        <header className="mx-auto max-w-[860px] px-4 py-10 md:px-8 md:py-14">
+          <TechLabel tone="signal">PRIVACY / CURRENT FRONTEND</TechLabel>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h1 className="text-display-2 text-bone">حریم خصوصی</h1>
+            <StatusTag tone={legal.privacyPublished ? "success" : "warning"}>
+              {legal.privacyPublished ? "سیاست منتشرشده" : "سیاست تجاری نهایی منتشر نشده"}
+            </StatusTag>
+          </div>
+          <p className="mt-4 max-w-[68ch] text-sm leading-8 text-metal">
+            این صفحه رفتار قابل مشاهدهٔ فرانت‌اند فعلی را توضیح می‌دهد. فعال‌شدن حساب کاربری، ثبت
+            سفارش، پرداخت، خبرنامه، تحلیل یا پشتیبانی سمت سرور باید پیش از جمع‌آوری دادهٔ جدید در
+            سیاست منتشرشده منعکس شود.
           </p>
         </header>
 
-        <div className="mx-auto max-w-[820px] px-4 pb-16 md:px-8">
-          <DemoNotice className="mb-10 rounded-xl">
-            این نسخه به بک‌اند سفارش، درگاه پرداخت، CRM، خبرنامه یا سامانه پشتیبانی متصل نیست. نام،
-            شماره تلفن، آدرس و کد پستی واردشده در Checkout از مرورگر ارسال یا در Storage ذخیره
-            نمی‌شوند.
-          </DemoNotice>
+        <div className="mx-auto max-w-[860px] px-4 pb-16 md:px-8">
+          {!legal.privacyPublished ? (
+            <StatePanel title="سیاست نهایی پردازش داده هنوز منتشر نشده است" tone="warning">
+              این صفحه دربارهٔ سامانه‌هایی که هنوز Contract عمومی تأییدشده ندارند، هدف پردازش، مدت
+              نگهداری یا اشتراک‌گذاری داده اختراع نمی‌کند. آنچه در ادامه آمده فقط رفتار فعلی
+              فرانت‌اند است.
+            </StatePanel>
+          ) : null}
 
-          <Section title="داده‌های ذخیره‌شده در Local Storage">
-            <p className="mb-3">
-              برای ادامه تجربه در همان مرورگر، داده‌های زیر ممکن است روی دستگاه شما ذخیره شوند:
-            </p>
-            <ul className="list-inside list-disc space-y-2">
-              <li>اقلام سبد خرید شامل شناسه محصول، نام، قیمت نمایشی، رنگ، سایز و تعداد</li>
-              <li>فهرست علاقه‌مندی‌ها</li>
-              <li>جست‌وجوهای اخیر و برخی انتخاب‌های رابط مانند بستن نوار اعلان</li>
-            </ul>
-            <p className="mt-3">
-              این داده‌ها به حساب کاربری متصل نیستند و با پاک‌کردن Storage مرورگر حذف می‌شوند.
-            </p>
-          </Section>
+          <div className="mt-10 space-y-9">
+            <Section title="داده‌های نگه‌داری‌شده در مرورگر">
+              <p>
+                برای حفظ تجربه در همان مرورگر، سبد خرید در Local Storage نگه‌داری می‌شود. اقلام سبد
+                می‌توانند شامل شناسه مسیر محصول، نام، قیمت کاتالوگ، انتخاب رنگ، سایز و تعداد باشند.
+              </p>
+              <p>
+                فهرست علاقه‌مندی‌ها نیز شناسه مسیر محصولات را در Local Storage نگه می‌دارد. برخی
+                قابلیت‌های رابط مانند جست‌وجوهای اخیر یا وضعیت اجزای رابط ممکن است دادهٔ محلی مشابهی
+                ذخیره کنند.
+              </p>
+              <p>
+                این داده‌های محلی به‌خودی‌خود حساب کاربری نیستند و با پاک‌کردن Storage مرورگر قابل
+                حذف‌اند.
+              </p>
+            </Section>
 
-          <Section title="داده‌های Session Storage">
-            <p>
-              پس از ساخت پیش‌نمایش سفارش، فقط کد شش‌رقمی، تعداد کالا، جمع کالا، هزینه ارسال نمایشی،
-              جمع نهایی و زمان ایجاد در همان تب ذخیره می‌شوند. نام، تلفن، آدرس و کد پستی در این
-              خلاصه وجود ندارند و داده با بسته‌شدن تب از بین می‌رود.
-            </p>
-          </Section>
+            <Section title="Checkout و اطلاعات هویتی">
+              <p>
+                تا زمانی که Transport و پردازش سمت سرور تأییدشده برای ثبت سفارش وجود نداشته باشد،
+                Checkout نباید فرم اطلاعات هویتی را با موفقیت ساختگی پردازش کند. صفحهٔ فعلی وضعیت
+                آماده‌بودن سفارش را نشان می‌دهد و ثبت سفارش واقعی انجام نمی‌دهد.
+              </p>
+              <p>
+                نام، تلفن، نشانی و کدپستی نباید فقط برای ساخت یک پیش‌نمایش محلی جمع‌آوری شوند. هر
+                فرم واقعی آینده باید همراه با مقصد پردازش، هدف استفاده و سیاست نگهداری مشخص شود.
+              </p>
+            </Section>
 
-          <Section title="اطلاعات Checkout">
-            <p>
-              فیلدهای Checkout برای آزمایش اعتبارسنجی فرم هستند. مقدار آن‌ها فقط در حافظه موقت React
-              همان صفحه قرار دارد و با Refresh یا خروج از صفحه پاک می‌شود. هیچ API برای ارسال این
-              اطلاعات فراخوانی نمی‌شود.
-            </p>
-          </Section>
+            <Section title="پرداخت و اطلاعات بانکی">
+              <p>
+                تنظیمات عمومی پرداخت فقط شامل داده‌های قابل نمایش است. Merchant ID محرمانه، API Key،
+                Client Secret، Private Key، Webhook Secret و دادهٔ Verify نباید در Bundle مرورگر یا
+                Storage عمومی قرار گیرند.
+              </p>
+              <p>
+                بازگشت مرورگر از یک درگاه یا وجود پارامترهای Callback به‌تنهایی اثبات پرداخت نیست؛
+                نتیجه فقط پس از Verify سمت سرور می‌تواند معتبر شود.
+              </p>
+            </Section>
 
-          <Section title="پرداخت و اطلاعات بانکی">
-            <p>
-              پرداخت فعال نیست و سایت هیچ اطلاعات بانکی دریافت نمی‌کند. در نتیجه شماره کارت، رمز،
-              CVV2، تاریخ انقضا یا نتیجه تراکنش در این نسخه پردازش یا ذخیره نمی‌شود.
-            </p>
-          </Section>
+            <Section title="فرم تماس و پشتیبانی">
+              <p>
+                این فرانت‌اند Transport تأییدشده‌ای برای فرم تماس ندارد و به همین دلیل فرم با پیام
+                موفقیت محلی ارائه نمی‌شود. راه‌های ارتباطی فقط از فهرست عمومی و تأییدشده Store
+                Settings نمایش داده می‌شوند.
+              </p>
+              {publicContacts.length > 0 ? (
+                <Link to="/contact" className={CtaClasses("line")}>
+                  مشاهده راه‌های ارتباطی تأییدشده
+                </Link>
+              ) : null}
+            </Section>
 
-          <Section title="کوکی، تحلیل و تبلیغات">
-            <p>
-              در پیاده‌سازی فعلی ابزار تحلیل ترافیک، تبلیغات رفتاری یا Consent Platform متصل نشده
-              است. Service Worker و فایل‌های فنی سایت ممکن است برای عملکرد و کش آفلاین استفاده شوند،
-              اما به‌تنهایی پروفایل تبلیغاتی کاربر ایجاد نمی‌کنند.
-            </p>
-          </Section>
+            <Section title="سرویس‌های بیرونی">
+              <p>
+                بازکردن یک لینک بیرونی مانند شبکه اجتماعی، شما را از دامنه LBB خارج می‌کند و پردازش
+                داده در مقصد تابع سیاست همان سرویس است. لینک خارجی تنها زمانی در رابط تماس نمایش
+                داده می‌شود که در تنظیمات عمومی تأیید شده باشد.
+              </p>
+            </Section>
 
-          <Section title="لینک‌های بیرونی">
-            <p>
-              بازکردن صفحه Instagram شما را از این سایت خارج می‌کند و پردازش داده در آن سرویس تابع
-              سیاست حریم خصوصی همان پلتفرم است. LBB کنترل مستقیمی بر Storage یا داده‌های آن سرویس
-              ندارد.
-            </p>
-          </Section>
+            <Section title="کوکی، تحلیل و سرویس‌های جدید">
+              <p>
+                این صفحه برای ابزار تحلیل، تبلیغات رفتاری، خبرنامه یا CRM که Contract عمومی و
+                پیاده‌سازی تأییدشده‌ای در فرانت‌اند فعلی ندارند، ادعای جمع‌آوری یا عدم جمع‌آوری
+                دائمی نمی‌سازد. هر اتصال جدید باید همراه با بازبینی این سیاست منتشر شود.
+              </p>
+              <p>
+                مرورگر و زیرساخت می‌توانند منابع فنی سایت را برای عملکرد یا کش نگه‌داری کنند؛ چنین
+                رفتار فنی به‌تنهایی مجوزی برای ساخت پروفایل تبلیغاتی محسوب نمی‌شود.
+              </p>
+            </Section>
 
-          <Section title="پس از راه‌اندازی بک‌اند">
-            <p>
-              پیش از فعال‌شدن حساب کاربری، سفارش، پرداخت، خبرنامه یا تحلیل، این صفحه باید با فهرست
-              دقیق داده‌ها، هدف پردازش، مدت نگهداری، ارائه‌دهندگان خدمت و روش درخواست حذف یا اصلاح
-              به‌روزرسانی شود.
-            </p>
-          </Section>
+            <Section title="تغییرات و اطلاعات تکمیلی">
+              <p>
+                هنگام فعال‌شدن پردازش سمت سرور، سیاست نهایی باید نوع داده، هدف پردازش، محل و مدت
+                نگهداری، دریافت‌کنندگان و روش پیگیری درخواست‌های مرتبط با داده را بر اساس وضعیت
+                واقعی کسب‌وکار مشخص کند.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/terms" className={CtaClasses("line")}>
+                  شرایط استفاده
+                </Link>
+                <Link to="/contact" className={CtaClasses("signal")}>
+                  تماس و پشتیبانی
+                </Link>
+              </div>
+            </Section>
+          </div>
         </div>
       </main>
       <Footer />
