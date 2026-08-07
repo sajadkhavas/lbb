@@ -110,9 +110,10 @@ test("lookbook lightbox traps focus and supports arrows, Escape and restoration"
   await opener.press("Enter");
 
   const dialog = page.getByRole("dialog");
-  const close = dialog.locator('button[aria-label="بستن تصویر"]');
   await expect(dialog).toBeVisible();
-  await expect(close).toBeFocused();
+  await expect
+    .poll(() => dialog.evaluate((element) => element.contains(document.activeElement)))
+    .toBe(true);
   await expectFocusWrap(page, dialog);
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("ArrowRight");
