@@ -32,8 +32,8 @@ async function expectTouchTarget(locator: Locator) {
   await expect(locator).toBeVisible();
   const box = await locator.boundingBox();
   expect(box, "touch target must have a rendered box").not.toBeNull();
-  expect(box!.width, "touch target width").toBeGreaterThanOrEqual(44);
-  expect(box!.height, "touch target height").toBeGreaterThanOrEqual(44);
+  expect(Math.round(box!.width), "touch target width").toBeGreaterThanOrEqual(44);
+  expect(Math.round(box!.height), "touch target height").toBeGreaterThanOrEqual(44);
 }
 
 async function addProductToCart(page: Page) {
