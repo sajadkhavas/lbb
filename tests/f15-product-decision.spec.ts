@@ -159,7 +159,7 @@ test("sticky purchase surface stays above mobile navigation and reflects blocked
     .last();
   const navBox = await mobileNav.boundingBox();
   if (stickyBox && navBox) expect(stickyBox.y + stickyBox.height).toBeLessThanOrEqual(navBox.y + 2);
-  await expect(sticky.getByRole("button")).toBeDisabled();
+  await expect(sticky.locator("button")).toBeDisabled();
 });
 
 test("draft PDP has no fabricated discovery or unsupported urgency claims", async ({ page }) => {
