@@ -46,7 +46,8 @@ async function text(path) {
 
 function requireTokens(path, source, tokens) {
   for (const token of tokens) {
-    if (!source.includes(token)) failures.push(`${path}: missing contract token ${JSON.stringify(token)}`);
+    if (!source.includes(token))
+      failures.push(`${path}: missing contract token ${JSON.stringify(token)}`);
   }
 }
 
@@ -98,7 +99,8 @@ for (const [path, source] of [
   ["tests/f19-rtl.spec.ts", rtl],
 ]) {
   for (const forbidden of ["test.skip(", "test.fixme("]) {
-    if (source.includes(forbidden)) failures.push(`${path}: ${forbidden} is not allowed in F19-A gates`);
+    if (source.includes(forbidden))
+      failures.push(`${path}: ${forbidden} is not allowed in F19-A gates`);
   }
 }
 
