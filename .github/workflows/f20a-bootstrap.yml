@@ -6,6 +6,7 @@ on:
       - phase/f20a-seo-ia-contract
     paths:
       - scripts/f20a-bootstrap.mjs
+      - scripts/smoke-production.mjs
       - .github/workflows/f20a-bootstrap.yml
 
 permissions:
@@ -64,7 +65,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Format branch changes
-        run: npx prettier --write docs/f20 package.json src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx src/routes/product.\$slug.tsx src/routes/\$category.tsx src/routes/shop.tsx src/routes/collections.\$slug.tsx 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
+        run: npx prettier --write docs/f20 package.json scripts/smoke-production.mjs src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx src/routes/product.\$slug.tsx src/routes/\$category.tsx src/routes/shop.tsx src/routes/collections.\$slug.tsx 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
 
       - name: Run dedicated SEO regressions
         run: npm run test:seo
@@ -76,7 +77,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/f20 package.json src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx 'src/routes/product.$slug.tsx' 'src/routes/$category.tsx' src/routes/shop.tsx 'src/routes/collections.$slug.tsx' 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
+          git add docs/f20 package.json scripts/smoke-production.mjs src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx 'src/routes/product.$slug.tsx' 'src/routes/$category.tsx' src/routes/shop.tsx 'src/routes/collections.$slug.tsx' 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
             exit 0
