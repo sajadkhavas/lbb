@@ -7,34 +7,29 @@ This backlog is the hand-off from the Wave-1 F19-A audit. F19-A intentionally le
 | Severity | Count | IDs                       |
 | -------- | ----: | ------------------------- |
 | P0       |     0 | —                         |
-| P1       |     5 | F19B-P1-001 … F19B-P1-005 |
+| P1       |     4 | F19B-P1-002 … F19B-P1-005 |
 | P2       |     4 | F19B-P2-001 … F19B-P2-004 |
 | P3       |     1 | F19B-P3-001               |
 
 No P0 blocker was identified in the baseline audit.
 
+## Resolved during F19-A
+
+### F19A-P1-001 — Disabled Search category facets failed serious color contrast
+
+- Route: `/search?q=هودی`
+- File: `src/components/lbb/ProductFilters.tsx`
+- Area: Axe / Contrast / Disabled state
+- Runtime evidence: the expanded route-family Axe gate reported `color-contrast` at `serious` impact on unavailable category labels because `text-mute opacity-55` reduced the visible text contrast.
+- Fix: keep the unavailable state through the disabled checkbox and `cursor-not-allowed`, but render its visible label with `text-metal` and no opacity reduction.
+- Scope: one isolated class-level production patch; no filter behavior, URL state, product model or layout architecture changed.
+- Regression: the Search route remains inside the mandatory `0 critical / 0 serious` Axe gate.
+
+The Lookbook lightbox was also re-verified after the full runtime suite: its Chromium interaction gate passes initial focus, Tab/Shift+Tab containment, arrows, Escape and opener restoration. It therefore does not remain an F19-B focus-debt item.
+
 ---
 
 ## P1 — High impact
-
-### F19B-P1-001 — Lookbook lightbox leaks Tab focus
-
-- Route: `/lookbook`
-- File: `src/routes/lookbook.tsx`
-- Area: Dialog / Keyboard / Focus
-- Evidence: lightbox manually focuses close, handles Escape/arrows and restores opener, but has no Tab/Shift+Tab containment.
-- Executable characterization: `tests/f19-interactions.spec.ts` expected-failure case with this ID.
-- Impact: keyboard users can move into Footer/Mobile navigation while an `aria-modal="true"` dialog is open.
-
-Acceptance:
-
-1. focus enters the lightbox,
-2. Tab/Shift+Tab wrap inside it,
-3. Escape closes,
-4. backdrop close remains usable,
-5. opener focus restores,
-6. arrow navigation remains functional,
-7. expected-failure annotation is removed and the same test passes normally.
 
 ### F19B-P1-002 — Checkout custom errors are not associated or focus-managed
 
@@ -149,14 +144,13 @@ Acceptance:
 
 Recommended F19-B order:
 
-1. `F19B-P1-001` Lookbook modal containment.
-2. `F19B-P1-002` Checkout error semantics/focus.
-3. `F19B-P1-005` RTL Gallery/Quick View previous-next contract.
-4. `F19B-P1-003` + `F19B-P1-004` product touch targets as one product interaction pass.
-5. `F19B-P2-001` + `F19B-P2-002` cart/filter target sizing.
-6. `F19B-P2-003` bidi identifier primitive.
-7. `F19B-P2-004` secondary target sweep.
-8. `F19B-P3-001` card semantic polish.
+1. `F19B-P1-002` Checkout error semantics/focus.
+2. `F19B-P1-005` RTL Gallery/Quick View previous-next contract.
+3. `F19B-P1-003` + `F19B-P1-004` product touch targets as one product interaction pass.
+4. `F19B-P2-001` + `F19B-P2-002` cart/filter target sizing.
+5. `F19B-P2-003` bidi identifier primitive.
+6. `F19B-P2-004` secondary target sweep.
+7. `F19B-P3-001` card semantic polish.
 
 ## F19-B exit rule
 
