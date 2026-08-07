@@ -4,18 +4,18 @@ Structured data is a machine-readable projection of **visible, public, verified 
 
 ## Route strategy
 
-| Route | Schema | Publication rule |
-|---|---|---|
-| Root/global | `Organization` | Brand identity and links only when verified. |
-| `/` | `WebSite` + `SearchAction` | Search target points to the real `/search?q=` behavior. |
-| `/` | `ClothingStore` | Only evidence-backed public location/entity fields. |
-| Listing/category | `BreadcrumbList` | Stable canonical navigation path. |
-| Listing/category/collection | `CollectionPage` | Page identity/copy must be public and visible. |
-| Listing/category/collection | `ItemList` | Include only SEO-publishable products/resources; do not list draft catalogue records as production facts. |
-| PDP | `Product` | Only when product publication/evidence gate passes. |
-| PDP | `Offer` or `AggregateOffer` | Only from verified public price/currency/availability/variant data. |
-| Journal detail | `Article` | Published article metadata and visible content. |
-| FAQ | `FAQPage` | Optional only when visible FAQ content and current search-engine eligibility/strategy justify it. |
+| Route                       | Schema                      | Publication rule                                                                                          |
+| --------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Root/global                 | `Organization`              | Brand identity and links only when verified.                                                              |
+| `/`                         | `WebSite` + `SearchAction`  | Search target points to the real `/search?q=` behavior.                                                   |
+| `/`                         | `ClothingStore`             | Only evidence-backed public location/entity fields.                                                       |
+| Listing/category            | `BreadcrumbList`            | Stable canonical navigation path.                                                                         |
+| Listing/category/collection | `CollectionPage`            | Page identity/copy must be public and visible.                                                            |
+| Listing/category/collection | `ItemList`                  | Include only SEO-publishable products/resources; do not list draft catalogue records as production facts. |
+| PDP                         | `Product`                   | Only when product publication/evidence gate passes.                                                       |
+| PDP                         | `Offer` or `AggregateOffer` | Only from verified public price/currency/availability/variant data.                                       |
+| Journal detail              | `Article`                   | Published article metadata and visible content.                                                           |
+| FAQ                         | `FAQPage`                   | Optional only when visible FAQ content and current search-engine eligibility/strategy justify it.         |
 
 ## Organization and ClothingStore
 

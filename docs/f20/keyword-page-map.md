@@ -4,22 +4,22 @@ F20-A does not fabricate search volume, traffic forecasts, keyword difficulty or
 
 ## Intent map
 
-| Intent family | Preferred page family | Example intent language | Must not compete with |
-|---|---|---|---|
-| Brand | `/` | LBB, ال‌بی‌بی, LBB clothing | `/shop`, categories |
-| Broad commercial catalogue | `/shop` | خرید لباس استریت‌ویر / پوشاک شهری LBB | individual categories, collections |
-| Product-type commercial | `/$category` | هودی LBB، شلوار بگی، تیشرت، کتونی | `/shop`, same-theme collections |
-| Exact product / SKU | `/product/$slug` | product name, SKU, exact model | category/collection copy |
-| Merchandising / drop / story | `/collections/$slug` | named drop, curated capsule, style grouping | taxonomy category unless intent is genuinely different |
-| Collection discovery | `/collections` | کالکشن‌های LBB، دراپ‌ها | `/shop` |
-| Editorial/informational | `/journal/$slug` | styling, fabric, care, trend guidance | PDP factual specs |
-| Editorial discovery | `/journal` | ژورنال LBB، راهنماها | `/lookbook` |
-| Visual inspiration | `/lookbook` | لوک‌بوک، استایل LBB | collection/category commercial landing pages |
-| Local / entity | `/` + `/contact` | فروشگاه LBB کرج، پاساژ مهستان | any Tehran store-location page |
-| Brand/entity information | `/about` | درباره LBB | homepage brand intent where not necessary |
-| Sizing support | `/size-guide` | راهنمای سایز LBB | product-specific measurements if they differ by product |
-| Support / policy | `/faq`, `/shipping-returns`, `/terms`, `/privacy`, `/contact` | policy/support questions | journal unless the content is editorial rather than operational |
-| Internal search | `/search` | user-generated query combinations | all indexable landing pages; search is always noindex |
+| Intent family                | Preferred page family                                         | Example intent language                     | Must not compete with                                           |
+| ---------------------------- | ------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------- |
+| Brand                        | `/`                                                           | LBB, ال‌بی‌بی, LBB clothing                 | `/shop`, categories                                             |
+| Broad commercial catalogue   | `/shop`                                                       | خرید لباس استریت‌ویر / پوشاک شهری LBB       | individual categories, collections                              |
+| Product-type commercial      | `/$category`                                                  | هودی LBB، شلوار بگی، تیشرت، کتونی           | `/shop`, same-theme collections                                 |
+| Exact product / SKU          | `/product/$slug`                                              | product name, SKU, exact model              | category/collection copy                                        |
+| Merchandising / drop / story | `/collections/$slug`                                          | named drop, curated capsule, style grouping | taxonomy category unless intent is genuinely different          |
+| Collection discovery         | `/collections`                                                | کالکشن‌های LBB، دراپ‌ها                     | `/shop`                                                         |
+| Editorial/informational      | `/journal/$slug`                                              | styling, fabric, care, trend guidance       | PDP factual specs                                               |
+| Editorial discovery          | `/journal`                                                    | ژورنال LBB، راهنماها                        | `/lookbook`                                                     |
+| Visual inspiration           | `/lookbook`                                                   | لوک‌بوک، استایل LBB                         | collection/category commercial landing pages                    |
+| Local / entity               | `/` + `/contact`                                              | فروشگاه LBB کرج، پاساژ مهستان               | any Tehran store-location page                                  |
+| Brand/entity information     | `/about`                                                      | درباره LBB                                  | homepage brand intent where not necessary                       |
+| Sizing support               | `/size-guide`                                                 | راهنمای سایز LBB                            | product-specific measurements if they differ by product         |
+| Support / policy             | `/faq`, `/shipping-returns`, `/terms`, `/privacy`, `/contact` | policy/support questions                    | journal unless the content is editorial rather than operational |
+| Internal search              | `/search`                                                     | user-generated query combinations           | all indexable landing pages; search is always noindex           |
 
 ## Category vs collection boundary
 

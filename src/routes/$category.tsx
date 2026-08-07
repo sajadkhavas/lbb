@@ -25,6 +25,7 @@ import {
   createFacetCounts,
 } from "@/lib/catalog-discovery";
 import { productsByCategory } from "@/lib/products";
+import { evaluateProductEvidence } from "@/lib/product-evidence";
 import { absAsset, absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
   applyFilters,
@@ -53,6 +54,7 @@ export const Route = createFileRoute("/$category")({
     if (!loaderData)
       return { meta: [{ title: "پیدا نشد" }, { name: "robots", content: "noindex" }] };
     const { cat, items } = loaderData;
+    const publishedItems = items.filter((product) => evaluateProductEvidence(product).publishable);
     const filters = parseFilters(match.search as unknown as Record<string, unknown>);
     const collectionLd = {
       "@context": "https://schema.org",
@@ -65,8 +67,8 @@ export const Route = createFileRoute("/$category")({
       "@context": "https://schema.org",
       "@type": "ItemList",
       name: cat.h1,
-      numberOfItems: items.length,
-      itemListElement: items.slice(0, 20).map((product, index) => ({
+      numberOfItems: publishedItems.length,
+      itemListElement: publishedItems.slice(0, 20).map((product, index) => ({
         "@type": "ListItem",
         position: index + 1,
         url: absUrl(`/product/${product.slug}`),
@@ -89,7 +91,7 @@ export const Route = createFileRoute("/$category")({
         description: cat.metaDesc,
         path: `/${cat.slug}`,
         image: absAsset(categoryImage(cat.slug)),
-        noindex: hasSearchModifiers(filters),
+        robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined,
       }),
       links: canonical(`/${cat.slug}`),
       scripts: [

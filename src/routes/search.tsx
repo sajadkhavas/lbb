@@ -101,7 +101,7 @@ export const Route = createFileRoute("/search")({
       ? `نتایج جستجو برای «${query}» در فروشگاه استریت‌ویر LBB.`
       : "جستجو در محصولات فروشگاه استریت‌ویر LBB — هودی، شلوار، تیشرت، کتونی و جوراب.";
     return {
-      meta: pageMeta({ title, description, path: "/search", noindex: true }),
+      meta: pageMeta({ title, description, path: "/search", robots: "noindex, follow" }),
       links: canonical("/search"),
     };
   },

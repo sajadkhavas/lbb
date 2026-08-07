@@ -4,17 +4,17 @@
 
 The current frontend normalizes catalogue state into these query parameters:
 
-| Concept | Current parameter | Notes |
-|---|---|---|
-| Category facet | `cats` | `/shop` only; category routes lock category by path. |
-| Color | `colors` | Comma-separated canonical values. |
-| Size | `sizes` | Comma-separated canonical values. |
-| Price ceiling | `max` | Positive value below the page scope ceiling. |
-| Availability | `instock` | Boolean. |
-| Sale | `sale` | Boolean. |
-| Sort | `sort` | `newest` default; other values are modifiers. |
-| Internal query | `q` | `/search` only. |
-| Collection | path route | Collections are intentional path-based merchandising pages, not a generic query facet in F20-A. |
+| Concept        | Current parameter | Notes                                                                                           |
+| -------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| Category facet | `cats`            | `/shop` only; category routes lock category by path.                                            |
+| Color          | `colors`          | Comma-separated canonical values.                                                               |
+| Size           | `sizes`           | Comma-separated canonical values.                                                               |
+| Price ceiling  | `max`             | Positive value below the page scope ceiling.                                                    |
+| Availability   | `instock`         | Boolean.                                                                                        |
+| Sale           | `sale`            | Boolean.                                                                                        |
+| Sort           | `sort`            | `newest` default; other values are modifiers.                                                   |
+| Internal query | `q`               | `/search` only.                                                                                 |
+| Collection     | path route        | Collections are intentional path-based merchandising pages, not a generic query facet in F20-A. |
 
 The conceptual F20 contract covers color, size, price, availability, sort, query and collection even where the implementation names differ.
 

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const siteOrigin = "https://lbb.example.test";
 const localOrigin = "http://127.0.0.1:4173";
@@ -13,7 +13,7 @@ function parseJsonLd(source: string[]) {
   });
 }
 
-async function jsonLd(page: Parameters<typeof test>[0] extends never ? never : any) {
+async function jsonLd(page: Page) {
   return parseJsonLd(await page.locator('script[type="application/ld+json"]').allTextContents());
 }
 
@@ -23,31 +23,39 @@ function schemaOfType(schemas: Record<string, unknown>[], type: string) {
 
 test("clean listings index while faceted states noindex to clean canonicals", async ({ page }) => {
   await page.goto("/shop", { waitUntil: "networkidle" });
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-    "href",
-    `${siteOrigin}/shop`,
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
+    "content",
+    "index, follow",
   );
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${siteOrigin}/shop`);
 
   await page.goto("/shop?sizes=M&sort=price-asc", { waitUntil: "networkidle" });
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-    "href",
-    `${siteOrigin}/shop`,
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
+    "content",
+    "noindex, follow",
   );
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${siteOrigin}/shop`);
 
   await page.goto("/hoodies?sizes=M&sort=price-asc", { waitUntil: "networkidle" });
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
+    "content",
+    "noindex, follow",
+  );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     `${siteOrigin}/hoodies`,
   );
 });
 
-test("internal search is crawlable-noindex, canonically clean and still shareable", async ({ page }) => {
+test("internal search is crawlable-noindex, canonically clean and still shareable", async ({
+  page,
+}) => {
   await page.goto("/search?q=هودی&sizes=M", { waitUntil: "networkidle" });
 
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
+    "content",
+    "noindex, follow",
+  );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     `${siteOrigin}/search`,
@@ -66,7 +74,9 @@ test("internal search is crawlable-noindex, canonically clean and still shareabl
   );
 });
 
-test("robots exposes noindex HTML to crawlers and advertises absolute sitemap", async ({ request }) => {
+test("robots exposes noindex HTML to crawlers and advertises absolute sitemap", async ({
+  request,
+}) => {
   const response = await request.get(`${localOrigin}/robots.txt`);
   expect(response.ok()).toBe(true);
   const body = await response.text();
@@ -86,7 +96,9 @@ test("sitemap excludes query, utility and F14C draft product URLs", async ({ req
 
   expect(xml).toContain(`<loc>${siteOrigin}/</loc>`);
   expect(xml).toContain(`<loc>${siteOrigin}/shop</loc>`);
-  expect(xml).not.toContain("?");
+  const locs = Array.from(xml.matchAll(/<loc>([^<]+)<\/loc>/g), (match) => match[1]);
+  expect(locs.length).toBeGreaterThan(0);
+  expect(locs.every((loc) => !loc.includes("?"))).toBe(true);
 
   for (const path of [
     "/search",
@@ -107,7 +119,7 @@ test("sitemap excludes query, utility and F14C draft product URLs", async ({ req
 test("draft products cannot become Product or Offer structured-data facts", async ({ page }) => {
   await page.goto("/product/oversized-black-hoodie", { waitUntil: "networkidle" });
 
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
     "content",
     "noindex, nofollow",
   );
@@ -125,8 +137,7 @@ test("draft products cannot become Product or Offer structured-data facts", asyn
   expect(schemaOfType(schemas, "Offer")).toBeUndefined();
 
   const breadcrumbs = schemaOfType(schemas, "BreadcrumbList") as
-    | { itemListElement?: Array<{ item?: string }> }
-    | undefined;
+    { itemListElement?: Array<{ item?: string }> } | undefined;
   expect(breadcrumbs).toBeTruthy();
   expect(breadcrumbs?.itemListElement?.every((item) => item.item?.startsWith(siteOrigin))).toBe(
     true,
@@ -146,15 +157,15 @@ test("published journal detail exposes Article and absolute breadcrumb contracts
   await page.goto(match?.[1] ?? "/journal", { waitUntil: "networkidle" });
   const schemas = await jsonLd(page);
   const article = schemaOfType(schemas, "Article") as
-    | { datePublished?: string; mainEntityOfPage?: string; image?: string }
-    | undefined;
+    { datePublished?: string; mainEntityOfPage?: string; image?: string } | undefined;
   const breadcrumbs = schemaOfType(schemas, "BreadcrumbList") as
-    | { itemListElement?: Array<{ item?: string }> }
-    | undefined;
+    { itemListElement?: Array<{ item?: string }> } | undefined;
 
   expect(article).toBeTruthy();
   expect(article?.datePublished).toMatch(/^\d{4}-\d{2}-\d{2}/);
-  expect(article?.mainEntityOfPage).toMatch(new RegExp(`^${siteOrigin.replaceAll(".", "\\.")}/journal/`));
+  expect(article?.mainEntityOfPage).toMatch(
+    new RegExp(`^${siteOrigin.replaceAll(".", "\\.")}/journal/`),
+  );
   expect(article?.image).toMatch(/^https?:\/\//);
   expect(breadcrumbs?.itemListElement?.every((item) => item.item?.startsWith(siteOrigin))).toBe(
     true,
@@ -167,8 +178,7 @@ test("homepage local schema stays on verified Karaj identity without invented NA
   await page.goto("/", { waitUntil: "networkidle" });
   const schemas = await jsonLd(page);
   const website = schemaOfType(schemas, "WebSite") as
-    | { potentialAction?: { target?: { urlTemplate?: string } } }
-    | undefined;
+    { potentialAction?: { target?: { urlTemplate?: string } } } | undefined;
   const store = schemaOfType(schemas, "ClothingStore") as
     | {
         description?: string;
@@ -199,31 +209,39 @@ test("invalid dynamic and global routes are real noindex 404 responses", async (
     waitUntil: "networkidle",
   });
   expect(productResponse?.status()).toBe(404);
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
   expect(schemaOfType(await jsonLd(page), "Product")).toBeUndefined();
 
   const globalResponse = await page.goto("/f20a-definitely-missing-route", {
     waitUntil: "networkidle",
   });
   expect(globalResponse?.status()).toBe(404);
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
     "content",
     "noindex, nofollow",
   );
   await expect(page).toHaveTitle("صفحه پیدا نشد | LBB");
 });
 
-test("canonical and social metadata basics use absolute production-origin URLs", async ({ page }) => {
+test("canonical and social metadata basics use absolute production-origin URLs", async ({
+  page,
+}) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${siteOrigin}/`);
-  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", `${siteOrigin}/`);
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    "content",
+    `${siteOrigin}/`,
+  );
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", /LBB/);
   await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /.+/);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /^https:\/\//);
   await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute("content", /LBB/);
   await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute("content", /.+/);
-  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute("content", /^https:\/\//);
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+    "content",
+    /^https:\/\//,
+  );
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
     "content",
     "summary_large_image",
