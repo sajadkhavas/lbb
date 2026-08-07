@@ -47,9 +47,10 @@ test("valid drop-style collection has narrative, safe empty commerce state and o
   await expect(main).toHaveAttribute("data-f17-collection-kind", "drop");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("شبگرد");
   await expect(page.locator('[data-f17-empty-products="true"]')).toBeVisible();
-  await expect(page.locator('[data-f17-editorial="commerce-bridge"]')).toBeVisible();
-  await expect(page.getByRole("link", { name: "هودی‌ها" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /مرور فروشگاه/ })).toBeVisible();
+  const bridge = page.locator('[data-f17-editorial="commerce-bridge"]');
+  await expect(bridge).toBeVisible();
+  await expect(bridge.getByRole("link", { name: "هودی‌ها" })).toBeVisible();
+  await expect(bridge.getByRole("link", { name: /مرور فروشگاه/ })).toBeVisible();
   await expectNoDraftProductLinks(page);
   await expect(page.getByText(/countdown|شمارش معکوس/i)).toHaveCount(0);
 });
@@ -106,9 +107,10 @@ test("journal index exposes five editorial stories and onward discovery", async 
   await expect(page.locator('main[data-f17-route="journal"]')).toBeVisible();
   const articleLinks = page.locator('main a[href^="/journal/"]');
   expect(await articleLinks.count()).toBeGreaterThanOrEqual(5);
-  await expect(page.getByRole("link", { name: "لوک‌بوک" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "کالکشن‌ها" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "فروشگاه" })).toBeVisible();
+  const onward = page.getByRole("navigation", { name: "مسیرهای بعدی ژورنال" });
+  await expect(onward.getByRole("link", { name: "لوک‌بوک" })).toBeVisible();
+  await expect(onward.getByRole("link", { name: "کالکشن‌ها" })).toBeVisible();
+  await expect(onward.getByRole("link", { name: "فروشگاه" })).toBeVisible();
   await expectNoDraftProductLinks(page);
 });
 
