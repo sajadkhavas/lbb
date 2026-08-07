@@ -4,12 +4,12 @@ This backlog is the hand-off from the Wave-1 F19-A audit. F19-A intentionally le
 
 ## Summary
 
-| Severity | Count | IDs |
-| --- | ---: | --- |
-| P0 | 0 | — |
-| P1 | 5 | F19B-P1-001 … F19B-P1-005 |
-| P2 | 4 | F19B-P2-001 … F19B-P2-004 |
-| P3 | 1 | F19B-P3-001 |
+| Severity | Count | IDs                       |
+| -------- | ----: | ------------------------- |
+| P0       |     0 | —                         |
+| P1       |     5 | F19B-P1-001 … F19B-P1-005 |
+| P2       |     4 | F19B-P2-001 … F19B-P2-004 |
+| P3       |     1 | F19B-P3-001               |
 
 No P0 blocker was identified in the baseline audit.
 
