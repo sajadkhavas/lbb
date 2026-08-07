@@ -115,7 +115,7 @@ jobs:
         run: npm ci
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Format branch changes
         run: npx prettier --write docs/f20 package.json scripts/smoke-production.mjs src/lib/site.ts src/routes/__root.tsx src/routes/index.tsx src/routes/product.\$slug.tsx src/routes/\$category.tsx src/routes/shop.tsx src/routes/search.tsx src/routes/collections.\$slug.tsx 'src/routes/robots[.]txt.ts' 'src/routes/sitemap[.]xml.ts' tests/seo-contract.spec.ts
