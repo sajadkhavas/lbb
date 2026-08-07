@@ -74,7 +74,9 @@ test("mixed-direction islands stay explicit inside the RTL document", async ({ p
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 });
 
-test("critical mobile controls meet the 44px touch contract", async ({ page }) => {
+test("critical mobile shell and Quick View controls meet the 44px touch contract", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
 
@@ -90,12 +92,47 @@ test("critical mobile controls meet the 44px touch contract", async ({ page }) =
   await expectTouchTarget(quickView.getByRole("button", { name: "بستن نمای سریع" }));
   await expectTouchTarget(quickView.getByRole("button", { name: "کاهش تعداد" }));
   await expectTouchTarget(quickView.getByRole("button", { name: "افزایش تعداد" }));
-  await page.keyboard.press("Escape");
+});
 
+test("F19B-P1-003: PDP mobile gallery selectors must meet the 44px touch contract", async ({
+  page,
+}) => {
+  test.fail(true, "F19B-P1-003 — PDP mobile gallery dot buttons are currently below 44px");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await expectTouchTarget(page.getByRole("button", { name: "رفتن به تصویر 1" }));
+});
+
+test("F19B-P1-004: Quick View thumbnails must meet the 44px touch contract", async ({ page }) => {
+  test.fail(true, "F19B-P1-004 — Quick View thumbnails are 36px wide");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: /انتخاب سایز و خرید/ }).first().click();
+  await expectTouchTarget(page.getByRole("dialog").getByRole("button", { name: "نمایش تصویر 1" }));
+});
+
+test("F19B-P2-001: Cart quantity controls must meet the 44px touch contract", async ({ page }) => {
+  test.fail(true, "F19B-P2-001 — Cart Drawer quantity controls are currently 36px square");
+
+  await page.setViewportSize({ width: 390, height: 844 });
   await addProductToCart(page);
   const cart = page.getByRole("dialog", { name: "سبد خرید" });
   await expectTouchTarget(cart.getByRole("button", { name: /کاهش تعداد/ }));
   await expectTouchTarget(cart.getByRole("button", { name: /افزایش تعداد/ }));
+});
+
+test("F19B-P2-002: active filter chips must meet the 44px touch contract", async ({ page }) => {
+  test.fail(true, "F19B-P2-002 — active filter chips currently use a 40px minimum height");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: /فیلترها/ }).first().click();
+  const filters = page.getByRole("dialog", { name: /فیلتر محصولات/ });
+  await filters.getByRole("checkbox", { name: "فقط کالاهای موجود" }).click();
+  await filters.getByRole("button", { name: /اعمال فیلترها/ }).click();
+  await expectTouchTarget(page.getByRole("button", { name: "حذف فیلتر فقط موجود" }));
 });
 
 test("reduced motion disables CSS motion and leaves Lenis inactive", async ({ page }) => {
