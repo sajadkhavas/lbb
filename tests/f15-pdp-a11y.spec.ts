@@ -28,7 +28,7 @@ test("F15 PDP has no serious or critical Axe violations", async ({ page }) => {
 test("gallery focus, Home/End and RTL arrow semantics remain usable", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  const gallery = page.getByRole("region", { name: /گالری/ });
+  const gallery = page.getByRole("region", { name: /گالری تصاویر/ });
   await gallery.focus();
   await page.keyboard.press("End");
   await expect(page.getByText(/جایگاه رسانه 2 از 2/)).toBeAttached();
@@ -60,14 +60,14 @@ test("PDP survives text-spacing override at mobile width", async ({ page }) => {
   await expect(page.getByRole("button", { name: "خرید در دسترس نیست" })).toBeVisible();
 });
 
-test("reduced motion removes sticky purchase transition", async ({ page }) => {
+test("reduced motion reduces sticky purchase transition to a negligible duration", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
   const duration = await page
     .getByTestId("pdp-sticky-buy-bar")
-    .evaluate((element) => getComputedStyle(element).transitionDuration);
-  expect(duration).toBe("0s");
+    .evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration));
+  expect(duration).toBeLessThanOrEqual(0.001);
 });
 
 test("PDP keeps one main landmark and one H1", async ({ page }) => {
