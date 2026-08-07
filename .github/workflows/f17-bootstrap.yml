@@ -1,0 +1,73 @@
+name: F17 bootstrap
+
+on:
+  push:
+    branches:
+      - phase/f17-editorial-commerce-linking
+    paths:
+      - .github/workflows/f17-bootstrap.yml
+
+permissions:
+  contents: write
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  verify-and-snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Format F17 changes
+        run: >-
+          npx prettier --write
+          docs/f17
+          src/lib/editorial-commerce.ts
+          src/components/lbb/editorial/EditorialCommerceBridge.tsx
+          src/components/lbb/home/DropStory.tsx
+          src/components/lbb/home/ShopTheLook.tsx
+          src/components/lbb/home/EditorialGateway.tsx
+          src/routes/collections.index.tsx
+          'src/routes/collections.$slug.tsx'
+          src/routes/lookbook.tsx
+          src/routes/journal.index.tsx
+          'src/routes/journal.$slug.tsx'
+          tests/f17-editorial-commerce.spec.ts
+          tests/f17-accessibility.spec.ts
+          tests/f17-visual.spec.ts
+
+      - name: Generate F17 and changed existing visual baselines
+        run: npx playwright test tests/visual.spec.ts tests/f17-visual.spec.ts --update-snapshots
+
+      - name: Run F17 functional and accessibility gates
+        run: npx playwright test tests/f17-editorial-commerce.spec.ts tests/f17-accessibility.spec.ts tests/f17-visual.spec.ts
+
+      - name: Run complete quality suite
+        run: npm run quality
+
+      - name: Commit verified formatting and snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/f17 src/lib/editorial-commerce.ts src/components/lbb/editorial/EditorialCommerceBridge.tsx src/components/lbb/home/DropStory.tsx src/components/lbb/home/ShopTheLook.tsx src/components/lbb/home/EditorialGateway.tsx src/routes/collections.index.tsx 'src/routes/collections.$slug.tsx' src/routes/lookbook.tsx src/routes/journal.index.tsx 'src/routes/journal.$slug.tsx' tests/f17-editorial-commerce.spec.ts tests/f17-accessibility.spec.ts tests/f17-visual.spec.ts tests/f17-visual.spec.ts-snapshots tests/visual.spec.ts-snapshots
+          if git diff --cached --quiet; then
+            echo "No verified generated changes to commit."
+            exit 0
+          fi
+          git commit -m "test(f17): verify editorial commerce and visual baselines"
+          git push origin HEAD:phase/f17-editorial-commerce-linking
