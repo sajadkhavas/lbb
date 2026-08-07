@@ -29,18 +29,29 @@ export function SizeGuideDialog({
       >
         <DialogHeader>
           <TechLabel tone="signal">GARMENT MEASUREMENTS</TechLabel>
-          <DialogTitle className="text-display-3 text-bone">راهنمای اندازه {productName}</DialogTitle>
+          <DialogTitle className="text-display-3 text-bone">
+            راهنمای اندازه {productName}
+          </DialogTitle>
           <DialogDescription className="text-sm leading-7 text-metal">
-            اندازه‌ها مربوط به خود لباس هستند، نه اندازه بدن. واحد تمام اعداد این جدول سانتی‌متر است.
+            اندازه‌ها مربوط به خود لباس هستند، نه اندازه بدن. واحد تمام اعداد این جدول سانتی‌متر
+            است.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-x-auto border border-hairline" tabIndex={0} aria-label="جدول اندازه محصول">
+        <div
+          className="overflow-x-auto border border-hairline"
+          tabIndex={0}
+          aria-label="جدول اندازه محصول"
+        >
           <table className="min-w-[560px] w-full text-xs">
-            <caption className="sr-only">اندازه‌های تأییدشده {productName} با واحد سانتی‌متر</caption>
+            <caption className="sr-only">
+              اندازه‌های تأییدشده {productName} با واحد سانتی‌متر
+            </caption>
             <thead>
               <tr className="bg-carbon text-metal">
-                <th scope="col" className="p-3 text-start font-semibold">سایز</th>
+                <th scope="col" className="p-3 text-start font-semibold">
+                  سایز
+                </th>
                 {measurements.columns.map((column) => (
                   <th key={column.key} scope="col" className="p-3 text-start font-semibold">
                     {column.label} <span className="font-normal text-mute">(cm)</span>
@@ -51,7 +62,9 @@ export function SizeGuideDialog({
             <tbody>
               {measurements.rows.map((row) => (
                 <tr key={row.size} className="border-t border-hairline">
-                  <th scope="row" className="num p-3 text-start font-bold text-bone">{row.size}</th>
+                  <th scope="row" className="num p-3 text-start font-bold text-bone">
+                    {row.size}
+                  </th>
                   {measurements.columns.map((column) => (
                     <td key={column.key} className="num p-3 text-metal">
                       {row.values[column.key] === null || row.values[column.key] === undefined
@@ -66,8 +79,13 @@ export function SizeGuideDialog({
         </div>
 
         {model && (model.heightCm || model.wornSize) ? (
-          <section aria-labelledby="model-measurements-heading" className="border-t border-hairline pt-4">
-            <h3 id="model-measurements-heading" className="text-sm font-bold text-bone">اطلاعات مدل</h3>
+          <section
+            aria-labelledby="model-measurements-heading"
+            className="border-t border-hairline pt-4"
+          >
+            <h3 id="model-measurements-heading" className="text-sm font-bold text-bone">
+              اطلاعات مدل
+            </h3>
             <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
               {model.heightCm ? (
                 <div>

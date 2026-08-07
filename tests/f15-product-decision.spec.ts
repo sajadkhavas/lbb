@@ -23,9 +23,9 @@ test("evidence publication is field-specific and fails closed", () => {
   expect(isEvidenceFieldPublic("published", verified)).toBe(true);
   expect(isEvidenceFieldPublic("draft", verified)).toBe(false);
   expect(isEvidenceFieldPublic("archived", verified)).toBe(false);
-  expect(
-    isEvidenceFieldPublic("published", { ...verified, state: "pending" as const }),
-  ).toBe(false);
+  expect(isEvidenceFieldPublic("published", { ...verified, state: "pending" as const })).toBe(
+    false,
+  );
   expect(isEvidenceFieldPublic("published", { ...verified, source: null })).toBe(false);
   expect(isEvidenceFieldPublic("published", { ...verified, reviewedAt: null })).toBe(false);
 });
@@ -106,7 +106,9 @@ test("invalid PDP remains a designed page-level failure", async ({ page }) => {
   await expect(page.getByTestId("pdp-color-selector")).toHaveCount(0);
 });
 
-test("pending gallery is keyboard usable without borrowing another product image", async ({ page }) => {
+test("pending gallery is keyboard usable without borrowing another product image", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
   const tablist = page.getByRole("tablist", { name: /تصاویر محصول/ });
@@ -125,9 +127,13 @@ test("pending gallery is keyboard usable without borrowing another product image
 test("mobile PDP is RTL, touch-safe and does not overflow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  expect(await page.evaluate(() => getComputedStyle(document.documentElement).direction)).toBe("rtl");
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).direction)).toBe(
+    "rtl",
+  );
   expect(
-    await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+    await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    ),
   ).toBeLessThanOrEqual(2);
   const dots = page.locator('[aria-label="انتخاب تصویر"] button');
   expect(await dots.count()).toBeGreaterThan(0);
@@ -138,14 +144,19 @@ test("mobile PDP is RTL, touch-safe and does not overflow", async ({ page }) => 
   }
 });
 
-test("sticky purchase surface stays above mobile navigation and reflects blocked state", async ({ page }) => {
+test("sticky purchase surface stays above mobile navigation and reflects blocked state", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
   await page.getByText("اطلاعات تصمیم‌گیری").scrollIntoViewIfNeeded();
   const sticky = page.getByTestId("pdp-sticky-buy-bar");
   await expect(sticky).toHaveAttribute("aria-hidden", "false");
   const stickyBox = await sticky.boundingBox();
-  const mobileNav = page.locator("nav").filter({ has: page.getByText("خانه") }).last();
+  const mobileNav = page
+    .locator("nav")
+    .filter({ has: page.getByText("خانه") })
+    .last();
   const navBox = await mobileNav.boundingBox();
   if (stickyBox && navBox) expect(stickyBox.y + stickyBox.height).toBeLessThanOrEqual(navBox.y + 2);
   await expect(sticky.getByRole("button")).toBeDisabled();

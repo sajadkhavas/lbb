@@ -155,13 +155,13 @@ export function buildProductDecisionViewModel(
         id: value || `color-${index + 1}`,
         label: colorName(value) || `رنگ ${index + 1}`,
         swatch: solidSwatch(value),
-        availability: (has("stock") && product.inStock ? "available" : "unknown") as DecisionAvailability,
+        availability: (has("stock") && product.inStock
+          ? "available"
+          : "unknown") as DecisionAvailability,
       }))
     : [];
 
-  const sizes = has("sizes")
-    ? product.sizes.map((label) => ({ id: label, label }))
-    : [];
+  const sizes = has("sizes") ? product.sizes.map((label) => ({ id: label, label })) : [];
 
   const extensionVariants = verifiedExtensionValue(enhancements.variants);
   const variants =
@@ -250,7 +250,8 @@ export function variantForSelection(
 ) {
   if (!colorId || !sizeId) return null;
   return (
-    model.variants.find((variant) => variant.colorId === colorId && variant.sizeId === sizeId) ?? null
+    model.variants.find((variant) => variant.colorId === colorId && variant.sizeId === sizeId) ??
+    null
   );
 }
 

@@ -174,10 +174,16 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
                   aria-label={item.alt}
                 >
                   <div className="max-w-[28rem]">
-                    <span aria-hidden="true" className="mx-auto block h-12 w-12 border border-hairline" />
-                    <p className="mt-5 text-sm font-semibold text-bone">رسانه محصول منتشر نشده است</p>
+                    <span
+                      aria-hidden="true"
+                      className="mx-auto block h-12 w-12 border border-hairline"
+                    />
+                    <p className="mt-5 text-sm font-semibold text-bone">
+                      رسانه محصول منتشر نشده است
+                    </p>
                     <p className="mt-2 text-xs leading-6 text-metal">
-                      تا زمانی که تصویر همان کالا با منبع قابل استناد تأیید نشود، تصویر نمونه یا تصویر محصول دیگری جایگزین نمی‌شود.
+                      تا زمانی که تصویر همان کالا با منبع قابل استناد تأیید نشود، تصویر نمونه یا
+                      تصویر محصول دیگری جایگزین نمی‌شود.
                     </p>
                   </div>
                 </div>

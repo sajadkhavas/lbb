@@ -1,9 +1,5 @@
 import { useRef } from "react";
-import type {
-  DecisionAvailability,
-  DecisionColor,
-  DecisionSize,
-} from "@/lib/product-decision";
+import type { DecisionAvailability, DecisionColor, DecisionSize } from "@/lib/product-decision";
 
 function availabilityLabel(state: DecisionAvailability) {
   if (state === "available") return "موجود";

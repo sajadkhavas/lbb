@@ -11,10 +11,7 @@ import { ProductPurchasePanel } from "@/components/lbb/product/ProductPurchasePa
 import { CompleteTheLook, RelatedProducts } from "@/components/lbb/product/ProductDiscovery";
 import { RecentlyViewed } from "@/components/lbb/product/RecentlyViewed";
 import { CATEGORIES } from "@/lib/categories";
-import {
-  buildProductDecisionViewModel,
-  type DecisionMedia,
-} from "@/lib/product-decision";
+import { buildProductDecisionViewModel, type DecisionMedia } from "@/lib/product-decision";
 import { evaluateProductEvidence } from "@/lib/product-evidence";
 import { productImage } from "@/lib/product-images";
 import { fmtToman, productBySlug, productsByCategory, type Product } from "@/lib/products";
@@ -72,7 +69,10 @@ export const Route = createFileRoute("/product/$slug")({
 
     const image = absAsset(productImage(product.slug));
     const title = `${product.name} | خرید از LBB — ${category.nameFa}`.slice(0, 59);
-    const description = `${product.shortDescription} قیمت: ${fmtToman(product.price)}.`.slice(0, 159);
+    const description = `${product.shortDescription} قیمت: ${fmtToman(product.price)}.`.slice(
+      0,
+      159,
+    );
     const productLd = {
       "@context": "https://schema.org",
       "@type": "Product",
@@ -100,7 +100,14 @@ export const Route = createFileRoute("/product/$slug")({
     ]);
 
     return {
-      meta: pageMeta({ title, description, path, image, type: "product", robots: ROBOTS.INDEX_FOLLOW }),
+      meta: pageMeta({
+        title,
+        description,
+        path,
+        image,
+        type: "product",
+        robots: ROBOTS.INDEX_FOLLOW,
+      }),
       links: canonical(path),
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(productLd) },
@@ -170,7 +177,8 @@ function ProductPage() {
               <TechLabel tone="signal">SHOW TRUTH / HIDE UNCERTAINTY</TechLabel>
               <h2 className="mt-2 text-display-3 text-bone">اطلاعات تصمیم‌گیری</h2>
               <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
-                هر بخش فقط زمانی نمایش داده می‌شود که داده همان محصول منبع قابل استناد و وضعیت تأییدشده داشته باشد.
+                هر بخش فقط زمانی نمایش داده می‌شود که داده همان محصول منبع قابل استناد و وضعیت
+                تأییدشده داشته باشد.
               </p>
             </div>
             <ProductFacts model={model} />
@@ -178,7 +186,8 @@ function ProductPage() {
             {!model.readyForCommerce ? (
               <div className="mt-8">
                 <StatePanel title="این رکورد هنوز برای تجارت عمومی منتشر نشده است" tone="warning">
-                  داده‌های موجود در کد برای توسعه رابط نگه داشته شده‌اند و تا تکمیل Evidence به‌عنوان قیمت، موجودی، سایز، رنگ یا مشخصات قطعی فروشگاه استفاده نمی‌شوند.
+                  داده‌های موجود در کد برای توسعه رابط نگه داشته شده‌اند و تا تکمیل Evidence
+                  به‌عنوان قیمت، موجودی، سایز، رنگ یا مشخصات قطعی فروشگاه استفاده نمی‌شوند.
                 </StatePanel>
               </div>
             ) : null}

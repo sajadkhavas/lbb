@@ -52,7 +52,9 @@ test("PDP survives text-spacing override at mobile width", async ({ page }) => {
     `,
   });
   expect(
-    await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+    await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    ),
   ).toBeLessThanOrEqual(2);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByRole("button", { name: "خرید در دسترس نیست" })).toBeVisible();
@@ -62,9 +64,9 @@ test("reduced motion removes sticky purchase transition", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  const duration = await page.getByTestId("pdp-sticky-buy-bar").evaluate(
-    (element) => getComputedStyle(element).transitionDuration,
-  );
+  const duration = await page
+    .getByTestId("pdp-sticky-buy-bar")
+    .evaluate((element) => getComputedStyle(element).transitionDuration);
   expect(duration).toBe("0s");
 });
 

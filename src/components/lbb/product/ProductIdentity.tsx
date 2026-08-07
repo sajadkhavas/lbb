@@ -28,7 +28,8 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
         <p className="mt-3 text-sm leading-7 text-metal">{identity.shortDescription}</p>
       ) : (
         <p className="mt-3 max-w-[52ch] text-sm leading-7 text-metal">
-          این رکورد برای توسعه رابط حفظ شده است، اما هویت و مشخصات آن هنوز برای نمایش عمومی تأیید نشده‌اند.
+          این رکورد برای توسعه رابط حفظ شده است، اما هویت و مشخصات آن هنوز برای نمایش عمومی تأیید
+          نشده‌اند.
         </p>
       )}
 
@@ -51,7 +52,9 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
           ) : null}
         </div>
       ) : (
-        <p className="mt-5 text-sm font-semibold text-metal">قیمت عمومی این محصول هنوز تأیید نشده است.</p>
+        <p className="mt-5 text-sm font-semibold text-metal">
+          قیمت عمومی این محصول هنوز تأیید نشده است.
+        </p>
       )}
     </section>
   );

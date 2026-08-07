@@ -111,7 +111,11 @@ export function ProductPurchasePanel({
             aria-label={liked ? "حذف محصول از علاقه‌مندی‌ها" : "افزودن محصول به علاقه‌مندی‌ها"}
             className="tap-target grid place-items-center border border-hairline text-bone hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
           >
-            <Heart size={18} aria-hidden="true" className={liked ? "fill-signal text-signal" : ""} />
+            <Heart
+              size={18}
+              aria-hidden="true"
+              className={liked ? "fill-signal text-signal" : ""}
+            />
           </button>
         </div>
 
@@ -156,12 +160,17 @@ export function ProductPurchasePanel({
 
         {!model.readyForCommerce ? (
           <StatePanel title="تصمیم خرید هنوز قابل تأیید نیست" tone="info">
-            رنگ، سایز، قیمت و موجودی فقط زمانی به کنترل خرید تبدیل می‌شوند که منبع و بازبینی معتبر داشته باشند. این صفحه مقدار موقت را به‌عنوان واقعیت فروشگاه نمایش نمی‌دهد.
+            رنگ، سایز، قیمت و موجودی فقط زمانی به کنترل خرید تبدیل می‌شوند که منبع و بازبینی معتبر
+            داشته باشند. این صفحه مقدار موقت را به‌عنوان واقعیت فروشگاه نمایش نمی‌دهد.
           </StatePanel>
         ) : null}
 
         {selectionError ? (
-          <p id="pdp-selection-error" role="alert" className="text-xs font-semibold leading-6 text-signal">
+          <p
+            id="pdp-selection-error"
+            role="alert"
+            className="text-xs font-semibold leading-6 text-signal"
+          >
             {statusLabel}
           </p>
         ) : null}
@@ -177,7 +186,11 @@ export function ProductPurchasePanel({
             <ShoppingBag size={18} aria-hidden="true" />
             <span>{canAdd ? "افزودن به سبد خرید" : "خرید در دسترس نیست"}</span>
           </button>
-          <p id="pdp-purchase-status" className="mt-2 text-xs leading-6 text-metal" aria-live="polite">
+          <p
+            id="pdp-purchase-status"
+            className="mt-2 text-xs leading-6 text-metal"
+            aria-live="polite"
+          >
             {statusLabel}
           </p>
         </div>

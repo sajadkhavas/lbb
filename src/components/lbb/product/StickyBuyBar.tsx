@@ -32,9 +32,13 @@ export function StickyBuyBar({
       <div className="mx-auto flex max-w-screen-sm items-center gap-3 px-4 py-2.5">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs text-metal">{name}</p>
-          {price !== null ? <p className="num text-sm font-bold text-bone">{fmtToman(price)}</p> : null}
+          {price !== null ? (
+            <p className="num text-sm font-bold text-bone">{fmtToman(price)}</p>
+          ) : null}
           <p className={`text-[10px] leading-5 ${canAdd ? "text-metal" : "text-signal"}`}>
-            {selectedColor && selectedSize ? `${selectedColor} · سایز ${selectedSize}` : statusLabel}
+            {selectedColor && selectedSize
+              ? `${selectedColor} · سایز ${selectedSize}`
+              : statusLabel}
           </p>
         </div>
         <button
