@@ -114,7 +114,8 @@ test("lookbook commerce controls are touch-safe or fail closed without a product
     }
   } else {
     await expect(page.getByText("این لوک‌بوک فعلاً لینک مستقیم محصول ندارد")).toBeVisible();
-    await expectTouchTarget(page.getByRole("link", { name: "مرور فروشگاه" }).last());
+    const main = page.locator('main[data-f17-route="lookbook"]');
+    await expectTouchTarget(main.getByRole("link", { name: "فروشگاه", exact: true }));
   }
 
   const opener = page.getByTestId("lookbook-scene-0");
