@@ -267,9 +267,26 @@ export const STORE_SETTINGS: StoreSettings = {
   ],
 };
 
+function isHttpsUrl(value: string | null): value is string {
+  if (!value) return false;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isSafeContactHref(channel: ContactChannel): boolean {
+  if (!channel.href.trim()) return false;
+  if (channel.kind === "email") return channel.href.startsWith("mailto:");
+  if (channel.kind === "phone") return channel.href.startsWith("tel:");
+  return isHttpsUrl(channel.href);
+}
+
 export function getPublicContactChannels(settings = STORE_SETTINGS): ContactChannel[] {
   return settings.contacts.filter(
-    (channel) => channel.isPublic && channel.verification === "verified",
+    (channel) =>
+      channel.isPublic && channel.verification === "verified" && isSafeContactHref(channel),
   );
 }
 
@@ -285,15 +302,47 @@ export function getPublicStoreLocation(settings = STORE_SETTINGS): StoreLocation
     : null;
 }
 
-export function canDisplayEnamad(settings = STORE_SETTINGS): boolean {
-  const { enamad } = settings;
+export function getPublicShippingMethods(settings = STORE_SETTINGS): ShippingMethodPublic[] {
+  if (!settings.shipping.isEnabled || settings.shipping.verification !== "verified") return [];
+  return settings.shipping.methods.filter(
+    (method) => method.isEnabled && method.verification === "verified",
+  );
+}
+
+export function canPublishShipping(settings = STORE_SETTINGS): boolean {
+  return getPublicShippingMethods(settings).length > 0;
+}
+
+export function canPublishReturns(settings = STORE_SETTINGS): boolean {
   return Boolean(
+    settings.returns.isEnabled &&
+    settings.returns.verification === "verified" &&
+    settings.legal.shippingReturnsPublished,
+  );
+}
+
+export function getPublicEnamad(
+  settings = STORE_SETTINGS,
+  placement?: EnamadPublicSettings["displayLocation"],
+): EnamadPublicSettings | null {
+  const { enamad } = settings;
+  const allowed = Boolean(
     enamad.isEnabled &&
     enamad.verification === "verified" &&
-    enamad.identifier &&
-    enamad.verificationUrl &&
-    enamad.badgeImageUrl,
+    enamad.identifier?.trim() &&
+    enamad.altText.trim() &&
+    isHttpsUrl(enamad.verificationUrl) &&
+    isHttpsUrl(enamad.badgeImageUrl) &&
+    (!placement || enamad.displayLocation === placement),
   );
+  return allowed ? enamad : null;
+}
+
+export function canDisplayEnamad(
+  settings = STORE_SETTINGS,
+  placement?: EnamadPublicSettings["displayLocation"],
+): boolean {
+  return getPublicEnamad(settings, placement) !== null;
 }
 
 export function canOfferPayment(settings = STORE_SETTINGS): boolean {
@@ -302,7 +351,11 @@ export function canOfferPayment(settings = STORE_SETTINGS): boolean {
     payment.isEnabled &&
     payment.verification === "verified" &&
     payment.provider &&
-    payment.displayName &&
+    payment.displayName?.trim() &&
     payment.paymentMethods.length,
   );
+}
+
+export function getPublicPaymentSettings(settings = STORE_SETTINGS): PaymentPublicSettings | null {
+  return canOfferPayment(settings) ? settings.payment : null;
 }

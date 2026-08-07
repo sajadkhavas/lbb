@@ -1,11 +1,14 @@
 import { ExternalLink } from "lucide-react";
-import { STORE_SETTINGS, canDisplayEnamad } from "@/lib/store-settings";
+import { STORE_SETTINGS, getPublicEnamad, type EnamadPublicSettings } from "@/lib/store-settings";
 
-export function TrustMarks() {
-  if (!canDisplayEnamad()) return null;
-
-  const { enamad } = STORE_SETTINGS;
-  if (!enamad.verificationUrl || !enamad.badgeImageUrl) return null;
+export function TrustMarks({
+  placement = "footer",
+}: {
+  placement?: EnamadPublicSettings["displayLocation"];
+}) {
+  const enamad = getPublicEnamad(STORE_SETTINGS, placement);
+  if (!enamad || !enamad.verificationUrl || !enamad.badgeImageUrl || !enamad.identifier)
+    return null;
 
   return (
     <section aria-label="نمادهای اعتماد فروشگاه" className="mt-6">
@@ -14,7 +17,7 @@ export function TrustMarks() {
         href={enamad.verificationUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-flex min-h-20 items-center gap-3 border border-hairline bg-carbon px-4 py-3 text-metal transition-colors hover:border-signal hover:text-bone"
+        className="mt-3 inline-flex min-h-20 items-center gap-3 border border-hairline bg-carbon px-4 py-3 text-metal transition-colors hover:border-signal hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
       >
         <img
           src={enamad.badgeImageUrl}
@@ -25,9 +28,12 @@ export function TrustMarks() {
           decoding="async"
           className="h-16 w-16 object-contain"
         />
-        <span className="flex items-center gap-2 text-xs font-semibold">
-          بررسی اعتبار نماد
-          <ExternalLink size={14} aria-hidden="true" />
+        <span className="flex flex-col items-start gap-1 text-xs font-semibold">
+          <span className="flex items-center gap-2">
+            بررسی اعتبار نماد
+            <ExternalLink size={14} aria-hidden="true" />
+          </span>
+          <span className="sr-only">شناسه نماد: {enamad.identifier}</span>
         </span>
       </a>
     </section>
