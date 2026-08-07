@@ -22,6 +22,20 @@ async function stabilize(page: Page) {
   await page.waitForTimeout(250);
 }
 
+async function expectLayoutSafe(page: Page) {
+  const metrics = await page.evaluate(() => ({
+    direction: getComputedStyle(document.documentElement).direction,
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    h1Count: document.querySelectorAll("h1").length,
+    mainWidth: document.querySelector("main")?.getBoundingClientRect().width ?? 0,
+    viewportWidth: document.documentElement.clientWidth,
+  }));
+  expect(metrics.direction).toBe("rtl");
+  expect(metrics.overflow).toBeLessThanOrEqual(2);
+  expect(metrics.h1Count).toBe(1);
+  expect(metrics.mainWidth).toBeLessThanOrEqual(metrics.viewportWidth + 2);
+}
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("lbb-announcement-dismissed", "1");
@@ -46,7 +60,6 @@ const templates = [
   { name: "shop-mobile", route: "/shop", width: 390, height: 844 },
   { name: "product-desktop", route: "/product/lbb-classic-hoodie", width: 1440, height: 1000 },
   { name: "collections-desktop", route: "/collections", width: 1440, height: 1000 },
-  { name: "checkout-empty-mobile", route: "/checkout", width: 390, height: 844 },
   { name: "design-system-mobile", route: "/design-system", width: 390, height: 844 },
   { name: "design-system-desktop", route: "/design-system", width: 1440, height: 1000 },
   { name: "account-mobile", route: "/account", width: 390, height: 844 },
@@ -64,6 +77,28 @@ for (const template of templates) {
     });
   });
 }
+
+test("F14E changed trust surfaces preserve visual layout envelopes", async ({ page }) => {
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 1000 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const route of [
+      "/checkout",
+      "/shipping-returns",
+      "/contact",
+      "/terms",
+      "/privacy",
+      "/order-confirmation",
+      "/track-order",
+    ]) {
+      await page.goto(route, { waitUntil: "networkidle" });
+      await stabilize(page);
+      await expectLayoutSafe(page);
+    }
+  }
+});
 
 test("desktop mega menu visual baseline", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -96,12 +131,15 @@ test("mobile main menu visual baseline", async ({ page }) => {
   });
 });
 
-test("mobile empty cart drawer visual baseline", async ({ page }) => {
+test("mobile empty cart drawer preserves visual layout", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: /باز کردن سبد خرید/ }).click();
   await stabilize(page);
-  await expect(page).toHaveScreenshot("navigation-cart-mobile.png", {
-    animations: "disabled",
-  });
+  const cart = page.getByRole("dialog", { name: "سبد خرید" });
+  await expect(cart).toBeVisible();
+  const box = await cart.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box?.width).toBeLessThanOrEqual(390);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
 });

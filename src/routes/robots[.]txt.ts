@@ -7,17 +7,7 @@ export const Route = createFileRoute("/robots.txt")({
     handlers: {
       GET: async () =>
         new Response(
-          [
-            "User-agent: *",
-            "Allow: /",
-            "Disallow: /checkout",
-            "Disallow: /order-confirmation",
-            "Disallow: /track-order",
-            "Disallow: /search",
-            "Disallow: /cart",
-            `Sitemap: ${absUrl("/sitemap.xml")}`,
-            "",
-          ].join("\n"),
+          ["User-agent: *", "Allow: /", `Sitemap: ${absUrl("/sitemap.xml")}`, ""].join("\n"),
           {
             headers: {
               "Content-Type": "text/plain; charset=utf-8",

@@ -39,7 +39,13 @@ export function absAsset(assetUrl: string): string {
 }
 
 export const OG_IMAGE = absUrl("/icons/icon-512.png");
-export const NOINDEX = { name: "robots", content: "noindex, nofollow" } as const;
+export const ROBOTS = {
+  INDEX_FOLLOW: "index, follow",
+  NOINDEX_FOLLOW: "noindex, follow",
+  NOINDEX_NOFOLLOW: "noindex, nofollow",
+} as const;
+export type RobotsDirective = (typeof ROBOTS)[keyof typeof ROBOTS];
+export const NOINDEX = { name: "robots", content: ROBOTS.NOINDEX_NOFOLLOW } as const;
 
 type MetaEntry =
   { title: string } | { name: string; content: string } | { property: string; content: string };
@@ -50,15 +56,19 @@ export function pageMeta(opts: {
   path: string;
   image?: string;
   type?: "website" | "article" | "product";
+  robots?: RobotsDirective;
   noindex?: boolean;
 }): MetaEntry[] {
-  const { title, description, path, image, type = "website", noindex } = opts;
+  const { title, description, path, image, type = "website", robots, noindex } = opts;
   const url = absUrl(path);
   const img = image ? absAsset(image) : OG_IMAGE;
   const meta: MetaEntry[] = [
     { title },
     { name: "description", content: description },
-    { name: "robots", content: noindex ? "noindex, nofollow" : "index, follow" },
+    {
+      name: "robots",
+      content: robots ?? (noindex ? ROBOTS.NOINDEX_NOFOLLOW : ROBOTS.INDEX_FOLLOW),
+    },
     { property: "og:title", content: title },
     { property: "og:description", content: description },
     { property: "og:type", content: type },
@@ -67,10 +77,8 @@ export function pageMeta(opts: {
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
   ];
-  if (!noindex) {
-    meta.push({ property: "og:image", content: img });
-    meta.push({ name: "twitter:image", content: img });
-  }
+  meta.push({ property: "og:image", content: img });
+  meta.push({ name: "twitter:image", content: img });
   return meta;
 }
 

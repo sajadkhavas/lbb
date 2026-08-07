@@ -27,7 +27,15 @@ import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { productGallery } from "@/lib/product-images";
 import { recordRecentlyViewed } from "@/lib/recently-viewed";
-import { absAsset, absUrl, breadcrumbLd as buildBreadcrumbLd } from "@/lib/site";
+import { evaluateProductEvidence } from "@/lib/product-evidence";
+import {
+  absAsset,
+  absUrl,
+  breadcrumbLd as buildBreadcrumbLd,
+  canonical,
+  pageMeta,
+  ROBOTS,
+} from "@/lib/site";
 import {
   Band,
   CtaClasses,
@@ -55,14 +63,18 @@ export const Route = createFileRoute("/product/$slug")({
   },
   head: ({ loaderData }) => {
     if (!loaderData)
-      return { meta: [{ title: "پیدا نشد" }, { name: "robots", content: "noindex" }] };
+      return {
+        meta: [{ title: "پیدا نشد" }, { name: "robots", content: ROBOTS.NOINDEX_NOFOLLOW }],
+      };
     const product = loaderData.product;
     const category = CATEGORIES[product.category];
     const title = `${product.name} | خرید از LBB — ${category.nameFa}`.slice(0, 59);
-    const description = `${product.shortDescription} قیمت: ${fmtToman(product.price)}.`.slice(
-      0,
-      159,
-    );
+    const evidence = evaluateProductEvidence(product);
+    const description = (
+      evidence.publishable
+        ? `${product.shortDescription} قیمت: ${fmtToman(product.price)}.`
+        : product.shortDescription
+    ).slice(0, 159);
     const path = `/product/${product.slug}`;
     const gallery = productGallery(product.slug).map(absAsset);
 
@@ -84,8 +96,6 @@ export const Route = createFileRoute("/product/$slug")({
         availability: product.inStock
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
-        itemCondition: "https://schema.org/NewCondition",
-        seller: { "@type": "Organization", name: "LBB" },
       },
     };
     const crumbs = buildBreadcrumbLd([
@@ -96,23 +106,19 @@ export const Route = createFileRoute("/product/$slug")({
     ]);
 
     return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { name: "robots", content: "index, follow" },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "product" },
-        { property: "og:url", content: absUrl(path) },
-        { property: "og:image", content: gallery[0] },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: title },
-        { name: "twitter:description", content: description },
-        { name: "twitter:image", content: gallery[0] },
-      ],
-      links: [{ rel: "canonical", href: absUrl(path) }],
+      meta: pageMeta({
+        title,
+        description,
+        path,
+        image: gallery[0],
+        type: "product",
+        robots: evidence.publishable ? ROBOTS.INDEX_FOLLOW : ROBOTS.NOINDEX_NOFOLLOW,
+      }),
+      links: canonical(path),
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(productLd) },
+        ...(evidence.publishable
+          ? [{ type: "application/ld+json", children: JSON.stringify(productLd) }]
+          : []),
         { type: "application/ld+json", children: JSON.stringify(crumbs) },
       ],
     };

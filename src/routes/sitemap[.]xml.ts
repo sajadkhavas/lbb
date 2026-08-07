@@ -4,6 +4,7 @@ import { products } from "@/lib/products";
 import { CATEGORY_SLUGS } from "@/lib/categories";
 import { COLLECTIONS } from "@/lib/collections";
 import { JOURNAL_ARTICLES } from "@/lib/journal";
+import { evaluateProductEvidence } from "@/lib/product-evidence";
 import { absUrl } from "@/lib/site";
 
 type Entry = { path: string; priority: string; changefreq?: string };
@@ -20,11 +21,13 @@ export const Route = createFileRoute("/sitemap.xml")({
             priority: "0.9",
             changefreq: "weekly",
           })),
-          ...products.map((product) => ({
-            path: `/product/${product.slug}`,
-            priority: "0.8",
-            changefreq: "weekly",
-          })),
+          ...products
+            .filter((product) => evaluateProductEvidence(product).publishable)
+            .map((product) => ({
+              path: `/product/${product.slug}`,
+              priority: "0.8",
+              changefreq: "weekly",
+            })),
           { path: "/collections", priority: "0.7", changefreq: "weekly" },
           ...COLLECTIONS.map((collection) => ({
             path: `/collections/${collection.slug}`,

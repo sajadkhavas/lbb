@@ -1,14 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { DemoNotice, Shell } from "@/components/lbb/ui/primitives";
+import {
+  CtaClasses,
+  Shell,
+  StatePanel,
+  StatusTag,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
+import {
+  STORE_SETTINGS,
+  canPublishReturns,
+  canPublishShipping,
+  getPublicPaymentSettings,
+} from "@/lib/store-settings";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 
-const TITLE = "شرایط استفاده از نسخه نمایشی | LBB";
+const TITLE = "شرایط استفاده | LBB";
 const DESC =
-  "شرایط استفاده از نسخه نمایشی LBB؛ پرداخت، سفارش، ارسال و حساب کاربری واقعی هنوز فعال نیستند.";
+  "شرایط استفاده از وب‌سایت LBB و وضعیت انتشار شرایط تجاری؛ سیاست‌ها و اطلاعات عملیاتی تأییدنشده به‌عنوان تعهد فروش نمایش داده نمی‌شوند.";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -29,86 +41,168 @@ export const Route = createFileRoute("/terms")({
   component: TermsPage,
 });
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  id,
+}: {
+  title: string;
+  children: React.ReactNode;
+  id?: string;
+}) {
   return (
-    <section className="mb-9">
-      <h2 className="mb-3 text-xl font-bold text-bone">{title}</h2>
-      <div className="text-sm leading-8 text-metal">{children}</div>
+    <section id={id} className="scroll-mt-28 border-t border-hairline pt-7">
+      <h2 className="text-xl font-bold text-bone">{title}</h2>
+      <div className="mt-3 space-y-3 text-sm leading-8 text-metal">{children}</div>
     </section>
   );
 }
 
 function TermsPage() {
+  const { legal, payment } = STORE_SETTINGS;
+  const shippingPublished = canPublishShipping();
+  const returnsPublished = canPublishReturns();
+  const publicPayment = getPublicPaymentSettings();
+
   return (
     <>
       <Navbar />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-28 pt-16">
+      <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16">
         <div className="hairline-b">
           <Shell className="py-3">
             <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "شرایط استفاده" }]} />
           </Shell>
         </div>
 
-        <header className="mx-auto max-w-[820px] px-4 py-10 md:px-8">
-          <p className="tech text-signal">DEMO TERMS</p>
-          <h1 className="mt-3 text-display-2 text-bone">شرایط استفاده</h1>
-          <p className="mt-3 text-sm leading-7 text-metal">
-            این شرایط وضعیت فعلی نسخه نمایشی سایت را توضیح می‌دهد و جایگزین شرایط فروش آینده نیست.
+        <header className="mx-auto max-w-[860px] px-4 py-10 md:px-8 md:py-14">
+          <TechLabel tone="signal">LEGAL / PUBLIC STATUS</TechLabel>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h1 className="text-display-2 text-bone">شرایط استفاده</h1>
+            <StatusTag tone={legal.termsPublished ? "success" : "warning"}>
+              {legal.termsPublished ? "منتشرشده" : "شرایط تجاری نهایی منتشر نشده"}
+            </StatusTag>
+          </div>
+          <p className="mt-4 max-w-[68ch] text-sm leading-8 text-metal">
+            این صفحه مرزهای فعلی استفاده از وب‌سایت را روشن می‌کند. جزئیات فروش، ارسال، مرجوعی یا
+            پرداخت فقط زمانی به‌عنوان شرط تجاری نمایش داده می‌شوند که منبع عمومی تأییدشده داشته
+            باشند.
           </p>
         </header>
 
-        <div className="mx-auto max-w-[820px] px-4 pb-16 md:px-8">
-          <DemoNotice className="mb-10 rounded-xl">
-            استفاده از سبد، Checkout و کد مرجع فقط برای آزمایش تجربه کاربری است. هیچ خرید، پرداخت،
-            رزرو موجودی، پیامک، ایمیل، ارسال یا قرارداد فروش از طریق این نسخه ایجاد نمی‌شود.
-          </DemoNotice>
+        <div className="mx-auto max-w-[860px] px-4 pb-16 md:px-8">
+          {!legal.termsPublished ? (
+            <StatePanel title="شرایط تجاری فروش هنوز نهایی نشده است" tone="warning">
+              این وضعیت به معنی وجود مهلت، هزینه، روش پرداخت یا تعهد پیش‌فرض نیست. تا انتشار نسخهٔ
+              تأییدشده، این صفحه هیچ سیاست تجاری نامشخصی را اختراع نمی‌کند.
+            </StatePanel>
+          ) : null}
 
-          <Section title="ماهیت نسخه فعلی">
-            <p>
-              محصولات، قیمت‌ها، موجودی‌ها و فرایند سفارش برای نمایش و ارزیابی رابط کاربری ارائه
-              شده‌اند. تا پیش از اعلام رسمی شروع فروش، دکمه‌های سایت تعهدی برای عرضه کالا یا پذیرش
-              سفارش ایجاد نمی‌کنند.
-            </p>
-          </Section>
+          <nav
+            aria-label="بخش‌های شرایط استفاده"
+            className="mt-6 flex flex-wrap gap-2 rounded-2xl border border-hairline bg-carbon p-4"
+          >
+            <a
+              href="#website-use"
+              className="min-h-11 px-3 py-2 text-xs text-metal hover:text-signal"
+            >
+              استفاده از سایت
+            </a>
+            <a href="#commerce" className="min-h-11 px-3 py-2 text-xs text-metal hover:text-signal">
+              فروش و پرداخت
+            </a>
+            <a href="#policies" className="min-h-11 px-3 py-2 text-xs text-metal hover:text-signal">
+              سیاست‌های عملیاتی
+            </a>
+            <a href="#support" className="min-h-11 px-3 py-2 text-xs text-metal hover:text-signal">
+              پشتیبانی
+            </a>
+          </nav>
 
-          <Section title="سبد و پیش‌نمایش سفارش">
-            <p>
-              سبد خرید در حافظه مرورگر نگه‌داری می‌شود. مرحله Checkout فقط اطلاعات را در همان صفحه
-              بررسی می‌کند و یک خلاصه غیرشخصی و موقت در همان تب می‌سازد. این خلاصه رسید، فاکتور یا
-              کد سفارش واقعی نیست.
-            </p>
-          </Section>
+          <div className="mt-10 space-y-9">
+            <Section id="website-use" title="استفاده از وب‌سایت">
+              <p>
+                صفحات عمومی LBB برای مرور محتوای فروشگاه، اطلاعات محصول و مسیرهای پشتیبانی در دسترس
+                هستند. رابط کاربری نباید از وجود یک مقدار داخلی، وضعیت تجاری عمومی نتیجه‌گیری کند؛
+                تنها دادهٔ تأییدشده و فعال مبنای ادعای عمومی است.
+              </p>
+              <p>
+                اطلاعات نمایش‌داده‌شده در هر صفحه باید در همان زمینه خوانده شوند. نبودن اطلاعات
+                عملیاتی به معنی اعمال یک مقدار عرفی یا سیاست خودکار نیست.
+              </p>
+            </Section>
 
-          <Section title="پرداخت و اطلاعات بانکی">
-            <p>
-              هیچ درگاه بانکی، انتقال وجه یا پرداخت در محل فعال نیست. سایت شماره کارت، رمز، CVV2 یا
-              سایر داده‌های بانکی درخواست و ذخیره نمی‌کند. هر درخواست پرداخت خارج از سامانه رسمی
-              آینده باید نامعتبر تلقی شود.
-            </p>
-          </Section>
+            <Section id="commerce" title="ثبت سفارش و پرداخت">
+              {publicPayment ? (
+                <p>
+                  روش پرداخت عمومی فعال با عنوان «{publicPayment.displayName}» در تنظیمات فروشگاه
+                  تأیید شده است. با این حال نتیجهٔ پرداخت تنها پس از Verify معتبر سمت سرور می‌تواند
+                  موفق تلقی شود؛ پارامترهای مرورگر یا Callback به‌تنهایی تأیید پرداخت نیستند.
+                </p>
+              ) : (
+                <p>
+                  در حال حاضر هیچ روش پرداخت عمومیِ فعال و تأییدشده‌ای برای نمایش در این فرانت‌اند
+                  وجود ندارد. نام درگاه، روش پرداخت یا شناسهٔ پذیرنده از روی حدس نمایش داده نمی‌شود.
+                </p>
+              )}
+              <p>
+                اطلاعات محرمانهٔ پرداخت مانند Merchant ID محرمانه، API Key، Client Secret، Private
+                Key و Webhook Secret بخشی از رابط عمومی نیستند و نباید به Bundle مرورگر وارد شوند.
+              </p>
+              {payment.verification === "pending" ? (
+                <p>تنظیمات عمومی پرداخت در حال بررسی است و تا تأیید نهایی منتشر نمی‌شود.</p>
+              ) : null}
+            </Section>
 
-          <Section title="قیمت و موجودی">
-            <p>
-              اعداد نمایش‌داده‌شده تا پیش از راه‌اندازی فروش، قیمت نهایی یا موجودی تضمین‌شده محسوب
-              نمی‌شوند. قیمت، مالیات، تخفیف، هزینه ارسال و موجودی نهایی باید هنگام فعال‌شدن سامانه
-              فروش بازبینی و منتشر شوند.
-            </p>
-          </Section>
+            <Section id="policies" title="ارسال، تعویض، مرجوعی و بازپرداخت">
+              <p>
+                وضعیت عمومی ارسال در حال حاضر {shippingPublished ? "منتشرشده" : "منتشرنشده"} و وضعیت
+                سیاست مرجوعی/تعویض {returnsPublished ? "منتشرشده" : "منتشرنشده"} است. این برچسب‌ها
+                از Store Settings می‌آیند و جای سیاست واقعی را نمی‌گیرند.
+              </p>
+              <p>
+                مبلغ ارسال، ارسال رایگان، زمان تحویل، مهلت مرجوعی و زمان بازپرداخت فقط در صفحهٔ
+                سیاست عملیاتی و تنها در صورت تأیید نمایش داده می‌شوند.
+              </p>
+              <Link to="/shipping-returns" className={CtaClasses("line")}>
+                مشاهده وضعیت ارسال و مرجوعی
+              </Link>
+            </Section>
 
-          <Section title="محتوا و علائم تجاری">
-            <p>
-              نام، طراحی رابط، نوشته‌ها و تصاویر منتشرشده در سایت برای معرفی تجربه LBB استفاده
-              می‌شوند. استفاده مجدد تجاری از محتوای اختصاصی بدون اجازه صاحب آن مجاز نیست؛ حقوق منابع
-              ثالث نیز متعلق به صاحبان همان منابع است.
-            </p>
-          </Section>
+            <Section title="حریم خصوصی">
+              <p>
+                داده‌هایی که فرانت‌اند فعلی در مرورگر نگه می‌دارد، مسیرهای خارجی و وضعیت اتصال
+                سرویس‌های سمت سرور در صفحهٔ حریم خصوصی توضیح داده شده‌اند. فعال‌شدن هر سرویس جدید
+                باید قبل از جمع‌آوری دادهٔ جدید در همان صفحه منعکس شود.
+              </p>
+              <Link to="/privacy" className={CtaClasses("line")}>
+                مطالعه حریم خصوصی
+              </Link>
+            </Section>
 
-          <Section title="تغییر وضعیت سرویس">
-            <p>
-              با اتصال بک‌اند، پرداخت و عملیات ارسال، این صفحه باید پیش از پذیرش سفارش واقعی با
-              اطلاعات کسب‌وکار، روش پرداخت، ارسال، مرجوعی و پشتیبانی نهایی به‌روزرسانی شود.
-            </p>
-          </Section>
+            <Section id="support" title="پشتیبانی و اطلاعات رسمی">
+              <p>
+                برای ارتباط، فقط کانال‌هایی که در صفحه تماس به‌عنوان عمومی و تأییدشده نمایش داده
+                می‌شوند معتبرند. این صفحه شماره تلفن، ایمیل، ساعت کاری یا نشانی تکمیلی تأییدنشده
+                تولید نمی‌کند.
+              </p>
+              <Link to="/contact" className={CtaClasses("signal")}>
+                تماس و پشتیبانی
+              </Link>
+            </Section>
+
+            <Section title="به‌روزرسانی این صفحه">
+              <p>
+                هنگام تأیید سیاست‌های واقعی کسب‌وکار، محتوای عمومی باید از تنظیمات منتشرشده تغذیه
+                شود. تا آن زمان، وضعیت «منتشر نشده» عمداً به‌جای متن حقوقی یا تعهد ساختگی نمایش داده
+                می‌شود.
+              </p>
+              {legal.lastReviewedAt ? (
+                <p>
+                  آخرین بازبینی ثبت‌شده: <span dir="ltr">{legal.lastReviewedAt}</span>
+                </p>
+              ) : null}
+            </Section>
+          </div>
         </div>
       </main>
       <Footer />
