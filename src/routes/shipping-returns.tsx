@@ -14,6 +14,7 @@ import {
 import {
   STORE_SETTINGS,
   canPublishReturns,
+  canPublishShipping,
   getPublicShippingMethods,
   type VerificationState,
 } from "@/lib/store-settings";
@@ -43,8 +44,8 @@ export const Route = createFileRoute("/shipping-returns")({
   component: ShippingReturnsPage,
 });
 
-function VerificationBadge({ state }: { state: VerificationState }) {
-  if (state === "verified") return <StatusTag tone="success">تأییدشده</StatusTag>;
+function PublicationBadge({ state, published }: { state: VerificationState; published: boolean }) {
+  if (published) return <StatusTag tone="success">تأیید و منتشرشده</StatusTag>;
   if (state === "pending") return <StatusTag tone="warning">در حال بررسی</StatusTag>;
   return <StatusTag tone="neutral">منتشر نشده</StatusTag>;
 }
@@ -197,6 +198,8 @@ function ReturnsState() {
 
 function ShippingReturnsPage() {
   const { shipping, returns } = STORE_SETTINGS;
+  const shippingPublished = canPublishShipping();
+  const returnsPublished = canPublishReturns();
 
   return (
     <>
@@ -218,11 +221,11 @@ function ShippingReturnsPage() {
           <div className="mt-5 flex flex-wrap gap-2" aria-label="وضعیت سیاست‌ها">
             <span className="inline-flex items-center gap-2">
               <span className="text-xs text-mute">ارسال</span>
-              <VerificationBadge state={shipping.verification} />
+              <PublicationBadge state={shipping.verification} published={shippingPublished} />
             </span>
             <span className="inline-flex items-center gap-2">
               <span className="text-xs text-mute">مرجوعی</span>
-              <VerificationBadge state={returns.verification} />
+              <PublicationBadge state={returns.verification} published={returnsPublished} />
             </span>
           </div>
         </header>
