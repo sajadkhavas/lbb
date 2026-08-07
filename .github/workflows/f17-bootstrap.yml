@@ -1,4 +1,4 @@
-# F17 acceptance rerun 2
+# F17 acceptance rerun 3
 name: F17 bootstrap
 
 on:
@@ -28,6 +28,57 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Apply F17 acceptance fixes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, label):
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected one target in {path}, found {count}")
+              file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          replace_once(
+              "src/routes/collections.$slug.tsx",
+              '''          <Shell>\n            <EmptyState\n              icon={<Layers3 aria-hidden="true" size={34} />}\n              title="این کالکشن پیدا نشد"''',
+              '''          <Shell>\n            <h1 className="sr-only">این کالکشن پیدا نشد</h1>\n            <EmptyState\n              icon={<Layers3 aria-hidden="true" size={34} />}\n              title="این کالکشن پیدا نشد"''',
+              "collection 404 h1",
+          )
+
+          replace_once(
+              "src/routes/journal.$slug.tsx",
+              '''          <Shell>\n            <EmptyState\n              icon={<BookOpenText aria-hidden="true" size={34} />}\n              title="این مقاله پیدا نشد"''',
+              '''          <Shell>\n            <h1 className="sr-only">این مقاله پیدا نشد</h1>\n            <EmptyState\n              icon={<BookOpenText aria-hidden="true" size={34} />}\n              title="این مقاله پیدا نشد"''',
+              "journal 404 h1",
+          )
+
+          replace_once(
+              "tests/homepage-narrative.spec.ts",
+              'test("product moments and shop the look expose truthful direct product paths", async ({ page }) => {',
+              'test("product moments retain their route while editorial shop-the-story gates draft products", async ({ page }) => {',
+              "homepage narrative test title",
+          )
+
+          replace_once(
+              "tests/homepage-narrative.spec.ts",
+              '''  const look = page.locator('section[aria-labelledby="shop-look-title"]');\n  await expect(look.getByRole("link", { name: /هودی کلاسیک LBB/ })).toBeVisible();\n  await expect(look.getByRole("link", { name: /شلوار کارگو استریت/ })).toBeVisible();\n  await expect(look.getByRole("link", { name: /کتونی اربن رانر/ })).toBeVisible();\n  await expect(look.getByText("تصویر برای نمایش ترکیب است")).toBeVisible();''',
+              '''  const look = page.locator('section[aria-labelledby="shop-look-title"]');\n  await expect(look.locator('a[href^="/product/"]')).toHaveCount(0);\n  await expect(look.locator("[data-f17-product-hotspot]")).toHaveCount(0);\n  await expect(look.getByText("نقطه خرید مستقیمی روی این تصویر فعال نیست")).toBeVisible();\n  await expect(look.getByRole("link", { name: "روایت شبگرد" })).toHaveAttribute(\n    "href",\n    "/collections/drop-01-shabgard",\n  );\n  await expect(look.getByRole("link", { name: "مرور فروشگاه" })).toHaveAttribute("href", "/shop");''',
+              "shop the story draft gate assertions",
+          )
+
+          replace_once(
+              "tests/homepage-narrative.spec.ts",
+              '''  await expect(section.getByText(/تاریخ انتشار تاییدشده ندارد/)).toBeVisible();\n  await expect(section.getByRole("link", { name: "مشاهده کالکشن شبگرد" })).toHaveAttribute(\n    "href",\n    "/collections/drop-01-shabgard",\n  );\n  await expect(page.getByText("دراپ بعدی در حال طراحی است", { exact: true })).toHaveCount(0);''',
+              '''  await expect(section.getByText(/وضعیت زمانی یا موجودی دراپ.*حدس زده نمی‌شود/)).toBeVisible();\n  await expect(section.locator('a[href^="/product/"]')).toHaveCount(0);\n  await expect(section.getByRole("link", { name: "مشاهده روایت دراپ ۰۱ — شبگرد" })).toHaveAttribute(\n    "href",\n    "/collections/drop-01-shabgard",\n  );\n  await expect(page.getByText("دراپ بعدی در حال طراحی است", { exact: true })).toHaveCount(0);''',
+              "drop story truth-safe assertions",
+          )
+
+          print("F17 acceptance fixes applied.")
+          PY
+
       - name: Install locked dependencies
         run: npm ci
 
@@ -48,12 +99,18 @@ jobs:
           src/routes/lookbook.tsx
           src/routes/journal.index.tsx
           'src/routes/journal.$slug.tsx'
+          tests/homepage-narrative.spec.ts
           tests/f17-editorial-commerce.spec.ts
           tests/f17-accessibility.spec.ts
           tests/f17-visual.spec.ts
 
       - name: Generate F17 and changed existing visual baselines
-        run: npx playwright test tests/visual.spec.ts tests/f17-visual.spec.ts --update-snapshots
+        run: >-
+          npx playwright test
+          tests/visual.spec.ts
+          tests/homepage-visual.spec.ts
+          tests/f17-visual.spec.ts
+          --update-snapshots
 
       - name: Run F17 functional and accessibility gates
         run: npx playwright test tests/f17-editorial-commerce.spec.ts tests/f17-accessibility.spec.ts tests/f17-visual.spec.ts
@@ -65,7 +122,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/f17 src/lib/editorial-commerce.ts src/components/lbb/editorial/EditorialCommerceBridge.tsx src/components/lbb/home/DropStory.tsx src/components/lbb/home/ShopTheLook.tsx src/components/lbb/home/EditorialGateway.tsx src/routes/collections.index.tsx 'src/routes/collections.$slug.tsx' src/routes/lookbook.tsx src/routes/journal.index.tsx 'src/routes/journal.$slug.tsx' tests/f17-editorial-commerce.spec.ts tests/f17-accessibility.spec.ts tests/f17-visual.spec.ts tests/f17-visual.spec.ts-snapshots tests/visual.spec.ts-snapshots
+          git add docs/f17 src/lib/editorial-commerce.ts src/components/lbb/editorial/EditorialCommerceBridge.tsx src/components/lbb/home/DropStory.tsx src/components/lbb/home/ShopTheLook.tsx src/components/lbb/home/EditorialGateway.tsx src/routes/collections.index.tsx 'src/routes/collections.$slug.tsx' src/routes/lookbook.tsx src/routes/journal.index.tsx 'src/routes/journal.$slug.tsx' tests/homepage-narrative.spec.ts tests/f17-editorial-commerce.spec.ts tests/f17-accessibility.spec.ts tests/f17-visual.spec.ts tests/f17-visual.spec.ts-snapshots tests/visual.spec.ts-snapshots tests/homepage-visual.spec.ts-snapshots
           if git diff --cached --quiet; then
             echo "No verified generated changes to commit."
             exit 0
