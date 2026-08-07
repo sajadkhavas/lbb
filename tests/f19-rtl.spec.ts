@@ -64,10 +64,14 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
-test("mixed-direction islands stay explicit inside the RTL document", async ({ page }) => {
+test("RTL pages keep external contact labels readable and directional media islands explicit", async ({
+  page,
+}) => {
   await page.goto("/contact", { waitUntil: "networkidle" });
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(page.locator('#store-location [dir="ltr"]')).toContainText("@lbbclo");
+  const instagram = page.getByRole("link", { name: "اینستاگرام رسمی LBB" });
+  await expect(instagram).toBeVisible();
+  await expect(instagram).toHaveAttribute("href", /^https:\/\/www\.instagram\.com\//);
 
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
   const gallery = page.locator('[aria-roledescription="carousel"]');
