@@ -2,11 +2,35 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import { FREE_SHIPPING_THRESHOLD, shippingFeeFor } from "@/lib/commerce";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { fmtToman } from "@/lib/products";
 import { productImage } from "@/lib/product-images";
+import { STORE_SETTINGS, getPublicShippingMethods } from "@/lib/store-settings";
 import { CtaClasses, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+
+function DrawerShippingState() {
+  const methods = getPublicShippingMethods();
+  const pending = STORE_SETTINGS.shipping.verification === "pending";
+
+  if (methods.length > 0) {
+    return (
+      <StatePanel title="ارسال عمومی تأیید شده" tone="success" className="mt-4">
+        روش‌های فعال: {methods.map((method) => method.title).join("، ")}. مبلغ یا زمان فقط در صورت
+        قابل‌اعمال بودن دادهٔ تأییدشده نمایش داده می‌شود.
+      </StatePanel>
+    );
+  }
+
+  return (
+    <StatePanel
+      title={pending ? "تنظیمات ارسال در حال بررسی است" : "هزینه ارسال هنوز منتشر نشده است"}
+      tone={pending ? "warning" : "info"}
+      className="mt-4"
+    >
+      سبد کناری مبلغ، ارسال رایگان یا زمان تحویل فرضی نمایش نمی‌دهد.
+    </StatePanel>
+  );
+}
 
 export function CartDrawer() {
   const {
@@ -21,8 +45,6 @@ export function CartDrawer() {
     hydrated,
   } = useCart();
   const panelRef = useRef<HTMLDivElement>(null);
-  const shipping = shippingFeeFor(subtotal);
-  const total = subtotal + shipping;
 
   useFocusTrap(drawerOpen, panelRef, closeDrawer);
   if (!drawerOpen) return null;
@@ -43,7 +65,7 @@ export function CartDrawer() {
       />
       <aside
         ref={panelRef}
-        className="absolute inset-y-0 left-0 flex w-full max-w-[430px] flex-col border-r border-hairline bg-obsidian text-bone shadow-overlay"
+        className="absolute inset-y-0 left-0 flex w-full max-w-[430px] flex-col overflow-x-hidden border-r border-hairline bg-obsidian text-bone shadow-overlay"
       >
         <header className="flex min-h-16 items-center justify-between border-b border-hairline px-4 md:px-6">
           <div>
@@ -60,7 +82,7 @@ export function CartDrawer() {
             type="button"
             onClick={closeDrawer}
             aria-label="بستن سبد خرید"
-            className="tap-target grid place-items-center border border-hairline text-bone transition-colors hover:border-signal hover:text-signal"
+            className="tap-target grid place-items-center border border-hairline text-bone transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
           >
             <X size={18} aria-hidden="true" />
           </button>
@@ -78,7 +100,7 @@ export function CartDrawer() {
             <div>
               <p className="text-title text-bone">سبد خالی است</p>
               <p className="mt-2 text-sm leading-7 text-metal">
-                محصول و Variant انتخاب‌شده در همین مرورگر نگه‌داری می‌شود.
+                محصول و انتخاب‌های شما در همین مرورگر نگه‌داری می‌شوند.
               </p>
             </div>
             <Link to="/shop" onClick={dismissDrawer} className={CtaClasses("signal")}>
@@ -92,7 +114,7 @@ export function CartDrawer() {
                 {lines.map((line, index) => (
                   <li
                     key={`${line.slug}-${line.color ?? ""}-${line.size ?? ""}`}
-                    className="grid grid-cols-[76px_minmax(0,1fr)] gap-3 border-b border-hairline-soft pb-5"
+                    className="grid min-w-0 grid-cols-[76px_minmax(0,1fr)] gap-3 border-b border-hairline-soft pb-5"
                   >
                     <Link
                       to="/product/$slug"
@@ -127,7 +149,7 @@ export function CartDrawer() {
                           type="button"
                           onClick={() => remove(index)}
                           aria-label={`حذف ${line.name}`}
-                          className="tap-target grid shrink-0 place-items-center text-mute transition-colors hover:text-danger"
+                          className="tap-target grid shrink-0 place-items-center text-mute transition-colors hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                         >
                           <Trash2 size={15} aria-hidden="true" />
                         </button>
@@ -139,7 +161,7 @@ export function CartDrawer() {
                             aria-label={`کاهش تعداد ${line.name}`}
                             onClick={() => setQty(index, line.qty - 1)}
                             disabled={line.qty <= 1}
-                            className="grid h-9 w-9 place-items-center text-bone disabled:opacity-35"
+                            className="grid h-9 w-9 place-items-center text-bone disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                           >
                             <Minus size={13} aria-hidden="true" />
                           </button>
@@ -150,7 +172,7 @@ export function CartDrawer() {
                             type="button"
                             aria-label={`افزایش تعداد ${line.name}`}
                             onClick={() => setQty(index, line.qty + 1)}
-                            className="grid h-9 w-9 place-items-center text-bone"
+                            className="grid h-9 w-9 place-items-center text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                           >
                             <Plus size={13} aria-hidden="true" />
                           </button>
@@ -166,33 +188,19 @@ export function CartDrawer() {
             </div>
 
             <footer className="border-t border-hairline bg-carbon px-4 py-5 md:px-6">
-              <dl className="space-y-2 text-xs text-metal">
+              <dl className="text-sm text-metal">
                 <div className="flex items-center justify-between gap-4">
-                  <dt>جمع کالاها</dt>
-                  <dd className="num text-bone">{fmtToman(subtotal)}</dd>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <dt>ارسال نمایشی</dt>
-                  <dd className="num text-bone">
-                    {shipping === 0 ? "رایگان" : fmtToman(shipping)}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between gap-4 border-t border-hairline pt-3 text-sm">
-                  <dt className="font-bold text-bone">جمع نمایشی</dt>
-                  <dd className="num text-lg font-black text-bone">{fmtToman(total)}</dd>
+                  <dt className="font-bold text-bone">جمع کالاها</dt>
+                  <dd className="num text-lg font-black text-bone">{fmtToman(subtotal)}</dd>
                 </div>
               </dl>
-              {subtotal < FREE_SHIPPING_THRESHOLD ? (
-                <p className="mt-2 text-[11px] leading-5 text-mute">
-                  ارسال رایگان نمایشی از {fmtToman(FREE_SHIPPING_THRESHOLD)}
-                </p>
-              ) : null}
+              <DrawerShippingState />
               <Link
                 to="/checkout"
                 onClick={dismissDrawer}
                 className={`${CtaClasses("signal")} mt-4 w-full`}
               >
-                ساخت پیش‌نمایش سفارش
+                بررسی امکان تکمیل سفارش
               </Link>
               <Link
                 to="/cart"
@@ -201,9 +209,10 @@ export function CartDrawer() {
               >
                 مشاهده صفحه سبد
               </Link>
-              <StatePanel title="عملیات واقعی انجام نمی‌شود" tone="info" className="mt-4">
-                پرداخت و ثبت سفارش Backend در این نسخه فعال نیست.
-              </StatePanel>
+              <p className="mt-4 text-[11px] leading-6 text-mute">
+                جمع نهایی، هزینه ارسال و وضعیت پرداخت بدون دادهٔ عمومی تأییدشده محاسبه یا ادعا
+                نمی‌شوند.
+              </p>
             </footer>
           </>
         )}
