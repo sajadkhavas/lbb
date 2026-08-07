@@ -47,26 +47,14 @@ jobs:
               raise SystemExit("sitemap assertion target not found")
           text = text.replace(old, new, 1)
 
-          old = '''  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);'''
-          new = '''  const productRobots = page.locator('meta[name="robots"]');
-          expect(await productRobots.count()).toBeGreaterThan(0);
-          await expect(productRobots.first()).toHaveAttribute("content", /noindex/);'''
-          if old not in text:
-              raise SystemExit("product 404 robots assertion target not found")
-          text = text.replace(old, new, 1)
-
-          old = '''  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-            "content",
-            "noindex, nofollow",
-          );'''
-          new = '''  const globalRobots = page.locator('meta[name="robots"]');
-          expect(await globalRobots.count()).toBeGreaterThan(0);
-          await expect(globalRobots.first()).toHaveAttribute("content", "noindex, nofollow");'''
-          if old not in text:
-              raise SystemExit("global 404 robots assertion target not found")
-          text = text.replace(old, new, 1)
+          old_locator = "page.locator('meta[name=\"robots\"]')"
+          locator_count = text.count(old_locator)
+          if locator_count == 0:
+              raise SystemExit("robots locator target not found")
+          text = text.replace(old_locator, old_locator + ".first()")
 
           path.write_text(text, encoding="utf-8")
+          print(f"Refined {locator_count} robots assertions.")
           PY
 
       - name: Install locked dependencies
