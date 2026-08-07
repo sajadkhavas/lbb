@@ -27,7 +27,7 @@ export function StickyBuyBar({
       aria-hidden={!visible}
       data-testid="pdp-sticky-buy-bar"
       className={`fixed inset-x-0 z-[140] border-t border-hairline bg-obsidian/95 backdrop-blur-xl transition-transform duration-300 ease-[var(--ease-lbb)] motion-reduce:transition-none md:hidden ${visible ? "translate-y-0" : "translate-y-full"}`}
-      style={{ bottom: "calc(60px + env(safe-area-inset-bottom))" }}
+      style={{ bottom: "calc(64px + env(safe-area-inset-bottom))" }}
     >
       <div className="mx-auto flex max-w-screen-sm items-center gap-3 px-4 py-2.5">
         <div className="min-w-0 flex-1">
