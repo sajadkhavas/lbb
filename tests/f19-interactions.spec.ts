@@ -154,7 +154,9 @@ test("FAQ disclosures work with Enter and Space", async ({ page }) => {
   await expect(details).not.toHaveAttribute("open", "");
 });
 
-test("checkout controls have labels, required state and valid autocomplete tokens", async ({ page }) => {
+test("checkout controls have labels, required state and valid autocomplete tokens", async ({
+  page,
+}) => {
   await addProductToCart(page);
   await page.goto("/checkout", { waitUntil: "networkidle" });
 
@@ -211,7 +213,9 @@ test("route navigation never leaves focus in a disconnected overlay", async ({ p
   await expect(page).toHaveURL(/\/collections$/);
   await expect(dialog).toBeHidden();
   expect(
-    await page.evaluate(() => Boolean(document.activeElement && document.activeElement.isConnected)),
+    await page.evaluate(() =>
+      Boolean(document.activeElement && document.activeElement.isConnected),
+    ),
   ).toBe(true);
 });
 
