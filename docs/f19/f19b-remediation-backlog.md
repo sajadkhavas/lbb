@@ -4,14 +4,16 @@ This backlog is the hand-off from the Wave-1 F19-A audit. F19-A intentionally le
 
 ## Summary
 
-| Severity | Count | IDs                       |
-| -------- | ----: | ------------------------- |
-| P0       |     0 | —                         |
-| P1       |     4 | F19B-P1-002 … F19B-P1-005 |
-| P2       |     4 | F19B-P2-001 … F19B-P2-004 |
-| P3       |     1 | F19B-P3-001               |
+| Severity | Active count | IDs                       |
+| -------- | -----------: | ------------------------- |
+| P0       |            0 | —                         |
+| P1       |            3 | F19B-P1-003 … F19B-P1-005 |
+| P2       |            4 | F19B-P2-001 … F19B-P2-004 |
+| P3       |            1 | F19B-P3-001               |
 
 No P0 blocker was identified in the baseline audit.
+
+`F19B-P1-002` remains a **conditional future checkout gate**, not active Wave-1 debt: F14E intentionally removed the identity-collection form while server-side commerce is unverified. The regression now asserts that the route fails closed without collecting PII, and automatically re-activates the error-association expected-failure contract if a form is reintroduced later.
 
 ## Resolved during F19-A
 
@@ -29,26 +31,29 @@ The Lookbook lightbox was also re-verified after the full runtime suite: its Chr
 
 ---
 
-## P1 — High impact
+## Conditional future checkout gate
 
-### F19B-P1-002 — Checkout custom errors are not associated or focus-managed
+### F19B-P1-002 — Checkout custom errors must be associated and focus-managed when identity collection returns
 
 - Route: `/checkout`
-- File: `src/routes/checkout.tsx`
 - Area: Forms / Errors / Screen reader / Focus
-- Evidence: `Field` renders `role="alert"` text, but inputs/select/textarea do not receive `aria-invalid` or `aria-describedby`; first invalid custom field is not focused.
-- Executable characterization: `tests/f19-interactions.spec.ts` expected-failure case with this ID.
-- Impact: screen-reader and keyboard users can hear an alert without a durable programmatic relation to the failing control; correction flow is slower.
+- Wave-1 integration state: F14E intentionally exposes **no checkout identity form** while shipping/payment/order submission are not backed by verified server-side commerce. No name, phone, address or postal-code controls are collected, so there is currently no custom validation-error surface to remediate.
+- Executable characterization: `tests/f19-interactions.spec.ts` first proves the fail-closed/zero-PII state. If a form later appears, the same test activates the expected-failure assertions for `aria-invalid`, `aria-describedby` and first-error focus.
+- Ownership: reactivate as an active P1 item in the phase that introduces real checkout identity collection, expected to be Backend/Frontend integration work followed by F19-B remediation.
 
-Acceptance:
+Acceptance when the form returns:
 
 1. every custom validation error has a stable ID,
 2. related control gets `aria-invalid="true"`,
 3. related control gets `aria-describedby=<error-id>`,
 4. first custom invalid control receives focus after validation,
 5. `required` and autocomplete remain intact,
-6. no checkout/order/payment engine behavior is changed,
-7. expected-failure annotation is removed.
+6. no checkout/order/payment engine behavior is weakened,
+7. the conditional expected-failure branch becomes a normal passing form test.
+
+---
+
+## P1 — High impact
 
 ### F19B-P1-003 — PDP mobile gallery selectors are below 44×44
 
@@ -142,15 +147,16 @@ Acceptance:
 
 ## Remediation order
 
-Recommended F19-B order:
+Recommended F19-B order for currently active debt:
 
-1. `F19B-P1-002` Checkout error semantics/focus.
-2. `F19B-P1-005` RTL Gallery/Quick View previous-next contract.
-3. `F19B-P1-003` + `F19B-P1-004` product touch targets as one product interaction pass.
-4. `F19B-P2-001` + `F19B-P2-002` cart/filter target sizing.
-5. `F19B-P2-003` bidi identifier primitive.
-6. `F19B-P2-004` secondary target sweep.
-7. `F19B-P3-001` card semantic polish.
+1. `F19B-P1-005` RTL Gallery/Quick View previous-next contract.
+2. `F19B-P1-003` + `F19B-P1-004` product touch targets as one product interaction pass.
+3. `F19B-P2-001` + `F19B-P2-002` cart/filter target sizing.
+4. `F19B-P2-003` bidi identifier primitive.
+5. `F19B-P2-004` secondary target sweep.
+6. `F19B-P3-001` card semantic polish.
+
+`F19B-P1-002` moves to the front of the queue only when a real checkout identity form is reintroduced.
 
 ## F19-B exit rule
 
