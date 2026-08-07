@@ -5,7 +5,7 @@
 LBB is Persian and RTL-first. The root document renders:
 
 ```html
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl"></html>
 ```
 
 F19-A keeps that contract under automated regression. Representative route families are exercised at `390`, `768`, `1440`, and `1920` CSS pixels with:
@@ -31,11 +31,11 @@ Positive baseline patterns:
 
 The audit recognizes that an RTL application can contain legitimate bidi islands. They must be explicit rather than inherited accidentally.
 
-| Surface | File | Why LTR exists | Audit disposition |
-| --- | --- | --- | --- |
-| Contact Instagram handle | `src/routes/contact.tsx` | Latin handle readability | Accepted explicit data island |
-| Checkout phone/postal fields | `src/routes/checkout.tsx` | digit entry/readability | Accepted explicit input island |
-| Price slider | `src/components/lbb/ProductFilters.tsx` | scalar min→max axis | Accepted, retain accessible Persian label |
+| Surface                      | File                                     | Why LTR exists                                                   | Audit disposition                                                 |
+| ---------------------------- | ---------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Contact Instagram handle     | `src/routes/contact.tsx`                 | Latin handle readability                                         | Accepted explicit data island                                     |
+| Checkout phone/postal fields | `src/routes/checkout.tsx`                | digit entry/readability                                          | Accepted explicit input island                                    |
+| Price slider                 | `src/components/lbb/ProductFilters.tsx`  | scalar min→max axis                                              | Accepted, retain accessible Persian label                         |
 | Product gallery scroll track | `src/components/lbb/product/Gallery.tsx` | current implementation normalizes `scrollLeft`/`offsetLeft` math | **Debt `F19B-P1-005`**; behavior must be made explicitly RTL-safe |
 
 ## F19B-P1-005 — Product gallery relies on an LTR scroll model
