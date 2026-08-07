@@ -23,6 +23,7 @@
     "smoke:production": "node scripts/smoke-production.mjs",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/accessibility.spec.ts",
+    "test:seo": "playwright test tests/seo-contract.spec.ts tests/seo-pwa.spec.ts",
     "test:visual": "playwright test tests/visual.spec.ts",
     "quality": "npm run format:check && npm run lint && npm run build && npm run typecheck && npm run audit:dependencies && npm run audit:production && npm run audit:brand && npm run audit:store-settings && npm run audit:product-evidence && npm run audit:source && npm run smoke:production && npm run test:e2e",
     "audit:store-settings": "node scripts/audit-store-settings.mjs",
