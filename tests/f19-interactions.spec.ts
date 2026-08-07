@@ -101,28 +101,24 @@ test("filter drawer and Quick View trap and restore focus", async ({ page }) => 
   await expect(quickViewTrigger).toBeFocused();
 });
 
-test("lookbook lightbox supports arrows, Escape and focus restoration", async ({ page }) => {
+test("lookbook lightbox traps focus and supports arrows, Escape and restoration", async ({
+  page,
+}) => {
   await page.goto("/lookbook", { waitUntil: "networkidle" });
   const opener = page.locator('button[aria-haspopup="dialog"]').first();
   await opener.focus();
   await opener.press("Enter");
 
   const dialog = page.getByRole("dialog");
+  const close = dialog.locator('button[aria-label="بستن تصویر"]');
   await expect(dialog).toBeVisible();
-  await expect(page.getByRole("button", { name: "بستن تصویر" })).toBeFocused();
+  await expect(close).toBeFocused();
+  await expectFocusWrap(page, dialog);
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(opener).toBeFocused();
-});
-
-test("F19B-P1-001: lookbook lightbox must trap Tab focus", async ({ page }) => {
-  test.fail(true, "F19B-P1-001 — lookbook lightbox currently has no Tab focus trap");
-
-  await page.goto("/lookbook", { waitUntil: "networkidle" });
-  await page.locator('button[aria-haspopup="dialog"]').first().click();
-  await expectFocusWrap(page, page.getByRole("dialog"));
 });
 
 test("product gallery supports roving focus, arrows, Home and End", async ({ page }) => {
