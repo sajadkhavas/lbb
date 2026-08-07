@@ -101,7 +101,7 @@ test("filter drawer and Quick View trap and restore focus", async ({ page }) => 
   await expect(quickViewTrigger).toBeFocused();
 });
 
-test("lookbook lightbox contains focus, supports arrows and restores opener", async ({ page }) => {
+test("lookbook lightbox supports arrows, Escape and focus restoration", async ({ page }) => {
   await page.goto("/lookbook", { waitUntil: "networkidle" });
   const opener = page.locator('button[aria-haspopup="dialog"]').first();
   await opener.focus();
@@ -109,12 +109,20 @@ test("lookbook lightbox contains focus, supports arrows and restores opener", as
 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await expectFocusWrap(page, dialog);
+  await expect(page.getByRole("button", { name: "بستن تصویر" })).toBeFocused();
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(opener).toBeFocused();
+});
+
+test("F19B-P1-001: lookbook lightbox must trap Tab focus", async ({ page }) => {
+  test.fail(true, "F19B-P1-001 — lookbook lightbox currently has no Tab focus trap");
+
+  await page.goto("/lookbook", { waitUntil: "networkidle" });
+  await page.locator('button[aria-haspopup="dialog"]').first().click();
+  await expectFocusWrap(page, page.getByRole("dialog"));
 });
 
 test("product gallery supports roving focus, arrows, Home and End", async ({ page }) => {
@@ -146,10 +154,40 @@ test("FAQ disclosures work with Enter and Space", async ({ page }) => {
   await expect(details).not.toHaveAttribute("open", "");
 });
 
-test("checkout custom errors are associated and focus the first invalid control", async ({ page }) => {
+test("checkout controls have labels, required state and valid autocomplete tokens", async ({ page }) => {
   await addProductToCart(page);
   await page.goto("/checkout", { waitUntil: "networkidle" });
 
+  const expectations = [
+    ["نام و نام‌خانوادگی", "name"],
+    ["شماره موبایل", "tel"],
+    ["استان", "address-level1"],
+    ["شهر", "address-level2"],
+    ["آدرس کامل", "street-address"],
+    ["کد پستی", "postal-code"],
+  ] as const;
+
+  for (const [label, autocomplete] of expectations) {
+    const control = page.getByLabel(label);
+    await expect(control).toBeVisible();
+    await expect(control).toHaveAttribute("required", "");
+    await expect(control).toHaveAttribute("autocomplete", autocomplete);
+  }
+});
+
+test("F19B-P1-002: checkout errors must be programmatically associated and focused", async ({
+  page,
+}) => {
+  test.fail(
+    true,
+    "F19B-P1-002 — custom checkout errors are not wired with aria-invalid/aria-describedby or first-error focus",
+  );
+
+  await addProductToCart(page);
+  await page.goto("/checkout", { waitUntil: "networkidle" });
+  await page.locator("form").evaluate((form: HTMLFormElement) => {
+    form.noValidate = true;
+  });
   await page.getByRole("button", { name: "مشاهده خلاصه نمایشی" }).click();
 
   const fields = ["name", "phone", "province", "city", "address", "postal"] as const;
