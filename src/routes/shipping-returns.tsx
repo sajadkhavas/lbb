@@ -121,12 +121,14 @@ function ReturnsState() {
     const pending = returns.verification === "pending";
     return (
       <StatePanel
-        title={pending ? "سیاست بازگشت در حال بررسی است" : "سیاست مرجوعی و تعویض هنوز منتشر نشده است"}
+        title={
+          pending ? "سیاست بازگشت در حال بررسی است" : "سیاست مرجوعی و تعویض هنوز منتشر نشده است"
+        }
         tone={pending ? "warning" : "info"}
       >
         مهلت درخواست، امکان تعویض، مسئول هزینهٔ بازگشت، کالاهای مستثنا و زمان بازپرداخت تا زمانی که
-        سیاست هم تأیید و هم منتشر نشود نمایش داده نمی‌شوند. از وضعیت فعلی هیچ «مهلت بازگشت» یا
-        ضمانت عمومی استنباط نکنید.
+        سیاست هم تأیید و هم منتشر نشود نمایش داده نمی‌شوند. از وضعیت فعلی هیچ «مهلت بازگشت» یا ضمانت
+        عمومی استنباط نکنید.
       </StatePanel>
     );
   }
@@ -298,7 +300,10 @@ function ShippingReturnsPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-hairline bg-carbon p-6" aria-labelledby="help-heading">
+          <section
+            className="rounded-2xl border border-hairline bg-carbon p-6"
+            aria-labelledby="help-heading"
+          >
             <h2 id="help-heading" className="text-lg font-bold text-bone">
               پیش از اقدام، اطلاعات منتشرشده را بررسی کنید
             </h2>

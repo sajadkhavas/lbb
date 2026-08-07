@@ -39,7 +39,9 @@ function ShippingReadiness() {
 
   return (
     <StatePanel
-      title={state === "pending" ? "تنظیمات ارسال در حال بررسی است" : "هزینه ارسال هنوز عمومی نشده است"}
+      title={
+        state === "pending" ? "تنظیمات ارسال در حال بررسی است" : "هزینه ارسال هنوز عمومی نشده است"
+      }
       tone={state === "pending" ? "warning" : "info"}
     >
       سبد خرید هیچ هزینه، آستانهٔ ارسال رایگان یا زمان تحویل فرضی محاسبه نمی‌کند. جزئیات فقط پس از
@@ -156,10 +158,7 @@ function CartPage() {
                 <Link to="/checkout" className={`mt-5 flex w-full ${CtaClasses("signal")}`}>
                   بررسی امکان تکمیل سفارش
                 </Link>
-                <Link
-                  to="/shipping-returns"
-                  className={`mt-2 flex w-full ${CtaClasses("line")}`}
-                >
+                <Link to="/shipping-returns" className={`mt-2 flex w-full ${CtaClasses("line")}`}>
                   وضعیت ارسال و مرجوعی
                 </Link>
               </aside>

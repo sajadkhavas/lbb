@@ -39,7 +39,9 @@ function TrackOrderPage() {
           <TechLabel tone="signal" className="mt-5">
             ORDER TRACKING / SERVER REQUIRED
           </TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">پیگیری سفارش هنوز به Order API متصل نیست</h1>
+          <h1 className="mt-3 text-display-2 text-bone">
+            پیگیری سفارش هنوز به Order API متصل نیست
+          </h1>
           <p className="mt-4 text-sm leading-8 text-metal">
             پیگیری معتبر باید وضعیت را از منبع سمت سرور بخواند. این صفحه کد محلی، Session Storage یا
             دادهٔ ساخته‌شده در مرورگر را به‌عنوان سفارش واقعی جست‌وجو نمی‌کند.

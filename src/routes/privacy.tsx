@@ -3,7 +3,13 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { CtaClasses, Shell, StatePanel, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
+import {
+  CtaClasses,
+  Shell,
+  StatePanel,
+  StatusTag,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import { STORE_SETTINGS, getPublicContactChannels } from "@/lib/store-settings";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 
@@ -142,8 +148,8 @@ function PrivacyPage() {
             <Section title="کوکی، تحلیل و سرویس‌های جدید">
               <p>
                 این صفحه برای ابزار تحلیل، تبلیغات رفتاری، خبرنامه یا CRM که Contract عمومی و
-                پیاده‌سازی تأییدشده‌ای در فرانت‌اند فعلی ندارند، ادعای جمع‌آوری یا عدم جمع‌آوری دائمی
-                نمی‌سازد. هر اتصال جدید باید همراه با بازبینی این سیاست منتشر شود.
+                پیاده‌سازی تأییدشده‌ای در فرانت‌اند فعلی ندارند، ادعای جمع‌آوری یا عدم جمع‌آوری
+                دائمی نمی‌سازد. هر اتصال جدید باید همراه با بازبینی این سیاست منتشر شود.
               </p>
               <p>
                 مرورگر و زیرساخت می‌توانند منابع فنی سایت را برای عملکرد یا کش نگه‌داری کنند؛ چنین
@@ -154,8 +160,8 @@ function PrivacyPage() {
             <Section title="تغییرات و اطلاعات تکمیلی">
               <p>
                 هنگام فعال‌شدن پردازش سمت سرور، سیاست نهایی باید نوع داده، هدف پردازش، محل و مدت
-                نگهداری، دریافت‌کنندگان و روش پیگیری درخواست‌های مرتبط با داده را بر اساس وضعیت واقعی
-                کسب‌وکار مشخص کند.
+                نگهداری، دریافت‌کنندگان و روش پیگیری درخواست‌های مرتبط با داده را بر اساس وضعیت
+                واقعی کسب‌وکار مشخص کند.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link to="/terms" className={CtaClasses("line")}>

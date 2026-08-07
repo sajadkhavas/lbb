@@ -3,7 +3,13 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { CtaClasses, Shell, StatePanel, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
+import {
+  CtaClasses,
+  Shell,
+  StatePanel,
+  StatusTag,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import {
   STORE_SETTINGS,
   canPublishReturns,
@@ -95,7 +101,10 @@ function TermsPage() {
             aria-label="بخش‌های شرایط استفاده"
             className="mt-6 flex flex-wrap gap-2 rounded-2xl border border-hairline bg-carbon p-4"
           >
-            <a href="#website-use" className="min-h-11 px-3 py-2 text-xs text-metal hover:text-signal">
+            <a
+              href="#website-use"
+              className="min-h-11 px-3 py-2 text-xs text-metal hover:text-signal"
+            >
               استفاده از سایت
             </a>
             <a href="#commerce" className="min-h-11 px-3 py-2 text-xs text-metal hover:text-signal">
@@ -146,9 +155,9 @@ function TermsPage() {
 
             <Section id="policies" title="ارسال، تعویض، مرجوعی و بازپرداخت">
               <p>
-                وضعیت عمومی ارسال در حال حاضر {shippingPublished ? "منتشرشده" : "منتشرنشده"} و
-                وضعیت سیاست مرجوعی/تعویض {returnsPublished ? "منتشرشده" : "منتشرنشده"} است. این
-                برچسب‌ها از Store Settings می‌آیند و جای سیاست واقعی را نمی‌گیرند.
+                وضعیت عمومی ارسال در حال حاضر {shippingPublished ? "منتشرشده" : "منتشرنشده"} و وضعیت
+                سیاست مرجوعی/تعویض {returnsPublished ? "منتشرشده" : "منتشرنشده"} است. این برچسب‌ها
+                از Store Settings می‌آیند و جای سیاست واقعی را نمی‌گیرند.
               </p>
               <p>
                 مبلغ ارسال، ارسال رایگان، زمان تحویل، مهلت مرجوعی و زمان بازپرداخت فقط در صفحهٔ

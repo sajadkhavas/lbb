@@ -60,7 +60,10 @@ function Checkout() {
             />
           ) : (
             <div className="mt-8 space-y-6">
-              <section className="rounded-2xl border border-hairline bg-carbon p-5" aria-labelledby="checkout-summary">
+              <section
+                className="rounded-2xl border border-hairline bg-carbon p-5"
+                aria-labelledby="checkout-summary"
+              >
                 <h2 id="checkout-summary" className="text-base font-bold text-bone">
                   خلاصه اقلام
                 </h2>
@@ -84,8 +87,8 @@ function Checkout() {
                   </div>
                 </div>
                 <p className="mt-3 text-xs leading-6 text-mute">
-                  این مبلغ فقط جمع اقلام سبد است؛ هزینه ارسال یا Total نهایی تا وجود دادهٔ قابل‌اعتماد
-                  اضافه نمی‌شود.
+                  این مبلغ فقط جمع اقلام سبد است؛ هزینه ارسال یا Total نهایی تا وجود دادهٔ
+                  قابل‌اعتماد اضافه نمی‌شود.
                 </p>
               </section>
 
@@ -133,8 +136,8 @@ function Checkout() {
                   submission و Payment verification باید Backend تأییدشده داشته باشند.
                 </p>
                 <p className="mt-2">
-                  به همین دلیل این صفحه فعلاً نام، تلفن، نشانی یا کدپستی جمع‌آوری نمی‌کند و هیچ دکمهٔ
-                  موفقیت ساختگی ندارد.
+                  به همین دلیل این صفحه فعلاً نام، تلفن، نشانی یا کدپستی جمع‌آوری نمی‌کند و هیچ
+                  دکمهٔ موفقیت ساختگی ندارد.
                 </p>
               </StatePanel>
 

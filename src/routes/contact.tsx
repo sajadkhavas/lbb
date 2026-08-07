@@ -114,7 +114,10 @@ function ContactPage() {
               </p>
 
               {contacts.length > 0 ? (
-                <div className="mt-8 grid gap-3 sm:grid-cols-2" aria-label="راه‌های ارتباطی تأییدشده">
+                <div
+                  className="mt-8 grid gap-3 sm:grid-cols-2"
+                  aria-label="راه‌های ارتباطی تأییدشده"
+                >
                   {contacts.map((channel) => (
                     <a
                       key={`${channel.kind}-${channel.value}`}
@@ -236,8 +239,8 @@ function ContactPage() {
                       aria-hidden="true"
                     />
                     <p className="text-sm leading-7 text-metal">
-                      جزئیات تکمیلی مراجعه هنوز عمومی نشده‌اند. این صفحه از روی نام مجتمع، شماره واحد
-                      یا ساعت کاری حدس نمی‌زند.
+                      جزئیات تکمیلی مراجعه هنوز عمومی نشده‌اند. این صفحه از روی نام مجتمع، شماره
+                      واحد یا ساعت کاری حدس نمی‌زند.
                     </p>
                   </div>
                 </div>

@@ -32,8 +32,8 @@ export function canSubmitOrder(settings: StoreSettings = STORE_SETTINGS): boolea
   const readiness = getCommerceReadiness(settings);
   return Boolean(
     readiness.shippingPublic &&
-      readiness.paymentPublic &&
-      readiness.orderSubmissionReady &&
-      readiness.paymentVerificationReady,
+    readiness.paymentPublic &&
+    readiness.orderSubmissionReady &&
+    readiness.paymentVerificationReady,
   );
 }

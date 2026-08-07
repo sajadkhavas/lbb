@@ -1,9 +1,5 @@
 import { ExternalLink } from "lucide-react";
-import {
-  STORE_SETTINGS,
-  getPublicEnamad,
-  type EnamadPublicSettings,
-} from "@/lib/store-settings";
+import { STORE_SETTINGS, getPublicEnamad, type EnamadPublicSettings } from "@/lib/store-settings";
 
 export function TrustMarks({
   placement = "footer",
@@ -11,7 +7,8 @@ export function TrustMarks({
   placement?: EnamadPublicSettings["displayLocation"];
 }) {
   const enamad = getPublicEnamad(STORE_SETTINGS, placement);
-  if (!enamad || !enamad.verificationUrl || !enamad.badgeImageUrl || !enamad.identifier) return null;
+  if (!enamad || !enamad.verificationUrl || !enamad.badgeImageUrl || !enamad.identifier)
+    return null;
 
   return (
     <section aria-label="نمادهای اعتماد فروشگاه" className="mt-6">

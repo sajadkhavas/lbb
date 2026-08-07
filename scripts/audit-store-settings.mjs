@@ -66,7 +66,9 @@ for (const required of [
 }
 
 if (!trustMarks.includes("getPublicEnamad(STORE_SETTINGS, placement)")) {
-  failures.push("Trust mark must remain gated by controlled verified Enamad settings and placement.");
+  failures.push(
+    "Trust mark must remain gated by controlled verified Enamad settings and placement.",
+  );
 }
 if (!trustMarks.includes('rel="noopener noreferrer"')) {
   failures.push("External trust verification link must prevent opener access.");
@@ -93,7 +95,9 @@ if (!commerce.includes("orderSubmissionReady: false")) {
   failures.push("Frontend must not claim order-submission readiness before backend integration.");
 }
 if (!commerce.includes("paymentVerificationReady: false")) {
-  failures.push("Frontend must not claim payment verification readiness before backend integration.");
+  failures.push(
+    "Frontend must not claim payment verification readiness before backend integration.",
+  );
 }
 
 for (const required of ["getPublicShippingMethods", "canPublishReturns"]) {

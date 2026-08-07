@@ -316,8 +316,8 @@ export function canPublishShipping(settings = STORE_SETTINGS): boolean {
 export function canPublishReturns(settings = STORE_SETTINGS): boolean {
   return Boolean(
     settings.returns.isEnabled &&
-      settings.returns.verification === "verified" &&
-      settings.legal.shippingReturnsPublished,
+    settings.returns.verification === "verified" &&
+    settings.legal.shippingReturnsPublished,
   );
 }
 
@@ -328,12 +328,12 @@ export function getPublicEnamad(
   const { enamad } = settings;
   const allowed = Boolean(
     enamad.isEnabled &&
-      enamad.verification === "verified" &&
-      enamad.identifier?.trim() &&
-      enamad.altText.trim() &&
-      isHttpsUrl(enamad.verificationUrl) &&
-      isHttpsUrl(enamad.badgeImageUrl) &&
-      (!placement || enamad.displayLocation === placement),
+    enamad.verification === "verified" &&
+    enamad.identifier?.trim() &&
+    enamad.altText.trim() &&
+    isHttpsUrl(enamad.verificationUrl) &&
+    isHttpsUrl(enamad.badgeImageUrl) &&
+    (!placement || enamad.displayLocation === placement),
   );
   return allowed ? enamad : null;
 }
@@ -349,15 +349,13 @@ export function canOfferPayment(settings = STORE_SETTINGS): boolean {
   const { payment } = settings;
   return Boolean(
     payment.isEnabled &&
-      payment.verification === "verified" &&
-      payment.provider &&
-      payment.displayName?.trim() &&
-      payment.paymentMethods.length,
+    payment.verification === "verified" &&
+    payment.provider &&
+    payment.displayName?.trim() &&
+    payment.paymentMethods.length,
   );
 }
 
-export function getPublicPaymentSettings(
-  settings = STORE_SETTINGS,
-): PaymentPublicSettings | null {
+export function getPublicPaymentSettings(settings = STORE_SETTINGS): PaymentPublicSettings | null {
   return canOfferPayment(settings) ? settings.payment : null;
 }

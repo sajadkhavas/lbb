@@ -210,11 +210,15 @@ test("contacts require public verified safe channels", () => {
   expect(getPublicContactChannels(settings).map((channel) => channel.label)).toEqual(["verified"]);
 });
 
-test("shipping, contact, legal and privacy routes are truth-safe at mobile width", async ({ page }) => {
+test("shipping, contact, legal and privacy routes are truth-safe at mobile width", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
 
   await page.goto("/shipping-returns", { waitUntil: "networkidle" });
-  await expect(page.getByRole("heading", { level: 1, name: "ارسال، تعویض و مرجوعی" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "ارسال، تعویض و مرجوعی" }),
+  ).toBeVisible();
   await expect(page.getByText("روش ارسال عمومی هنوز منتشر نشده است")).toBeVisible();
   await expect(page.getByText("سیاست مرجوعی و تعویض هنوز منتشر نشده است")).toBeVisible();
   await expect(page.getByText(/۷ روز ضمانت بازگشت/)).toHaveCount(0);

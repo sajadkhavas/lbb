@@ -37,9 +37,9 @@ function OrderConfirmation() {
           </TechLabel>
           <h1 className="mt-3 text-display-2 text-bone">سفارشی برای تأیید معتبر وجود ندارد</h1>
           <p className="mt-4 text-sm leading-8 text-metal">
-            این Route از Session Storage، Query String، شناسهٔ ساخته‌شده در مرورگر یا پارامتر Callback
-            برای اعلام موفقیت استفاده نمی‌کند. رسید و وضعیت موفق فقط باید از Order API و Verify معتبر
-            سمت سرور بیایند.
+            این Route از Session Storage، Query String، شناسهٔ ساخته‌شده در مرورگر یا پارامتر
+            Callback برای اعلام موفقیت استفاده نمی‌کند. رسید و وضعیت موفق فقط باید از Order API و
+            Verify معتبر سمت سرور بیایند.
           </p>
           <StatePanel className="mt-6 text-start" title="مرز اعتماد سفارش" tone="warning">
             تا زمانی که Backend سفارش و تأیید پرداخت متصل نشده‌اند، نمایش «پرداخت موفق»، «سفارش ثبت
