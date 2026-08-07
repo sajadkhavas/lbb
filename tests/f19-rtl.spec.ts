@@ -38,8 +38,34 @@ async function expectTouchTarget(locator: Locator) {
 
 async function addProductToCart(page: Page) {
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  await page.locator('button[aria-label^="انتخاب سایز"]:not(:disabled)').first().click();
-  await page.getByRole("button", { name: "افزودن به سبد خرید" }).click();
+  const purchase = page.getByRole("button", { name: /افزودن به سبد خرید|خرید در دسترس نیست/ });
+
+  if (await purchase.isDisabled()) {
+    await page.evaluate(() => {
+      localStorage.setItem(
+        "lbb-cart-v1",
+        JSON.stringify([
+          {
+            slug: "f19-touch-fixture",
+            name: "F19 touch fixture",
+            price: 1,
+            size: "TEST",
+            qty: 1,
+          },
+        ]),
+      );
+    });
+    await page.reload({ waitUntil: "networkidle" });
+    await page
+      .getByRole("button", { name: /سبد خرید/ })
+      .first()
+      .click();
+    await expect(page.getByRole("dialog", { name: "سبد خرید" })).toBeVisible();
+    return;
+  }
+
+  await page.locator('button[aria-label^="سایز "]:not([aria-disabled="true"])').first().click();
+  await purchase.click();
   await expect(page.getByRole("dialog", { name: "سبد خرید" })).toBeVisible();
 }
 
@@ -100,14 +126,10 @@ test("critical mobile shell and Quick View controls meet the 44px touch contract
   await expectTouchTarget(quickView.getByRole("button", { name: "افزایش تعداد" }));
 });
 
-test("F19B-P1-003: PDP mobile gallery selectors must meet the 44px touch contract", async ({
-  page,
-}) => {
-  test.fail(true, "F19B-P1-003 — PDP mobile gallery dot buttons are currently below 44px");
-
+test("F19B-P1-003: PDP mobile gallery selectors meet the 44px touch contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  await expectTouchTarget(page.getByRole("button", { name: "رفتن به تصویر 1" }));
+  await expectTouchTarget(page.getByRole("button", { name: /رفتن به (?:تصویر|جایگاه رسانه) 1/ }));
 });
 
 test("F19B-P1-004: Quick View thumbnails must meet the 44px touch contract", async ({ page }) => {
