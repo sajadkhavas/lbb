@@ -1,31 +1,27 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft } from "lucide-react";
-import { CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
-import { collectionBySlug } from "@/lib/collections";
-import { lifestyle2, productImage } from "@/lib/product-images";
-import { fmtToman, productBySlug } from "@/lib/products";
+import { CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import { getCollectionEditorialViewBySlug } from "@/lib/editorial-commerce";
 
 export function DropStory() {
-  const collection = collectionBySlug("drop-01-shabgard");
-  if (!collection) return null;
+  const view = getCollectionEditorialViewBySlug("drop-01-shabgard");
+  if (!view) return null;
 
-  const pieces = collection.productSlugs
-    .map((slug) => productBySlug(slug))
-    .filter((product): product is NonNullable<typeof product> => Boolean(product))
-    .slice(0, 3);
+  const { collection } = view;
 
   return (
     <section
       dir="rtl"
       aria-labelledby="drop-story-title"
       className="relative overflow-hidden border-t border-hairline bg-carbon"
+      data-f17-editorial="home-drop-story"
     >
       <div aria-hidden="true" className="absolute inset-0 grid-marks opacity-35" />
       <Shell className="relative grid gap-0 py-14 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)]">
         <div className="relative min-h-[520px] overflow-hidden border border-hairline bg-obsidian lg:min-h-[760px]">
           <img
-            src={lifestyle2}
-            alt="استایل شبگرد LBB با پالت تیره و نور قرمز"
+            src={view.media}
+            alt={`روایت تصویری ${collection.nameFa}`}
             width={1200}
             height={1500}
             loading="lazy"
@@ -64,43 +60,51 @@ export function DropStory() {
             ))}
           </ol>
 
-          <div className="mt-8">
-            <TechLabel>PIECES IN THIS STORY</TechLabel>
-            <ul className="mt-3 space-y-2">
-              {pieces.map((product) => (
-                <li key={product.slug}>
-                  <Link
-                    to="/product/$slug"
-                    params={{ slug: product.slug }}
-                    className="group grid min-h-[78px] grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 border border-hairline bg-carbon p-2 transition-colors hover:border-signal"
-                  >
-                    <img
-                      src={productImage(product.slug)}
-                      alt=""
-                      width={56}
-                      height={70}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-[70px] w-14 object-cover"
-                    />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-black text-bone">
-                        {product.name}
+          {view.publicProducts.length > 0 ? (
+            <div className="mt-8">
+              <TechLabel>PUBLIC PIECES IN THIS STORY</TechLabel>
+              <ul className="mt-3 space-y-2">
+                {view.publicProducts.slice(0, 3).map((reference) => (
+                  <li key={reference.slug}>
+                    <Link
+                      to="/product/$slug"
+                      params={{ slug: reference.slug }}
+                      className="group grid min-h-[78px] grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 border border-hairline bg-carbon p-2 transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                      data-f17-public-product-link={reference.slug}
+                    >
+                      <img
+                        src={reference.image}
+                        alt=""
+                        width={56}
+                        height={70}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-[70px] w-14 object-cover"
+                      />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-black text-bone">
+                          {reference.product.name}
+                        </span>
+                        <span className="mt-1 block text-xs leading-6 text-metal">
+                          مشاهده جزئیات عمومی محصول
+                        </span>
                       </span>
-                      <span className="num mt-1 block text-xs text-metal">
-                        {fmtToman(product.price)}
-                      </span>
-                    </span>
-                    <ArrowUpLeft
-                      size={16}
-                      aria-hidden="true"
-                      className="text-mute transition-colors group-hover:text-signal"
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+                      <ArrowUpLeft
+                        size={16}
+                        aria-hidden="true"
+                        className="text-mute transition-colors group-hover:text-signal"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <StatePanel className="mt-8" title="این دراپ فعلاً لینک مستقیم محصول ندارد">
+              روایت و مسیرهای کشف فعال‌اند؛ لینک محصول زمانی نمایش داده می‌شود که وضعیت انتشار آن برای
+              نمایش عمومی آماده باشد.
+            </StatePanel>
+          )}
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -108,22 +112,17 @@ export function DropStory() {
               params={{ slug: collection.slug }}
               className={CtaClasses("signal")}
             >
-              مشاهده کالکشن شبگرد
+              مشاهده روایت {collection.nameFa}
             </Link>
             <Link to="/lookbook" className={CtaClasses("line")}>
               دیدن لوک‌بوک
             </Link>
           </div>
 
-          <aside className="mt-auto border-t border-hairline pt-7">
-            <div className="grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
-              <TechLabel tone="signal">DROP 002</TechLabel>
-              <p className="text-xs leading-6 text-mute">
-                دراپ بعدی هنوز در حال توسعه است و تاریخ انتشار تاییدشده ندارد؛ اطلاع‌رسانی فقط از
-                کانال رسمی انجام می‌شود.
-              </p>
-            </div>
-          </aside>
+          <p className="mt-auto border-t border-hairline pt-7 text-xs leading-6 text-mute">
+            وضعیت زمانی یا موجودی دراپ در این روایت حدس زده نمی‌شود؛ اطلاعات زمانی فقط با داده منتشرشده
+            نمایش داده خواهد شد.
+          </p>
         </div>
       </Shell>
     </section>
