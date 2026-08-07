@@ -41,7 +41,10 @@ export function ShopTheLook() {
           title={<span id="shop-look-title">تصویر را ببین، مسیر معتبر را ادامه بده</span>}
           lede="نقطه خرید فقط برای محصولی فعال می‌شود که برای انتشار عمومی آماده باشد؛ در غیر این صورت، تصویر به کالکشن و مسیرهای کشف متصل می‌ماند."
           action={
-            <Link to="/lookbook" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
+            <Link
+              to="/lookbook"
+              className="tech inline-flex min-h-11 items-center gap-2 text-signal"
+            >
               مشاهده لوک‌بوک
               <ArrowUpLeft size={15} aria-hidden="true" />
             </Link>
@@ -85,7 +88,11 @@ export function ShopTheLook() {
                     }}
                     data-f17-product-hotspot={hotspot.slug}
                   >
-                    {selected ? <X size={15} aria-hidden="true" /> : <Plus size={15} aria-hidden="true" />}
+                    {selected ? (
+                      <X size={15} aria-hidden="true" />
+                    ) : (
+                      <Plus size={15} aria-hidden="true" />
+                    )}
                     <span className="sr-only">نقطه {index + 1}</span>
                   </button>
                 );
@@ -96,8 +103,8 @@ export function ShopTheLook() {
           <aside className="flex flex-col border border-hairline bg-carbon p-4 md:p-6">
             <TechLabel tone="signal">STORY DESTINATIONS</TechLabel>
             <p className="mt-3 text-sm leading-7 text-metal">
-              این بخش بین الهام تصویری و مسیرهای واقعی سایت پل می‌زند، بدون اینکه داده منتشرنشده را به
-              خرید عمومی تبدیل کند.
+              این بخش بین الهام تصویری و مسیرهای واقعی سایت پل می‌زند، بدون اینکه داده منتشرنشده را
+              به خرید عمومی تبدیل کند.
             </p>
 
             {publicReferences.length > 0 ? (
@@ -149,7 +156,8 @@ export function ShopTheLook() {
               </ol>
             ) : (
               <StatePanel className="mt-6" title="نقطه خرید مستقیمی روی این تصویر فعال نیست">
-                کالکشن و لوک‌بوک مسیرهای امن بعدی هستند؛ Hotspot محصول فقط با داده عمومی معتبر ظاهر می‌شود.
+                کالکشن و لوک‌بوک مسیرهای امن بعدی هستند؛ Hotspot محصول فقط با داده عمومی معتبر ظاهر
+                می‌شود.
               </StatePanel>
             )}
 

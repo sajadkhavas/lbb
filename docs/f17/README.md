@@ -11,14 +11,14 @@ F17 connects editorial discovery to onward commerce without changing the PDP, ch
 
 ## Current Wave 1 inventory
 
-| Surface | Current inventory | F17 interpretation |
-| --- | ---: | --- |
-| Collections | 3 | editorial/merchandising groupings |
-| Drop-like collection records | 2 | drop UI semantics through an adapter, without timing claims |
-| Lookbook scenes | 8 | visual stories with conditional product references |
-| Journal articles | 5 | editorial stories with contextual onward destinations |
-| Catalogue products | 8 | all remain draft/non-publishable under the existing Product Evidence Contract |
-| Public editorial product links | 0 | intentionally zero until the evidence/publication gate passes |
+| Surface                        | Current inventory | F17 interpretation                                                            |
+| ------------------------------ | ----------------: | ----------------------------------------------------------------------------- |
+| Collections                    |                 3 | editorial/merchandising groupings                                             |
+| Drop-like collection records   |                 2 | drop UI semantics through an adapter, without timing claims                   |
+| Lookbook scenes                |                 8 | visual stories with conditional product references                            |
+| Journal articles               |                 5 | editorial stories with contextual onward destinations                         |
+| Catalogue products             |                 8 | all remain draft/non-publishable under the existing Product Evidence Contract |
+| Public editorial product links |                 0 | intentionally zero until the evidence/publication gate passes                 |
 
 ## What changed
 

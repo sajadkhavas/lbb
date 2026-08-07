@@ -90,7 +90,10 @@ function CollectionNotFound() {
   return (
     <>
       <Navbar theme="light" />
-      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="collection-not-found">
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="collection-not-found"
+      >
         <Shell className="py-3">
           <Breadcrumb
             items={[
@@ -102,6 +105,7 @@ function CollectionNotFound() {
         </Shell>
         <Band hairline={false}>
           <Shell>
+            <h1 className="sr-only">این کالکشن پیدا نشد</h1>
             <EmptyState
               icon={<Layers3 aria-hidden="true" size={34} />}
               title="این کالکشن پیدا نشد"
@@ -150,17 +154,25 @@ function CollectionDetailPage() {
             <div className="flex flex-col justify-center">
               <div className="flex flex-wrap items-center gap-3">
                 <TechLabel tone="signal">{collection.latinName}</TechLabel>
-                <StatusTag tone={view.kind === "drop" ? "signal" : "neutral"} className="rounded-lg">
+                <StatusTag
+                  tone={view.kind === "drop" ? "signal" : "neutral"}
+                  className="rounded-lg"
+                >
                   {view.kind === "drop" ? "DROP / EDITORIAL" : "COLLECTION / EDITORIAL"}
                 </StatusTag>
               </div>
               <h1 className="mt-5 text-display-1 text-bone">{collection.nameFa}</h1>
               <p className="text-lede mt-5 max-w-[52ch]">{collection.tagline}</p>
-              <p className="mt-6 max-w-[64ch] text-sm leading-8 text-metal">{collection.description}</p>
+              <p className="mt-6 max-w-[64ch] text-sm leading-8 text-metal">
+                {collection.description}
+              </p>
 
               <div className="mt-7 flex flex-wrap gap-2">
                 {collection.storyPoints.map((point) => (
-                  <span key={point} className="rounded-full border border-hairline px-3 py-1.5 text-[11px] text-metal">
+                  <span
+                    key={point}
+                    className="rounded-full border border-hairline px-3 py-1.5 text-[11px] text-metal"
+                  >
                     {point}
                   </span>
                 ))}
@@ -187,14 +199,19 @@ function CollectionDetailPage() {
               height={1500}
             >
               <div className="absolute inset-0 bg-gradient-to-t from-obsidian/75 via-transparent to-transparent" />
-              <StatusTag tone="neutral" className="absolute inset-inline-end-4 top-4 rounded-lg backdrop-blur">
+              <StatusTag
+                tone="neutral"
+                className="absolute inset-inline-end-4 top-4 rounded-lg backdrop-blur"
+              >
                 {view.publicProducts.length > 0
                   ? `${view.publicProducts.length.toLocaleString("fa-IR")} لینک محصول عمومی`
                   : "روایت بدون لینک خرید مستقیم"}
               </StatusTag>
               <div className="absolute inset-x-5 bottom-5">
                 <TechLabel tone="bone">VISUAL STORY</TechLabel>
-                <p className="mt-2 max-w-[36ch] text-sm font-bold leading-7 text-bone">{collection.tagline}</p>
+                <p className="mt-2 max-w-[36ch] text-sm font-bold leading-7 text-bone">
+                  {collection.tagline}
+                </p>
               </div>
             </Frame>
           </Shell>
@@ -228,7 +245,9 @@ function CollectionDetailPage() {
             <div>
               <TechLabel tone="signal">EDITORIAL NOTE</TechLabel>
               <h2 className="mt-3 text-display-3 text-bone">یادداشت استایلینگ</h2>
-              <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">{collection.editorialNote}</p>
+              <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
+                {collection.editorialNote}
+              </p>
             </div>
             <div className="flex flex-wrap gap-3 md:justify-end">
               <Link to="/lookbook" className={CtaClasses("line")}>

@@ -81,7 +81,10 @@ function CollectionsIndexPage() {
           <Shell>
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
               {COLLECTION_VIEWS.map((view, index) => (
-                <article key={view.collection.slug} className={index === 0 ? "lg:col-span-2" : undefined}>
+                <article
+                  key={view.collection.slug}
+                  className={index === 0 ? "lg:col-span-2" : undefined}
+                >
                   <Link
                     to="/collections/$slug"
                     params={{ slug: view.collection.slug }}
@@ -93,13 +96,20 @@ function CollectionsIndexPage() {
                       alt={`فضای تصویری ${view.collection.nameFa}`}
                       ratio={index === 0 ? "16/9" : "4/5"}
                       priority={index === 0}
-                      sizes={index === 0 ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 1024px) 100vw, 33vw"}
+                      sizes={
+                        index === 0
+                          ? "(max-width: 1024px) 100vw, 66vw"
+                          : "(max-width: 1024px) 100vw, 33vw"
+                      }
                       className="rounded-t-2xl"
                       imgClassName="transition-transform duration-700 group-hover:scale-[1.04]"
                     >
                       <div className="absolute inset-0 bg-gradient-to-t from-obsidian/75 via-transparent to-transparent" />
                       <div className="absolute inset-inline-end-4 top-4 flex flex-wrap justify-end gap-2">
-                        <StatusTag tone={view.kind === "drop" ? "signal" : "neutral"} className="rounded-lg backdrop-blur">
+                        <StatusTag
+                          tone={view.kind === "drop" ? "signal" : "neutral"}
+                          className="rounded-lg backdrop-blur"
+                        >
                           {view.kind === "drop" ? "DROP STORY" : "EDITORIAL COLLECTION"}
                         </StatusTag>
                         <StatusTag tone="neutral" className="rounded-lg backdrop-blur">
@@ -114,9 +124,15 @@ function CollectionsIndexPage() {
                       <TechLabel tone="signal">{view.collection.latinName}</TechLabel>
                       <h2 className="mt-3 text-display-3 text-bone">{view.collection.nameFa}</h2>
                       <p className="mt-3 text-sm leading-7 text-metal">{view.collection.tagline}</p>
-                      <ul className="mt-5 flex flex-wrap gap-2" aria-label={`ویژگی‌های ${view.collection.nameFa}`}>
+                      <ul
+                        className="mt-5 flex flex-wrap gap-2"
+                        aria-label={`ویژگی‌های ${view.collection.nameFa}`}
+                      >
                         {view.collection.storyPoints.map((point) => (
-                          <li key={point} className="rounded-full border border-hairline px-3 py-1.5 text-[11px] text-metal">
+                          <li
+                            key={point}
+                            className="rounded-full border border-hairline px-3 py-1.5 text-[11px] text-metal"
+                          >
                             {point}
                           </li>
                         ))}
@@ -141,7 +157,10 @@ function CollectionsIndexPage() {
               title="روایت را با دسته‌بندی محصول قاطی نمی‌کنیم"
               lede="کالکشن برای کشف و داستان‌گویی است؛ دسته‌ها برای مرور نوع محصول. اگر قصد مقایسه مستقیم دارید، از فروشگاه یا دسته مربوط ادامه دهید."
               action={
-                <Link to="/journal" className="tech min-h-11 text-bone transition-colors hover:text-signal">
+                <Link
+                  to="/journal"
+                  className="tech min-h-11 text-bone transition-colors hover:text-signal"
+                >
                   راهنماهای ژورنال ←
                 </Link>
               }

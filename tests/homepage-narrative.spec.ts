@@ -100,7 +100,9 @@ test("homepage narrative follows identity to product to story to support", async
   expect(order).toEqual([...order].sort((a, b) => a - b));
 });
 
-test("product moments and shop the look expose truthful direct product paths", async ({ page }) => {
+test("product moments retain their route while editorial shop-the-story gates draft products", async ({
+  page,
+}) => {
   await page.goto("/", { waitUntil: "networkidle" });
 
   const productSection = page.locator('section[aria-labelledby="home-products-title"]');
@@ -108,10 +110,14 @@ test("product moments and shop the look expose truthful direct product paths", a
   await expect(productSection.getByText("منتخب‌ها بر اساس جایگاه Merchandising")).toBeVisible();
 
   const look = page.locator('section[aria-labelledby="shop-look-title"]');
-  await expect(look.getByRole("link", { name: /هودی کلاسیک LBB/ })).toBeVisible();
-  await expect(look.getByRole("link", { name: /شلوار کارگو استریت/ })).toBeVisible();
-  await expect(look.getByRole("link", { name: /کتونی اربن رانر/ })).toBeVisible();
-  await expect(look.getByText("تصویر برای نمایش ترکیب است")).toBeVisible();
+  await expect(look.locator('a[href^="/product/"]')).toHaveCount(0);
+  await expect(look.locator("[data-f17-product-hotspot]")).toHaveCount(0);
+  await expect(look.getByText("نقطه خرید مستقیمی روی این تصویر فعال نیست")).toBeVisible();
+  await expect(look.getByRole("link", { name: "روایت شبگرد" })).toHaveAttribute(
+    "href",
+    "/collections/drop-01-shabgard",
+  );
+  await expect(look.getByRole("link", { name: "مرور فروشگاه" })).toHaveAttribute("href", "/shop");
 });
 
 test("drop story avoids manufactured urgency and links to a real collection", async ({ page }) => {
@@ -119,8 +125,9 @@ test("drop story avoids manufactured urgency and links to a real collection", as
 
   const section = page.locator('section[aria-labelledby="drop-story-title"]');
   await expect(section.getByRole("heading", { name: "دراپ ۰۱ — شبگرد" })).toBeVisible();
-  await expect(section.getByText(/تاریخ انتشار تاییدشده ندارد/)).toBeVisible();
-  await expect(section.getByRole("link", { name: "مشاهده کالکشن شبگرد" })).toHaveAttribute(
+  await expect(section.getByText(/وضعیت زمانی یا موجودی دراپ.*حدس زده نمی‌شود/)).toBeVisible();
+  await expect(section.locator('a[href^="/product/"]')).toHaveCount(0);
+  await expect(section.getByRole("link", { name: "مشاهده روایت دراپ ۰۱ — شبگرد" })).toHaveAttribute(
     "href",
     "/collections/drop-01-shabgard",
   );

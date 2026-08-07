@@ -22,8 +22,7 @@ import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 const TITLE = "لوک‌بوک LBB | داستان‌های تصویری و مسیرهای مرتبط";
 const DESC =
   "لوک‌بوک LBB را ببینید؛ داستان‌های تصویری با مسیرهای مرتبط به کالکشن، دسته و در صورت انتشار عمومی، صفحه محصول.";
-const FOCUSABLE =
-  'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export const Route = createFileRoute("/lookbook")({
   head: () => ({
@@ -69,9 +68,7 @@ function LookbookPage() {
       }
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        setActiveIndex((current) =>
-          current === null ? null : (current + 1) % sceneViews.length,
-        );
+        setActiveIndex((current) => (current === null ? null : (current + 1) % sceneViews.length));
         return;
       }
       if (event.key === "ArrowRight") {
@@ -85,7 +82,9 @@ function LookbookPage() {
 
       const focusable = Array.from(
         dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
-      ).filter((element) => !element.hasAttribute("disabled") && element.getClientRects().length > 0);
+      ).filter(
+        (element) => !element.hasAttribute("disabled") && element.getClientRects().length > 0,
+      );
       if (focusable.length === 0) return;
 
       const first = focusable[0];
@@ -116,9 +115,7 @@ function LookbookPage() {
     );
   };
   const showNext = () => {
-    setActiveIndex((current) =>
-      current === null ? null : (current + 1) % sceneViews.length,
-    );
+    setActiveIndex((current) => (current === null ? null : (current + 1) % sceneViews.length));
   };
 
   return (
@@ -141,8 +138,12 @@ function LookbookPage() {
             </p>
 
             {directProductLinkCount === 0 ? (
-              <StatePanel className="mt-7 max-w-[720px]" title="این لوک‌بوک فعلاً لینک مستقیم محصول ندارد">
-                مسیرهای کالکشن و دسته برای ادامه کشف فعال‌اند؛ هیچ نقطه خریدی روی محصول منتشرنشده ساخته نمی‌شود.
+              <StatePanel
+                className="mt-7 max-w-[720px]"
+                title="این لوک‌بوک فعلاً لینک مستقیم محصول ندارد"
+              >
+                مسیرهای کالکشن و دسته برای ادامه کشف فعال‌اند؛ هیچ نقطه خریدی روی محصول منتشرنشده
+                ساخته نمی‌شود.
               </StatePanel>
             ) : null}
           </Shell>
@@ -184,7 +185,10 @@ function LookbookPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-obsidian/85 via-transparent to-transparent" />
                       <div className="absolute inset-x-4 bottom-4 flex flex-wrap items-end justify-between gap-3">
                         <TechLabel tone="bone">{scene.label}</TechLabel>
-                        <StatusTag tone={scene.publicProducts.length > 0 ? "signal" : "neutral"} className="rounded-lg backdrop-blur">
+                        <StatusTag
+                          tone={scene.publicProducts.length > 0 ? "signal" : "neutral"}
+                          className="rounded-lg backdrop-blur"
+                        >
                           {scene.publicProducts.length > 0
                             ? "PRODUCT LINK"
                             : scene.collection
@@ -303,7 +307,10 @@ function LookbookPage() {
             <figcaption className="w-full max-w-[760px] rounded-xl border border-hairline bg-carbon p-4 text-center md:p-5">
               <TechLabel tone="signal">{activeScene.label}</TechLabel>
               <p className="mt-2 text-xs leading-6 text-metal">{activeScene.alt}</p>
-              <nav aria-label="مسیرهای مرتبط این تصویر" className="mt-4 flex flex-wrap justify-center gap-2">
+              <nav
+                aria-label="مسیرهای مرتبط این تصویر"
+                className="mt-4 flex flex-wrap justify-center gap-2"
+              >
                 {activeScene.publicProducts.map((reference) => (
                   <Link
                     key={reference.slug}

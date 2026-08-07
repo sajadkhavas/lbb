@@ -178,7 +178,8 @@ function JournalIndexPage() {
               <TechLabel tone="signal">CONTINUE DISCOVERY</TechLabel>
               <h2 className="mt-3 text-display-3 text-bone">مطلب را به مسیر کشف بعدی وصل کن</h2>
               <p className="mt-3 max-w-[58ch] text-sm leading-7 text-metal">
-                برای دیدن روایت‌های تصویری به لوک‌بوک برو، کالکشن‌ها را مرور کن یا مستقیماً سراغ دسته‌های فروشگاه برو.
+                برای دیدن روایت‌های تصویری به لوک‌بوک برو، کالکشن‌ها را مرور کن یا مستقیماً سراغ
+                دسته‌های فروشگاه برو.
               </p>
             </div>
             <nav aria-label="مسیرهای بعدی ژورنال" className="flex flex-wrap gap-3 md:justify-end">

@@ -90,7 +90,10 @@ function JournalNotFound() {
   return (
     <>
       <Navbar theme="light" />
-      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="journal-not-found">
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="journal-not-found"
+      >
         <Shell className="py-3">
           <Breadcrumb
             items={[
@@ -102,6 +105,7 @@ function JournalNotFound() {
         </Shell>
         <Band hairline={false}>
           <Shell>
+            <h1 className="sr-only">این مقاله پیدا نشد</h1>
             <EmptyState
               icon={<BookOpenText aria-hidden="true" size={34} />}
               title="این مقاله پیدا نشد"
@@ -255,7 +259,9 @@ function JournalDetailPage() {
                     <div className="flex flex-col justify-center p-5">
                       <TechLabel tone="signal">{item.category}</TechLabel>
                       <h3 className="mt-3 text-lg font-bold leading-8 text-bone">{item.title}</h3>
-                      <p className="mt-2 line-clamp-2 text-xs leading-6 text-metal">{item.excerpt}</p>
+                      <p className="mt-2 line-clamp-2 text-xs leading-6 text-metal">
+                        {item.excerpt}
+                      </p>
                       <span className="tech mt-4 inline-flex items-center gap-2 text-bone transition-colors group-hover:text-signal">
                         خواندن
                         <ArrowUpLeft aria-hidden="true" size={14} />

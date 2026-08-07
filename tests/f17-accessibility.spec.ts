@@ -166,7 +166,9 @@ test("editorial routes remain usable with zoom-permitting viewport and WCAG text
 test("lookbook remains operable under reduced motion preference", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/lookbook", { waitUntil: "networkidle" });
-  expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true);
+  expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(
+    true,
+  );
   await page.getByTestId("lookbook-scene-0").click();
   const dialog = page.locator('[data-f17-lookbook-dialog="true"]');
   await expect(dialog).toBeVisible();

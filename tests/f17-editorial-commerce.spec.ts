@@ -139,7 +139,9 @@ test("invalid journal article keeps a real noindex 404 state", async ({ page }) 
   await expect(page.getByRole("link", { name: "بازگشت به ژورنال" })).toBeVisible();
 });
 
-test("collection and journal detail breadcrumbs preserve the editorial hierarchy", async ({ page }) => {
+test("collection and journal detail breadcrumbs preserve the editorial hierarchy", async ({
+  page,
+}) => {
   await page.goto("/collections/drop-01-shabgard", { waitUntil: "networkidle" });
   await expect(page.getByRole("link", { name: "خانه" }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "کالکشن‌ها" }).first()).toBeVisible();
@@ -150,7 +152,8 @@ test("collection and journal detail breadcrumbs preserve the editorial hierarchy
 });
 
 test("F17 surfaces contain no unsupported urgency or popularity claims", async ({ page }) => {
-  const forbidden = /sold out in hours|most popular drop|limited edition|exclusive|best seller|community favorite|پرفروش‌ترین|محبوب‌ترین|نسخه محدود|شمارش معکوس/i;
+  const forbidden =
+    /sold out in hours|most popular drop|limited edition|exclusive|best seller|community favorite|پرفروش‌ترین|محبوب‌ترین|نسخه محدود|شمارش معکوس/i;
   for (const route of [
     "/collections",
     "/collections/drop-01-shabgard",
