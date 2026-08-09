@@ -9,6 +9,7 @@ import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { useQuickView } from "@/lib/quickview";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
+import { isLiveBackend } from "@/lib/backend-api";
 import { Frame, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
 
 export type ProductCardModel = Product | BackendCatalogCard;
@@ -39,6 +40,27 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     setLoaded(false);
     if (imgRef.current?.complete) setLoaded(true);
   }, [primaryImage]);
+
+  if (!backend && isLiveBackend()) {
+    return (
+      <article className="flex min-h-72 flex-col justify-between border border-hairline bg-carbon p-5">
+        <div>
+          <TechLabel tone="metal">BACKEND PRODUCT ONLY</TechLabel>
+          <p className="mt-4 text-sm leading-7 text-metal">
+            این جایگاه هنوز به محصول منتشرشده Backend متصل نشده است؛ داده نمونه در حالت live نمایش
+            داده نمی‌شود.
+          </p>
+        </div>
+        <Link
+          to="/shop"
+          search={{}}
+          className="mt-6 inline-flex min-h-11 items-center justify-center border border-hairline px-3 text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+        >
+          مشاهده کاتالوگ زنده
+        </Link>
+      </article>
+    );
+  }
 
   const addWithSize = (size: string) => {
     if (backend) return;
@@ -153,11 +175,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             <span className="num text-xs text-mute line-through">{fmtToman(p.originalPrice)}</span>
           ) : null}
         </div>
-        <div
-          role="group"
-          className="mt-1 flex gap-1.5"
-          aria-label={`${p.colors.length} رنگ موجود`}
-        >
+        <div role="group" className="mt-1 flex gap-1.5" aria-label={`${p.colors.length} رنگ موجود`}>
           {backend
             ? p.colors.map((color) => (
                 <span

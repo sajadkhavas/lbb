@@ -101,8 +101,7 @@ export function ProductPurchasePanel({
 
     const backendVariant =
       selectedVariant.id.length === 26 && selectedVariant.priceToman !== undefined;
-    const swatch =
-      selectedColor?.swatch?.type === "solid" ? selectedColor.swatch.value : undefined;
+    const swatch = selectedColor?.swatch?.type === "solid" ? selectedColor.swatch.value : undefined;
 
     add({
       slug: model.slug,

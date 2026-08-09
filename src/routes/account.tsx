@@ -166,7 +166,9 @@ function LiveAccount() {
         </p>
       ) : error ? (
         <div className="mt-8">
-          <StatePanel title="Backend حساب در دسترس نیست" tone="warning">{error}</StatePanel>
+          <StatePanel title="Backend حساب در دسترس نیست" tone="warning">
+            {error}
+          </StatePanel>
         </div>
       ) : !customer ? (
         <div className="mt-8 max-w-[620px]">
@@ -184,7 +186,9 @@ function LiveAccount() {
               <h2 className="mt-2 text-xl font-bold text-bone">
                 {customer.fullName?.trim() || "مشتری LBB"}
               </h2>
-              <p className="mt-2 num text-sm text-metal" dir="ltr">{customer.mobile}</p>
+              <p className="mt-2 num text-sm text-metal" dir="ltr">
+                {customer.mobile}
+              </p>
               {customer.email ? <p className="mt-1 text-sm text-metal">{customer.email}</p> : null}
             </Surface>
             <button type="button" onClick={logout} className={CtaClasses("line")}>
@@ -198,10 +202,19 @@ function LiveAccount() {
               const Icon = action.icon;
               return (
                 <Link key={action.to} to={action.to} className="group block">
-                  <Surface tone="raised" className="h-full p-5 transition-colors group-hover:border-signal md:p-7">
+                  <Surface
+                    tone="raised"
+                    className="h-full p-5 transition-colors group-hover:border-signal md:p-7"
+                  >
                     <div className="flex items-start justify-between gap-4">
-                      <span className="grid h-11 w-11 place-items-center border border-hairline text-signal"><Icon size={19} aria-hidden="true" /></span>
-                      <ArrowUpLeft size={18} aria-hidden="true" className="text-mute group-hover:text-signal" />
+                      <span className="grid h-11 w-11 place-items-center border border-hairline text-signal">
+                        <Icon size={19} aria-hidden="true" />
+                      </span>
+                      <ArrowUpLeft
+                        size={18}
+                        aria-hidden="true"
+                        className="text-mute group-hover:text-signal"
+                      />
                     </div>
                     <h2 className="mt-7 text-title text-bone">{action.title}</h2>
                     <p className="mt-2 text-sm leading-7 text-metal">{action.body}</p>
@@ -215,20 +228,43 @@ function LiveAccount() {
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <TechLabel tone="signal">ORDERS / BACKEND</TechLabel>
-                <h2 id="account-orders-title" className="mt-2 text-display-3 text-bone">سفارش‌های من</h2>
+                <h2 id="account-orders-title" className="mt-2 text-display-3 text-bone">
+                  سفارش‌های من
+                </h2>
               </div>
-              <button type="button" onClick={() => void loadOrders()} disabled={ordersLoading} className={CtaClasses("line")}>
-                {ordersLoading ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : null}
+              <button
+                type="button"
+                onClick={() => void loadOrders()}
+                disabled={ordersLoading}
+                className={CtaClasses("line")}
+              >
+                {ordersLoading ? (
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+                ) : null}
                 تازه‌سازی
               </button>
             </div>
 
-            {actionError ? <div className="mt-4"><StatePanel title="عملیات حساب کامل نشد" tone="warning">{actionError}</StatePanel></div> : null}
+            {actionError ? (
+              <div className="mt-4">
+                <StatePanel title="عملیات حساب کامل نشد" tone="warning">
+                  {actionError}
+                </StatePanel>
+              </div>
+            ) : null}
 
             {ordersLoading && orders.length === 0 ? (
-              <p className="mt-6 flex items-center gap-2 text-sm text-metal"><Loader2 size={16} className="animate-spin" aria-hidden="true" />در حال دریافت سفارش‌ها…</p>
+              <p className="mt-6 flex items-center gap-2 text-sm text-metal">
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                در حال دریافت سفارش‌ها…
+              </p>
             ) : orders.length === 0 ? (
-              <EmptyState className="mt-6" icon={<PackageSearch size={38} aria-hidden="true" />} title="هنوز سفارشی ثبت نشده است" body="فقط سفارش‌های واقعی متعلق به همین نشست مشتری نمایش داده می‌شوند." />
+              <EmptyState
+                className="mt-6"
+                icon={<PackageSearch size={38} aria-hidden="true" />}
+                title="هنوز سفارشی ثبت نشده است"
+                body="فقط سفارش‌های واقعی متعلق به همین نشست مشتری نمایش داده می‌شوند."
+              />
             ) : (
               <div className="mt-6 space-y-3">
                 {orders.map((order) => (
@@ -236,16 +272,31 @@ function LiveAccount() {
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
                         <p className="font-bold text-bone">سفارش {order.number}</p>
-                        <p className="mt-1 text-xs text-metal">{order.statusLabel} · {order.paymentStatusLabel}</p>
-                        {order.placedAt ? <p className="mt-1 text-xs text-mute">{new Date(order.placedAt).toLocaleString("fa-IR")}</p> : null}
+                        <p className="mt-1 text-xs text-metal">
+                          {order.statusLabel} · {order.paymentStatusLabel}
+                        </p>
+                        {order.placedAt ? (
+                          <p className="mt-1 text-xs text-mute">
+                            {new Date(order.placedAt).toLocaleString("fa-IR")}
+                          </p>
+                        ) : null}
                       </div>
                       <div className="text-end">
-                        <p className="num font-bold text-bone">{fmtToman(order.totals.grandTotal.amount)}</p>
-                        <p className="mt-1 text-xs text-metal">{order.itemCount.toLocaleString("fa-IR")} قلم</p>
+                        <p className="num font-bold text-bone">
+                          {fmtToman(order.totals.grandTotal.amount)}
+                        </p>
+                        <p className="mt-1 text-xs text-metal">
+                          {order.itemCount.toLocaleString("fa-IR")} قلم
+                        </p>
                       </div>
                     </div>
                     {order.canCancel ? (
-                      <button type="button" onClick={() => void cancel(order)} disabled={busyOrder === order.id} className="mt-4 min-h-11 border border-hairline px-4 text-xs font-semibold text-metal hover:border-signal hover:text-signal disabled:opacity-50">
+                      <button
+                        type="button"
+                        onClick={() => void cancel(order)}
+                        disabled={busyOrder === order.id}
+                        className="mt-4 min-h-11 border border-hairline px-4 text-xs font-semibold text-metal hover:border-signal hover:text-signal disabled:opacity-50"
+                      >
                         {busyOrder === order.id ? "در حال لغو…" : "لغو سفارش واجد شرایط"}
                       </button>
                     ) : null}
@@ -264,7 +315,11 @@ function AccountChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar theme="dark" />
-      <main id="main" dir="rtl" className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] text-bone md:pb-0">
+      <main
+        id="main"
+        dir="rtl"
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] text-bone md:pb-0"
+      >
         <Shell className="border-b border-hairline py-4">
           <Breadcrumb items={[{ label: "خانه", to: "/" }, { label: "حساب کاربری" }]} />
         </Shell>
@@ -273,12 +328,19 @@ function AccountChrome({ children }: { children: React.ReactNode }) {
             <div>
               <TechLabel tone="signal">ACCOUNT / CUSTOMER SESSION</TechLabel>
               <h1 className="mt-3 text-display-2">مرکز حساب</h1>
-              <p className="mt-4 max-w-[54ch] text-sm leading-8 text-metal">در حالت live هویت و سفارش‌ها از Backend می‌آیند؛ وضعیت ساختگی در حساب نمایش داده نمی‌شود.</p>
+              <p className="mt-4 max-w-[54ch] text-sm leading-8 text-metal">
+                در حالت live هویت و سفارش‌ها از Backend می‌آیند؛ وضعیت ساختگی در حساب نمایش داده
+                نمی‌شود.
+              </p>
             </div>
-            <div className="grid h-20 w-20 place-items-center border border-hairline bg-carbon text-signal"><UserRound size={30} strokeWidth={1.4} aria-hidden="true" /></div>
+            <div className="grid h-20 w-20 place-items-center border border-hairline bg-carbon text-signal">
+              <UserRound size={30} strokeWidth={1.4} aria-hidden="true" />
+            </div>
           </Shell>
         </header>
-        <Band hairline={false} className="!py-10 md:!py-14"><Shell>{children}</Shell></Band>
+        <Band hairline={false} className="!py-10 md:!py-14">
+          <Shell>{children}</Shell>
+        </Band>
       </main>
       <Footer />
       <MobileBottomBar />
@@ -289,14 +351,30 @@ function AccountChrome({ children }: { children: React.ReactNode }) {
 function PrototypeAccount() {
   return (
     <AccountChrome>
-      <DemoNotice title="حساب واقعی در حالت Prototype متصل نیست">ورود، ثبت‌نام و سفارش واقعی فقط در Backend mode live فعال می‌شوند. علاقه‌مندی و سبد این حالت در مرورگر فعلی نگه‌داری می‌شوند.</DemoNotice>
+      <DemoNotice title="حساب واقعی در حالت Prototype متصل نیست">
+        ورود، ثبت‌نام و سفارش واقعی فقط در Backend mode live فعال می‌شوند. علاقه‌مندی و سبد این حالت
+        در مرورگر فعلی نگه‌داری می‌شوند.
+      </DemoNotice>
       <div className="mt-8 grid gap-3 md:grid-cols-3">
-        {[...actions, { title: "پیگیری سفارش", body: "بررسی مرجع نمایشی همان تب.", to: "/track-order" as const, icon: PackageSearch }].map((action) => {
+        {[
+          ...actions,
+          {
+            title: "پیگیری سفارش",
+            body: "بررسی مرجع نمایشی همان تب.",
+            to: "/track-order" as const,
+            icon: PackageSearch,
+          },
+        ].map((action) => {
           const Icon = action.icon;
           return (
             <Link key={action.to} to={action.to} className="group block">
-              <Surface tone="raised" className="h-full p-5 transition-colors group-hover:border-signal md:p-7">
-                <span className="grid h-11 w-11 place-items-center border border-hairline text-signal"><Icon size={19} aria-hidden="true" /></span>
+              <Surface
+                tone="raised"
+                className="h-full p-5 transition-colors group-hover:border-signal md:p-7"
+              >
+                <span className="grid h-11 w-11 place-items-center border border-hairline text-signal">
+                  <Icon size={19} aria-hidden="true" />
+                </span>
                 <h2 className="mt-7 text-title text-bone">{action.title}</h2>
                 <p className="mt-2 text-sm leading-7 text-metal">{action.body}</p>
               </Surface>
@@ -304,7 +382,9 @@ function PrototypeAccount() {
           );
         })}
       </div>
-      <StatePanel title="Product Truth" tone="info" className="mt-8">حالت Prototype هیچ پروفایل یا تاریخچه خرید واقعی جعل نمی‌کند.</StatePanel>
+      <StatePanel title="Product Truth" tone="info" className="mt-8">
+        حالت Prototype هیچ پروفایل یا تاریخچه خرید واقعی جعل نمی‌کند.
+      </StatePanel>
     </AccountChrome>
   );
 }

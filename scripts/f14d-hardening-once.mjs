@@ -31,7 +31,10 @@ patchFile("src/components/lbb/ProductCard.tsx", (text) => {
   const importAnchor = `import type { BackendCatalogCard } from \"@/lib/backend-storefront\";\n`;
   if (!text.includes(`import { isLiveBackend } from \"@/lib/backend-api\";`)) {
     if (!text.includes(importAnchor)) throw new Error("ProductCard import anchor not found");
-    text = text.replace(importAnchor, `${importAnchor}import { isLiveBackend } from \"@/lib/backend-api\";\n`);
+    text = text.replace(
+      importAnchor,
+      `${importAnchor}import { isLiveBackend } from \"@/lib/backend-api\";\n`,
+    );
   }
 
   if (!text.includes("BACKEND PRODUCT ONLY")) {

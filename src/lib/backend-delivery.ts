@@ -26,11 +26,13 @@ export type DeliveryOptionsDto = {
   methods: DeliveryOptionDto[];
 };
 
-export async function getDeliveryOptions(input: {
-  province?: string | null;
-  city?: string | null;
-  subtotalToman?: number | null;
-} = {}) {
+export async function getDeliveryOptions(
+  input: {
+    province?: string | null;
+    city?: string | null;
+    subtotalToman?: number | null;
+  } = {},
+) {
   const params = new URLSearchParams();
   if (input.province?.trim()) params.set("province", input.province.trim());
   if (input.city?.trim()) params.set("city", input.city.trim());

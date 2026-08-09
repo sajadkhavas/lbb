@@ -167,8 +167,12 @@ export function normalizeBackendFilters(filters: Filters, scope?: FilterScope): 
       : scope?.categories
         ? normalizeList(filters.cats, scope.categories)
         : backendList(filters.cats);
-  const colors = scope?.colors ? normalizeList(filters.colors, scope.colors) : backendList(filters.colors);
-  const sizes = scope?.sizes ? normalizeList(filters.sizes, scope.sizes) : backendList(filters.sizes);
+  const colors = scope?.colors
+    ? normalizeList(filters.colors, scope.colors)
+    : backendList(filters.colors);
+  const sizes = scope?.sizes
+    ? normalizeList(filters.sizes, scope.sizes)
+    : backendList(filters.sizes);
   const priceCeil = Math.max(1, Math.floor(scope?.priceCeil ?? Number.MAX_SAFE_INTEGER));
   const rawMax = Number.isFinite(filters.max) ? Math.max(0, Math.floor(filters.max)) : 0;
   const max = rawMax > 0 && rawMax < priceCeil ? rawMax : 0;
@@ -210,8 +214,7 @@ export function parseBackendFilters(search: Record<string, unknown>): Filters {
     max: Number.isFinite(maxValue) ? maxValue : 0,
     instock: parseBoolean(search.instock),
     sale: false,
-    sort:
-      rawSort && BACKEND_SORTS.includes(rawSort as SortKey) ? (rawSort as SortKey) : "newest",
+    sort: rawSort && BACKEND_SORTS.includes(rawSort as SortKey) ? (rawSort as SortKey) : "newest",
   });
 }
 

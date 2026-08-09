@@ -197,10 +197,7 @@ function LiveCheckout() {
     setActionError(null);
     try {
       await ensureBackendCsrf();
-      const response = await initiatePayment(
-        orderResult.order.id,
-        createIdempotencyKey("payment"),
-      );
+      const response = await initiatePayment(orderResult.order.id, createIdempotencyKey("payment"));
       const redirectUrl = response.data.payment.redirectUrl;
       if (typeof redirectUrl !== "string" || !redirectUrl.startsWith("https://")) {
         throw new Error("payment_redirect_missing");
@@ -228,11 +225,17 @@ function LiveCheckout() {
           className="mt-8"
           title="سبد خرید خالی است"
           body="برای تکمیل سفارش ابتدا یک محصول منتشرشده را با رنگ و سایز مشخص به سبد اضافه کنید."
-          action={<Link to="/shop" className={CtaClasses("signal")}>رفتن به فروشگاه</Link>}
+          action={
+            <Link to="/shop" className={CtaClasses("signal")}>
+              رفتن به فروشگاه
+            </Link>
+          }
         />
       ) : sessionError ? (
         <div className="mt-8">
-          <StatePanel title="Backend قابل تأیید نیست" tone="warning">{sessionError}</StatePanel>
+          <StatePanel title="Backend قابل تأیید نیست" tone="warning">
+            {sessionError}
+          </StatePanel>
         </div>
       ) : !customer ? (
         <div className="mt-8">
@@ -246,66 +249,134 @@ function LiveCheckout() {
           />
         </div>
       ) : orderResult ? (
-        <OrderCreated result={orderResult} busy={busy} error={actionError} onPayment={startPayment} />
+        <OrderCreated
+          result={orderResult}
+          busy={busy}
+          error={actionError}
+          onPayment={startPayment}
+        />
       ) : (
         <form onSubmit={requestQuote} className="mt-8 space-y-6">
           {!cartCompatible ? (
             <StatePanel title="سبد قدیمی با Backend سازگار نیست" tone="warning">
-              یکی از اقلام شناسه Variant معتبر Backend ندارد. آن قلم را حذف و دوباره از صفحه محصول انتخاب کنید.
+              یکی از اقلام شناسه Variant معتبر Backend ندارد. آن قلم را حذف و دوباره از صفحه محصول
+              انتخاب کنید.
             </StatePanel>
           ) : null}
 
-          <section className="border border-hairline bg-carbon p-5" aria-labelledby="checkout-items">
-            <h2 id="checkout-items" className="text-base font-bold text-bone">اقلام انتخاب‌شده</h2>
+          <section
+            className="border border-hairline bg-carbon p-5"
+            aria-labelledby="checkout-items"
+          >
+            <h2 id="checkout-items" className="text-base font-bold text-bone">
+              اقلام انتخاب‌شده
+            </h2>
             <div className="mt-4 space-y-3 text-sm">
               {lines.map((line) => (
-                <div key={line.variantId ?? `${line.slug}-${line.size}`} className="flex items-start justify-between gap-4 border-t border-hairline pt-3 first:border-0 first:pt-0">
+                <div
+                  key={line.variantId ?? `${line.slug}-${line.size}`}
+                  className="flex items-start justify-between gap-4 border-t border-hairline pt-3 first:border-0 first:pt-0"
+                >
                   <div className="min-w-0">
                     <p className="font-semibold text-bone">{line.name}</p>
                     <p className="mt-1 text-xs text-metal">
-                      {line.colorLabel ?? line.color ?? "رنگ"} · {line.sizeLabel ?? line.size ?? "سایز"} · {line.qty.toLocaleString("fa-IR")} عدد
+                      {line.colorLabel ?? line.color ?? "رنگ"} ·{" "}
+                      {line.sizeLabel ?? line.size ?? "سایز"} · {line.qty.toLocaleString("fa-IR")}{" "}
+                      عدد
                     </p>
                   </div>
-                  <span className="shrink-0 text-xs text-mute">قیمت در مرحله Quote بازبینی می‌شود</span>
+                  <span className="shrink-0 text-xs text-mute">
+                    قیمت در مرحله Quote بازبینی می‌شود
+                  </span>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="border border-hairline bg-carbon p-5" aria-labelledby="recipient-title">
+          <section
+            className="border border-hairline bg-carbon p-5"
+            aria-labelledby="recipient-title"
+          >
             <TechLabel tone="signal">RECIPIENT</TechLabel>
-            <h2 id="recipient-title" className="mt-2 text-lg font-bold text-bone">اطلاعات تحویل</h2>
+            <h2 id="recipient-title" className="mt-2 text-lg font-bold text-bone">
+              اطلاعات تحویل
+            </h2>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <Field label="نام و نام خانوادگی" value={fullName} onChange={setFullName} autoComplete="name" required />
+              <Field
+                label="نام و نام خانوادگی"
+                value={fullName}
+                onChange={setFullName}
+                autoComplete="name"
+                required
+              />
               <Field label="شماره موبایل تأییدشده" value={customer.mobile} readOnly dir="ltr" />
-              <Field label="استان" value={province} onChange={setProvince} autoComplete="address-level1" required={needsAddress} />
-              <Field label="شهر" value={city} onChange={setCity} autoComplete="address-level2" required={needsAddress} />
+              <Field
+                label="استان"
+                value={province}
+                onChange={setProvince}
+                autoComplete="address-level1"
+                required={needsAddress}
+              />
+              <Field
+                label="شهر"
+                value={city}
+                onChange={setCity}
+                autoComplete="address-level2"
+                required={needsAddress}
+              />
               {needsAddress ? (
                 <div className="md:col-span-2">
-                  <Field label="نشانی" value={address} onChange={setAddress} autoComplete="street-address" required />
+                  <Field
+                    label="نشانی"
+                    value={address}
+                    onChange={setAddress}
+                    autoComplete="street-address"
+                    required
+                  />
                 </div>
               ) : null}
-              <Field label="کدپستی (اختیاری)" value={postalCode} onChange={setPostalCode} inputMode="numeric" />
+              <Field
+                label="کدپستی (اختیاری)"
+                value={postalCode}
+                onChange={setPostalCode}
+                inputMode="numeric"
+              />
               <Field label="یادداشت سفارش (اختیاری)" value={notes} onChange={setNotes} />
             </div>
           </section>
 
-          <section className="border border-hairline bg-carbon p-5" aria-labelledby="delivery-title">
+          <section
+            className="border border-hairline bg-carbon p-5"
+            aria-labelledby="delivery-title"
+          >
             <TechLabel tone="signal">DELIVERY</TechLabel>
-            <h2 id="delivery-title" className="mt-2 text-lg font-bold text-bone">روش تحویل</h2>
+            <h2 id="delivery-title" className="mt-2 text-lg font-bold text-bone">
+              روش تحویل
+            </h2>
             {deliveryLoading ? (
               <p className="mt-4 flex items-center gap-2 text-sm text-metal">
                 <Loader2 size={15} className="animate-spin" aria-hidden="true" />
                 در حال دریافت روش‌های فعال از Backend…
               </p>
             ) : deliveryError ? (
-              <div className="mt-4"><StatePanel title="روش ارسال قابل دریافت نیست" tone="warning">{deliveryError}</StatePanel></div>
+              <div className="mt-4">
+                <StatePanel title="روش ارسال قابل دریافت نیست" tone="warning">
+                  {deliveryError}
+                </StatePanel>
+              </div>
             ) : enabledMethods.length === 0 ? (
-              <div className="mt-4"><StatePanel title="روش تحویل فعالی وجود ندارد" tone="warning">Checkout تا انتشار روش واقعی تحویل متوقف می‌ماند.</StatePanel></div>
+              <div className="mt-4">
+                <StatePanel title="روش تحویل فعالی وجود ندارد" tone="warning">
+                  Checkout تا انتشار روش واقعی تحویل متوقف می‌ماند.
+                </StatePanel>
+              </div>
             ) : (
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 {enabledMethods.map((method) => (
-                  <label key={method.method} className={`cursor-pointer border p-4 ${deliveryMethod === method.method ? "border-signal" : "border-hairline"}`}>
+                  <label
+                    key={method.method}
+                    className={`cursor-pointer border p-4 ${deliveryMethod === method.method ? "border-signal" : "border-hairline"}`}
+                  >
                     <input
                       type="radio"
                       name="deliveryMethod"
@@ -315,7 +386,9 @@ function LiveCheckout() {
                       className="me-2"
                     />
                     <span className="font-semibold text-bone">{method.label}</span>
-                    <span className="mt-1 block text-xs text-metal">هزینه نهایی فقط در Quote سرور قطعی می‌شود.</span>
+                    <span className="mt-1 block text-xs text-metal">
+                      هزینه نهایی فقط در Quote سرور قطعی می‌شود.
+                    </span>
                   </label>
                 ))}
               </div>
@@ -326,25 +399,49 @@ function LiveCheckout() {
             <ServerQuote quote={quote} />
           ) : (
             <StatePanel title="جمع نهایی هنوز محاسبه نشده است" tone="info">
-              قیمت Variantها، موجودی و هزینه تحویل با دکمه «دریافت جمع نهایی» دوباره در Backend بررسی می‌شوند.
+              قیمت Variantها، موجودی و هزینه تحویل با دکمه «دریافت جمع نهایی» دوباره در Backend
+              بررسی می‌شوند.
             </StatePanel>
           )}
 
-          {actionError ? <StatePanel title="عملیات تکمیل نشد" tone="warning">{actionError}</StatePanel> : null}
+          {actionError ? (
+            <StatePanel title="عملیات تکمیل نشد" tone="warning">
+              {actionError}
+            </StatePanel>
+          ) : null}
 
           <div className="flex flex-wrap gap-3">
             {!quote ? (
-              <button type="submit" disabled={busy !== null || !cartCompatible || !recipientReady || !selectedMethod} className={`${CtaClasses("signal")} disabled:opacity-50`}>
-                {busy === "quote" ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <ReceiptText size={16} aria-hidden="true" />}
+              <button
+                type="submit"
+                disabled={busy !== null || !cartCompatible || !recipientReady || !selectedMethod}
+                className={`${CtaClasses("signal")} disabled:opacity-50`}
+              >
+                {busy === "quote" ? (
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <ReceiptText size={16} aria-hidden="true" />
+                )}
                 دریافت جمع نهایی از Backend
               </button>
             ) : (
-              <button type="button" onClick={commit} disabled={busy !== null} className={`${CtaClasses("signal")} disabled:opacity-50`}>
-                {busy === "commit" ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <LockKeyhole size={16} aria-hidden="true" />}
+              <button
+                type="button"
+                onClick={commit}
+                disabled={busy !== null}
+                className={`${CtaClasses("signal")} disabled:opacity-50`}
+              >
+                {busy === "commit" ? (
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <LockKeyhole size={16} aria-hidden="true" />
+                )}
                 ثبت سفارش با همین Quote
               </button>
             )}
-            <Link to="/cart" className={CtaClasses("line")}>بازگشت به سبد</Link>
+            <Link to="/cart" className={CtaClasses("line")}>
+              بازگشت به سبد
+            </Link>
           </div>
         </form>
       )}
@@ -356,15 +453,22 @@ function ServerQuote({ quote }: { quote: CheckoutQuoteDto }) {
   return (
     <section className="border border-signal/60 bg-carbon p-5" aria-labelledby="server-quote-title">
       <TechLabel tone="signal">SERVER QUOTE</TechLabel>
-      <h2 id="server-quote-title" className="mt-2 text-lg font-bold text-bone">جمع نهایی تأییدشده</h2>
+      <h2 id="server-quote-title" className="mt-2 text-lg font-bold text-bone">
+        جمع نهایی تأییدشده
+      </h2>
       <div className="mt-4 space-y-2 text-sm">
         <Row label="جمع کالاها" value={fmtToman(quote.totals.subtotal.amount)} />
         <Row label="هزینه تحویل" value={fmtToman(quote.totals.deliveryFee.amount)} />
         <Row label="هزینه بسته‌بندی" value={fmtToman(quote.totals.packagingFee.amount)} />
-        {quote.totals.discount.amount > 0 ? <Row label="تخفیف" value={`− ${fmtToman(quote.totals.discount.amount)}`} /> : null}
+        {quote.totals.discount.amount > 0 ? (
+          <Row label="تخفیف" value={`− ${fmtToman(quote.totals.discount.amount)}`} />
+        ) : null}
         <Row label="مبلغ نهایی" value={fmtToman(quote.totals.grandTotal.amount)} bold />
       </div>
-      <p className="mt-3 text-xs leading-6 text-metal">Quote تا {new Date(quote.expiresAt).toLocaleString("fa-IR")} معتبر است؛ Commit دوباره Truth را کنترل می‌کند.</p>
+      <p className="mt-3 text-xs leading-6 text-metal">
+        Quote تا {new Date(quote.expiresAt).toLocaleString("fa-IR")} معتبر است؛ Commit دوباره Truth
+        را کنترل می‌کند.
+      </p>
     </section>
   );
 }
@@ -395,15 +499,28 @@ function OrderCreated({
           سفارش ثبت شده اما پرداخت نشده است. هیچ Success پرداختی شبیه‌سازی نمی‌شود.
         </StatePanel>
       )}
-      {error ? <StatePanel title="پرداخت شروع نشد" tone="warning">{error}</StatePanel> : null}
+      {error ? (
+        <StatePanel title="پرداخت شروع نشد" tone="warning">
+          {error}
+        </StatePanel>
+      ) : null}
       <div className="flex flex-wrap gap-3">
         {result.payment.available ? (
-          <button type="button" onClick={onPayment} disabled={busy !== null} className={`${CtaClasses("signal")} disabled:opacity-50`}>
-            {busy === "payment" ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
+          <button
+            type="button"
+            onClick={onPayment}
+            disabled={busy !== null}
+            className={`${CtaClasses("signal")} disabled:opacity-50`}
+          >
+            {busy === "payment" ? (
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+            ) : null}
             انتقال به درگاه واقعی
           </button>
         ) : null}
-        <Link to="/account" className={CtaClasses("line")}>مشاهده سفارش‌ها</Link>
+        <Link to="/account" className={CtaClasses("line")}>
+          مشاهده سفارش‌ها
+        </Link>
       </div>
     </div>
   );
@@ -447,7 +564,9 @@ function Field({
 
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
-    <div className={`flex items-center justify-between gap-4 ${bold ? "border-t border-hairline pt-3 text-base font-bold text-bone" : "text-metal"}`}>
+    <div
+      className={`flex items-center justify-between gap-4 ${bold ? "border-t border-hairline pt-3 text-base font-bold text-bone" : "text-metal"}`}
+    >
       <span>{label}</span>
       <span className={bold ? "num text-bone" : "num text-bone"}>{value}</span>
     </div>
@@ -462,7 +581,10 @@ function CheckoutChrome({ children }: { children: React.ReactNode }) {
         <div className="mx-auto w-full max-w-[820px]">
           <TechLabel tone="signal">CHECKOUT / SERVER AUTHORITATIVE</TechLabel>
           <h1 className="mt-3 text-display-2 text-bone">تکمیل سفارش</h1>
-          <p className="mt-3 max-w-[66ch] text-sm leading-8 text-metal">قیمت، موجودی، هزینه تحویل، Order و Payment state در حالت live فقط از Backend پذیرفته می‌شوند.</p>
+          <p className="mt-3 max-w-[66ch] text-sm leading-8 text-metal">
+            قیمت، موجودی، هزینه تحویل، Order و Payment state در حالت live فقط از Backend پذیرفته
+            می‌شوند.
+          </p>
           {children}
         </div>
       </main>
@@ -481,18 +603,56 @@ function PrototypeCheckout() {
   return (
     <CheckoutChrome>
       {!hydrated ? (
-        <p className="mt-8 text-sm text-metal" role="status">در حال خواندن سبد خرید…</p>
+        <p className="mt-8 text-sm text-metal" role="status">
+          در حال خواندن سبد خرید…
+        </p>
       ) : lines.length === 0 ? (
-        <EmptyState className="mt-8" title="سبد خرید خالی است" body="برای بررسی Checkout ابتدا یک محصول به سبد اضافه کنید." action={<Link to="/shop" className={CtaClasses("signal")}>رفتن به فروشگاه</Link>} />
+        <EmptyState
+          className="mt-8"
+          title="سبد خرید خالی است"
+          body="برای بررسی Checkout ابتدا یک محصول به سبد اضافه کنید."
+          action={
+            <Link to="/shop" className={CtaClasses("signal")}>
+              رفتن به فروشگاه
+            </Link>
+          }
+        />
       ) : (
         <div className="mt-8 space-y-6">
           <section className="border border-hairline bg-carbon p-5">
             <h2 className="text-base font-bold text-bone">خلاصه اقلام نمونه</h2>
             <p className="mt-3 text-sm text-metal">جمع محلی نمونه: {fmtToman(subtotal)}</p>
           </section>
-          {shippingMethods.length > 0 ? <StatePanel title="روش ارسال عمومی تأیید شده است" tone="success">{shippingMethods.map((method) => method.title).join("، ")}</StatePanel> : <StatePanel title={STORE_SETTINGS.shipping.verification === "pending" ? "تنظیمات ارسال در حال بررسی است" : "روش ارسال عمومی در دسترس نیست"} tone="info">Checkout نمونه هزینه فرضی تولید نمی‌کند.</StatePanel>}
-          {payment ? <StatePanel title={`روش پرداخت عمومی: ${payment.displayName}`} tone="success">شروع تراکنش و Verify در حالت نمونه انجام نمی‌شود.</StatePanel> : <StatePanel title="روش پرداخت عمومی هنوز فعال نیست" tone="info">هیچ Merchant یا Success فرضی نمایش داده نمی‌شود.</StatePanel>}
-          <StatePanel title="حالت Prototype" tone="warning">Shipping: {readiness.shippingPublic ? "آماده" : "ناآماده"}؛ Payment: {readiness.paymentPublic ? "آماده" : "ناآماده"}. ثبت واقعی سفارش فقط در Backend mode live انجام می‌شود.</StatePanel>
+          {shippingMethods.length > 0 ? (
+            <StatePanel title="روش ارسال عمومی تأیید شده است" tone="success">
+              {shippingMethods.map((method) => method.title).join("، ")}
+            </StatePanel>
+          ) : (
+            <StatePanel
+              title={
+                STORE_SETTINGS.shipping.verification === "pending"
+                  ? "تنظیمات ارسال در حال بررسی است"
+                  : "روش ارسال عمومی در دسترس نیست"
+              }
+              tone="info"
+            >
+              Checkout نمونه هزینه فرضی تولید نمی‌کند.
+            </StatePanel>
+          )}
+          {payment ? (
+            <StatePanel title={`روش پرداخت عمومی: ${payment.displayName}`} tone="success">
+              شروع تراکنش و Verify در حالت نمونه انجام نمی‌شود.
+            </StatePanel>
+          ) : (
+            <StatePanel title="روش پرداخت عمومی هنوز فعال نیست" tone="info">
+              هیچ Merchant یا Success فرضی نمایش داده نمی‌شود.
+            </StatePanel>
+          )}
+          <StatePanel title="حالت Prototype" tone="warning">
+            Shipping: {readiness.shippingPublic ? "آماده" : "ناآماده"}؛ Payment:{" "}
+            {readiness.paymentPublic ? "آماده" : "ناآماده"}. ثبت واقعی سفارش فقط در Backend mode
+            live انجام می‌شود.
+          </StatePanel>
         </div>
       )}
     </CheckoutChrome>

@@ -165,7 +165,9 @@ export const Route = createFileRoute("/$category")({
       const path = `/${category.slug}`;
       const title = category.seo.metaTitle?.trim() || `${category.name} | LBB`;
       const description =
-        category.seo.metaDescription?.trim() || category.description || `محصولات ${category.name} در LBB`;
+        category.seo.metaDescription?.trim() ||
+        category.description ||
+        `محصولات ${category.name} در LBB`;
       const scripts = [
         {
           type: "application/ld+json",
@@ -247,7 +249,11 @@ export const Route = createFileRoute("/$category")({
 
 function CategoryPage() {
   const loader = Route.useLoaderData();
-  return loader.mode === "live" ? <LiveCategory loader={loader} /> : <PrototypeCategory loader={loader} />;
+  return loader.mode === "live" ? (
+    <LiveCategory loader={loader} />
+  ) : (
+    <PrototypeCategory loader={loader} />
+  );
 }
 
 function LiveCategory({ loader }: { loader: LiveLoader }) {
@@ -285,12 +291,24 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
 
   if (!category) {
     return (
-      <CategoryChrome categoryName="دسته‌بندی" categorySlug="unavailable" description="داده تأییدشده در دسترس نیست.">
+      <CategoryChrome
+        categoryName="دسته‌بندی"
+        categorySlug="unavailable"
+        description="داده تأییدشده در دسترس نیست."
+      >
         <EmptyState
           icon={<RefreshCcw size={40} aria-hidden="true" />}
           title="دسته‌بندی قابل تأیید نیست"
           body={loader.error ?? "Backend پاسخ معتبر برنگرداند."}
-          action={<button type="button" onClick={() => window.location.reload()} className={CtaClasses("signal")}>تلاش دوباره</button>}
+          action={
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className={CtaClasses("signal")}
+            >
+              تلاش دوباره
+            </button>
+          }
         />
       </CategoryChrome>
     );
@@ -298,7 +316,9 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
 
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
-    startTransition(() => navigate({ search: serializeBackendFilters(normalized, scope), replace: false }));
+    startTransition(() =>
+      navigate({ search: serializeBackendFilters(normalized, scope), replace: false }),
+    );
   };
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
@@ -336,16 +356,24 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
     <CategoryChrome
       categoryName={category.name}
       categorySlug={category.slug}
-      description={category.description || "محصولات منتشرشده این دسته مستقیماً از Backend خوانده می‌شوند."}
+      description={
+        category.description || "محصولات منتشرشده این دسته مستقیماً از Backend خوانده می‌شوند."
+      }
       image={category.image}
-      siblingCategories={facets?.categories.filter((item) => item.slug !== category.slug).slice(0, 4)}
+      siblingCategories={facets?.categories
+        .filter((item) => item.slug !== category.slug)
+        .slice(0, 4)}
     >
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{facets ? renderFilters(filters, setFilters) : null}</div>
+          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+            {facets ? renderFilters(filters, setFilters) : null}
+          </div>
         </aside>
         <section aria-labelledby="category-grid-title">
-          <h2 id="category-grid-title" className="sr-only">محصولات دسته {category.name}</h2>
+          <h2 id="category-grid-title" className="sr-only">
+            محصولات دسته {category.name}
+          </h2>
           {facets ? (
             <ProductGridControls
               filters={filters}
@@ -358,30 +386,60 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
             />
           ) : null}
           {loader.error ? (
-            <EmptyState className="mt-6" icon={<RefreshCcw size={40} aria-hidden="true" />} title="کاتالوگ این دسته در دسترس نیست" body={loader.error} />
+            <EmptyState
+              className="mt-6"
+              icon={<RefreshCcw size={40} aria-hidden="true" />}
+              title="کاتالوگ این دسته در دسترس نیست"
+              body={loader.error}
+            />
           ) : isPending ? (
-            <div className="mt-6" aria-busy="true"><GridSkeleton count={8} /></div>
+            <div className="mt-6" aria-busy="true">
+              <GridSkeleton count={8} />
+            </div>
           ) : loader.total === 0 ? (
             <EmptyState
               className="mt-6"
               icon={<PackageSearch size={40} aria-hidden="true" />}
               title={`محصولی از ${category.name} با این فیلترها پیدا نشد`}
               body="فیلترها را تغییر دهید یا همه محصولات این دسته را ببینید."
-              action={<button type="button" onClick={() => setFilters({ ...filters, colors: [], sizes: [], max: 0, instock: false })} className={CtaClasses("signal")}>پاک کردن فیلترها</button>}
+              action={
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFilters({ ...filters, colors: [], sizes: [], max: 0, instock: false })
+                  }
+                  className={CtaClasses("signal")}
+                >
+                  پاک کردن فیلترها
+                </button>
+              }
             />
           ) : (
             <>
               <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3">
-                {items.map((product, index) => <ProductCard key={product.id} p={product} priority={index < 2} />)}
+                {items.map((product, index) => (
+                  <ProductCard key={product.id} p={product} priority={index < 2} />
+                ))}
               </div>
               {page < loader.totalPages ? (
                 <div className="mt-10 flex flex-col items-center gap-3">
-                  <button type="button" onClick={loadMore} disabled={loadingMore} className={CtaClasses("line")}>
+                  <button
+                    type="button"
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className={CtaClasses("line")}
+                  >
                     {loadingMore ? "در حال دریافت…" : "نمایش قطعه‌های بیشتر"}
                   </button>
-                  {loadMoreError ? <p role="alert" className="text-xs text-signal">{loadMoreError}</p> : null}
+                  {loadMoreError ? (
+                    <p role="alert" className="text-xs text-signal">
+                      {loadMoreError}
+                    </p>
+                  ) : null}
                 </div>
-              ) : <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>}
+              ) : (
+                <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>
+              )}
             </>
           )}
         </section>
@@ -408,15 +466,34 @@ function CategoryChrome({
   return (
     <>
       <Navbar theme="dark" />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0">
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
+      >
         <Shell className="border-b border-hairline py-4">
-          <Breadcrumb items={[{ label: "خانه", to: "/" }, { label: "فروشگاه", to: "/shop" }, { label: categoryName }]} />
+          <Breadcrumb
+            items={[
+              { label: "خانه", to: "/" },
+              { label: "فروشگاه", to: "/shop" },
+              { label: categoryName },
+            ]}
+          />
         </Shell>
         <section className="border-b border-hairline">
-          <Shell className={`grid grid-cols-1 gap-7 py-8 ${image ? "md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]" : ""} md:items-center md:py-12`}>
+          <Shell
+            className={`grid grid-cols-1 gap-7 py-8 ${image ? "md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]" : ""} md:items-center md:py-12`}
+          >
             {image ? (
               <div className="overflow-hidden rounded-2xl border border-hairline bg-carbon">
-                <img src={image} alt={categoryName} width={720} height={540} loading="eager" fetchPriority="high" className="aspect-[4/3] h-full w-full object-cover" />
+                <img
+                  src={image}
+                  alt={categoryName}
+                  width={720}
+                  height={540}
+                  loading="eager"
+                  fetchPriority="high"
+                  className="aspect-[4/3] h-full w-full object-cover"
+                />
               </div>
             ) : null}
             <div>
@@ -427,13 +504,20 @@ function CategoryChrome({
             </div>
           </Shell>
         </section>
-        <Band hairline={false} className="!py-10 md:!py-14"><Shell>{children}</Shell></Band>
+        <Band hairline={false} className="!py-10 md:!py-14">
+          <Shell>{children}</Shell>
+        </Band>
         {siblingCategories.length > 0 ? (
           <Band label="MORE CATEGORIES">
             <Shell>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 {siblingCategories.map((category) => (
-                  <Link key={category.publicId} to="/$category" params={{ category: category.slug }} className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal">
+                  <Link
+                    key={category.publicId}
+                    to="/$category"
+                    params={{ category: category.slug }}
+                    className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  >
                     {category.name}
                   </Link>
                 ))}
@@ -466,7 +550,8 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const expected = serializeFilters(filters);
-    if (!isCanonicalSearch(window.location.search, expected)) navigate({ search: expected, replace: true });
+    if (!isCanonicalSearch(window.location.search, expected))
+      navigate({ search: expected, replace: true });
   }, [filters, navigate]);
 
   const setFilters = (next: Filters) => {
@@ -477,20 +562,44 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
   const shown = filtered.slice(0, visible);
   const getResultCount = (candidate: Filters) => countDiscoveryResults(items, candidate, scope);
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
-    <ProductFilters filters={candidate} onChange={onChange} colors={scope.colors} sizes={scope.sizes} priceCeil={scope.priceCeil} facetCounts={createFacetCounts(items, candidate, scope)} />
+    <ProductFilters
+      filters={candidate}
+      onChange={onChange}
+      colors={scope.colors}
+      sizes={scope.sizes}
+      priceCeil={scope.priceCeil}
+      facetCounts={createFacetCounts(items, candidate, scope)}
+    />
   );
 
   return (
     <>
       <Navbar theme="dark" />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0">
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
+      >
         <Shell className="border-b border-hairline py-4">
-          <Breadcrumb items={[{ label: "خانه", to: "/" }, { label: "فروشگاه", to: "/shop" }, { label: cat.nameFa }]} />
+          <Breadcrumb
+            items={[
+              { label: "خانه", to: "/" },
+              { label: "فروشگاه", to: "/shop" },
+              { label: cat.nameFa },
+            ]}
+          />
         </Shell>
         <section className="border-b border-hairline">
           <Shell className="grid grid-cols-1 gap-7 py-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:items-center md:py-12">
             <div className="overflow-hidden rounded-2xl border border-hairline bg-carbon">
-              <img src={categoryImage(cat.slug)} alt={`مدل در حال پوشیدن ${cat.nameFaPlural} استریت‌ویر LBB`} width={720} height={540} loading="eager" fetchPriority="high" className="aspect-[4/3] h-full w-full object-cover" />
+              <img
+                src={categoryImage(cat.slug)}
+                alt={`مدل در حال پوشیدن ${cat.nameFaPlural} استریت‌ویر LBB`}
+                width={720}
+                height={540}
+                loading="eager"
+                fetchPriority="high"
+                className="aspect-[4/3] h-full w-full object-cover"
+              />
             </div>
             <div>
               <TechLabel tone="signal">CATEGORY / {cat.slug.toUpperCase()}</TechLabel>
@@ -503,24 +612,84 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
         <Band hairline={false} className="!py-10 md:!py-14">
           <Shell>
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
-              <aside className="hidden lg:block"><div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{renderFilters(filters, setFilters)}</div></aside>
+              <aside className="hidden lg:block">
+                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+                  {renderFilters(filters, setFilters)}
+                </div>
+              </aside>
               <section aria-labelledby="category-grid-title">
-                <h2 id="category-grid-title" className="sr-only">محصولات دسته {cat.nameFa}</h2>
-                <ProductGridControls filters={filters} onChange={setFilters} resultCount={filtered.length} filterSlot={renderFilters} getResultCount={getResultCount} lockedCategory />
-                {isPending ? <div className="mt-6" aria-busy="true"><GridSkeleton count={8} /></div> : filtered.length === 0 ? (
-                  <EmptyState className="mt-6" icon={<PackageSearch size={40} aria-hidden="true" />} title={`قطعه‌ای از ${cat.nameFaPlural} با این فیلترها پیدا نشد`} body="فیلترهای این دسته را تغییر بده." />
+                <h2 id="category-grid-title" className="sr-only">
+                  محصولات دسته {cat.nameFa}
+                </h2>
+                <ProductGridControls
+                  filters={filters}
+                  onChange={setFilters}
+                  resultCount={filtered.length}
+                  filterSlot={renderFilters}
+                  getResultCount={getResultCount}
+                  lockedCategory
+                />
+                {isPending ? (
+                  <div className="mt-6" aria-busy="true">
+                    <GridSkeleton count={8} />
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <EmptyState
+                    className="mt-6"
+                    icon={<PackageSearch size={40} aria-hidden="true" />}
+                    title={`قطعه‌ای از ${cat.nameFaPlural} با این فیلترها پیدا نشد`}
+                    body="فیلترهای این دسته را تغییر بده."
+                  />
                 ) : (
                   <>
-                    <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3">{shown.map((product, index) => <ProductCard key={product.id} p={product} priority={index < 2} />)}</div>
-                    {visible < filtered.length ? <div className="mt-10 flex justify-center"><button type="button" onClick={() => setVisible((value) => value + PAGE_SIZE)} className={CtaClasses("line")}>نمایش قطعه‌های بیشتر</button></div> : null}
+                    <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3">
+                      {shown.map((product, index) => (
+                        <ProductCard key={product.id} p={product} priority={index < 2} />
+                      ))}
+                    </div>
+                    {visible < filtered.length ? (
+                      <div className="mt-10 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() => setVisible((value) => value + PAGE_SIZE)}
+                          className={CtaClasses("line")}
+                        >
+                          نمایش قطعه‌های بیشتر
+                        </button>
+                      </div>
+                    ) : null}
                   </>
                 )}
               </section>
             </div>
           </Shell>
         </Band>
-        <Band label="CATEGORY GUIDE"><Shell className="max-w-[900px]"><h2 className="text-display-3 text-bone">{cat.nameFaPlural} استریت‌ویر LBB چه ویژگی‌هایی دارن؟</h2><p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p></Shell></Band>
-        <Band label="MORE CATEGORIES"><Shell><div className="grid grid-cols-2 gap-3 md:grid-cols-4">{CATEGORY_SLUGS.filter((slug) => slug !== cat.slug).slice(0, 4).map((slug) => <Link key={slug} to="/$category" params={{ category: slug }} className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone hover:border-signal hover:text-signal">{CATEGORIES[slug].nameFa}</Link>)}</div></Shell></Band>
+        <Band label="CATEGORY GUIDE">
+          <Shell className="max-w-[900px]">
+            <h2 className="text-display-3 text-bone">
+              {cat.nameFaPlural} استریت‌ویر LBB چه ویژگی‌هایی دارن؟
+            </h2>
+            <p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>
+          </Shell>
+        </Band>
+        <Band label="MORE CATEGORIES">
+          <Shell>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {CATEGORY_SLUGS.filter((slug) => slug !== cat.slug)
+                .slice(0, 4)
+                .map((slug) => (
+                  <Link
+                    key={slug}
+                    to="/$category"
+                    params={{ category: slug }}
+                    className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone hover:border-signal hover:text-signal"
+                  >
+                    {CATEGORIES[slug].nameFa}
+                  </Link>
+                ))}
+            </div>
+          </Shell>
+        </Band>
       </main>
       <Footer theme="dark" />
       <MobileBottomBar />

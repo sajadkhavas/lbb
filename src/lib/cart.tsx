@@ -78,7 +78,10 @@ function readCart(): CartLine[] {
     const valid = parsed.filter(isValidLine);
     if (getBackendMode() === "live") {
       return valid.filter(
-        (line) => line.source === "backend" && typeof line.variantId === "string" && line.variantId.length === 26,
+        (line) =>
+          line.source === "backend" &&
+          typeof line.variantId === "string" &&
+          line.variantId.length === 26,
       );
     }
     return valid;

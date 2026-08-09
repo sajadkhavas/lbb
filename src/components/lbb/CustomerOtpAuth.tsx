@@ -1,11 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { CheckCircle2, KeyRound, Loader2, Smartphone } from "lucide-react";
-import {
-  backendErrorMessage,
-  requestOtp,
-  verifyOtp,
-  type CustomerDto,
-} from "@/lib/backend-api";
+import { backendErrorMessage, requestOtp, verifyOtp, type CustomerDto } from "@/lib/backend-api";
 import { ensureBackendCsrf } from "@/lib/backend-session";
 import { CtaClasses, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 
@@ -67,10 +62,17 @@ export function CustomerOtpAuth({
   };
 
   return (
-    <section className="border border-hairline bg-carbon p-5 md:p-6" aria-labelledby="customer-auth-title">
+    <section
+      className="border border-hairline bg-carbon p-5 md:p-6"
+      aria-labelledby="customer-auth-title"
+    >
       <div className="flex items-start gap-3">
         <div className="grid h-10 w-10 shrink-0 place-items-center border border-hairline text-signal">
-          {sent ? <KeyRound size={18} aria-hidden="true" /> : <Smartphone size={18} aria-hidden="true" />}
+          {sent ? (
+            <KeyRound size={18} aria-hidden="true" />
+          ) : (
+            <Smartphone size={18} aria-hidden="true" />
+          )}
         </div>
         <div>
           <TechLabel tone="signal">CUSTOMER SESSION</TechLabel>
@@ -96,7 +98,11 @@ export function CustomerOtpAuth({
             placeholder="0912…"
             className="min-h-12 border border-hairline bg-obsidian px-4 text-left text-sm text-bone outline-none focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
           />
-          <button type="submit" disabled={busy || !mobile.trim()} className={`${CtaClasses("signal")} disabled:opacity-50`}>
+          <button
+            type="submit"
+            disabled={busy || !mobile.trim()}
+            className={`${CtaClasses("signal")} disabled:opacity-50`}
+          >
             {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
             دریافت کد ورود
           </button>
@@ -119,7 +125,11 @@ export function CustomerOtpAuth({
             onChange={(event) => setCode(event.target.value)}
             className="min-h-12 border border-hairline bg-obsidian px-4 text-center num text-lg tracking-[0.35em] text-bone outline-none focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
           />
-          <button type="submit" disabled={busy || !code.trim()} className={`${CtaClasses("signal")} disabled:opacity-50`}>
+          <button
+            type="submit"
+            disabled={busy || !code.trim()}
+            className={`${CtaClasses("signal")} disabled:opacity-50`}
+          >
             {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : null}
             تأیید و ورود
           </button>

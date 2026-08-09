@@ -431,10 +431,9 @@ export function isLiveBackend(): boolean {
 export function getBackendBaseUrl(): string {
   const raw = clean(import.meta.env.VITE_LBB_API_BASE_URL);
   if (!raw) {
-    throw new BackendApiError(
-      "آدرس Backend برای حالت live تنظیم نشده است.",
-      { code: "backend_not_configured" },
-    );
+    throw new BackendApiError("آدرس Backend برای حالت live تنظیم نشده است.", {
+      code: "backend_not_configured",
+    });
   }
 
   let parsed: URL;
@@ -462,11 +461,28 @@ function assertContract(meta: ApiMeta | undefined) {
     });
   }
   if (meta.contractVersion !== LBB_CONTRACT_VERSION) {
-    throw new BackendApiError(
-      `نسخه Backend با Frontend هم‌خوان نیست (${meta.contractVersion}).`,
-      { code: "contract_version_mismatch", meta },
-    );
+    throw new BackendApiError(`نسخه Backend با Frontend هم‌خوان نیست (${meta.contractVersion}).`, {
+      code: "contract_version_mismatch",
+      meta,
+    });
   }
+}
+
+function buildRequestHeaders(init: RequestInit): Headers {
+  const headers = new Headers(init.headers);
+  headers.set("Accept", "application/json");
+  if (init.body) headers.set("Content-Type", "application/json");
+
+  const method = (init.method ?? "GET").toUpperCase();
+  if (typeof document !== "undefined" && !["GET", "HEAD", "OPTIONS"].includes(method)) {
+    const entry = document.cookie.split("; ").find((cookie) => cookie.startsWith("XSRF-TOKEN="));
+    if (entry) {
+      const token = entry.slice("XSRF-TOKEN=".length);
+      headers.set("X-XSRF-TOKEN", decodeURIComponent(token));
+    }
+  }
+
+  return headers;
 }
 
 async function request<T>(
@@ -479,11 +495,7 @@ async function request<T>(
     response = await fetch(url, {
       ...init,
       credentials: "include",
-      headers: {
-        Accept: "application/json",
-        ...(init.body ? { "Content-Type": "application/json" } : {}),
-        ...init.headers,
-      },
+      headers: buildRequestHeaders(init),
     });
   } catch {
     throw new BackendApiError("ارتباط با Backend برقرار نشد.", {
@@ -609,9 +621,7 @@ export async function getOrder(orderId: string) {
 }
 
 export async function cancelOrder(orderId: string) {
-  return post<{ order: OrderDto }>(
-    `/api/v1/account/orders/${encodeURIComponent(orderId)}/cancel`,
-  );
+  return post<{ order: OrderDto }>(`/api/v1/account/orders/${encodeURIComponent(orderId)}/cancel`);
 }
 
 export async function initiatePayment(orderId: string, idempotencyKey: string) {

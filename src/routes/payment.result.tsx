@@ -85,10 +85,13 @@ function PaymentResultPage() {
               <StatePanel title="پرداخت توسط Backend تأیید شد" tone="success">
                 <span className="inline-flex items-center gap-2">
                   <CheckCircle2 size={17} aria-hidden="true" />
-                  سفارش {result.order.number} با وضعیت «{result.order.paymentStatusLabel}» ثبت شده است.
+                  سفارش {result.order.number} با وضعیت «{result.order.paymentStatusLabel}» ثبت شده
+                  است.
                 </span>
               </StatePanel>
-              <Link to="/account" className={CtaClasses("signal")}>مشاهده سفارش</Link>
+              <Link to="/account" className={CtaClasses("signal")}>
+                مشاهده سفارش
+              </Link>
             </div>
           ) : (
             <div className="mt-8 space-y-5">
@@ -98,10 +101,17 @@ function PaymentResultPage() {
                   {error ?? "Backend این بازگشت را پرداخت موفق تشخیص نداد."}
                 </span>
               </StatePanel>
-              <p className="text-sm leading-7 text-metal">بازگشت مرورگر به‌تنهایی Success محسوب نمی‌شود؛ تنها پاسخ Verify سمت Backend ملاک است.</p>
+              <p className="text-sm leading-7 text-metal">
+                بازگشت مرورگر به‌تنهایی Success محسوب نمی‌شود؛ تنها پاسخ Verify سمت Backend ملاک
+                است.
+              </p>
               <div className="flex flex-wrap gap-3">
-                <Link to="/account" className={CtaClasses("line")}>سفارش‌های من</Link>
-                <Link to="/contact" className={CtaClasses("line")}>پشتیبانی</Link>
+                <Link to="/account" className={CtaClasses("line")}>
+                  سفارش‌های من
+                </Link>
+                <Link to="/contact" className={CtaClasses("line")}>
+                  پشتیبانی
+                </Link>
               </div>
             </div>
           )}

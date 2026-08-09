@@ -25,7 +25,14 @@ import {
   pageMeta,
   ROBOTS,
 } from "@/lib/site";
-import { Band, CtaClasses, EmptyState, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import {
+  Band,
+  CtaClasses,
+  EmptyState,
+  Shell,
+  StatePanel,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import {
   BackendApiError,
   backendErrorMessage,
@@ -34,7 +41,11 @@ import {
   listProducts,
   type ProductDetailDto,
 } from "@/lib/backend-api";
-import { backendCard, backendDecisionModel, type BackendCatalogCard } from "@/lib/backend-storefront";
+import {
+  backendCard,
+  backendDecisionModel,
+  type BackendCatalogCard,
+} from "@/lib/backend-storefront";
 
 type PrototypeLoader = { mode: "prototype"; product: Product; related: Product[] };
 type LiveLoader = {
@@ -83,7 +94,9 @@ export const Route = createFileRoute("/product/$slug")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "پیدا نشد" }, { name: "robots", content: ROBOTS.NOINDEX_NOFOLLOW }] };
+      return {
+        meta: [{ title: "پیدا نشد" }, { name: "robots", content: ROBOTS.NOINDEX_NOFOLLOW }],
+      };
     }
 
     if (loaderData.mode === "live") {
@@ -165,7 +178,8 @@ export const Route = createFileRoute("/product/$slug")({
       return {
         meta: pageMeta({
           title: "محصول در انتظار تأیید | LBB",
-          description: "این صفحه تا زمان تأیید هویت و داده‌های محصول، اطلاعات تجاری تأییدنشده را منتشر نمی‌کند.",
+          description:
+            "این صفحه تا زمان تأیید هویت و داده‌های محصول، اطلاعات تجاری تأییدنشده را منتشر نمی‌کند.",
           path,
           robots: ROBOTS.NOINDEX_NOFOLLOW,
         }),
@@ -187,7 +201,10 @@ export const Route = createFileRoute("/product/$slug")({
 
     const image = absAsset(productImage(product.slug));
     const title = `${product.name} | خرید از LBB — ${category.nameFa}`.slice(0, 59);
-    const description = `${product.shortDescription} قیمت: ${fmtToman(product.price)}.`.slice(0, 159);
+    const description = `${product.shortDescription} قیمت: ${fmtToman(product.price)}.`.slice(
+      0,
+      159,
+    );
     const productLd = {
       "@context": "https://schema.org",
       "@type": "Product",
@@ -202,11 +219,20 @@ export const Route = createFileRoute("/product/$slug")({
         url: absUrl(path),
         priceCurrency: "IRR",
         price: product.price * 10,
-        availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        availability: product.inStock
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
       },
     };
     return {
-      meta: pageMeta({ title, description, path, image, type: "product", robots: ROBOTS.INDEX_FOLLOW }),
+      meta: pageMeta({
+        title,
+        description,
+        path,
+        image,
+        type: "product",
+        robots: ROBOTS.INDEX_FOLLOW,
+      }),
       links: canonical(path),
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(productLd) },
@@ -229,12 +255,22 @@ export const Route = createFileRoute("/product/$slug")({
 
 function ProductPage() {
   const loader = Route.useLoaderData();
-  return loader.mode === "live" ? <LiveProductPage loader={loader} /> : <PrototypeProductPage loader={loader} />;
+  return loader.mode === "live" ? (
+    <LiveProductPage loader={loader} />
+  ) : (
+    <PrototypeProductPage loader={loader} />
+  );
 }
 
 function LiveProductPage({ loader }: { loader: LiveLoader }) {
   const product = loader.product;
-  if (!product) {
+  const model = useMemo(() => (product ? backendDecisionModel(product) : null), [product]);
+  const [galleryMedia, setGalleryMedia] = useState<DecisionMedia[]>(model?.media ?? []);
+  const updateGallery = useCallback((media: DecisionMedia[]) => setGalleryMedia(media), []);
+
+  useEffect(() => setGalleryMedia(model?.media ?? []), [model]);
+
+  if (!product || !model) {
     return (
       <PageChrome theme="light">
         <Shell className="py-16">
@@ -242,18 +278,16 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
             icon={<RefreshCcw size={40} aria-hidden="true" />}
             title="اطلاعات محصول قابل تأیید نیست"
             body={loader.error ?? "Backend پاسخ معتبر برای این محصول برنگرداند."}
-            action={<Link to="/shop" className={CtaClasses("line")}>بازگشت به فروشگاه</Link>}
+            action={
+              <Link to="/shop" className={CtaClasses("line")}>
+                بازگشت به فروشگاه
+              </Link>
+            }
           />
         </Shell>
       </PageChrome>
     );
   }
-
-  const model = useMemo(() => backendDecisionModel(product), [product]);
-  const [galleryMedia, setGalleryMedia] = useState<DecisionMedia[]>(model.media);
-  const updateGallery = useCallback((media: DecisionMedia[]) => setGalleryMedia(media), []);
-
-  useEffect(() => setGalleryMedia(model.media), [model]);
 
   return (
     <PageChrome theme="light">
@@ -262,7 +296,11 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
           items={[
             { label: "خانه", to: "/" },
             { label: "فروشگاه", to: "/shop" },
-            { label: product.category.name, to: "/$category", params: { category: product.category.slug } },
+            {
+              label: product.category.name,
+              to: "/$category",
+              params: { category: product.category.slug },
+            },
             { label: product.name },
           ]}
         />
@@ -281,12 +319,15 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
             <TechLabel tone="signal">BACKEND VERIFIED PRODUCT DATA</TechLabel>
             <h2 className="mt-2 text-display-3 text-bone">اطلاعات تصمیم‌گیری</h2>
             <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
-              قیمت، موجودی، رنگ، سایز و مشخصات نمایش‌داده‌شده از رکورد منتشرشده Backend خوانده شده‌اند.
+              قیمت، موجودی، رنگ، سایز و مشخصات نمایش‌داده‌شده از رکورد منتشرشده Backend خوانده
+              شده‌اند.
             </p>
           </div>
           <ProductFacts model={model} />
           <div className="mt-8 border-t border-hairline pt-6">
-            <p className="text-sm leading-7 text-metal">قوانین ارسال، مرجوعی و پشتیبانی مستقل از مشخصات محصول نگهداری می‌شوند.</p>
+            <p className="text-sm leading-7 text-metal">
+              قوانین ارسال، مرجوعی و پشتیبانی مستقل از مشخصات محصول نگهداری می‌شوند.
+            </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link to="/shipping-returns" className={CtaClasses("line")}>
                 ارسال و مرجوعی <ArrowUpLeft size={16} aria-hidden="true" />
@@ -302,7 +343,9 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
         <Band label="RELATED PRODUCTS">
           <Shell>
             <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4">
-              {loader.related.map((item) => <ProductCard key={item.id} p={item} />)}
+              {loader.related.map((item) => (
+                <ProductCard key={item.id} p={item} />
+              ))}
             </div>
           </Shell>
         </Band>
@@ -339,7 +382,11 @@ function PrototypeProductPage({ loader }: { loader: PrototypeLoader }) {
           ]}
         />
       </Shell>
-      <Shell as="section" aria-label="تصمیم‌گیری محصول" className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10">
+      <Shell
+        as="section"
+        aria-label="تصمیم‌گیری محصول"
+        className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
+      >
         <Gallery media={galleryMedia} name={model.identity.name ?? "محصول"} />
         <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
       </Shell>
@@ -349,17 +396,26 @@ function PrototypeProductPage({ loader }: { loader: PrototypeLoader }) {
           {!model.readyForCommerce ? (
             <div className="mt-8">
               <StatePanel title="این رکورد هنوز برای تجارت عمومی منتشر نشده است" tone="warning">
-                داده‌های موجود در کد برای توسعه رابط نگه داشته شده‌اند و تا تکمیل Evidence به‌عنوان قیمت، موجودی، سایز، رنگ یا مشخصات قطعی فروشگاه استفاده نمی‌شوند.
+                داده‌های موجود در کد برای توسعه رابط نگه داشته شده‌اند و تا تکمیل Evidence به‌عنوان
+                قیمت، موجودی، سایز، رنگ یا مشخصات قطعی فروشگاه استفاده نمی‌شوند.
               </StatePanel>
             </div>
           ) : null}
         </Shell>
       </Band>
       {completeTheLook.length > 0 ? (
-        <Band label="COMPLETE THE LOOK"><Shell><CompleteTheLook products={completeTheLook} /></Shell></Band>
+        <Band label="COMPLETE THE LOOK">
+          <Shell>
+            <CompleteTheLook products={completeTheLook} />
+          </Shell>
+        </Band>
       ) : null}
       {loader.related.length > 0 ? (
-        <Band label="RELATED PRODUCTS"><Shell><RelatedProducts products={loader.related} /></Shell></Band>
+        <Band label="RELATED PRODUCTS">
+          <Shell>
+            <RelatedProducts products={loader.related} />
+          </Shell>
+        </Band>
       ) : null}
       <RecentlyViewed excludeSlug={p.slug} />
     </PageChrome>
@@ -370,7 +426,10 @@ function PageChrome({ children, theme }: { children: React.ReactNode; theme: "li
   return (
     <>
       <Navbar theme={theme} />
-      <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-[calc(9rem+env(safe-area-inset-bottom))] pt-16 md:pb-0">
+      <main
+        dir="rtl"
+        className="min-h-screen overflow-x-clip bg-obsidian pb-[calc(9rem+env(safe-area-inset-bottom))] pt-16 md:pb-0"
+      >
         {children}
       </main>
       <Footer theme={theme} />

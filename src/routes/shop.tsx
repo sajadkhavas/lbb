@@ -299,7 +299,11 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
               title="کاتالوگ قابل تأیید نیست"
               body={loader.error}
               action={
-                <button type="button" onClick={() => window.location.reload()} className={CtaClasses("signal")}>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className={CtaClasses("signal")}
+                >
                   تلاش دوباره
                 </button>
               }
@@ -317,7 +321,16 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
               action={
                 <button
                   type="button"
-                  onClick={() => setFilters({ ...filters, cats: [], colors: [], sizes: [], max: 0, instock: false })}
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      cats: [],
+                      colors: [],
+                      sizes: [],
+                      max: 0,
+                      instock: false,
+                    })
+                  }
                   className={CtaClasses("signal")}
                 >
                   بازگشت به همه قطعه‌ها
@@ -341,7 +354,11 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
                   >
                     {loadingMore ? "در حال دریافت…" : "نمایش قطعه‌های بیشتر"}
                   </button>
-                  {loadMoreError ? <p role="alert" className="text-xs text-signal">{loadMoreError}</p> : null}
+                  {loadMoreError ? (
+                    <p role="alert" className="text-xs text-signal">
+                      {loadMoreError}
+                    </p>
+                  ) : null}
                 </div>
               ) : (
                 <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>
@@ -359,7 +376,11 @@ function PrototypeShop() {
   const filterScope = useMemo(() => createDiscoveryScope(products, true), []);
   const inventory = useMemo(() => catalogueInventorySummary(products), []);
   const filters = useMemo(
-    () => normalizeFilters(parseFilters(routeFilters as unknown as Record<string, unknown>), filterScope),
+    () =>
+      normalizeFilters(
+        parseFilters(routeFilters as unknown as Record<string, unknown>),
+        filterScope,
+      ),
     [filterScope, routeFilters],
   );
   const navigate = useNavigate({ from: "/shop" });
@@ -382,7 +403,8 @@ function PrototypeShop() {
   };
   const filtered = useMemo(() => applyFilters(products, filters), [filters]);
   const shown = filtered.slice(0, visible);
-  const getResultCount = (candidate: Filters) => countDiscoveryResults(products, candidate, filterScope);
+  const getResultCount = (candidate: Filters) =>
+    countDiscoveryResults(products, candidate, filterScope);
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
       filters={candidate}
@@ -402,10 +424,14 @@ function PrototypeShop() {
     >
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{renderFilters(filters, setFilters)}</div>
+          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+            {renderFilters(filters, setFilters)}
+          </div>
         </aside>
         <section aria-labelledby="shop-grid-title">
-          <h2 id="shop-grid-title" className="sr-only">نتایج کاتالوگ LBB</h2>
+          <h2 id="shop-grid-title" className="sr-only">
+            نتایج کاتالوگ LBB
+          </h2>
           <ProductGridControls
             filters={filters}
             onChange={setFilters}
@@ -414,7 +440,9 @@ function PrototypeShop() {
             getResultCount={getResultCount}
           />
           {isPending ? (
-            <div className="mt-6" aria-busy="true"><GridSkeleton count={8} /></div>
+            <div className="mt-6" aria-busy="true">
+              <GridSkeleton count={8} />
+            </div>
           ) : filtered.length === 0 ? (
             <EmptyState
               className="mt-6"
@@ -425,11 +453,17 @@ function PrototypeShop() {
           ) : (
             <>
               <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
-                {shown.map((product, index) => <ProductCard key={product.id} p={product} priority={index < 2} />)}
+                {shown.map((product, index) => (
+                  <ProductCard key={product.id} p={product} priority={index < 2} />
+                ))}
               </div>
               {visible < filtered.length ? (
                 <div className="mt-10 flex justify-center">
-                  <button type="button" onClick={() => setVisible((value) => value + PAGE_SIZE)} className={CtaClasses("line")}>
+                  <button
+                    type="button"
+                    onClick={() => setVisible((value) => value + PAGE_SIZE)}
+                    className={CtaClasses("line")}
+                  >
                     نمایش قطعه‌های بیشتر
                   </button>
                 </div>
@@ -454,7 +488,10 @@ function ShopChrome({
   return (
     <>
       <Navbar theme="dark" />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0">
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
+      >
         <Shell className="border-b border-hairline py-4">
           <Breadcrumb items={[{ label: "خانه", to: "/" }, { label: "فروشگاه" }]} />
         </Shell>
@@ -464,7 +501,8 @@ function ShopChrome({
               <TechLabel tone="signal">CATALOG / ALL PIECES</TechLabel>
               <h1 className="text-display-2 mt-3 text-bone">همه قطعه‌ها</h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-metal">
-                از دسته شروع کن یا با رنگ، سایز، قیمت و وضعیت موجودی به نتیجه دقیق برس. هر تغییر در URL ثبت می‌شود و لینک قابل اشتراک باقی می‌ماند.
+                از دسته شروع کن یا با رنگ، سایز، قیمت و وضعیت موجودی به نتیجه دقیق برس. هر تغییر در
+                URL ثبت می‌شود و لینک قابل اشتراک باقی می‌ماند.
               </p>
             </div>
             <div className="border-s border-hairline ps-5">
@@ -473,7 +511,10 @@ function ShopChrome({
             </div>
           </Shell>
           <Shell className="flex snap-x gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <Link to="/shop" className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-signal px-4 py-3 text-signal">
+            <Link
+              to="/shop"
+              className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-signal px-4 py-3 text-signal"
+            >
               همه قطعه‌ها
             </Link>
             {categories.map((category) => (
