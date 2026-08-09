@@ -1,0 +1,54 @@
+name: F14D Restore Prototype Collection Once
+
+on:
+  push:
+    branches:
+      - phase/f14d-production-backend-integration
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: phase/f14d-production-backend-integration
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Restore exact F17 prototype wrapper
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/routes/collections.$slug.tsx')
+          text = path.read_text()
+          start = '''  return (\n    <PageChrome breadcrumbLabel={collection.nameFa}>\n'''
+          replacement = '''  return (\n    <>\n      <Navbar theme="light" />\n      <main\n        className="min-h-screen bg-obsidian pb-bottombar pt-16"\n        data-f17-route="collection-detail"\n        data-f17-collection-kind={view.kind}\n      >\n        <Shell className="py-3">\n          <Breadcrumb\n            items={[\n              { label: "خانه", href: "/" },\n              { label: "کالکشن‌ها", href: "/collections" },\n              { label: collection.nameFa },\n            ]}\n          />\n        </Shell>\n\n'''
+          if start not in text:
+              raise SystemExit('prototype wrapper start not found')
+          text = text.replace(start, replacement, 1)
+
+          end = '''      </Band>\n    </PageChrome>\n  );\n}\n'''
+          replacement_end = '''        </Band>\n      </main>\n      <Footer theme="light" />\n      <MobileBottomBar />\n    </>\n  );\n}\n'''
+          before, sep, after = text.rpartition(end)
+          if not sep:
+              raise SystemExit('prototype wrapper end not found')
+          text = before + replacement_end + after
+          path.write_text(text)
+          PY
+      - run: npx prettier --write 'src/routes/collections.$slug.tsx'
+      - name: Commit regression fix
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'src/routes/collections.$slug.tsx'
+          git commit -m 'F14D: restore F17 prototype collection DOM'
+          git push origin HEAD:phase/f14d-production-backend-integration
