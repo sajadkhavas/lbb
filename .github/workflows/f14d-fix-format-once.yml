@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   fix-format:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -22,113 +21,19 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Apply browser-session hardening guards
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          api = Path('src/lib/backend-api.ts')
-          text = api.read_text()
-          marker = 'async function request<T>(\n'
-          helper = '''function buildRequestHeaders(init: RequestInit): Headers {
-            const headers = new Headers(init.headers);
-            headers.set("Accept", "application/json");
-            if (init.body) headers.set("Content-Type", "application/json");
-
-            const method = (init.method ?? "GET").toUpperCase();
-            if (
-              typeof document !== "undefined" &&
-              !["GET", "HEAD", "OPTIONS"].includes(method)
-            ) {
-              const entry = document.cookie
-                .split("; ")
-                .find((cookie) => cookie.startsWith("XSRF-TOKEN="));
-              if (entry) {
-                const token = entry.slice("XSRF-TOKEN=".length);
-                headers.set("X-XSRF-TOKEN", decodeURIComponent(token));
-              }
-            }
-
-            return headers;
-          }
-
-          '''
-          if 'function buildRequestHeaders(' not in text:
-              if marker not in text:
-                  raise SystemExit('backend-api request marker not found')
-              text = text.replace(marker, helper + marker, 1)
-          old = '''      headers: {
-                Accept: "application/json",
-                ...(init.body ? { "Content-Type": "application/json" } : {}),
-                ...init.headers,
-              },'''
-          old2 = '''      headers: {
-        Accept: "application/json",
-        ...(init.body ? { "Content-Type": "application/json" } : {}),
-        ...init.headers,
-      },'''
-          if 'headers: buildRequestHeaders(init),' not in text:
-              if old in text:
-                  text = text.replace(old, '      headers: buildRequestHeaders(init),', 1)
-              elif old2 in text:
-                  text = text.replace(old2, '      headers: buildRequestHeaders(init),', 1)
-              else:
-                  raise SystemExit('backend-api headers block not found')
-          api.write_text(text)
-
-          card = Path('src/components/lbb/ProductCard.tsx')
-          text = card.read_text()
-          import_line = 'import { isLiveBackend } from "@/lib/backend-api";\n'
-          if import_line not in text:
-              anchor = 'import type { BackendCatalogCard } from "@/lib/backend-storefront";\n'
-              if anchor not in text:
-                  raise SystemExit('ProductCard import anchor not found')
-              text = text.replace(anchor, anchor + import_line, 1)
-          guard_anchor = '  const backend = isBackendCard(p);\n'
-          guard = '''  if (!backend && isLiveBackend()) {
-            return (
-              <article className="flex min-h-72 flex-col justify-between border border-hairline bg-carbon p-5">
-                <div>
-                  <TechLabel tone="metal">BACKEND PRODUCT ONLY</TechLabel>
-                  <p className="mt-4 text-sm leading-7 text-metal">
-                    این جایگاه هنوز به محصول منتشرشده Backend متصل نشده است؛ داده نمونه در حالت live نمایش داده نمی‌شود.
-                  </p>
-                </div>
-                <Link
-                  to="/shop"
-                  search={{}}
-                  className="mt-6 inline-flex min-h-11 items-center justify-center border border-hairline px-3 text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
-                >
-                  مشاهده کاتالوگ زنده
-                </Link>
-              </article>
-            );
-          }
-          '''
-          if 'BACKEND PRODUCT ONLY' not in text:
-              if guard_anchor not in text:
-                  raise SystemExit('ProductCard guard anchor not found')
-              text = text.replace(guard_anchor, guard_anchor + guard, 1)
-          card.write_text(text)
-          PY
-      - name: Format changed files
+      - name: Apply hardening patch
+        run: node scripts/f14d-hardening-once.mjs
+      - name: Format F14D diff
         shell: bash
         run: |
           BASE=9f8cc0f0aa4e2f8b4c8681f2c3b2786874c04fdc
-          mapfile -t changed < <(git diff --name-only "$BASE" HEAD | grep -E '\.(ts|tsx|js|mjs|json|yml|yaml|md|css)$' || true)
-          if [ "${#changed[@]}" -gt 0 ]; then
-            npx prettier --write "${changed[@]}"
-          fi
-      - name: ESLint autofix changed TypeScript
+          git diff --name-only "$BASE" HEAD -- '*.ts' '*.tsx' '*.js' '*.mjs' '*.json' '*.yml' '*.yaml' '*.md' '*.css' | xargs -r npx prettier --write
+      - name: ESLint fix F14D TypeScript
         shell: bash
         run: |
           BASE=9f8cc0f0aa4e2f8b4c8681f2c3b2786874c04fdc
-          mapfile -t changed < <(git diff --name-only "$BASE" HEAD | grep -E '\.(ts|tsx)$' || true)
-          if [ "${#changed[@]}" -gt 0 ]; then
-            npx eslint --fix "${changed[@]}"
-          fi
-      - name: Commit fixes
+          git diff --name-only "$BASE" HEAD -- '*.ts' '*.tsx' | xargs -r npx eslint --fix
+      - name: Commit formatted hardening changes
         shell: bash
         run: |
           if git diff --quiet; then
