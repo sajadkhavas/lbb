@@ -20,7 +20,6 @@ function isBackendCard(product: ProductCardModel): product is BackendCatalogCard
 
 export function ProductCard({ p, priority = false }: { p: ProductCardModel; priority?: boolean }) {
   const backend = isBackendCard(p);
-  const cat = backend ? null : CATEGORIES[p.category];
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const { open: openQuickView } = useQuickView();
@@ -29,7 +28,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
 
   const primaryImage = backend ? p.primaryImage : productImage(p.slug);
   const name = p.name;
-  const categoryLabel = backend ? p.categoryLabel : cat.nameFa;
+  const categoryLabel = backend ? p.categoryLabel : CATEGORIES[p.category].nameFa;
   const liked = has(p.slug);
   const discount = backend ? 0 : discountPercent(p);
   const available = backend ? p.availability : p.inStock;
