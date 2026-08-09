@@ -79,12 +79,7 @@ for (const endpoint of [
   requireText(api, endpoint, `Versioned backend endpoint missing from typed client: ${endpoint}`);
 }
 
-for (const legacy of [
-  "/api/auth/",
-  "/api/checkout",
-  "/api/account/",
-  "/api/delivery/options",
-]) {
+for (const legacy of ["/api/auth/", "/api/checkout", "/api/account/", "/api/delivery/options"]) {
   if (`${api}\n${checkout}\n${paymentResult}`.includes(legacy)) {
     failures.push(`Legacy unversioned backend route leaked into F14D: ${legacy}`);
   }
@@ -95,11 +90,7 @@ requireText(
   "/sanctum/csrf-cookie",
   "Sanctum CSRF bootstrap endpoint is missing from browser session helper.",
 );
-requireText(
-  session,
-  'credentials: "include"',
-  "CSRF bootstrap must include browser credentials.",
-);
+requireText(session, 'credentials: "include"', "CSRF bootstrap must include browser credentials.");
 
 for (const required of [
   "isLiveBackend() ? <LiveCheckout /> : <PrototypeCheckout />",
@@ -124,7 +115,9 @@ if (liveStart < 0 || prototypeStart < 0 || prototypeStart <= liveStart) {
   for (const required of ["createCheckoutQuote", "commitCheckout", "initiatePayment"]) {
     if (!live.includes(required)) failures.push(`Live checkout does not execute ${required}.`);
   }
-  if (/createCheckoutQuote|commitCheckout|initiatePayment|window\.location\.assign/.test(prototype)) {
+  if (
+    /createCheckoutQuote|commitCheckout|initiatePayment|window\.location\.assign/.test(prototype)
+  ) {
     failures.push("Prototype checkout must never execute production commerce operations.");
   }
 }
@@ -136,13 +129,17 @@ for (const required of [
   "پرداخت توسط Backend تأیید شد",
   "بازگشت مرورگر به‌تنهایی Success محسوب نمی‌شود",
 ]) {
-  requireText(paymentResult, required, `Payment result server-verification boundary is missing: ${required}`);
+  requireText(
+    paymentResult,
+    required,
+    `Payment result server-verification boundary is missing: ${required}`,
+  );
 }
 if (paymentResult.includes("setResult({ verified: true")) {
   failures.push("Frontend must not synthesize a successful payment verification result.");
 }
 
-for (const required of ["BACKEND PRODUCT ONLY", "!backend && isLiveBackend()"] ) {
+for (const required of ["BACKEND PRODUCT ONLY", "!backend && isLiveBackend()"]) {
   requireText(card, required, `Prototype ProductCard live-mode guard is missing: ${required}`);
 }
 
