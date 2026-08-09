@@ -41,7 +41,7 @@ jobs:
             echo 'Legacy unversioned backend route leaked into F14D frontend.'
             exit 1
           fi
-          if git grep -nE 'payment.*success|success.*payment' -- src/routes/checkout.tsx src/routes/payment.result.tsx | grep -vi 'Backend\|verify\|verified\|تأیید'; then
+          if git grep -niE 'پرداخت.{0,30}موفق|موفق.{0,30}پرداخت|payment.{0,24}(successful|succeeded)|success.{0,24}payment' -- src/routes/checkout.tsx src/routes/payment.result.tsx | grep -vi 'Backend\|verify\|verified\|تأیید'; then
             echo 'Potential frontend-authored payment success claim detected.'
             exit 1
           fi
