@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import type { CartLineRequest } from "@/lib/backend-api";
+import { getBackendMode } from "@/lib/backend-api";
 import {
   closeOverlayHistory,
   dismissOverlayHistory,
@@ -8,9 +10,14 @@ import {
 export type CartLine = {
   slug: string;
   name: string;
+  /** Last displayed unit price. In live mode this is never the checkout authority. */
   price: number;
+  variantId?: string;
+  source?: "prototype" | "backend";
   color?: string;
+  colorLabel?: string;
   size?: string;
+  sizeLabel?: string;
   qty: number;
 };
 
@@ -30,8 +37,13 @@ type CartCtx = {
 };
 
 const Ctx = createContext<CartCtx | null>(null);
-const KEY = "lbb-cart-v1";
+const PROTOTYPE_KEY = "lbb-cart-v1";
+const LIVE_KEY = "lbb-cart-v2";
 const MAX_QTY = 20;
+
+function storageKey() {
+  return getBackendMode() === "live" ? LIVE_KEY : PROTOTYPE_KEY;
+}
 
 function isValidLine(value: unknown): value is CartLine {
   if (!value || typeof value !== "object") return false;
@@ -48,21 +60,46 @@ function isValidLine(value: unknown): value is CartLine {
     Number.isInteger(line.qty) &&
     line.qty > 0 &&
     line.qty <= MAX_QTY &&
+    (line.variantId === undefined || typeof line.variantId === "string") &&
+    (line.source === undefined || line.source === "prototype" || line.source === "backend") &&
     (line.color === undefined || typeof line.color === "string") &&
-    (line.size === undefined || typeof line.size === "string")
+    (line.colorLabel === undefined || typeof line.colorLabel === "string") &&
+    (line.size === undefined || typeof line.size === "string") &&
+    (line.sizeLabel === undefined || typeof line.sizeLabel === "string")
   );
 }
 
 function readCart(): CartLine[] {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(storageKey());
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isValidLine);
+    const valid = parsed.filter(isValidLine);
+    if (getBackendMode() === "live") {
+      return valid.filter(
+        (line) => line.source === "backend" && typeof line.variantId === "string" && line.variantId.length === 26,
+      );
+    }
+    return valid;
   } catch {
     return [];
   }
+}
+
+export function cartLinesToBackendItems(lines: CartLine[]): CartLineRequest[] {
+  return lines
+    .filter(
+      (line) =>
+        line.source === "backend" &&
+        typeof line.variantId === "string" &&
+        line.variantId.length === 26,
+    )
+    .map((line) => ({
+      variantId: line.variantId!,
+      quantity: Math.min(MAX_QTY, Math.max(1, Math.floor(line.qty))),
+      expectedUnitPriceToman: Math.max(1, Math.floor(line.price)),
+    }));
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -78,7 +115,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      localStorage.setItem(KEY, JSON.stringify(lines));
+      localStorage.setItem(storageKey(), JSON.stringify(lines));
     } catch {
       // Storage can be unavailable in private mode or after quota exhaustion.
     }
@@ -93,13 +130,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const add = (line: CartLine) =>
     setLines((previous) => {
       if (!isValidLine(line)) return previous;
-      const index = previous.findIndex(
-        (item) => item.slug === line.slug && item.color === line.color && item.size === line.size,
+      if (
+        getBackendMode() === "live" &&
+        (line.source !== "backend" || !line.variantId || line.variantId.length !== 26)
+      ) {
+        return previous;
+      }
+      const index = previous.findIndex((item) =>
+        line.variantId && item.variantId
+          ? item.variantId === line.variantId
+          : item.slug === line.slug && item.color === line.color && item.size === line.size,
       );
       if (index >= 0) {
         const copy = [...previous];
         copy[index] = {
           ...copy[index],
+          ...line,
           qty: Math.min(MAX_QTY, copy[index].qty + line.qty),
         };
         return copy;
