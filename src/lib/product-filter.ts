@@ -46,6 +46,7 @@ export const EMPTY_FILTERS: Filters = {
 };
 
 const SORTS: readonly SortKey[] = ["newest", "best", "price-asc", "price-desc", "discount"];
+const BACKEND_SORTS: readonly SortKey[] = ["newest", "price-asc", "price-desc"];
 const CATEGORY_ORDER: readonly CategorySlug[] = ["hoodies", "pants", "tshirts", "shoes", "socks"];
 
 /**
@@ -116,6 +117,21 @@ const parseBoolean = (value: unknown) => {
   return text === "true" || text === "1" || text === "yes";
 };
 
+const safeBackendToken = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 80) return null;
+  return /^[\p{L}\p{N}_.#-]+$/u.test(trimmed) ? trimmed : null;
+};
+
+const backendList = (value: unknown) =>
+  Array.from(
+    new Set(
+      toArray(value)
+        .map(safeBackendToken)
+        .filter((entry): entry is string => Boolean(entry)),
+    ),
+  ).sort((a, b) => a.localeCompare(b, "en"));
+
 /** Normalizes filters for a page-specific catalogue scope. */
 export function normalizeFilters(filters: Filters, scope: FilterScope = {}): Filters {
   const categories =
@@ -140,6 +156,35 @@ export function normalizeFilters(filters: Filters, scope: FilterScope = {}): Fil
   };
 }
 
+/**
+ * Backend mode keeps URL tokens syntactically safe without applying the prototype allowlists.
+ * The authoritative allowlist comes from `/api/v1/catalog/facets`.
+ */
+export function normalizeBackendFilters(filters: Filters, scope?: FilterScope): Filters {
+  const categories =
+    scope?.categories === false
+      ? []
+      : scope?.categories
+        ? normalizeList(filters.cats, scope.categories)
+        : backendList(filters.cats);
+  const colors = scope?.colors ? normalizeList(filters.colors, scope.colors) : backendList(filters.colors);
+  const sizes = scope?.sizes ? normalizeList(filters.sizes, scope.sizes) : backendList(filters.sizes);
+  const priceCeil = Math.max(1, Math.floor(scope?.priceCeil ?? Number.MAX_SAFE_INTEGER));
+  const rawMax = Number.isFinite(filters.max) ? Math.max(0, Math.floor(filters.max)) : 0;
+  const max = rawMax > 0 && rawMax < priceCeil ? rawMax : 0;
+  const sort = BACKEND_SORTS.includes(filters.sort) ? filters.sort : "newest";
+
+  return {
+    cats: categories,
+    colors,
+    sizes,
+    max,
+    instock: Boolean(filters.instock),
+    sale: false,
+    sort,
+  };
+}
+
 /** Parses raw URL search into a safe and deterministic internal Filters object. */
 export function parseFilters(search: Record<string, unknown>): Filters {
   const rawSort = scalar(search.sort);
@@ -152,6 +197,21 @@ export function parseFilters(search: Record<string, unknown>): Filters {
     instock: parseBoolean(search.instock),
     sale: parseBoolean(search.sale),
     sort: rawSort && SORTS.includes(rawSort as SortKey) ? (rawSort as SortKey) : "newest",
+  });
+}
+
+export function parseBackendFilters(search: Record<string, unknown>): Filters {
+  const rawSort = scalar(search.sort);
+  const maxValue = Number(scalar(search.max));
+  return normalizeBackendFilters({
+    cats: backendList(search.cats),
+    colors: backendList(search.colors),
+    sizes: backendList(search.sizes),
+    max: Number.isFinite(maxValue) ? maxValue : 0,
+    instock: parseBoolean(search.instock),
+    sale: false,
+    sort:
+      rawSort && BACKEND_SORTS.includes(rawSort as SortKey) ? (rawSort as SortKey) : "newest",
   });
 }
 
@@ -169,9 +229,25 @@ export function serializeFilters(filters: Filters): FilterSearch {
   return output;
 }
 
+export function serializeBackendFilters(filters: Filters, scope?: FilterScope): FilterSearch {
+  const normalized = normalizeBackendFilters(filters, scope);
+  const output: FilterSearch = {};
+  if (normalized.cats.length) output.cats = normalized.cats.join(",");
+  if (normalized.colors.length) output.colors = normalized.colors.join(",");
+  if (normalized.sizes.length) output.sizes = normalized.sizes.join(",");
+  if (normalized.max > 0) output.max = normalized.max;
+  if (normalized.instock) output.instock = true;
+  if (normalized.sort !== "newest") output.sort = normalized.sort;
+  return output;
+}
+
 /** Safe optional URL shape used directly by TanStack validateSearch. */
 export function parseFilterSearch(search: Record<string, unknown>): FilterSearch {
   return serializeFilters(parseFilters(search));
+}
+
+export function parseBackendFilterSearch(search: Record<string, unknown>): FilterSearch {
+  return serializeBackendFilters(parseBackendFilters(search));
 }
 
 /** Stable query string used to clean direct/deep links without changing semantics. */
