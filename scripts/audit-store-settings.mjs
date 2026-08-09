@@ -120,7 +120,12 @@ if (!checkout.includes("getCommerceReadiness") || !checkout.includes("getPublicP
   failures.push("Checkout must preserve explicit public commerce/payment readiness boundaries.");
 }
 
-for (const forbidden of ["saveDemoOrder", "createDemoOrderRef", "shippingFeeFor", "findDemoOrder"]) {
+for (const forbidden of [
+  "saveDemoOrder",
+  "createDemoOrderRef",
+  "shippingFeeFor",
+  "findDemoOrder",
+]) {
   if (checkout.includes(forbidden)) {
     failures.push(`Checkout still contains invented/demo commerce behavior: ${forbidden}`);
   }
@@ -154,7 +159,9 @@ if (liveStart < 0 || prototypeStart < 0 || prototypeStart <= liveStart) {
   );
 
   if (!/<form\b/i.test(liveCheckout)) {
-    failures.push("Live checkout must collect recipient data only for authoritative backend quote.");
+    failures.push(
+      "Live checkout must collect recipient data only for authoritative backend quote.",
+    );
   }
   for (const required of ["createCheckoutQuote", "commitCheckout", "initiatePayment"]) {
     if (!liveCheckout.includes(required)) {
@@ -164,7 +171,11 @@ if (liveStart < 0 || prototypeStart < 0 || prototypeStart <= liveStart) {
   if (/<form\b/i.test(prototypeCheckout)) {
     failures.push("Prototype checkout must not collect order submission data.");
   }
-  if (/createCheckoutQuote|commitCheckout|initiatePayment|window\.location\.assign/.test(prototypeCheckout)) {
+  if (
+    /createCheckoutQuote|commitCheckout|initiatePayment|window\.location\.assign/.test(
+      prototypeCheckout,
+    )
+  ) {
     failures.push("Prototype checkout must not execute live commerce operations.");
   }
 }
