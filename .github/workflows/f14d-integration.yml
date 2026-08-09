@@ -33,17 +33,7 @@ jobs:
         run: npm run build
       - name: Typecheck
         run: npm run typecheck
-      - name: Contract/source guard
-        shell: bash
-        run: |
-          grep -q '2026-08-09-f14-be-f1' src/lib/backend-api.ts
-          if git grep -nE '/api/auth/|/api/checkout|/api/account/|/api/delivery/options' -- src ':!src/lib/backend-api.ts'; then
-            echo 'Legacy unversioned backend route leaked into F14D frontend.'
-            exit 1
-          fi
-          if git grep -niE 'پرداخت.{0,30}موفق|موفق.{0,30}پرداخت|payment.{0,24}(successful|succeeded)|success.{0,24}payment' -- src/routes/checkout.tsx src/routes/payment.result.tsx | grep -vi 'Backend\|verify\|verified\|تأیید'; then
-            echo 'Potential frontend-authored payment success claim detected.'
-            exit 1
-          fi
+      - name: F14D contract/source audit
+        run: node scripts/audit-f14d-integration.mjs
       - name: Production dependency audit
         run: npm audit --omit=dev --audit-level=high
