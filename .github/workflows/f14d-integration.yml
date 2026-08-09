@@ -1,0 +1,49 @@
+name: F14D Production Backend Integration
+
+on:
+  push:
+    branches:
+      - phase/f14d-production-backend-integration
+  pull_request:
+    branches:
+      - integration/wave2-reviewed
+
+permissions:
+  contents: read
+
+jobs:
+  live-contract-gates:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SITE_URL: https://lbb.example.test
+      VITE_LBB_BACKEND_MODE: live
+      VITE_LBB_API_BASE_URL: https://api.example.test
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build live mode
+        run: npm run build
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Contract/source guard
+        shell: bash
+        run: |
+          grep -q '2026-08-09-f14-be-f1' src/lib/backend-api.ts
+          if git grep -nE '/api/auth/|/api/checkout|/api/account/|/api/delivery/options' -- src ':!src/lib/backend-api.ts'; then
+            echo 'Legacy unversioned backend route leaked into F14D frontend.'
+            exit 1
+          fi
+          if git grep -nE 'payment.*success|success.*payment' -- src/routes/checkout.tsx src/routes/payment.result.tsx | grep -vi 'Backend\|verify\|verified\|تأیید'; then
+            echo 'Potential frontend-authored payment success claim detected.'
+            exit 1
+          fi
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
