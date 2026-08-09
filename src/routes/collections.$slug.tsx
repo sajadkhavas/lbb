@@ -342,7 +342,11 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
             <>
               <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
                 {loader.products.map((product, index) => (
-                  <ProductCard key={product.publicId} p={backendCard(product)} priority={index < 2} />
+                  <ProductCard
+                    key={product.publicId}
+                    p={backendCard(product)}
+                    priority={index < 2}
+                  />
                 ))}
               </div>
               {categories.length > 0 ? (
@@ -410,10 +414,7 @@ function PrototypeCollectionDetail({ collection }: { collection: Collection }) {
           <div className="flex flex-col justify-center">
             <div className="flex flex-wrap items-center gap-3">
               <TechLabel tone="signal">{collection.latinName}</TechLabel>
-              <StatusTag
-                tone={view.kind === "drop" ? "signal" : "neutral"}
-                className="rounded-lg"
-              >
+              <StatusTag tone={view.kind === "drop" ? "signal" : "neutral"} className="rounded-lg">
                 {view.kind === "drop" ? "DROP / EDITORIAL" : "COLLECTION / EDITORIAL"}
               </StatusTag>
             </div>
