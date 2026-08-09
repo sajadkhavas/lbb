@@ -6,6 +6,7 @@ import {
   verifyOtp,
   type CustomerDto,
 } from "@/lib/backend-api";
+import { ensureBackendCsrf } from "@/lib/backend-session";
 import { CtaClasses, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 
 type Props = {
@@ -32,6 +33,7 @@ export function CustomerOtpAuth({
     setBusy(true);
     setError(null);
     try {
+      await ensureBackendCsrf();
       const response = await requestOtp(mobile.trim());
       setChallengeId(response.data.challengeId);
       setSent(true);
@@ -50,6 +52,7 @@ export function CustomerOtpAuth({
     setBusy(true);
     setError(null);
     try {
+      await ensureBackendCsrf();
       const response = await verifyOtp({
         mobile: mobile.trim(),
         challengeId,
