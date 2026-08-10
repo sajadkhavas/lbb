@@ -1,4 +1,4 @@
-/* Push-only extension imported by the generated Workbox worker. */
+/* Push-only extension imported by the production service worker. */
 self.addEventListener("push", (event) => {
   if (!event.data) return;
   event.waitUntil(
@@ -10,10 +10,9 @@ self.addEventListener("push", (event) => {
         return;
       }
       if (!payload || typeof payload.title !== "string") return;
-      const url =
-        typeof payload.url === "string" && payload.url.startsWith("/")
-          ? payload.url
-          : "/";
+      const candidate = typeof payload.url === "string" ? payload.url : "/";
+      const target = new URL(candidate, self.location.origin);
+      const url = target.origin === self.location.origin ? target.pathname + target.search : "/";
       await self.registration.showNotification(payload.title, {
         body: typeof payload.body === "string" ? payload.body : undefined,
         icon: "/icons/icon-192.png",
@@ -28,17 +27,11 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = new URL(
-    event.notification.data?.url || "/",
-    self.location.origin,
-  );
-  if (target.origin !== self.location.origin) target.pathname = "/";
+  const candidate = new URL(event.notification.data?.url || "/", self.location.origin);
+  const target = candidate.origin === self.location.origin ? candidate : new URL("/", self.location.origin);
   event.waitUntil(
     (async () => {
-      const windows = await self.clients.matchAll({
-        type: "window",
-        includeUncontrolled: true,
-      });
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       const existing = windows.find(
         (client) => new URL(client.url).origin === self.location.origin,
       );
