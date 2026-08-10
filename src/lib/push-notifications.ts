@@ -11,12 +11,7 @@ export type PushSubscriptionRequest = {
   preferences: PushPreference[];
 };
 
-export type PushState =
-  | "unsupported"
-  | "not-configured"
-  | "denied"
-  | "available"
-  | "subscribed";
+export type PushState = "unsupported" | "not-configured" | "denied" | "available" | "subscribed";
 
 const PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY?.trim();
 const SUBSCRIPTIONS_URL = import.meta.env.VITE_PUSH_SUBSCRIPTIONS_URL?.trim();
@@ -27,9 +22,7 @@ const toBytes = (value: string): Uint8Array<ArrayBuffer> => {
   return Uint8Array.from(raw, (character) => character.charCodeAt(0));
 };
 
-export function getPushState(
-  subscription?: PushSubscription | null,
-): PushState {
+export function getPushState(subscription?: PushSubscription | null): PushState {
   if (
     typeof window === "undefined" ||
     !("serviceWorker" in navigator) ||
@@ -61,13 +54,10 @@ async function syncSubscription(
   if (!response.ok) throw new Error(`PUSH_SYNC_FAILED_${response.status}`);
 }
 
-export async function subscribeToPush(
-  preferences: PushPreference[],
-): Promise<PushSubscription> {
+export async function subscribeToPush(preferences: PushPreference[]): Promise<PushSubscription> {
   if (!PUBLIC_KEY || !SUBSCRIPTIONS_URL) throw new Error("PUSH_NOT_CONFIGURED");
   const permission = await Notification.requestPermission();
-  if (permission !== "granted")
-    throw new Error(`PUSH_PERMISSION_${permission.toUpperCase()}`);
+  if (permission !== "granted") throw new Error(`PUSH_PERMISSION_${permission.toUpperCase()}`);
   const registration = await navigator.serviceWorker.ready;
   const existing = await registration.pushManager.getSubscription();
   const subscription =
@@ -88,9 +78,7 @@ export async function subscribeToPush(
   }
 }
 
-export async function unsubscribeFromPush(
-  preferences: PushPreference[],
-): Promise<void> {
+export async function unsubscribeFromPush(preferences: PushPreference[]): Promise<void> {
   const subscription = await currentPushSubscription();
   if (!subscription) return;
   await syncSubscription("DELETE", {
