@@ -73,19 +73,19 @@ export function readPendingCheckout(storage = browserStorage()): PendingCheckout
 export function persistPendingCheckout(
   input: Omit<PendingCheckout, "schemaVersion" | "committedAt">,
   storage = browserStorage(),
-): PendingCheckout | null {
-  if (!storage) return null;
+): PendingCheckout {
   const record: PendingCheckout = {
     schemaVersion: SCHEMA_VERSION,
     ...input,
     committedAt: Date.now(),
   };
+  if (!storage) return record;
   try {
     storage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify(record));
-    return record;
   } catch {
-    return null;
+    // Keep the in-memory handoff usable for this session when persistence is unavailable.
   }
+  return record;
 }
 
 export function clearPendingCheckoutForOrder(orderId: string, storage = browserStorage()) {

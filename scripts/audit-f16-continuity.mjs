@@ -19,6 +19,21 @@ const required = [
   [checkout, "persistPendingCheckout", "committed order handoff is persisted before cart clear"],
   [checkout, "clearCheckoutCommitKey(quote.quoteId)", "commit attempt is cleared after success"],
   [
+    checkout,
+    "const shouldRecoverPending = lines.length === 0 && Boolean(continuity)",
+    "a fresh cart is never blocked by an older pending order",
+  ],
+  [
+    checkout,
+    "if (order.paidAt || order.cancelledAt)",
+    "terminal recovered orders are retired from checkout continuity",
+  ],
+  [
+    checkout,
+    "clearPendingCheckoutForOrder(order.id)",
+    "terminal pending handoff is cleared by backend order truth",
+  ],
+  [
     payment,
     "clearPendingCheckoutForOrder(response.data.order.id)",
     "verified payment clears matching handoff",

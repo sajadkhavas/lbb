@@ -34,6 +34,7 @@ import { getDeliveryOptions, type DeliveryOptionDto } from "@/lib/backend-delive
 import { ensureBackendCsrf } from "@/lib/backend-session";
 import {
   clearCheckoutCommitKey,
+  clearPendingCheckoutForOrder,
   getOrCreateCheckoutCommitKey,
   persistPendingCheckout,
   readPendingCheckout,
@@ -90,6 +91,7 @@ function LiveCheckout() {
     Boolean(customer?.mobile) &&
     Boolean(deliveryMethod) &&
     (!needsAddress || (province.trim() && city.trim() && address.trim()));
+  const shouldRecoverPending = lines.length === 0 && Boolean(continuity);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -130,6 +132,11 @@ function LiveCheckout() {
 
   useEffect(() => {
     if (!continuityHydrated || !customer || !continuity || orderResult) return;
+    if (!shouldRecoverPending) {
+      setRecoveryLoading(false);
+      setRecoveryError(null);
+      return;
+    }
     let cancelled = false;
     setRecoveryLoading(true);
     setRecoveryError(null);
@@ -137,7 +144,13 @@ function LiveCheckout() {
       .then((response) => {
         if (cancelled) return;
         const order = response.data.order;
-        const paymentAvailable = continuity.paymentAvailable && !order.paidAt && !order.cancelledAt;
+        if (order.paidAt || order.cancelledAt) {
+          clearPendingCheckoutForOrder(order.id);
+          setContinuity(null);
+          setOrderResult(null);
+          return;
+        }
+        const paymentAvailable = continuity.paymentAvailable;
         setOrderResult({
           order,
           payment: {
@@ -161,7 +174,7 @@ function LiveCheckout() {
     return () => {
       cancelled = true;
     };
-  }, [continuityHydrated, customer, continuity, orderResult]);
+  }, [continuityHydrated, customer, continuity, orderResult, shouldRecoverPending]);
 
   useEffect(() => {
     if (!customer || !cartCompatible) return;
@@ -290,7 +303,7 @@ function LiveCheckout() {
       !continuityHydrated ||
       sessionLoading ||
       recoveryLoading ||
-      (continuity && customer && !orderResult && !recoveryError) ? (
+      (shouldRecoverPending && customer && !orderResult && !recoveryError) ? (
         <p className="mt-8 flex items-center gap-2 text-sm text-metal" role="status">
           <Loader2 size={16} className="animate-spin" aria-hidden="true" />
           در حال بررسی سبد و نشست مشتری…
@@ -312,7 +325,7 @@ function LiveCheckout() {
             {sessionError}
           </StatePanel>
         </div>
-      ) : recoveryError ? (
+      ) : shouldRecoverPending && recoveryError ? (
         <div className="mt-8 space-y-4">
           <StatePanel title="بازیابی سفارش ناتمام کامل نشد" tone="warning">
             {recoveryError}
