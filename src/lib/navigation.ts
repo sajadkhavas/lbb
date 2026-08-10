@@ -47,6 +47,7 @@ export const BRAND_NAVIGATION: NavigationItem[] = [
 
 export const PERSONAL_NAVIGATION: NavigationItem[] = [
   { label: "حساب کاربری", latin: "ACCOUNT", to: "/account" },
+  { label: "Web App و اعلان‌ها", latin: "WEB APP", to: "/web-app" },
   { label: "علاقه‌مندی‌ها", latin: "WISHLIST", to: "/wishlist" },
   { label: "سبد خرید", latin: "CART", to: "/cart" },
 ];
