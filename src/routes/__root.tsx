@@ -17,7 +17,7 @@ import { ProductQuickView } from "@/components/lbb/ProductQuickView";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/lib/cart";
 import { NavigationOverlayProvider } from "@/lib/navigation-overlay";
-import { registerPwa } from "@/lib/pwa";
+import { prepareWebAppInstall, registerPwa } from "@/lib/pwa";
 import { QuickViewProvider } from "@/lib/quickview";
 import { absUrl } from "@/lib/site";
 import { WishlistProvider } from "@/lib/wishlist";
@@ -167,6 +167,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
+    prepareWebAppInstall();
     void registerPwa();
   }, []);
 
