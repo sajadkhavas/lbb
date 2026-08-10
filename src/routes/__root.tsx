@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartDrawer } from "@/components/lbb/CartDrawer";
 import { ProductQuickView } from "@/components/lbb/ProductQuickView";
+import { PwaExperience } from "@/components/lbb/PwaExperience";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/lib/cart";
 import { EMPTY_FILTERS } from "@/lib/product-filter";
@@ -179,6 +180,7 @@ function RootComponent() {
             <Outlet />
             <CartDrawer />
             <ProductQuickView />
+            <PwaExperience />
             <Toaster position="bottom-left" dir="rtl" richColors closeButton />
           </QuickViewProvider>
         </CartProvider>
