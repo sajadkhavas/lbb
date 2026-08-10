@@ -598,6 +598,7 @@ img {
   .marquee-track,
   .skeleton-shimmer::after {
     animation: none !important;
+    animation-play-state: paused !important;
   }
 }
 
