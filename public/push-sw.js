@@ -12,10 +12,7 @@ self.addEventListener("push", (event) => {
       if (!payload || typeof payload.title !== "string") return;
       const candidate = typeof payload.url === "string" ? payload.url : "/";
       const target = new URL(candidate, self.location.origin);
-      const url =
-        target.origin === self.location.origin
-          ? target.pathname + target.search
-          : "/";
+      const url = target.origin === self.location.origin ? target.pathname + target.search : "/";
       await self.registration.showNotification(payload.title, {
         body: typeof payload.body === "string" ? payload.body : undefined,
         icon: "/icons/icon-192.png",
@@ -30,14 +27,9 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const candidate = new URL(
-    event.notification.data?.url || "/",
-    self.location.origin,
-  );
+  const candidate = new URL(event.notification.data?.url || "/", self.location.origin);
   const target =
-    candidate.origin === self.location.origin
-      ? candidate
-      : new URL("/", self.location.origin);
+    candidate.origin === self.location.origin ? candidate : new URL("/", self.location.origin);
   event.waitUntil(
     (async () => {
       const windows = await self.clients.matchAll({
