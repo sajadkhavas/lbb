@@ -1,0 +1,47 @@
+name: Web App Push Notifications
+
+on:
+  push:
+    branches:
+      - phase/web-app-push-notifications
+  pull_request:
+    branches:
+      - integration/final-reviewed
+
+permissions:
+  contents: read
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+  VITE_LBB_BACKEND_MODE: prototype
+
+jobs:
+  web-app-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Format lint build typecheck
+        run: |
+          npm run format:check
+          npm run lint
+          npm run build
+          npm run typecheck
+      - name: Web App and Push contracts
+        run: |
+          npm run audit:web-app-push
+          npm run test:web-app-push
+          npm run test:seo
+      - name: Production and dependency budgets
+        run: |
+          npm run audit:dependencies
+          npm run audit:production
+      - name: Full inherited quality
+        run: npm run quality
