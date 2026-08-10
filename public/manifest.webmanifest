@@ -25,5 +25,7 @@
     { "name": "فروشگاه", "url": "/shop" },
     { "name": "سبد خرید", "url": "/cart" },
     { "name": "علاقه‌مندی‌ها", "url": "/wishlist" }
-  ]
+  ],
+  "id": "/",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"]
 }

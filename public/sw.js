@@ -1,12 +1,23 @@
-/* LBB production service worker — network-first pages, cache-first hashed assets. */
-const VERSION = "lbb-2026-08-f0-f3";
+/* LBB production service worker — bounded public caches and push extension. */
+importScripts("/push-sw.js");
+
+const VERSION = "lbb-2026-08-f8b";
 const PAGE_CACHE = `${VERSION}-pages`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const OWN_CACHES = new Set([PAGE_CACHE, ASSET_CACHE]);
 const MAX_PAGE_ENTRIES = 40;
 const MAX_ASSET_ENTRIES = 200;
+const OFFLINE_URL = "/offline.html";
+const SENSITIVE_PATH =
+  /^\/(?:api|~oauth|account|cart|checkout|order(?:-confirmation)?|orders|payment|track-order|wishlist)(?:\/|$)/;
 
-self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(PAGE_CACHE).then((cache) => cache.add(OFFLINE_URL)));
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") void self.skipWaiting();
+});
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
@@ -40,10 +51,8 @@ async function networkFirst(request) {
       void trim(PAGE_CACHE, MAX_PAGE_ENTRIES);
     }
     return response;
-  } catch (error) {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    throw error;
+  } catch {
+    return (await cache.match(request)) ?? (await cache.match(OFFLINE_URL));
   }
 }
 
@@ -51,7 +60,6 @@ async function cacheFirst(request) {
   const cache = await caches.open(ASSET_CACHE);
   const cached = await cache.match(request);
   if (cached) return cached;
-
   const response = await fetch(request);
   if (response.ok) {
     await cache.put(request, response.clone());
@@ -70,7 +78,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname === "/sw.js" ||
     url.pathname === "/sitemap.xml" ||
     url.pathname.startsWith("/api/") ||
-    url.pathname.startsWith("/~oauth")
+    url.pathname.startsWith("/~oauth") ||
+    SENSITIVE_PATH.test(url.pathname)
   )
     return;
 
@@ -78,7 +87,6 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(networkFirst(request));
     return;
   }
-
   if (["image", "script", "style", "font"].includes(request.destination)) {
     event.respondWith(cacheFirst(request));
   }
