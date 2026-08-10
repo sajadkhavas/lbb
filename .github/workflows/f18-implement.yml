@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   implement:
-    if: ${{ !contains(github.event.head_commit.message, 'feat(f18): prune legacy motion runtime') }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
@@ -244,10 +243,12 @@ jobs:
           const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
           pkg.scripts["audit:f18"] = "node scripts/audit-f18-motion.mjs";
           pkg.scripts["test:f18"] = "playwright test tests/f18-motion-performance.spec.ts";
-          pkg.scripts.quality = pkg.scripts.quality.replace(
-            "npm run audit:f16 && npm run smoke:production",
-            "npm run audit:f16 && npm run audit:f18 && npm run smoke:production",
-          );
+          if (!pkg.scripts.quality.includes("npm run audit:f18")) {
+            pkg.scripts.quality = pkg.scripts.quality.replace(
+              "npm run audit:f16 && npm run smoke:production",
+              "npm run audit:f16 && npm run audit:f18 && npm run smoke:production",
+            );
+          }
           fs.writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
           EOF
       - name: Format changed source
@@ -275,5 +276,9 @@ jobs:
           git config user.email "144109918+sajadkhavas@users.noreply.github.com"
           git add package.json package-lock.json docs/f18 scripts/audit-f18-motion.mjs tests/f18-motion-performance.spec.ts src/components/lbb/home/TickerStrip.tsx
           git add -u src/components/SmoothScroll.tsx src/components/lbb/CustomCursor.tsx src/components/lbb/MagneticButton.tsx src/hooks/use-reveal.ts src/components/lbb/home/BestSellers.tsx src/components/lbb/home/HeroSplit.tsx
+          if git diff --cached --quiet; then
+            echo "F18 source already matches verified implementation."
+            exit 0
+          fi
           git commit -m "feat(f18): prune legacy motion runtime and pause offscreen ticker"
           git push origin HEAD:phase/f18-motion-performance-polish
