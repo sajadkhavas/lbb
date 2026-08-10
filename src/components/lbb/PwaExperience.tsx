@@ -7,9 +7,7 @@ type InstallPromptEvent = Event & {
 };
 
 export function PwaExperience() {
-  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(
-    null,
-  );
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const [offline, setOffline] = useState(false);
   const [update, setUpdate] = useState<(() => Promise<void>) | null>(null);
   const [hidden, setHidden] = useState(false);
@@ -43,8 +41,7 @@ export function PwaExperience() {
       ? {
           label: "نصب وب‌اپ",
           icon: Download,
-          run: () =>
-            void installPrompt.prompt().then(() => setInstallPrompt(null)),
+          run: () => void installPrompt.prompt().then(() => setInstallPrompt(null)),
         }
       : null;
 
@@ -55,17 +52,9 @@ export function PwaExperience() {
       className="fixed inset-x-3 bottom-[calc(72px+env(safe-area-inset-bottom))] z-[260] mx-auto flex max-w-lg items-center gap-3 rounded-xl border border-hairline bg-carbon p-3 text-bone shadow-2xl md:bottom-5"
     >
       {offline ? (
-        <WifiOff
-          aria-hidden="true"
-          className="shrink-0 text-signal"
-          size={20}
-        />
+        <WifiOff aria-hidden="true" className="shrink-0 text-signal" size={20} />
       ) : action ? (
-        <action.icon
-          aria-hidden="true"
-          className="shrink-0 text-signal"
-          size={20}
-        />
+        <action.icon aria-hidden="true" className="shrink-0 text-signal" size={20} />
       ) : null}
       <p className="flex-1 text-xs leading-6">
         {offline
