@@ -65,7 +65,9 @@ export function prepareWebAppInstall() {
 
 export function subscribeWebAppInstall(listener: () => void) {
   installListeners.add(listener);
-  return () => installListeners.delete(listener);
+  return () => {
+    installListeners.delete(listener);
+  };
 }
 
 export function isStandaloneWebApp(): boolean {
