@@ -1,5 +1,5 @@
-/* LBB production service worker — network-first pages, cache-first hashed assets. */
-const VERSION = "lbb-2026-08-f0-f3";
+/* LBB production service worker — network-first pages, cache-first hashed assets + Web Push. */
+const VERSION = "lbb-2026-08-web-push";
 const PAGE_CACHE = `${VERSION}-pages`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const OWN_CACHES = new Set([PAGE_CACHE, ASSET_CACHE]);
@@ -59,6 +59,58 @@ async function cacheFirst(request) {
   }
   return response;
 }
+
+function safeNotificationUrl(value) {
+  try {
+    const url = new URL(typeof value === "string" ? value : "/account", self.location.origin);
+    if (url.origin !== self.location.origin) return "/account";
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return "/account";
+  }
+}
+
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { body: event.data?.text() ?? "" };
+  }
+
+  const title = typeof payload.title === "string" && payload.title.trim() ? payload.title : "LBB";
+  const body = typeof payload.body === "string" ? payload.body : "";
+  const url = safeNotificationUrl(payload.url);
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: typeof payload.icon === "string" ? payload.icon : "/icons/icon-192.png",
+      badge: typeof payload.badge === "string" ? payload.badge : "/icons/icon-192.png",
+      tag: typeof payload.tag === "string" ? payload.tag : undefined,
+      data: { ...(payload.data && typeof payload.data === "object" ? payload.data : {}), url },
+      dir: "rtl",
+      lang: "fa",
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const path = safeNotificationUrl(event.notification.data?.url);
+  const target = new URL(path, self.location.origin).href;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clients) => {
+      const sameOrigin = clients.find((client) => new URL(client.url).origin === self.location.origin);
+      if (sameOrigin) {
+        if ("navigate" in sameOrigin) await sameOrigin.navigate(target);
+        return sameOrigin.focus();
+      }
+      return self.clients.openWindow(target);
+    }),
+  );
+});
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;
