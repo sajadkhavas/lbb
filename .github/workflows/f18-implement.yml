@@ -1,0 +1,279 @@
+name: F18 One Shot Implementation
+
+on:
+  push:
+    branches:
+      - phase/f18-motion-performance-polish
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    if: ${{ !contains(github.event.head_commit.message, 'feat(f18): prune legacy motion runtime') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      VITE_SITE_URL: https://lbb.example.test
+      VITE_LBB_BACKEND_MODE: prototype
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Prune disconnected motion stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm uninstall gsap lenis motion
+          rm -f \
+            src/components/SmoothScroll.tsx \
+            src/components/lbb/CustomCursor.tsx \
+            src/components/lbb/MagneticButton.tsx \
+            src/hooks/use-reveal.ts \
+            src/components/lbb/home/BestSellers.tsx \
+            src/components/lbb/home/HeroSplit.tsx
+      - name: Install viewport-aware ticker
+        shell: bash
+        run: |
+          cat > src/components/lbb/home/TickerStrip.tsx <<'EOF'
+          import { useEffect, useRef } from "react";
+
+          const ITEMS = ["LBB", "پوشاک شهری", "دراپ ۰۰۱", "هودی", "شلوار", "کرج", "پاساژ مهستان", "LBB"];
+
+          export function TickerStrip() {
+            const trackRef = useRef<HTMLDivElement>(null);
+            const row = (
+              <div className="flex shrink-0 items-center">
+                {ITEMS.map((text, index) => (
+                  <span
+                    key={`${text}-${index}`}
+                    className="tech flex items-center gap-6 whitespace-nowrap px-6 text-obsidian"
+                  >
+                    {text}
+                    <span aria-hidden="true" className="text-obsidian/70">
+                      ✦
+                    </span>
+                  </span>
+                ))}
+              </div>
+            );
+
+            useEffect(() => {
+              const track = trackRef.current;
+              if (!track || typeof window === "undefined") return;
+
+              const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+              let inViewport = false;
+
+              const updatePlayback = () => {
+                track.style.animationPlayState =
+                  !reducedMotion.matches && inViewport && !document.hidden ? "running" : "paused";
+              };
+
+              const observer = new IntersectionObserver(
+                ([entry]) => {
+                  inViewport = Boolean(entry?.isIntersecting);
+                  updatePlayback();
+                },
+                { rootMargin: "120px 0px", threshold: 0.01 },
+              );
+
+              observer.observe(track);
+              reducedMotion.addEventListener("change", updatePlayback);
+              document.addEventListener("visibilitychange", updatePlayback);
+              updatePlayback();
+
+              return () => {
+                observer.disconnect();
+                reducedMotion.removeEventListener("change", updatePlayback);
+                document.removeEventListener("visibilitychange", updatePlayback);
+              };
+            }, []);
+
+            return (
+              <div aria-hidden="true" className="group h-11 w-full overflow-hidden bg-signal">
+                <div
+                  ref={trackRef}
+                  data-f18-motion="viewport-ticker"
+                  className="marquee-track flex h-11 w-max items-center group-hover:[animation-play-state:paused]"
+                  style={{ animationPlayState: "paused" }}
+                >
+                  {row}
+                  {row}
+                </div>
+              </div>
+            );
+          }
+          EOF
+      - name: Add F18 audit, tests and completion record
+        shell: bash
+        run: |
+          mkdir -p docs/f18
+          cat > docs/f18/README.md <<'EOF'
+          # F18 — Motion & Performance Polish
+
+          Baseline: `integration/wave4-reviewed@45a210b3c1e049d4640bf0feffdac23b56fb596b`.
+
+          ## Scope
+
+          F18 is a finish-mode performance pass. It does not redesign the storefront, add choreography, or introduce a new animation library.
+
+          ## Completed
+
+          - Removed the disconnected legacy motion stack (`SmoothScroll`, `CustomCursor`, `MagneticButton`, legacy `BestSellers`/`HeroSplit`, and `useReveal`).
+          - Removed the unused `gsap`, `lenis`, and `motion` production dependencies and their lockfile entries.
+          - Preserved native browser scrolling as required by the accepted homepage performance contract.
+          - Kept the existing global `prefers-reduced-motion` safety contract intact.
+          - Hardened the active homepage ticker so its continuous animation is paused by default, runs only while near/in the viewport, pauses while the document is hidden, and remains paused for reduced-motion users.
+          - Added a permanent source audit and focused Playwright regression for the F18 contract.
+
+          ## Performance boundary
+
+          F18 deliberately does not activate smooth scrolling, custom cursors, magnetic pointer effects, GSAP, Lenis, or Motion. Focus-management `requestAnimationFrame` calls remain because they schedule accessibility state after DOM updates rather than drive continuous visual animation.
+
+          ## Acceptance
+
+          F18 is acceptable only when its dedicated workflow, the inherited F19 reduced-motion/RTL regression, production bundle audit, and global Quality suite all pass on the same final head.
+          EOF
+
+          cat > scripts/audit-f18-motion.mjs <<'EOF'
+          import fs from "node:fs";
+          import path from "node:path";
+
+          const root = process.cwd();
+          const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
+          const exists = (file) => fs.existsSync(path.join(root, file));
+
+          const removed = [
+            "src/components/SmoothScroll.tsx",
+            "src/components/lbb/CustomCursor.tsx",
+            "src/components/lbb/MagneticButton.tsx",
+            "src/hooks/use-reveal.ts",
+            "src/components/lbb/home/BestSellers.tsx",
+            "src/components/lbb/home/HeroSplit.tsx",
+          ];
+          for (const file of removed) {
+            if (exists(file)) throw new Error(`F18 audit failed: legacy motion file remains: ${file}`);
+          }
+
+          const packageJson = JSON.parse(read("package.json"));
+          for (const dependency of ["gsap", "lenis", "motion"]) {
+            if (packageJson.dependencies?.[dependency] || packageJson.devDependencies?.[dependency]) {
+              throw new Error(`F18 audit failed: unused motion dependency remains: ${dependency}`);
+            }
+          }
+
+          const sourceFiles = [];
+          const walk = (dir) => {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const next = path.join(dir, entry.name);
+              if (entry.isDirectory()) walk(next);
+              else if (/\.(?:ts|tsx|js|jsx)$/.test(entry.name)) sourceFiles.push(next);
+            }
+          };
+          walk(path.join(root, "src"));
+          const source = sourceFiles.map((file) => fs.readFileSync(file, "utf8")).join("\n");
+          for (const token of ['from "gsap', 'import("gsap', 'from "lenis', 'import("lenis', 'from "motion', 'import("motion']) {
+            if (source.includes(token)) throw new Error(`F18 audit failed: runtime motion import remains: ${token}`);
+          }
+
+          const ticker = read("src/components/lbb/home/TickerStrip.tsx");
+          for (const token of [
+            "IntersectionObserver",
+            "visibilitychange",
+            "prefers-reduced-motion: reduce",
+            'animationPlayState: "paused"',
+            'data-f18-motion="viewport-ticker"',
+          ]) {
+            if (!ticker.includes(token)) throw new Error(`F18 audit failed: ticker contract missing ${token}`);
+          }
+
+          const styles = read("src/styles.css");
+          if (!styles.includes("@media (prefers-reduced-motion: reduce)")) {
+            throw new Error("F18 audit failed: global reduced-motion contract missing");
+          }
+          if (!styles.includes(".marquee-track,\n  .skeleton-shimmer::after")) {
+            throw new Error("F18 audit failed: marquee reduced-motion opt-out missing");
+          }
+
+          const homepage = read("src/routes/index.tsx");
+          for (const banned of ["SmoothScroll", "CustomCursor", "MagneticButton", "gsap", "lenis"]) {
+            if (homepage.includes(banned)) throw new Error(`F18 audit failed: homepage imports ${banned}`);
+          }
+
+          console.log("F18 motion/performance audit: PASS");
+          EOF
+
+          cat > tests/f18-motion-performance.spec.ts <<'EOF'
+          import { expect, test } from "@playwright/test";
+
+          test("reduced motion keeps the active ticker static and native scrolling intact", async ({ page }) => {
+            await page.emulateMedia({ reducedMotion: "reduce" });
+            await page.goto("/", { waitUntil: "networkidle" });
+
+            const ticker = page.locator('[data-f18-motion="viewport-ticker"]');
+            await expect(ticker).toHaveCSS("animation-name", "none");
+            await expect(ticker).toHaveCSS("animation-play-state", "paused");
+            expect(
+              await page.evaluate(
+                () =>
+                  document.documentElement.classList.contains("lenis") ||
+                  document.body.classList.contains("lenis"),
+              ),
+            ).toBe(false);
+          });
+
+          test("ticker only spends animation work while near the viewport", async ({ page }) => {
+            await page.emulateMedia({ reducedMotion: "no-preference" });
+            await page.goto("/", { waitUntil: "networkidle" });
+
+            const ticker = page.locator('[data-f18-motion="viewport-ticker"]');
+            await ticker.scrollIntoViewIfNeeded();
+            await expect(ticker).toHaveCSS("animation-play-state", "running");
+
+            await page.locator("footer").scrollIntoViewIfNeeded();
+            await expect(ticker).toHaveCSS("animation-play-state", "paused");
+          });
+          EOF
+
+          node <<'EOF'
+          const fs = require("node:fs");
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          pkg.scripts["audit:f18"] = "node scripts/audit-f18-motion.mjs";
+          pkg.scripts["test:f18"] = "playwright test tests/f18-motion-performance.spec.ts";
+          pkg.scripts.quality = pkg.scripts.quality.replace(
+            "npm run audit:f16 && npm run smoke:production",
+            "npm run audit:f16 && npm run audit:f18 && npm run smoke:production",
+          );
+          fs.writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
+          EOF
+      - name: Format changed source
+        run: npx prettier --write package.json src/components/lbb/home/TickerStrip.tsx scripts/audit-f18-motion.mjs tests/f18-motion-performance.spec.ts docs/f18/README.md
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: F18 pre-commit gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run format:check
+          npm run lint
+          npm run build
+          npm run typecheck
+          npm run audit:dependencies
+          npm run audit:production
+          npm run audit:f18
+          npm run test:f18
+          npm run test:rtl
+      - name: Commit verified implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "sajadkhavas"
+          git config user.email "144109918+sajadkhavas@users.noreply.github.com"
+          git add package.json package-lock.json docs/f18 scripts/audit-f18-motion.mjs tests/f18-motion-performance.spec.ts src/components/lbb/home/TickerStrip.tsx
+          git add -u src/components/SmoothScroll.tsx src/components/lbb/CustomCursor.tsx src/components/lbb/MagneticButton.tsx src/hooks/use-reveal.ts src/components/lbb/home/BestSellers.tsx src/components/lbb/home/HeroSplit.tsx
+          git commit -m "feat(f18): prune legacy motion runtime and pause offscreen ticker"
+          git push origin HEAD:phase/f18-motion-performance-polish
