@@ -12,7 +12,9 @@ const SENSITIVE_PATH =
   /^\/(?:api|~oauth|account|cart|checkout|order(?:-confirmation)?|orders|payment|track-order|wishlist)(?:\/|$)/;
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(PAGE_CACHE).then((cache) => cache.add(OFFLINE_URL)));
+  event.waitUntil(
+    caches.open(PAGE_CACHE).then((cache) => cache.add(OFFLINE_URL)),
+  );
 });
 
 self.addEventListener("message", (event) => {
@@ -39,7 +41,9 @@ async function trim(cacheName, maxEntries) {
   const keys = await cache.keys();
   const overflow = keys.length - maxEntries;
   if (overflow <= 0) return;
-  await Promise.all(keys.slice(0, overflow).map((request) => cache.delete(request)));
+  await Promise.all(
+    keys.slice(0, overflow).map((request) => cache.delete(request)),
+  );
 }
 
 async function networkFirst(request) {
@@ -74,7 +78,11 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname === "/sw.js" || url.pathname === "/sitemap.xml" || SENSITIVE_PATH.test(url.pathname))
+  if (
+    url.pathname === "/sw.js" ||
+    url.pathname === "/sitemap.xml" ||
+    SENSITIVE_PATH.test(url.pathname)
+  )
     return;
 
   if (request.mode === "navigate") {
