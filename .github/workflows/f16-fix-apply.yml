@@ -20,37 +20,7 @@ jobs:
       - name: Repair build-before-typecheck order
         shell: bash
         run: |
-          python3 <<'PY'
-          from pathlib import Path
-
-          path = Path('.github/workflows/f16-apply.yml')
-          text = path.read_text(encoding='utf-8')
-          text = text.replace("  apply:\n    if: github.actor != 'github-actions[bot]'\n    runs-on: ubuntu-latest", "  apply:\n    runs-on: ubuntu-latest", 1)
-          anchor = '''      - name: Typecheck before commit
-        env:
-          VITE_SITE_URL: https://lbb.example.test
-          VITE_LBB_BACKEND_MODE: live
-          VITE_LBB_API_BASE_URL: https://api.example.test
-        run: npm run typecheck
-'''
-          replacement = '''      - name: Build before typecheck
-        env:
-          VITE_SITE_URL: https://lbb.example.test
-          VITE_LBB_BACKEND_MODE: live
-          VITE_LBB_API_BASE_URL: https://api.example.test
-        run: npm run build
-      - name: Typecheck before commit
-        env:
-          VITE_SITE_URL: https://lbb.example.test
-          VITE_LBB_BACKEND_MODE: live
-          VITE_LBB_API_BASE_URL: https://api.example.test
-        run: npm run typecheck
-'''
-          if anchor not in text:
-              raise SystemExit('typecheck anchor missing')
-          path.write_text(text.replace(anchor, replacement, 1), encoding='utf-8')
-          Path('.github/workflows/f16-fix-apply.yml').unlink()
-          PY
+          python3 -c "from pathlib import Path; p=Path('.github/workflows/f16-apply.yml'); t=p.read_text(); t=t.replace(\"  apply:\\n    if: github.actor != 'github-actions[bot]'\\n    runs-on: ubuntu-latest\", \"  apply:\\n    runs-on: ubuntu-latest\", 1); needle='      - name: Typecheck before commit\\n'; insert='      - name: Build before typecheck\\n        env:\\n          VITE_SITE_URL: https://lbb.example.test\\n          VITE_LBB_BACKEND_MODE: live\\n          VITE_LBB_API_BASE_URL: https://api.example.test\\n        run: npm run build\\n'; assert needle in t; p.write_text(t.replace(needle, insert+needle, 1)); Path('.github/workflows/f16-fix-apply.yml').unlink()"
       - name: Commit repaired workflow
         run: |
           git config user.name "github-actions[bot]"
