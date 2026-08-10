@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#0A0A0A" />
+    <title>اتصال اینترنت در دسترس نیست — LBB</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #050505;
+        color: #f2efe8;
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+      }
+      main {
+        max-width: 520px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: #0c0c0d;
+        padding: 32px;
+        border-radius: 20px;
+      }
+      small {
+        color: #e6291e;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 12px 0;
+      }
+      p {
+        color: #9b9b9b;
+        line-height: 1.9;
+      }
+      button,
+      a {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        padding: 0 18px;
+        font: inherit;
+        font-weight: 700;
+      }
+      button {
+        border: 0;
+        background: #e6291e;
+        color: white;
+        cursor: pointer;
+      }
+      a {
+        margin-inline-start: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f2efe8;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <small>LBB / OFFLINE</small>
+      <h1>فعلاً به اینترنت دسترسی ندارید</h1>
+      <p>
+        صفحه‌هایی که قبلاً باز کرده‌اید ممکن است همچنان در دسترس باشند. برای
+        دریافت موجودی، قیمت و اطلاعات حساب باید دوباره آنلاین شوید.
+      </p>
+      <button type="button" onclick="location.reload()">تلاش دوباره</button>
+      <a href="/">خانه</a>
+    </main>
+  </body>
+</html>
