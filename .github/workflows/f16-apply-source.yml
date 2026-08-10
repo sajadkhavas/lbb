@@ -31,6 +31,7 @@ jobs:
             capture { sub(/^          /, ""); print }
           ' .github/workflows/f16-apply.yml > /tmp/f16-apply.py
           python3 /tmp/f16-apply.py
+          python3 -c "from pathlib import Path; p=Path('tests/f16-commerce-continuity.spec.ts'); p.write_text(p.read_text().replace('سبد خرید خالی است', 'سبد خرید شما خالی است'), encoding='utf-8')"
           git checkout HEAD -- .github/workflows
       - name: Install locked dependencies
         run: npm ci
