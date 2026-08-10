@@ -116,15 +116,17 @@ export function SearchOverlay() {
   useEffect(() => setActiveIndex(-1), [term]);
 
   const remember = (value: string) => setRecent(saveRecent(value));
+  const dismissAfterNavigation = () => window.queueMicrotask(dismissForNavigation);
 
   const choose = (suggestion: Suggestion) => {
     remember(term || suggestion.label);
-    dismissForNavigation();
     if (suggestion.kind === "product") {
       navigate({ to: "/product/$slug", params: { slug: suggestion.slug } });
+      dismissAfterNavigation();
       return;
     }
     navigate({ to: "/$category", params: { category: suggestion.slug } });
+    dismissAfterNavigation();
   };
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -135,8 +137,8 @@ export function SearchOverlay() {
       return;
     }
     remember(term);
-    dismissForNavigation();
     navigate({ to: "/search", search: { q: term } });
+    dismissAfterNavigation();
   };
 
   return (
@@ -333,7 +335,7 @@ export function SearchOverlay() {
               <div className="mt-4 grid gap-2">
                 <Link
                   to="/collections"
-                  onClick={dismissForNavigation}
+                  onClick={dismissAfterNavigation}
                   className="group flex min-h-12 items-center justify-between border border-hairline px-4 text-sm font-bold text-bone transition-colors hover:border-signal"
                 >
                   کالکشن‌های فعلی
@@ -345,7 +347,7 @@ export function SearchOverlay() {
                 </Link>
                 <Link
                   to="/journal"
-                  onClick={dismissForNavigation}
+                  onClick={dismissAfterNavigation}
                   className="group flex min-h-12 items-center justify-between border border-hairline px-4 text-sm font-bold text-bone transition-colors hover:border-signal"
                 >
                   راهنما و ژورنال
@@ -358,7 +360,7 @@ export function SearchOverlay() {
                 <Link
                   to="/search"
                   search={{ q: term }}
-                  onClick={dismissForNavigation}
+                  onClick={dismissAfterNavigation}
                   className="group flex min-h-12 items-center justify-between bg-signal px-4 text-sm font-bold text-obsidian"
                 >
                   صفحه کامل جست‌وجو
