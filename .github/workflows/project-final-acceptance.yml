@@ -79,6 +79,8 @@ jobs:
         run: |
           npm run test:seo
           npm run test:f20b
+      - name: Production build for bundle audit
+        run: npm run build
       - name: Motion and performance regressions
         run: |
           npm run audit:production
