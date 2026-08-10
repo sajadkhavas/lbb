@@ -102,6 +102,7 @@ function AppPage() {
                 className="mt-5 space-y-3"
                 disabled={
                   busy ||
+                  state === "subscribed" ||
                   state === "unsupported" ||
                   state === "denied" ||
                   state === "not-configured"
@@ -125,6 +126,11 @@ function AppPage() {
                   </label>
                 ))}
               </fieldset>
+              {state === "subscribed" ? (
+                <p className="mt-3 text-xs leading-6 text-metal">
+                  برای تغییر نوع اعلان‌ها، ابتدا اعلان‌ها را غیرفعال و سپس با انتخاب جدید فعال کنید.
+                </p>
+              ) : null}
               <button
                 type="button"
                 disabled={
