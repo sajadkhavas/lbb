@@ -26,6 +26,7 @@ import {
 } from "@/lib/catalog-discovery";
 import { productsByCategory } from "@/lib/products";
 import { evaluateProductEvidence } from "@/lib/product-evidence";
+import { backendCanonicalPath } from "@/lib/seo-live";
 import { absAsset, absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
   applyFilters,
@@ -162,7 +163,7 @@ export const Route = createFileRoute("/$category")({
         };
       }
       const filters = parseBackendFilters(match.search as unknown as Record<string, unknown>);
-      const path = `/${category.slug}`;
+      const path = backendCanonicalPath(category.seo, `/${category.slug}`);
       const title = category.seo.metaTitle?.trim() || `${category.name} | LBB`;
       const description =
         category.seo.metaDescription?.trim() ||
@@ -189,6 +190,25 @@ export const Route = createFileRoute("/$category")({
             url: absUrl(path),
           }),
         },
+        ...(loaderData.items.length > 0
+          ? [
+              {
+                type: "application/ld+json",
+                children: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "ItemList",
+                  name: category.name,
+                  numberOfItems: loaderData.items.length,
+                  itemListElement: loaderData.items.map((product, index) => ({
+                    "@type": "ListItem",
+                    position: index + 1,
+                    url: absUrl(`/product/${product.slug}`),
+                    name: product.name,
+                  })),
+                }),
+              },
+            ]
+          : []),
       ];
       return {
         meta: pageMeta({
