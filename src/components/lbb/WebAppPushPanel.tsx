@@ -87,8 +87,10 @@ export function WebAppPushPanel() {
     setMessage(null);
     try {
       const choice = await promptWebAppInstall();
-      if (choice?.outcome === "accepted") setMessage("Web App نصب شد و از صفحه اصلی دستگاه در دسترس است.");
-      else if (choice?.outcome === "dismissed") setMessage("نصب لغو شد؛ هر زمان خواستی دوباره می‌توانی انجامش بدهی.");
+      if (choice?.outcome === "accepted")
+        setMessage("Web App نصب شد و از صفحه اصلی دستگاه در دسترس است.");
+      else if (choice?.outcome === "dismissed")
+        setMessage("نصب لغو شد؛ هر زمان خواستی دوباره می‌توانی انجامش بدهی.");
     } finally {
       setBusy(null);
     }
@@ -100,9 +102,13 @@ export function WebAppPushPanel() {
     setMessage(null);
     try {
       if (!live) throw new Error("اعلان واقعی فقط در حالت Backend live فعال می‌شود.");
-      if (!authenticated) throw new Error("برای اتصال اعلان به سفارش‌های خودت ابتدا وارد حساب LBB شو.");
+      if (!authenticated)
+        throw new Error("برای اتصال اعلان به سفارش‌های خودت ابتدا وارد حساب LBB شو.");
       if (!supportsPush()) throw new Error("این مرورگر Web Push را پشتیبانی نمی‌کند.");
-      if (ios && !standalone) throw new Error("در iPhone/iPad ابتدا سایت را به Home Screen اضافه کن، سپس از همان Web App اعلان را فعال کن.");
+      if (ios && !standalone)
+        throw new Error(
+          "در iPhone/iPad ابتدا سایت را به Home Screen اضافه کن، سپس از همان Web App اعلان را فعال کن.",
+        );
 
       const currentConfig = config ?? (await getWebPushConfig()).data;
       setConfig(currentConfig);
@@ -111,7 +117,8 @@ export function WebAppPushPanel() {
       }
 
       const result = await Notification.requestPermission();
-      if (result !== "granted") throw new Error("مجوز اعلان داده نشد. از تنظیمات مرورگر می‌توانی آن را تغییر بدهی.");
+      if (result !== "granted")
+        throw new Error("مجوز اعلان داده نشد. از تنظیمات مرورگر می‌توانی آن را تغییر بدهی.");
 
       const registration = await navigator.serviceWorker.ready;
       const existing = await registration.pushManager.getSubscription();
@@ -183,22 +190,37 @@ export function WebAppPushPanel() {
           <Smartphone className="text-signal" aria-hidden="true" />
         </div>
         <p className="mt-4 text-sm leading-7 text-metal">
-          نسخه Web App همان فروشگاه واقعی است و بدون نصب اپ جداگانه از Home Screen یا Desktop اجرا می‌شود.
+          نسخه Web App همان فروشگاه واقعی است و بدون نصب اپ جداگانه از Home Screen یا Desktop اجرا
+          می‌شود.
         </p>
         <div className="mt-5">
           {standalone ? (
-            <p className="text-sm font-semibold text-bone" role="status">Web App روی این دستگاه نصب/Standalone است.</p>
+            <p className="text-sm font-semibold text-bone" role="status">
+              Web App روی این دستگاه نصب/Standalone است.
+            </p>
           ) : installPrompt ? (
-            <button type="button" onClick={() => void install()} disabled={busy !== null} className={CtaClasses("signal")}>
-              {busy === "install" ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Download size={16} aria-hidden="true" />}
+            <button
+              type="button"
+              onClick={() => void install()}
+              disabled={busy !== null}
+              className={CtaClasses("signal")}
+            >
+              {busy === "install" ? (
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Download size={16} aria-hidden="true" />
+              )}
               نصب Web App
             </button>
           ) : ios ? (
             <StatePanel title="نصب در iPhone / iPad" tone="info">
-              از منوی Share مرورگر Safari گزینه Add to Home Screen را بزن؛ بعد LBB را از همان آیکن باز کن.
+              از منوی Share مرورگر Safari گزینه Add to Home Screen را بزن؛ بعد LBB را از همان آیکن
+              باز کن.
             </StatePanel>
           ) : (
-            <p className="text-sm leading-7 text-metal">اگر مرورگر نصب مستقیم را ارائه کند، دکمه نصب همین‌جا ظاهر می‌شود.</p>
+            <p className="text-sm leading-7 text-metal">
+              اگر مرورگر نصب مستقیم را ارائه کند، دکمه نصب همین‌جا ظاهر می‌شود.
+            </p>
           )}
         </div>
       </Surface>
@@ -209,39 +231,87 @@ export function WebAppPushPanel() {
             <TechLabel tone="signal">WEB PUSH / ORDERS</TechLabel>
             <h2 className="mt-2 text-title text-bone">اعلان وضعیت سفارش</h2>
           </div>
-          {subscription ? <Bell className="text-signal" aria-hidden="true" /> : <BellOff className="text-metal" aria-hidden="true" />}
+          {subscription ? (
+            <Bell className="text-signal" aria-hidden="true" />
+          ) : (
+            <BellOff className="text-metal" aria-hidden="true" />
+          )}
         </div>
         <p className="mt-4 text-sm leading-7 text-metal">
-          فقط بعد از اجازه خودت فعال می‌شود و تغییرات واقعی سفارش مثل تأیید پرداخت، آماده‌سازی، ارسال و تحویل را از Backend دریافت می‌کند.
+          فقط بعد از اجازه خودت فعال می‌شود و تغییرات واقعی سفارش مثل تأیید پرداخت، آماده‌سازی،
+          ارسال و تحویل را از Backend دریافت می‌کند.
         </p>
         <p className="mt-3 text-xs text-mute" role="status">
-          وضعیت مرورگر: {permission === "granted" ? "مجاز" : permission === "denied" ? "مسدود" : "هنوز درخواست نشده"}
+          وضعیت مرورگر:{" "}
+          {permission === "granted"
+            ? "مجاز"
+            : permission === "denied"
+              ? "مسدود"
+              : "هنوز درخواست نشده"}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           {subscription ? (
             <>
-              <button type="button" onClick={() => void testPush()} disabled={busy !== null || !live || !authenticated} className={CtaClasses("line")}>
-                {busy === "test" ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Send size={16} aria-hidden="true" />}
+              <button
+                type="button"
+                onClick={() => void testPush()}
+                disabled={busy !== null || !live || !authenticated}
+                className={CtaClasses("line")}
+              >
+                {busy === "test" ? (
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Send size={16} aria-hidden="true" />
+                )}
                 تست اعلان
               </button>
-              <button type="button" onClick={() => void disablePush()} disabled={busy !== null} className={CtaClasses("line")}>
-                {busy === "disable" ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <BellOff size={16} aria-hidden="true" />}
+              <button
+                type="button"
+                onClick={() => void disablePush()}
+                disabled={busy !== null}
+                className={CtaClasses("line")}
+              >
+                {busy === "disable" ? (
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <BellOff size={16} aria-hidden="true" />
+                )}
                 غیرفعال‌سازی
               </button>
             </>
           ) : (
-            <button type="button" onClick={() => void enablePush()} disabled={busy !== null || permission === "denied"} className={CtaClasses("signal")}>
-              {busy === "enable" ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Bell size={16} aria-hidden="true" />}
+            <button
+              type="button"
+              onClick={() => void enablePush()}
+              disabled={busy !== null || permission === "denied"}
+              className={CtaClasses("signal")}
+            >
+              {busy === "enable" ? (
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Bell size={16} aria-hidden="true" />
+              )}
               فعال‌کردن اعلان
             </button>
           )}
         </div>
-        {!live ? <p className="mt-4 text-xs leading-6 text-mute">در Prototype فقط رابط قابل بررسی است؛ subscription واقعی فقط با Backend live ثبت می‌شود.</p> : !authenticated ? <p className="mt-4 text-xs leading-6 text-mute">برای اعلان سفارش، ابتدا از صفحه حساب وارد شو.</p> : null}
+        {!live ? (
+          <p className="mt-4 text-xs leading-6 text-mute">
+            در Prototype فقط رابط قابل بررسی است؛ subscription واقعی فقط با Backend live ثبت می‌شود.
+          </p>
+        ) : !authenticated ? (
+          <p className="mt-4 text-xs leading-6 text-mute">
+            برای اعلان سفارش، ابتدا از صفحه حساب وارد شو.
+          </p>
+        ) : null}
       </Surface>
 
       {(message || error) && (
         <div className="lg:col-span-2" aria-live="polite">
-          <StatePanel title={error ? "عملیات کامل نشد" : "وضعیت Web App"} tone={error ? "warning" : "info"}>
+          <StatePanel
+            title={error ? "عملیات کامل نشد" : "وضعیت Web App"}
+            tone={error ? "warning" : "info"}
+          >
             {error ?? message}
           </StatePanel>
         </div>

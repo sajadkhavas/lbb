@@ -1,4 +1,9 @@
-import { BackendApiError, getBackendBaseUrl, type ApiFailure, type ApiSuccess } from "@/lib/backend-api";
+import {
+  BackendApiError,
+  getBackendBaseUrl,
+  type ApiFailure,
+  type ApiSuccess,
+} from "@/lib/backend-api";
 import { ensureBackendCsrf } from "@/lib/backend-session";
 
 export type WebPushConfig = {

@@ -102,7 +102,9 @@ self.addEventListener("notificationclick", (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clients) => {
-      const sameOrigin = clients.find((client) => new URL(client.url).origin === self.location.origin);
+      const sameOrigin = clients.find(
+        (client) => new URL(client.url).origin === self.location.origin,
+      );
       if (sameOrigin) {
         if ("navigate" in sameOrigin) await sameOrigin.navigate(target);
         return sameOrigin.focus();

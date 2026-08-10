@@ -39,7 +39,8 @@ function WebAppPage() {
             <TechLabel tone="signal">LBB / WEB APP / PUSH</TechLabel>
             <h1 className="mt-3 text-display-2">Web App و اعلان‌های سفارش</h1>
             <p className="mt-4 max-w-[62ch] text-sm leading-8 text-metal">
-              نصب فروشگاه روی دستگاه و کنترل اعلان‌ها کاملاً اختیاری است. مجوز اعلان فقط وقتی خودت دکمه فعال‌سازی را بزنی درخواست می‌شود.
+              نصب فروشگاه روی دستگاه و کنترل اعلان‌ها کاملاً اختیاری است. مجوز اعلان فقط وقتی خودت
+              دکمه فعال‌سازی را بزنی درخواست می‌شود.
             </p>
           </Shell>
         </header>
