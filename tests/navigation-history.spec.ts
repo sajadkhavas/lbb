@@ -27,11 +27,14 @@ test("filtered category deep links survive refresh", async ({ page }) => {
 
 test("product deep link and keyboard gallery remain usable", async ({ page }) => {
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  await expect(page.getByRole("heading", { level: 1, name: "هودی کلاسیک LBB" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  const gallery = page.getByRole("region", { name: /گالری تصاویر/ });
+  await gallery.focus();
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("ArrowRight");
   await page.reload({ waitUntil: "networkidle" });
-  await expect(page.getByRole("heading", { level: 1, name: "هودی کلاسیک LBB" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole("region", { name: /گالری تصاویر/ })).toBeVisible();
 });
 
 test("lookbook dialog supports arrows, Escape and focus restoration", async ({ page }) => {

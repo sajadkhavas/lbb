@@ -1,33 +1,22 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Check, Heart, ShoppingBag } from "lucide-react";
-import { toast } from "sonner";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowUpLeft, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { ProductCard } from "@/components/lbb/ProductCard";
 import { Gallery } from "@/components/lbb/product/Gallery";
-import { StickyBuyBar } from "@/components/lbb/product/StickyBuyBar";
-import { FitGuide } from "@/components/lbb/product/FitGuide";
+import { ProductFacts } from "@/components/lbb/product/ProductFacts";
+import { ProductPurchasePanel } from "@/components/lbb/product/ProductPurchasePanel";
+import { CompleteTheLook, RelatedProducts } from "@/components/lbb/product/ProductDiscovery";
 import { RecentlyViewed } from "@/components/lbb/product/RecentlyViewed";
-import { SizeGuideDialog } from "@/components/lbb/product/SizeGuideDialog";
-import { colorName } from "@/lib/color-names";
-import type { Product } from "@/lib/products";
-import {
-  bestSellers,
-  discountPercent,
-  fmtToman,
-  isSizeAvailable,
-  productBySlug,
-  productsByCategory,
-} from "@/lib/products";
+import { ProductCard } from "@/components/lbb/ProductCard";
 import { CATEGORIES } from "@/lib/categories";
-import { useCart } from "@/lib/cart";
-import { useWishlist } from "@/lib/wishlist";
-import { productGallery } from "@/lib/product-images";
-import { recordRecentlyViewed } from "@/lib/recently-viewed";
+import { buildProductDecisionViewModel, type DecisionMedia } from "@/lib/product-decision";
 import { evaluateProductEvidence } from "@/lib/product-evidence";
+import { productImage } from "@/lib/product-images";
+import { fmtToman, productBySlug, productsByCategory, type Product } from "@/lib/products";
+import { recordRecentlyViewed } from "@/lib/recently-viewed";
 import {
   absAsset,
   absUrl,
@@ -39,45 +28,183 @@ import {
 import {
   Band,
   CtaClasses,
-  SectionHead,
+  EmptyState,
   Shell,
-  StatusTag,
+  StatePanel,
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  BackendApiError,
+  backendErrorMessage,
+  getProduct,
+  isLiveBackend,
+  listProducts,
+  type ProductDetailDto,
+} from "@/lib/backend-api";
+import {
+  backendCard,
+  backendDecisionModel,
+  type BackendCatalogCard,
+} from "@/lib/backend-storefront";
 
-const MAX_QTY = 10;
+type PrototypeLoader = { mode: "prototype"; product: Product; related: Product[] };
+type LiveLoader = {
+  mode: "live";
+  product: ProductDetailDto | null;
+  related: BackendCatalogCard[];
+  error: string | null;
+};
+type ProductLoader = PrototypeLoader | LiveLoader;
 
 export const Route = createFileRoute("/product/$slug")({
-  loader: ({ params }) => {
+  loader: async ({ params }): Promise<ProductLoader> => {
+    if (isLiveBackend()) {
+      try {
+        const response = await getProduct(params.slug);
+        const product = response.data;
+        let related: BackendCatalogCard[] = [];
+        try {
+          const relatedResponse = await listProducts({
+            category: product.category.slug,
+            per_page: 5,
+            page: 1,
+            sort: "newest",
+          });
+          related = relatedResponse.data
+            .filter((item) => item.slug !== product.slug)
+            .slice(0, 4)
+            .map(backendCard);
+        } catch {
+          related = [];
+        }
+        return { mode: "live", product, related, error: null };
+      } catch (error) {
+        if (error instanceof BackendApiError && error.status === 404) throw notFound();
+        return { mode: "live", product: null, related: [], error: backendErrorMessage(error) };
+      }
+    }
+
     const product = productBySlug(params.slug);
     if (!product) throw notFound();
-    let related = productsByCategory(product.category).filter((item) => item.slug !== product.slug);
-    if (related.length === 0) related = bestSellers(4).filter((item) => item.slug !== product.slug);
-    return { product, related: related.slice(0, 4) };
+    const related = productsByCategory(product.category)
+      .filter((item) => item.slug !== product.slug)
+      .filter((item) => evaluateProductEvidence(item).publishable)
+      .slice(0, 4);
+    return { mode: "prototype", product, related };
   },
   head: ({ loaderData }) => {
-    if (!loaderData)
+    if (!loaderData) {
       return {
         meta: [{ title: "پیدا نشد" }, { name: "robots", content: ROBOTS.NOINDEX_NOFOLLOW }],
       };
-    const product = loaderData.product;
-    const category = CATEGORIES[product.category];
-    const title = `${product.name} | خرید از LBB — ${category.nameFa}`.slice(0, 59);
-    const evidence = evaluateProductEvidence(product);
-    const description = (
-      evidence.publishable
-        ? `${product.shortDescription} قیمت: ${fmtToman(product.price)}.`
-        : product.shortDescription
-    ).slice(0, 159);
-    const path = `/product/${product.slug}`;
-    const gallery = productGallery(product.slug).map(absAsset);
+    }
 
+    if (loaderData.mode === "live") {
+      const product = loaderData.product;
+      if (!product) {
+        return {
+          meta: pageMeta({
+            title: "محصول موقتاً در دسترس نیست | LBB",
+            description: "اطلاعات تأییدشده محصول از Backend قابل دریافت نیست.",
+            path: "/shop",
+            robots: ROBOTS.NOINDEX_NOFOLLOW,
+          }),
+        };
+      }
+      const path = `/product/${product.slug}`;
+      const title = product.seo.metaTitle?.trim() || `${product.name} | LBB`;
+      const description =
+        product.seo.metaDescription?.trim() || product.shortDescription || "مشاهده محصول LBB";
+      const image = product.seo.primaryImage || product.primaryImage || undefined;
+      const low = product.seo.structuredData?.lowPrice ?? product.price.from?.amount ?? null;
+      const high = product.seo.structuredData?.highPrice ?? product.price.to?.amount ?? low;
+      const offers =
+        low !== null
+          ? {
+              "@type": high !== null && high !== low ? "AggregateOffer" : "Offer",
+              url: absUrl(path),
+              priceCurrency: "IRR",
+              ...(high !== null && high !== low
+                ? { lowPrice: low * 10, highPrice: high * 10 }
+                : { price: low * 10 }),
+              availability: product.availability
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+            }
+          : undefined;
+      const productLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        brand: { "@type": "Brand", name: "LBB" },
+        description: product.description || product.shortDescription || undefined,
+        image: image ? [image] : undefined,
+        sku: product.variants.length === 1 ? product.variants[0].sku || undefined : undefined,
+        offers,
+      };
+      const crumbs = buildBreadcrumbLd(
+        product.breadcrumbs.length
+          ? product.breadcrumbs.map((item) => ({ name: item.label, path: item.path }))
+          : [
+              { name: "خانه", path: "/" },
+              { name: "فروشگاه", path: "/shop" },
+              { name: product.category.name, path: `/${product.category.slug}` },
+              { name: product.name, path },
+            ],
+      );
+      return {
+        meta: pageMeta({
+          title: title.slice(0, 70),
+          description: description.slice(0, 170),
+          path,
+          image,
+          type: "product",
+          robots: ROBOTS.INDEX_FOLLOW,
+        }),
+        links: canonical(path),
+        scripts: [
+          { type: "application/ld+json", children: JSON.stringify(productLd) },
+          { type: "application/ld+json", children: JSON.stringify(crumbs) },
+        ],
+      };
+    }
+
+    const product = loaderData.product;
+    const evidence = evaluateProductEvidence(product);
+    const category = CATEGORIES[product.category];
+    const path = `/product/${product.slug}`;
+
+    if (!evidence.publishable) {
+      return {
+        meta: pageMeta({
+          title: "محصول در انتظار تأیید | LBB",
+          description:
+            "این صفحه تا زمان تأیید هویت و داده‌های محصول، اطلاعات تجاری تأییدنشده را منتشر نمی‌کند.",
+          path,
+          robots: ROBOTS.NOINDEX_NOFOLLOW,
+        }),
+        links: canonical(path),
+        scripts: [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify(
+              buildBreadcrumbLd([
+                { name: "خانه", path: "/" },
+                { name: "فروشگاه", path: "/shop" },
+                { name: "محصول", path },
+              ]),
+            ),
+          },
+        ],
+      };
+    }
+
+    const image = absAsset(productImage(product.slug));
+    const title = `${product.name} | خرید از LBB — ${category.nameFa}`.slice(0, 59);
+    const description = `${product.shortDescription} قیمت: ${fmtToman(product.price)}.`.slice(
+      0,
+      159,
+    );
     const productLd = {
       "@context": "https://schema.org",
       "@type": "Product",
@@ -85,8 +212,7 @@ export const Route = createFileRoute("/product/$slug")({
       sku: product.sku,
       brand: { "@type": "Brand", name: "LBB" },
       description: product.description,
-      image: gallery,
-      color: product.colors.map(colorName).join("، "),
+      image: [image],
       size: product.sizes.join("، "),
       offers: {
         "@type": "Offer",
@@ -98,28 +224,29 @@ export const Route = createFileRoute("/product/$slug")({
           : "https://schema.org/OutOfStock",
       },
     };
-    const crumbs = buildBreadcrumbLd([
-      { name: "خانه", path: "/" },
-      { name: "فروشگاه", path: "/shop" },
-      { name: category.nameFa, path: `/${category.slug}` },
-      { name: product.name, path },
-    ]);
-
     return {
       meta: pageMeta({
         title,
         description,
         path,
-        image: gallery[0],
+        image,
         type: "product",
-        robots: evidence.publishable ? ROBOTS.INDEX_FOLLOW : ROBOTS.NOINDEX_NOFOLLOW,
+        robots: ROBOTS.INDEX_FOLLOW,
       }),
       links: canonical(path),
       scripts: [
-        ...(evidence.publishable
-          ? [{ type: "application/ld+json", children: JSON.stringify(productLd) }]
-          : []),
-        { type: "application/ld+json", children: JSON.stringify(crumbs) },
+        { type: "application/ld+json", children: JSON.stringify(productLd) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            buildBreadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: "فروشگاه", path: "/shop" },
+              { name: category.nameFa, path: `/${category.slug}` },
+              { name: product.name, path },
+            ]),
+          ),
+        },
       ],
     };
   },
@@ -127,384 +254,233 @@ export const Route = createFileRoute("/product/$slug")({
 });
 
 function ProductPage() {
-  const { product, related } = Route.useLoaderData();
+  const loader = Route.useLoaderData();
+  return loader.mode === "live" ? (
+    <LiveProductPage loader={loader} />
+  ) : (
+    <PrototypeProductPage loader={loader} />
+  );
+}
+
+function LiveProductPage({ loader }: { loader: LiveLoader }) {
+  const product = loader.product;
+  const model = useMemo(() => (product ? backendDecisionModel(product) : null), [product]);
+  const [galleryMedia, setGalleryMedia] = useState<DecisionMedia[]>(model?.media ?? []);
+  const updateGallery = useCallback((media: DecisionMedia[]) => setGalleryMedia(media), []);
+
+  useEffect(() => setGalleryMedia(model?.media ?? []), [model]);
+
+  if (!product || !model) {
+    return (
+      <PageChrome theme="light">
+        <Shell className="py-16">
+          <EmptyState
+            icon={<RefreshCcw size={40} aria-hidden="true" />}
+            title="اطلاعات محصول قابل تأیید نیست"
+            body={loader.error ?? "Backend پاسخ معتبر برای این محصول برنگرداند."}
+            action={
+              <Link to="/shop" className={CtaClasses("line")}>
+                بازگشت به فروشگاه
+              </Link>
+            }
+          />
+        </Shell>
+      </PageChrome>
+    );
+  }
+
+  return (
+    <PageChrome theme="light">
+      <Shell className="py-4">
+        <Breadcrumb
+          items={[
+            { label: "خانه", to: "/" },
+            { label: "فروشگاه", to: "/shop" },
+            {
+              label: product.category.name,
+              to: "/$category",
+              params: { category: product.category.slug },
+            },
+            { label: product.name },
+          ]}
+        />
+      </Shell>
+      <Shell
+        as="section"
+        aria-label="تصمیم‌گیری محصول"
+        className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
+      >
+        <Gallery media={galleryMedia} name={product.name} />
+        <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
+      </Shell>
+      <Band label="PRODUCT DECISION FACTS">
+        <Shell className="max-w-[980px]">
+          <div className="mb-8">
+            <TechLabel tone="signal">BACKEND VERIFIED PRODUCT DATA</TechLabel>
+            <h2 className="mt-2 text-display-3 text-bone">اطلاعات تصمیم‌گیری</h2>
+            <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
+              قیمت، موجودی، رنگ، سایز و مشخصات نمایش‌داده‌شده از رکورد منتشرشده Backend خوانده
+              شده‌اند.
+            </p>
+          </div>
+          <ProductFacts model={model} />
+          <div className="mt-8 border-t border-hairline pt-6">
+            <p className="text-sm leading-7 text-metal">
+              قوانین ارسال، مرجوعی و پشتیبانی مستقل از مشخصات محصول نگهداری می‌شوند.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link to="/shipping-returns" className={CtaClasses("line")}>
+                ارسال و مرجوعی <ArrowUpLeft size={16} aria-hidden="true" />
+              </Link>
+              <Link to="/contact" className={CtaClasses("line")}>
+                تماس و پشتیبانی <ArrowUpLeft size={16} aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </Shell>
+      </Band>
+      {loader.related.length > 0 ? (
+        <Band label="RELATED PRODUCTS">
+          <Shell>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4">
+              {loader.related.map((item) => (
+                <ProductCard key={item.id} p={item} />
+              ))}
+            </div>
+          </Shell>
+        </Band>
+      ) : null}
+    </PageChrome>
+  );
+}
+
+function PrototypeProductPage({ loader }: { loader: PrototypeLoader }) {
+  const { product, related } = loader;
   const p: Product = product;
   const relatedItems: Product[] = related;
   const cat = CATEGORIES[p.category];
-  const [color, setColor] = useState(p.colors[0] ?? "");
-  const [size, setSize] = useState("");
-  const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
-  const [sizeError, setSizeError] = useState(false);
-  const [stickyVisible, setStickyVisible] = useState(false);
-  const { add, openDrawer } = useCart();
-  const { has, toggle } = useWishlist();
-  const addBtnRef = useRef<HTMLDivElement>(null);
-  const sizeGroupRef = useRef<HTMLDivElement>(null);
-  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const discount = discountPercent(p);
-  const liked = has(p.slug);
+  const model = useMemo(() => buildProductDecisionViewModel(p), [p]);
+  const [galleryMedia, setGalleryMedia] = useState<DecisionMedia[]>(model.media);
+
+  const updateGallery = useCallback((media: DecisionMedia[]) => setGalleryMedia(media), []);
 
   useEffect(() => {
     recordRecentlyViewed(p.slug);
   }, [p.slug]);
 
   useEffect(() => {
-    setColor(p.colors[0] ?? "");
-    setSize("");
-    setQty(1);
-    setSizeError(false);
-    setAdded(false);
-  }, [p.slug, p.colors]);
+    setGalleryMedia(model.media);
+  }, [model]);
 
-  useEffect(() => {
-    const element = addBtnRef.current;
-    if (!element || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setStickyVisible(!entry.isIntersecting),
-      { rootMargin: "0px" },
-    );
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [p.slug]);
+  const completeTheLook = model.completeTheLookSlugs
+    .map((slug) => productBySlug(slug))
+    .filter((item): item is Product => Boolean(item))
+    .filter((item) => evaluateProductEvidence(item).publishable)
+    .slice(0, 4);
 
-  useEffect(
-    () => () => {
-      if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
-    },
-    [],
-  );
-
-  const focusSizePicker = () => {
-    sizeGroupRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    requestAnimationFrame(() =>
-      sizeGroupRef.current?.querySelector<HTMLButtonElement>("button:not([disabled])")?.focus(),
-    );
-  };
-
-  const onAdd = () => {
-    if (!p.inStock) return;
-    if (!size || !isSizeAvailable(p, size)) {
-      setSizeError(true);
-      toast.error("لطفاً یک سایز موجود را انتخاب کنید");
-      focusSizePicker();
-      return;
-    }
-    add({ slug: p.slug, name: p.name, price: p.price, color, size, qty });
-    toast.success("به سبد خرید اضافه شد", { description: `${p.name} — سایز ${size}` });
-    openDrawer();
-    setAdded(true);
-    if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
-    addedTimerRef.current = setTimeout(() => setAdded(false), 1500);
-  };
+  const breadcrumbName = model.identity.name ?? "محصول";
 
   return (
     <>
       <Navbar theme="light" />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-bottombar pt-16 md:pb-0">
+      <main
+        dir="rtl"
+        className="min-h-screen overflow-x-clip bg-obsidian pb-[calc(9rem+env(safe-area-inset-bottom))] pt-16 md:pb-0"
+      >
         <Shell className="py-4">
           <Breadcrumb
             items={[
               { label: "خانه", to: "/" },
               { label: "فروشگاه", to: "/shop" },
               { label: cat.nameFa, to: "/$category", params: { category: cat.slug } },
-              { label: p.name },
+              { label: breadcrumbName },
             ]}
           />
         </Shell>
 
         <Shell
           as="section"
-          className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,62%)_minmax(0,38%)] md:gap-10"
+          aria-label="تصمیم‌گیری محصول"
+          className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
         >
-          <Gallery slug={p.slug} name={p.name} />
-
-          <div className="flex min-w-0 flex-col gap-5 md:sticky md:top-20 md:self-start">
-            <div>
-              <TechLabel tone="signal">
-                {cat.nameFa} / {p.latinName}
-              </TechLabel>
-              <h1 className="mt-2 text-display-2 text-bone">{p.name}</h1>
-              <p className="mt-2 text-sm leading-7 text-metal">{p.shortDescription}</p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {p.isNew ? <StatusTag tone="signal">جدید</StatusTag> : null}
-              {!p.inStock ? <StatusTag tone="out">ناموجود</StatusTag> : null}
-              {discount > 0 ? <StatusTag tone="bone">{discount}٪ تخفیف</StatusTag> : null}
-            </div>
-
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex flex-wrap items-baseline gap-3">
-                <span className="num text-2xl font-bold text-bone">{fmtToman(p.price)}</span>
-                {p.originalPrice ? (
-                  <span className="num text-sm text-mute line-through">
-                    {fmtToman(p.originalPrice)}
-                  </span>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  toggle(p.slug);
-                  toast(liked ? "از علاقه‌مندی‌ها حذف شد" : "به علاقه‌مندی‌ها اضافه شد", {
-                    description: p.name,
-                  });
-                }}
-                aria-label={
-                  liked ? `حذف ${p.name} از علاقه‌مندی‌ها` : `افزودن ${p.name} به علاقه‌مندی‌ها`
-                }
-                aria-pressed={liked}
-                className="tap-target grid shrink-0 place-items-center border border-hairline text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
-              >
-                <Heart
-                  size={18}
-                  aria-hidden="true"
-                  className={liked ? "fill-signal text-signal" : ""}
-                />
-              </button>
-            </div>
-
-            <span aria-hidden="true" className="h-px w-full bg-hairline" />
-
-            <fieldset>
-              <legend className="mb-2 text-xs font-semibold text-bone">
-                رنگ: <span className="font-normal text-metal">{colorName(color)}</span>
-              </legend>
-              <div className="flex flex-wrap gap-2">
-                {p.colors.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    aria-label={`انتخاب رنگ ${colorName(item)}`}
-                    aria-pressed={color === item}
-                    onClick={() => setColor(item)}
-                    className="tap-target grid place-items-center rounded-full border-2 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
-                    style={{
-                      background: item,
-                      borderColor: color === item ? "var(--lbb-signal)" : "var(--lbb-hairline)",
-                    }}
-                  />
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <legend className="text-xs font-semibold text-bone">سایز</legend>
-                <SizeGuideDialog
-                  trigger={
-                    <button
-                      type="button"
-                      className="min-h-11 tech text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
-                    >
-                      راهنمای سایز
-                    </button>
-                  }
-                />
-              </div>
-              <div
-                ref={sizeGroupRef}
-                className="flex flex-wrap gap-2"
-                aria-describedby={sizeError ? "pdp-size-error" : undefined}
-              >
-                {p.sizes.map((item) => {
-                  const available = isSizeAvailable(p, item);
-                  return (
-                    <button
-                      key={item}
-                      type="button"
-                      disabled={!available}
-                      aria-pressed={size === item}
-                      aria-label={available ? `انتخاب سایز ${item}` : `سایز ${item} ناموجود`}
-                      onClick={() => {
-                        setSize(item);
-                        setSizeError(false);
-                      }}
-                      className={`tap-target min-w-[44px] border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
-                        !available
-                          ? "cursor-not-allowed border-hairline text-mute line-through opacity-40"
-                          : size === item
-                            ? "border-signal bg-signal text-obsidian"
-                            : "border-hairline text-bone hover:border-metal"
-                      }`}
-                    >
-                      {item}
-                    </button>
-                  );
-                })}
-              </div>
-              {sizeError ? (
-                <p
-                  id="pdp-size-error"
-                  role="alert"
-                  className="mt-2 text-xs font-semibold text-signal"
-                >
-                  لطفاً پیش از افزودن به سبد، یک سایز موجود را انتخاب کنید.
-                </p>
-              ) : null}
-              {!p.inStock ? (
-                <p className="mt-2 text-xs leading-6 text-metal">
-                  این محصول فعلاً ناموجود است؛ برای مشاهدهٔ گزینه‌های مشابه به بخش پیشنهادها بروید.
-                </p>
-              ) : null}
-            </fieldset>
-
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold text-bone">تعداد:</span>
-              <div className="flex items-center border border-hairline">
-                <button
-                  type="button"
-                  onClick={() => setQty((value) => Math.max(1, value - 1))}
-                  disabled={qty <= 1}
-                  aria-label="کاهش تعداد"
-                  className="tap-target text-lg text-bone disabled:opacity-35"
-                >
-                  −
-                </button>
-                <output className="num w-10 text-center text-sm text-bone" aria-live="polite">
-                  {qty}
-                </output>
-                <button
-                  type="button"
-                  onClick={() => setQty((value) => Math.min(MAX_QTY, value + 1))}
-                  disabled={qty >= MAX_QTY}
-                  aria-label="افزایش تعداد"
-                  className="tap-target text-lg text-bone disabled:opacity-35"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div ref={addBtnRef}>
-              <button
-                type="button"
-                onClick={onAdd}
-                disabled={!p.inStock}
-                className={`${CtaClasses("signal")} h-14 w-full`}
-              >
-                {added ? (
-                  <>
-                    <Check size={18} aria-hidden="true" />
-                    <span>به سبد اضافه شد</span>
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag size={18} aria-hidden="true" />
-                    <span>{p.inStock ? "افزودن به سبد خرید" : "ناموجود"}</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+          <Gallery media={galleryMedia} name={model.identity.name ?? "محصول"} />
+          <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
         </Shell>
 
-        <Band label="PRODUCT INFO">
-          <Shell className="max-w-[760px]">
-            <Accordion type="single" collapsible defaultValue="details" className="text-bone">
-              <AccordionItem value="details" className="border-hairline">
-                <AccordionTrigger className="text-sm font-bold text-bone hover:no-underline">
-                  جزئیات
-                </AccordionTrigger>
-                <AccordionContent className="text-sm leading-8 text-metal">
-                  {p.description}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="care" className="border-hairline">
-                <AccordionTrigger className="text-sm font-bold text-bone hover:no-underline">
-                  جنس و مراقبت
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="flex flex-col gap-4 text-sm leading-8 text-metal">
-                    <table className="w-full max-w-[420px] text-sm">
-                      <tbody>
-                        <tr className="border-b border-hairline">
-                          <th scope="row" className="py-2 text-start font-normal text-mute">
-                            جنس
-                          </th>
-                          <td className="py-2">{p.material}</td>
-                        </tr>
-                        <tr className="border-b border-hairline">
-                          <th scope="row" className="py-2 text-start font-normal text-mute">
-                            سایزبندی
-                          </th>
-                          <td className="num py-2">{p.sizes.join(" · ")}</td>
-                        </tr>
-                        <tr>
-                          <th scope="row" className="py-2 text-start font-normal text-mute">
-                            کد محصول
-                          </th>
-                          <td className="num py-2">{p.sku}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <ul className="flex flex-col gap-1.5">
-                      {p.care.map((care) => (
-                        <li key={care} className="flex gap-2">
-                          <span aria-hidden="true" className="mt-3 h-px w-3 shrink-0 bg-signal" />
-                          {care}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="fit" className="border-hairline">
-                <AccordionTrigger className="text-sm font-bold text-bone hover:no-underline">
-                  راهنمای فیت
-                </AccordionTrigger>
-                <AccordionContent>
-                  <FitGuide product={p} />
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="shipping" className="border-hairline">
-                <AccordionTrigger className="text-sm font-bold text-bone hover:no-underline">
-                  ارسال و بازگشت
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-3 text-sm leading-8 text-metal">
-                    <p>
-                      فروش، پرداخت، ارسال و مرجوعی واقعی هنوز فعال نیستند. افزودن این محصول به سبد
-                      فقط برای آزمایش رابط کاربری انجام می‌شود.
-                    </p>
-                    <a
-                      href="/shipping-returns"
-                      className="inline-flex min-h-11 items-center text-signal underline-offset-4 hover:underline"
-                    >
-                      مشاهده وضعیت فعلی ارسال و مرجوعی
-                    </a>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+        <Band label="PRODUCT DECISION FACTS">
+          <Shell className="max-w-[980px]">
+            <div className="mb-8">
+              <TechLabel tone="signal">SHOW TRUTH / HIDE UNCERTAINTY</TechLabel>
+              <h2 className="mt-2 text-display-3 text-bone">اطلاعات تصمیم‌گیری</h2>
+              <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
+                هر بخش فقط زمانی نمایش داده می‌شود که داده همان محصول منبع قابل استناد و وضعیت
+                تأییدشده داشته باشد.
+              </p>
+            </div>
+            <ProductFacts model={model} />
+
+            {!model.readyForCommerce ? (
+              <div className="mt-8">
+                <StatePanel title="این رکورد هنوز برای تجارت عمومی منتشر نشده است" tone="warning">
+                  داده‌های موجود در کد برای توسعه رابط نگه داشته شده‌اند و تا تکمیل Evidence
+                  به‌عنوان قیمت، موجودی، سایز، رنگ یا مشخصات قطعی فروشگاه استفاده نمی‌شوند.
+                </StatePanel>
+              </div>
+            ) : null}
+
+            <div className="mt-8 border-t border-hairline pt-6">
+              <p className="text-sm leading-7 text-metal">
+                وضعیت ارسال، مرجوعی و راه‌های پشتیبانی مستقل از مشخصات محصول نگهداری می‌شوند.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link to="/shipping-returns" className={CtaClasses("line")}>
+                  ارسال و مرجوعی
+                  <ArrowUpLeft size={16} aria-hidden="true" />
+                </Link>
+                <Link to="/contact" className={CtaClasses("line")}>
+                  تماس و پشتیبانی
+                  <ArrowUpLeft size={16} aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
           </Shell>
         </Band>
 
-        {relatedItems.length > 0 ? (
-          <Band label="YOU MAY ALSO LIKE">
+        {completeTheLook.length > 0 ? (
+          <Band label="COMPLETE THE LOOK">
             <Shell>
-              <SectionHead label="شاید بپسندید" title="پیشنهاد برای شما" className="mb-8" />
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-                {relatedItems.map((product: Product) => (
-                  <ProductCard key={product.id} p={product} />
-                ))}
-              </div>
+              <CompleteTheLook products={completeTheLook} />
+            </Shell>
+          </Band>
+        ) : null}
+
+        {relatedItems.length > 0 ? (
+          <Band label="RELATED PRODUCTS">
+            <Shell>
+              <RelatedProducts products={relatedItems} />
             </Shell>
           </Band>
         ) : null}
 
         <RecentlyViewed excludeSlug={p.slug} />
       </main>
-      <StickyBuyBar
-        visible={stickyVisible}
-        name={p.name}
-        price={p.price}
-        inStock={p.inStock}
-        selectedSize={size}
-        onAdd={onAdd}
-      />
       <Footer theme="light" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PageChrome({ children, theme }: { children: React.ReactNode; theme: "light" | "dark" }) {
+  return (
+    <>
+      <Navbar theme={theme} />
+      <main
+        dir="rtl"
+        className="min-h-screen overflow-x-clip bg-obsidian pb-[calc(9rem+env(safe-area-inset-bottom))] pt-16 md:pb-0"
+      >
+        {children}
+      </main>
+      <Footer theme={theme} />
       <MobileBottomBar />
     </>
   );

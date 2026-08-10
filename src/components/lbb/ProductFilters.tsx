@@ -9,6 +9,8 @@ import type { Filters } from "@/lib/product-filter";
 import { fmtToman, type CategorySlug } from "@/lib/products";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 
+type CategoryOption = { slug: string; label: string };
+
 type Props = {
   filters: Filters;
   onChange: (filters: Filters) => void;
@@ -16,6 +18,8 @@ type Props = {
   sizes: readonly string[];
   priceCeil: number;
   showCategory?: boolean;
+  showSale?: boolean;
+  categoryOptions?: readonly CategoryOption[];
   facetCounts?: FacetCounts;
 };
 
@@ -43,11 +47,16 @@ export function ProductFilters({
   sizes,
   priceCeil,
   showCategory,
+  showSale = true,
+  categoryOptions,
   facetCounts,
 }: Props) {
   const effectiveMax = filters.max > 0 ? Math.min(filters.max, priceCeil) : priceCeil;
   const [draftMax, setDraftMax] = useState<number | null>(null);
   const displayedMax = draftMax ?? effectiveMax;
+  const categories: readonly CategoryOption[] =
+    categoryOptions ??
+    CATEGORY_SLUGS.map((slug: CategorySlug) => ({ slug, label: CATEGORIES[slug].nameFa }));
 
   const commitMax = (value: number) => {
     setDraftMax(null);
@@ -65,8 +74,8 @@ export function ProductFilters({
       {showCategory ? (
         <fieldset className="flex flex-col gap-2">
           <legend className="tech mb-1 text-metal">دسته‌بندی</legend>
-          {CATEGORY_SLUGS.map((slug: CategorySlug) => {
-            const active = filters.cats.includes(slug);
+          {categories.map(({ slug, label }) => {
+            const active = filters.cats.includes(slug as CategorySlug);
             const count = facetCounts?.categories[slug];
             const unavailable = isUnavailable(active, count);
             return (
@@ -80,10 +89,13 @@ export function ProductFilters({
                   checked={active}
                   disabled={unavailable}
                   onCheckedChange={() =>
-                    onChange({ ...filters, cats: toggleValue(filters.cats, slug) })
+                    onChange({
+                      ...filters,
+                      cats: toggleValue(filters.cats, slug) as CategorySlug[],
+                    })
                   }
                 />
-                <span>{CATEGORIES[slug].nameFa}</span>
+                <span>{label}</span>
                 <FacetCount value={count} />
               </label>
             );
@@ -97,9 +109,10 @@ export function ProductFilters({
           <div className="flex flex-wrap gap-2.5">
             {colors.map((color) => {
               const active = filters.colors.includes(color);
-              const label = colorName(color);
+              const label = colorName(color) || color;
               const count = facetCounts?.colors[color];
               const unavailable = isUnavailable(active, count);
+              const visualColor = /^#[0-9a-f]{3,8}$/i.test(color) ? color : undefined;
               return (
                 <button
                   key={color}
@@ -117,13 +130,15 @@ export function ProductFilters({
                 >
                   <span
                     aria-hidden="true"
-                    className="h-7 w-7 rounded-full border transition-transform hover:scale-110"
+                    className="grid h-7 w-7 place-items-center rounded-full border text-[8px] transition-transform hover:scale-110"
                     style={{
-                      background: color,
+                      background: visualColor ?? "var(--lbb-carbon)",
                       borderColor: active ? "var(--lbb-signal)" : "var(--lbb-hairline)",
                       boxShadow: active ? "0 0 0 2px var(--lbb-signal)" : "none",
                     }}
-                  />
+                  >
+                    {!visualColor ? label.slice(0, 1) : null}
+                  </span>
                 </button>
               );
             })}
@@ -166,24 +181,26 @@ export function ProductFilters({
         </fieldset>
       ) : null}
 
-      <fieldset>
-        <legend className="tech mb-3 flex w-full items-center justify-between gap-3 text-metal">
-          <span>حداکثر قیمت</span>
-          <output className="num text-bone" aria-live="polite">
-            {fmtToman(displayedMax)}
-          </output>
-        </legend>
-        <Slider
-          dir="ltr"
-          min={0}
-          max={priceCeil}
-          step={50000}
-          aria-label="حداکثر قیمت"
-          value={[displayedMax]}
-          onValueChange={([value]) => setDraftMax(value)}
-          onValueCommit={([value]) => commitMax(value)}
-        />
-      </fieldset>
+      {priceCeil > 0 ? (
+        <fieldset>
+          <legend className="tech mb-3 flex w-full items-center justify-between gap-3 text-metal">
+            <span>حداکثر قیمت</span>
+            <output className="num text-bone" aria-live="polite">
+              {fmtToman(displayedMax)}
+            </output>
+          </legend>
+          <Slider
+            dir="ltr"
+            min={0}
+            max={priceCeil}
+            step={50000}
+            aria-label="حداکثر قیمت"
+            value={[displayedMax]}
+            onValueChange={([value]) => setDraftMax(value)}
+            onValueCommit={([value]) => commitMax(value)}
+          />
+        </fieldset>
+      ) : null}
 
       <fieldset className="flex flex-col gap-2">
         <legend className="sr-only">وضعیت کالا</legend>
@@ -194,13 +211,15 @@ export function ProductFilters({
           />
           فقط کالاهای موجود
         </label>
-        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
-          <Checkbox
-            checked={filters.sale}
-            onCheckedChange={(value) => onChange({ ...filters, sale: value === true })}
-          />
-          فقط تخفیف‌دارها
-        </label>
+        {showSale ? (
+          <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
+            <Checkbox
+              checked={filters.sale}
+              onCheckedChange={(value) => onChange({ ...filters, sale: value === true })}
+            />
+            فقط تخفیف‌دارها
+          </label>
+        ) : null}
       </fieldset>
     </div>
   );
