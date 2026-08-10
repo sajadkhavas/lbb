@@ -78,7 +78,7 @@ export async function subscribeToPush(
     }));
   try {
     await syncSubscription("PUT", {
-    subscription: subscription.toJSON() as PushSubscriptionRecord,
+      subscription: subscription.toJSON() as PushSubscriptionRecord,
       preferences,
     });
     return subscription;
