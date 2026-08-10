@@ -1,10 +1,23 @@
 import { expect, test } from "@playwright/test";
 
 const meta = { apiVersion: "v1", contractVersion: "2026-08-09-f14-be-f1" };
+const liveMode = process.env.VITE_LBB_BACKEND_MODE === "live";
 
 test("live checkout associates custom errors and focuses the first invalid field", async ({
   page,
 }) => {
+  if (!liveMode) {
+    await page.goto("/checkout", { waitUntil: "networkidle" });
+    await expect(page.getByRole("heading", { name: "تکمیل سفارش", level: 1 })).toBeVisible();
+    await expect(page.getByRole("button", { name: "دریافت جمع نهایی از Backend" })).toHaveCount(0);
+    await expect(
+      page.locator(
+        'input[autocomplete="name"], input[autocomplete="tel"], input[autocomplete="street-address"]',
+      ),
+    ).toHaveCount(0);
+    return;
+  }
+
   await page.addInitScript(() => {
     localStorage.setItem(
       "lbb-cart-v2",
