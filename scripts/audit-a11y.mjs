@@ -84,10 +84,9 @@ requireTokens("tests/f19b-live-checkout.spec.ts", liveCheckout, [
   "aria-invalid",
   "aria-describedby",
   "toBeFocused",
-  "co-name",
-  "co-province",
-  "co-city",
-  "co-address",
+  '["name", "province", "city", "address"]',
+  "#co-${field}",
+  "co-${field}-error",
 ]);
 
 const rtl = await text("tests/f19-rtl.spec.ts");
