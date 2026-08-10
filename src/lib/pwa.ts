@@ -50,8 +50,13 @@ export async function registerPwa(): Promise<void> {
 
   try {
     const { registerSW } = await import("virtual:pwa-register");
-    registerSW({
+    const updateSW = registerSW({
       immediate: true,
+      onNeedRefresh() {
+        window.dispatchEvent(
+          new CustomEvent("lbb:pwa-update", { detail: async () => updateSW(true) }),
+        );
+      },
       onRegisterError(error) {
         if (import.meta.env.DEV) console.error("PWA registration failed", error);
       },
