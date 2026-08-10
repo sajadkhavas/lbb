@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 test("Web App settings route exposes install and notification controls", async ({ page }) => {
@@ -7,6 +8,12 @@ test("Web App settings route exposes install and notification controls", async (
   await expect(page.getByRole("heading", { name: "نصب LBB روی دستگاه" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "اعلان وضعیت سفارش" })).toBeVisible();
   await expect(page.getByText("مجوز اعلان فقط وقتی خودت دکمه فعال‌سازی را بزنی درخواست می‌شود.")).toBeVisible();
+
+  const results = await new AxeBuilder({ page }).analyze();
+  const blocking = results.violations.filter((violation) =>
+    ["serious", "critical"].includes(violation.impact ?? ""),
+  );
+  expect(blocking).toEqual([]);
 });
 
 test("manifest remains installable and links to Web App settings", async ({ request }) => {
