@@ -36,7 +36,7 @@ export function PwaExperience() {
 
   if (hidden || (!offline && !update && !installPrompt)) return null;
   const action = update
-    ? { label: "به‌روزرسانی", icon: RefreshCw, run: () => void update(true) }
+    ? { label: "به‌روزرسانی", icon: RefreshCw, run: () => void update() }
     : installPrompt
       ? {
           label: "نصب وب‌اپ",
