@@ -77,6 +77,8 @@ self.addEventListener("fetch", (event) => {
   if (
     url.pathname === "/sw.js" ||
     url.pathname === "/sitemap.xml" ||
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/~oauth") ||
     SENSITIVE_PATH.test(url.pathname)
   )
     return;
