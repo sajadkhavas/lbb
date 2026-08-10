@@ -18,11 +18,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '===== IMPORT / SYMBOL REFERENCES ====='
-          grep -RInE 'SmoothScroll|CustomCursor|MagneticButton|useReveal|requestAnimationFrame|from "gsap|import\("gsap|from "lenis|import\("lenis|from "motion|import\("motion' src tests --exclude='*.map' || true
+          echo '===== MOTION SYMBOL REFERENCES ====='
+          grep -RInE 'SmoothScroll|CustomCursor|MagneticButton|useReveal|BestSellers|HeroSplit|requestAnimationFrame|from "gsap|import\("gsap|from "lenis|import\("lenis|from "motion|import\("motion' src tests --exclude='*.map' || true
+          echo
+          echo '===== ACTIVE IMPORTS OF LEGACY MOTION ====='
+          grep -RInE 'SmoothScroll|CustomCursor|MagneticButton|BestSellers|HeroSplit|use-reveal' src/routes src/components/lbb --exclude='CustomCursor.tsx' --exclude='MagneticButton.tsx' --exclude='BestSellers.tsx' --exclude='HeroSplit.tsx' || true
           echo
           echo '===== PACKAGE REFERENCES ====='
           grep -RInE '"(gsap|lenis|motion)"' package.json package-lock.json | head -80 || true
-          echo
-          echo '===== MOTION DATA ATTRIBUTES ====='
-          grep -RInE 'data-reveal|marquee-track|frame-zoom|animate-' src --exclude='styles.css' | head -200 || true
