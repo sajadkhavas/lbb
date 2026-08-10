@@ -1,0 +1,39 @@
+name: F18 Reduced Motion CSS Fix
+
+on:
+  push:
+    branches:
+      - phase/f18-motion-performance-polish
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Make reduced motion playback state explicit
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/styles.css')
+          text = path.read_text()
+          needle = ".marquee-track,\n  .skeleton-shimmer::after {\n    animation: none !important;\n  }"
+          replacement = ".marquee-track,\n  .skeleton-shimmer::after {\n    animation: none !important;\n    animation-play-state: paused !important;\n  }"
+          if replacement not in text:
+              if needle not in text:
+                  raise SystemExit('reduced-motion marquee block not found')
+              path.write_text(text.replace(needle, replacement))
+          PY
+          if git diff --quiet -- src/styles.css; then
+            echo "Reduced-motion CSS already hardened."
+            exit 0
+          fi
+          git config user.name "sajadkhavas"
+          git config user.email "144109918+sajadkhavas@users.noreply.github.com"
+          git add src/styles.css
+          git commit -m "fix(f18): pause animation playback under reduced motion"
+          git push origin HEAD:phase/f18-motion-performance-polish
