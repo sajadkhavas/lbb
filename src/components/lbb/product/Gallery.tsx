@@ -39,15 +39,19 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
     setActive(clamped);
     const track = trackRef.current;
     const child = track?.children.item(clamped) as HTMLElement | null;
-    if (track && child) track.scrollTo({ left: child.offsetLeft, behavior });
+    if (track && child) {
+      child.scrollIntoView({ behavior, block: "nearest", inline: "center" });
+    }
   };
 
   const onScroll = () => {
     const track = trackRef.current;
     if (!track || track.clientWidth <= 0) return;
+    const trackRect = track.getBoundingClientRect();
+    const trackCenter = trackRect.left + trackRect.width / 2;
     const centers = Array.from(track.children).map((child) => {
-      const element = child as HTMLElement;
-      return Math.abs(element.offsetLeft - track.scrollLeft);
+      const rect = (child as HTMLElement).getBoundingClientRect();
+      return Math.abs(rect.left + rect.width / 2 - trackCenter);
     });
     const next = centers.indexOf(Math.min(...centers));
     setActive((current) => (current === next ? current : next));
@@ -148,7 +152,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
       <div className="min-w-0 flex-1">
         <div
           id={`${id}-gallery`}
-          dir="ltr"
+          dir="rtl"
           ref={trackRef}
           onScroll={onScroll}
           onKeyDown={onMainKeyDown}

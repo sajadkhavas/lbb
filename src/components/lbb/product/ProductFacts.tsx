@@ -1,5 +1,6 @@
 import { StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 import type { ProductDecisionViewModel } from "@/lib/product-decision";
+import { Identifier } from "@/components/lbb/ui/Identifier";
 
 export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
   const hasDetails = Boolean(
@@ -39,8 +40,8 @@ export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
             {model.identity.sku ? (
               <div>
                 <dt className="text-mute">کد محصول</dt>
-                <dd className="num mt-1 font-semibold text-bone" dir="ltr">
-                  {model.identity.sku}
+                <dd className="mt-1 font-semibold text-bone">
+                  <Identifier>{model.identity.sku}</Identifier>
                 </dd>
               </div>
             ) : null}

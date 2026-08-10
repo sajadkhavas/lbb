@@ -209,7 +209,7 @@ const CTA_BASE =
   "inline-flex items-center justify-center gap-2 tap-target font-bold transition-[background-color,color,border-color,transform,box-shadow] ease-[var(--ease-lbb-standard)] active:translate-y-px disabled:pointer-events-none disabled:opacity-40 aria-busy:cursor-wait";
 
 const CTA_SIZE: Record<CtaSize, string> = {
-  sm: "min-h-10 px-4 text-[11px] tracking-[0.1em]",
+  sm: "min-h-11 px-4 text-[11px] tracking-[0.1em]",
   md: "min-h-11 px-6 text-xs tracking-[0.12em]",
   lg: "min-h-12 px-8 text-sm tracking-[0.1em]",
 };
