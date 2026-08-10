@@ -1,0 +1,745 @@
+name: F16 Apply Continuity Implementation
+
+on:
+  push:
+    branches:
+      - phase/f16-cart-commerce-continuity
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: phase/f16-cart-commerce-continuity
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Apply F16 implementation
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          cart = r'''import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+          import type { CartLineRequest } from "@/lib/backend-api";
+          import { getBackendMode, type BackendMode } from "@/lib/backend-api";
+          import {
+            closeOverlayHistory,
+            dismissOverlayHistory,
+            openOverlayHistory,
+          } from "@/lib/overlay-history";
+
+          export type CartLine = {
+            slug: string;
+            name: string;
+            /** Last displayed unit price. In live mode this is never the checkout authority. */
+            price: number;
+            variantId?: string;
+            source?: "prototype" | "backend";
+            color?: string;
+            colorLabel?: string;
+            size?: string;
+            sizeLabel?: string;
+            qty: number;
+          };
+
+          type CartCtx = {
+            lines: CartLine[];
+            count: number;
+            add: (line: CartLine) => void;
+            remove: (index: number) => void;
+            setQty: (index: number, qty: number) => void;
+            clear: () => void;
+            subtotal: number;
+            hydrated: boolean;
+            drawerOpen: boolean;
+            openDrawer: () => void;
+            closeDrawer: () => void;
+            dismissDrawer: () => void;
+          };
+
+          type CartEnvelope = {
+            schemaVersion: 1;
+            mode: BackendMode;
+            updatedAt: number;
+            lines: CartLine[];
+          };
+
+          const Ctx = createContext<CartCtx | null>(null);
+          const PROTOTYPE_KEY = "lbb-cart-v1";
+          const LIVE_KEY = "lbb-cart-v2";
+          const MAX_QTY = 20;
+          const CART_SCHEMA_VERSION = 1 as const;
+
+          function storageKey(mode = getBackendMode()) {
+            return mode === "live" ? LIVE_KEY : PROTOTYPE_KEY;
+          }
+
+          function isLineShape(value: unknown): value is CartLine {
+            if (!value || typeof value !== "object") return false;
+            const line = value as Record<string, unknown>;
+            return (
+              typeof line.slug === "string" &&
+              line.slug.length > 0 &&
+              typeof line.name === "string" &&
+              line.name.length > 0 &&
+              typeof line.price === "number" &&
+              Number.isFinite(line.price) &&
+              line.price > 0 &&
+              typeof line.qty === "number" &&
+              Number.isInteger(line.qty) &&
+              line.qty > 0 &&
+              (line.variantId === undefined || typeof line.variantId === "string") &&
+              (line.source === undefined || line.source === "prototype" || line.source === "backend") &&
+              (line.color === undefined || typeof line.color === "string") &&
+              (line.colorLabel === undefined || typeof line.colorLabel === "string") &&
+              (line.size === undefined || typeof line.size === "string") &&
+              (line.sizeLabel === undefined || typeof line.sizeLabel === "string")
+            );
+          }
+
+          function lineIdentity(line: CartLine) {
+            return line.variantId
+              ? `variant:${line.variantId}`
+              : `selection:${line.slug}:${line.color ?? ""}:${line.size ?? ""}`;
+          }
+
+          function normalizeQuantity(qty: number) {
+            if (!Number.isFinite(qty)) return 1;
+            return Math.min(MAX_QTY, Math.max(1, Math.floor(qty)));
+          }
+
+          function normalizeCartLines(values: unknown[], mode = getBackendMode()): CartLine[] {
+            const normalized: CartLine[] = [];
+            for (const value of values) {
+              if (!isLineShape(value)) continue;
+              if (
+                mode === "live" &&
+                (value.source !== "backend" ||
+                  typeof value.variantId !== "string" ||
+                  value.variantId.length !== 26)
+              ) {
+                continue;
+              }
+              const line = { ...value, qty: normalizeQuantity(value.qty) };
+              const identity = lineIdentity(line);
+              const existingIndex = normalized.findIndex((item) => lineIdentity(item) === identity);
+              if (existingIndex < 0) {
+                normalized.push(line);
+                continue;
+              }
+              const existing = normalized[existingIndex];
+              normalized[existingIndex] = {
+                ...existing,
+                ...line,
+                qty: normalizeQuantity(existing.qty + line.qty),
+              };
+            }
+            return normalized;
+          }
+
+          function parseCart(raw: string | null, mode = getBackendMode()): CartLine[] {
+            if (!raw) return [];
+            try {
+              const parsed: unknown = JSON.parse(raw);
+              if (Array.isArray(parsed)) return normalizeCartLines(parsed, mode);
+              if (!parsed || typeof parsed !== "object") return [];
+              const envelope = parsed as Partial<CartEnvelope>;
+              if (
+                envelope.schemaVersion !== CART_SCHEMA_VERSION ||
+                envelope.mode !== mode ||
+                !Array.isArray(envelope.lines)
+              ) {
+                return [];
+              }
+              return normalizeCartLines(envelope.lines, mode);
+            } catch {
+              return [];
+            }
+          }
+
+          function readCart(mode = getBackendMode()): CartLine[] {
+            try {
+              return parseCart(localStorage.getItem(storageKey(mode)), mode);
+            } catch {
+              return [];
+            }
+          }
+
+          function persistCart(lines: CartLine[], mode = getBackendMode()) {
+            const envelope: CartEnvelope = {
+              schemaVersion: CART_SCHEMA_VERSION,
+              mode,
+              updatedAt: Date.now(),
+              lines: normalizeCartLines(lines, mode),
+            };
+            localStorage.setItem(storageKey(mode), JSON.stringify(envelope));
+          }
+
+          function sameLines(left: CartLine[], right: CartLine[]) {
+            return JSON.stringify(left) === JSON.stringify(right);
+          }
+
+          export function cartLinesToBackendItems(lines: CartLine[]): CartLineRequest[] {
+            return normalizeCartLines(lines, "live").map((line) => ({
+              variantId: line.variantId!,
+              quantity: normalizeQuantity(line.qty),
+              expectedUnitPriceToman: Math.max(1, Math.floor(line.price)),
+            }));
+          }
+
+          export function CartProvider({ children }: { children: ReactNode }) {
+            const [lines, setLines] = useState<CartLine[]>([]);
+            const [hydrated, setHydrated] = useState(false);
+            const [drawerOpen, setDrawerOpen] = useState(false);
+
+            useEffect(() => {
+              setLines(readCart());
+              setHydrated(true);
+            }, []);
+
+            useEffect(() => {
+              if (!hydrated) return;
+              try {
+                persistCart(lines);
+              } catch {
+                // Storage can be unavailable in private mode or after quota exhaustion.
+              }
+            }, [lines, hydrated]);
+
+            useEffect(() => {
+              const key = storageKey();
+              const mode = getBackendMode();
+              const onStorage = (event: StorageEvent) => {
+                if (event.storageArea !== localStorage || event.key !== key) return;
+                const next = parseCart(event.newValue, mode);
+                setLines((previous) => (sameLines(previous, next) ? previous : next));
+              };
+              window.addEventListener("storage", onStorage);
+              return () => window.removeEventListener("storage", onStorage);
+            }, []);
+
+            useEffect(() => {
+              const onPopState = () => setDrawerOpen(false);
+              window.addEventListener("popstate", onPopState);
+              return () => window.removeEventListener("popstate", onPopState);
+            }, []);
+
+            const add = (line: CartLine) =>
+              setLines((previous) => normalizeCartLines([...previous, line], getBackendMode()));
+
+            const remove = (index: number) =>
+              setLines((previous) => previous.filter((_, itemIndex) => itemIndex !== index));
+
+            const setQty = (index: number, qty: number) =>
+              setLines((previous) =>
+                previous.map((line, itemIndex) =>
+                  itemIndex === index ? { ...line, qty: normalizeQuantity(qty) } : line,
+                ),
+              );
+
+            const clear = () => setLines([]);
+            const count = lines.reduce((sum, line) => sum + line.qty, 0);
+            const subtotal = lines.reduce((sum, line) => sum + line.price * line.qty, 0);
+
+            const openDrawer = useCallback(() => {
+              openOverlayHistory("cart");
+              setDrawerOpen(true);
+            }, []);
+
+            const closeDrawer = useCallback(() => {
+              closeOverlayHistory("cart", () => setDrawerOpen(false));
+            }, []);
+
+            const dismissDrawer = useCallback(() => {
+              dismissOverlayHistory("cart");
+              setDrawerOpen(false);
+            }, []);
+
+            return (
+              <Ctx.Provider
+                value={{
+                  lines,
+                  count,
+                  add,
+                  remove,
+                  setQty,
+                  clear,
+                  subtotal,
+                  hydrated,
+                  drawerOpen,
+                  openDrawer,
+                  closeDrawer,
+                  dismissDrawer,
+                }}
+              >
+                {children}
+              </Ctx.Provider>
+            );
+          }
+
+          export function useCart() {
+            const context = useContext(Ctx);
+            if (!context) throw new Error("useCart must be used inside CartProvider");
+            return context;
+          }
+          '''
+          Path('src/lib/cart.tsx').write_text(cart, encoding='utf-8')
+
+          continuity = r'''export type PendingCheckout = {
+            schemaVersion: 1;
+            orderId: string;
+            orderNumber: string;
+            paymentAvailable: boolean;
+            paymentIdempotencyKey: string;
+            committedAt: number;
+          };
+
+          type CommitAttempt = {
+            schemaVersion: 1;
+            quoteId: string;
+            idempotencyKey: string;
+            createdAt: number;
+          };
+
+          type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+          export const PENDING_CHECKOUT_KEY = "lbb-checkout-pending-v1";
+          export const CHECKOUT_COMMIT_KEY = "lbb-checkout-commit-v1";
+          const SCHEMA_VERSION = 1 as const;
+          const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+          function browserStorage(): StorageLike | null {
+            if (typeof window === "undefined") return null;
+            try {
+              return window.localStorage;
+            } catch {
+              return null;
+            }
+          }
+
+          function fresh(timestamp: number) {
+            return Number.isFinite(timestamp) && timestamp > 0 && Date.now() - timestamp <= MAX_AGE_MS;
+          }
+
+          function validPending(value: unknown): value is PendingCheckout {
+            if (!value || typeof value !== "object") return false;
+            const record = value as Record<string, unknown>;
+            return (
+              record.schemaVersion === SCHEMA_VERSION &&
+              typeof record.orderId === "string" &&
+              record.orderId.length > 0 &&
+              typeof record.orderNumber === "string" &&
+              record.orderNumber.length > 0 &&
+              typeof record.paymentAvailable === "boolean" &&
+              typeof record.paymentIdempotencyKey === "string" &&
+              record.paymentIdempotencyKey.length > 0 &&
+              typeof record.committedAt === "number" &&
+              fresh(record.committedAt)
+            );
+          }
+
+          export function readPendingCheckout(storage = browserStorage()): PendingCheckout | null {
+            if (!storage) return null;
+            try {
+              const raw = storage.getItem(PENDING_CHECKOUT_KEY);
+              if (!raw) return null;
+              const parsed: unknown = JSON.parse(raw);
+              if (validPending(parsed)) return parsed;
+              storage.removeItem(PENDING_CHECKOUT_KEY);
+              return null;
+            } catch {
+              try {
+                storage.removeItem(PENDING_CHECKOUT_KEY);
+              } catch {
+                // Ignore unavailable storage.
+              }
+              return null;
+            }
+          }
+
+          export function persistPendingCheckout(
+            input: Omit<PendingCheckout, "schemaVersion" | "committedAt">,
+            storage = browserStorage(),
+          ): PendingCheckout | null {
+            if (!storage) return null;
+            const record: PendingCheckout = {
+              schemaVersion: SCHEMA_VERSION,
+              ...input,
+              committedAt: Date.now(),
+            };
+            try {
+              storage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify(record));
+              return record;
+            } catch {
+              return null;
+            }
+          }
+
+          export function clearPendingCheckoutForOrder(orderId: string, storage = browserStorage()) {
+            if (!storage) return;
+            const current = readPendingCheckout(storage);
+            if (!current || current.orderId !== orderId) return;
+            try {
+              storage.removeItem(PENDING_CHECKOUT_KEY);
+            } catch {
+              // Ignore unavailable storage.
+            }
+          }
+
+          function readCommitAttempt(storage: StorageLike, quoteId: string): CommitAttempt | null {
+            try {
+              const raw = storage.getItem(CHECKOUT_COMMIT_KEY);
+              if (!raw) return null;
+              const parsed = JSON.parse(raw) as Partial<CommitAttempt>;
+              if (
+                parsed.schemaVersion === SCHEMA_VERSION &&
+                parsed.quoteId === quoteId &&
+                typeof parsed.idempotencyKey === "string" &&
+                parsed.idempotencyKey.length > 0 &&
+                typeof parsed.createdAt === "number" &&
+                fresh(parsed.createdAt)
+              ) {
+                return parsed as CommitAttempt;
+              }
+              return null;
+            } catch {
+              return null;
+            }
+          }
+
+          export function getOrCreateCheckoutCommitKey(
+            quoteId: string,
+            createKey: () => string,
+            storage = browserStorage(),
+          ) {
+            if (!storage) return createKey();
+            const existing = readCommitAttempt(storage, quoteId);
+            if (existing) return existing.idempotencyKey;
+            const attempt: CommitAttempt = {
+              schemaVersion: SCHEMA_VERSION,
+              quoteId,
+              idempotencyKey: createKey(),
+              createdAt: Date.now(),
+            };
+            try {
+              storage.setItem(CHECKOUT_COMMIT_KEY, JSON.stringify(attempt));
+            } catch {
+              // The returned key remains stable for the current invocation only when storage is unavailable.
+            }
+            return attempt.idempotencyKey;
+          }
+
+          export function clearCheckoutCommitKey(quoteId: string, storage = browserStorage()) {
+            if (!storage) return;
+            const current = readCommitAttempt(storage, quoteId);
+            if (!current) return;
+            try {
+              storage.removeItem(CHECKOUT_COMMIT_KEY);
+            } catch {
+              // Ignore unavailable storage.
+            }
+          }
+          '''
+          Path('src/lib/checkout-continuity.ts').write_text(continuity, encoding='utf-8')
+
+          p = Path('src/routes/checkout.tsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+          '''  getCurrentCustomer,\n  initiatePayment,''',
+          '''  getCurrentCustomer,\n  getOrder,\n  initiatePayment,''')
+          text = text.replace(
+          '''import { ensureBackendCsrf } from "@/lib/backend-session";''',
+          '''import { ensureBackendCsrf } from "@/lib/backend-session";\nimport {\n  clearCheckoutCommitKey,\n  getOrCreateCheckoutCommitKey,\n  persistPendingCheckout,\n  readPendingCheckout,\n  type PendingCheckout,\n} from "@/lib/checkout-continuity";''')
+          text = text.replace(
+          '''  const [actionError, setActionError] = useState<string | null>(null);''',
+          '''  const [actionError, setActionError] = useState<string | null>(null);\n  const [continuity, setContinuity] = useState<PendingCheckout | null>(null);\n  const [continuityHydrated, setContinuityHydrated] = useState(false);\n  const [recoveryLoading, setRecoveryLoading] = useState(false);\n  const [recoveryError, setRecoveryError] = useState<string | null>(null);''')
+          old_session = '''  useEffect(() => {\n    if (!hydrated || lines.length === 0) {\n      setSessionLoading(false);\n      return;\n    }'''
+          new_session = '''  useEffect(() => {\n    if (!hydrated) return;\n    setContinuity(readPendingCheckout());\n    setContinuityHydrated(true);\n  }, [hydrated]);\n\n  useEffect(() => {\n    if (!hydrated || !continuityHydrated) return;\n    if (lines.length === 0 && !continuity) {\n      setSessionLoading(false);\n      return;\n    }'''
+          if old_session not in text: raise SystemExit('session anchor missing')
+          text = text.replace(old_session, new_session, 1)
+          text = text.replace('''  }, [hydrated, lines.length]);''', '''  }, [hydrated, continuityHydrated, continuity, lines.length]);''', 1)
+
+          delivery_anchor = '''  useEffect(() => {\n    if (!customer || !cartCompatible) return;'''
+          recovery = '''  useEffect(() => {\n    if (!continuityHydrated || !customer || !continuity || orderResult) return;\n    let cancelled = false;\n    setRecoveryLoading(true);\n    setRecoveryError(null);\n    getOrder(continuity.orderId)\n      .then((response) => {\n        if (cancelled) return;\n        const order = response.data.order;\n        const paymentAvailable =\n          continuity.paymentAvailable && !order.paidAt && !order.cancelledAt;\n        setOrderResult({\n          order,\n          payment: {\n            available: paymentAvailable,\n            state: paymentAvailable ? "ready" : "disabled",\n            initiationEndpoint: null,\n          },\n        });\n      })\n      .catch((error) => {\n        if (cancelled) return;\n        if (isAuthenticationError(error)) {\n          setCustomer(null);\n          return;\n        }\n        setRecoveryError(backendErrorMessage(error));\n      })\n      .finally(() => {\n        if (!cancelled) setRecoveryLoading(false);\n      });\n    return () => {\n      cancelled = true;\n    };\n  }, [continuityHydrated, customer, continuity, orderResult]);\n\n'''
+          if delivery_anchor not in text: raise SystemExit('delivery anchor missing')
+          text = text.replace(delivery_anchor, recovery + delivery_anchor, 1)
+
+          old_invalidation = '''  useEffect(() => {\n    setQuote(null);\n    setOrderResult(null);\n    setActionError(null);\n  }, [fullName, province, city, address, postalCode, notes, deliveryMethod, lines]);'''
+          new_invalidation = '''  useEffect(() => {\n    setQuote(null);\n    setActionError(null);\n  }, [fullName, province, city, address, postalCode, notes, deliveryMethod, lines]);'''
+          if old_invalidation not in text: raise SystemExit('invalidation anchor missing')
+          text = text.replace(old_invalidation, new_invalidation, 1)
+
+          text = text.replace(
+          '''      setQuote(response.data);''',
+          '''      getOrCreateCheckoutCommitKey(response.data.quoteId, () => createIdempotencyKey("checkout"));\n      setQuote(response.data);''', 1)
+
+          old_commit = '''      const response = await commitCheckout(quote.quoteId, createIdempotencyKey("checkout"));\n      setOrderResult(response.data);\n      clear();'''
+          new_commit = '''      const idempotencyKey = getOrCreateCheckoutCommitKey(\n        quote.quoteId,\n        () => createIdempotencyKey("checkout"),\n      );\n      const response = await commitCheckout(quote.quoteId, idempotencyKey);\n      const pending = persistPendingCheckout({\n        orderId: response.data.order.id,\n        orderNumber: response.data.order.number,\n        paymentAvailable: response.data.payment.available,\n        paymentIdempotencyKey: createIdempotencyKey("payment"),\n      });\n      clearCheckoutCommitKey(quote.quoteId);\n      setContinuity(pending);\n      setOrderResult(response.data);\n      clear();'''
+          if old_commit not in text: raise SystemExit('commit anchor missing')
+          text = text.replace(old_commit, new_commit, 1)
+
+          old_payment = '''      const response = await initiatePayment(orderResult.order.id, createIdempotencyKey("payment"));'''
+          new_payment = '''      const persisted =\n        continuity?.orderId === orderResult.order.id ? continuity : readPendingCheckout();\n      const paymentIdempotencyKey =\n        persisted?.orderId === orderResult.order.id\n          ? persisted.paymentIdempotencyKey\n          : createIdempotencyKey("payment");\n      const response = await initiatePayment(orderResult.order.id, paymentIdempotencyKey);'''
+          if old_payment not in text: raise SystemExit('payment anchor missing')
+          text = text.replace(old_payment, new_payment, 1)
+
+          text = text.replace(
+          '''      {!hydrated || sessionLoading ? (''',
+          '''      {!hydrated ||\n      !continuityHydrated ||\n      sessionLoading ||\n      recoveryLoading ||\n      (continuity && customer && !orderResult && !recoveryError) ? (''', 1)
+          text = text.replace(
+          '''      ) : lines.length === 0 && !orderResult ? (''',
+          '''      ) : lines.length === 0 && !orderResult && !continuity ? (''', 1)
+          error_anchor = '''      ) : !customer ? ('''
+          recovery_branch = '''      ) : recoveryError ? (\n        <div className="mt-8 space-y-4">\n          <StatePanel title="بازیابی سفارش ناتمام کامل نشد" tone="warning">\n            {recoveryError}\n          </StatePanel>\n          <Link to="/account" className={CtaClasses("line")}>\n            بررسی سفارش‌ها در حساب\n          </Link>\n        </div>\n'''
+          if error_anchor not in text: raise SystemExit('customer branch anchor missing')
+          text = text.replace(error_anchor, recovery_branch + error_anchor, 1)
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('src/routes/payment.result.tsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+          '''import { ensureBackendCsrf } from "@/lib/backend-session";''',
+          '''import { ensureBackendCsrf } from "@/lib/backend-session";\nimport { clearPendingCheckoutForOrder } from "@/lib/checkout-continuity";''')
+          old = '''        const response = await verifyPayment(search.Authority!, search.Status!);\n        if (!cancelled) setResult(response.data);'''
+          new = '''        const response = await verifyPayment(search.Authority!, search.Status!);\n        if (response.data.verified) clearPendingCheckoutForOrder(response.data.order.id);\n        if (!cancelled) setResult(response.data);'''
+          if old not in text: raise SystemExit('payment result anchor missing')
+          text = text.replace(old, new, 1)
+          p.write_text(text, encoding='utf-8')
+
+          tests = r'''import { expect, test } from "@playwright/test";
+
+          const legacyLine = {
+            slug: "f16-legacy-item",
+            name: "F16 Legacy Item",
+            price: 125000,
+            source: "prototype",
+            color: "black",
+            colorLabel: "مشکی",
+            size: "M",
+            sizeLabel: "M",
+            qty: 2,
+          };
+
+          test("F16 migrates legacy cart arrays into the versioned envelope", async ({ page }) => {
+            await page.addInitScript((line) => {
+              localStorage.setItem("lbb-cart-v1", JSON.stringify([line]));
+            }, legacyLine);
+            await page.goto("/cart");
+            await expect(page.getByText("F16 Legacy Item")).toBeVisible();
+            await expect
+              .poll(() =>
+                page.evaluate(() => {
+                  const raw = localStorage.getItem("lbb-cart-v1");
+                  if (!raw) return null;
+                  const value = JSON.parse(raw);
+                  return { schemaVersion: value.schemaVersion, mode: value.mode, count: value.lines?.length };
+                }),
+              )
+              .toEqual({ schemaVersion: 1, mode: "prototype", count: 1 });
+          });
+
+          test("F16 sanitizes, deduplicates and caps restored quantities", async ({ page }) => {
+            await page.addInitScript((line) => {
+              localStorage.setItem(
+                "lbb-cart-v1",
+                JSON.stringify({
+                  schemaVersion: 1,
+                  mode: "prototype",
+                  updatedAt: Date.now(),
+                  lines: [
+                    { ...line, qty: 15 },
+                    { ...line, qty: 10 },
+                    { slug: "broken", name: "Broken", price: -1, qty: 1 },
+                  ],
+                }),
+              );
+            }, legacyLine);
+            await page.goto("/cart");
+            await expect
+              .poll(() =>
+                page.evaluate(() => {
+                  const raw = localStorage.getItem("lbb-cart-v1");
+                  if (!raw) return null;
+                  const value = JSON.parse(raw);
+                  return value.lines?.map((line: { slug: string; qty: number }) => ({
+                    slug: line.slug,
+                    qty: line.qty,
+                  }));
+                }),
+              )
+              .toEqual([{ slug: "f16-legacy-item", qty: 20 }]);
+          });
+
+          test("F16 synchronizes cart state between tabs through storage events", async ({ context }) => {
+            const first = await context.newPage();
+            const second = await context.newPage();
+            await first.goto("/cart");
+            await second.goto("/cart");
+            await expect(second.getByText("سبد خرید خالی است")).toBeVisible();
+
+            await first.evaluate((line) => {
+              localStorage.setItem(
+                "lbb-cart-v1",
+                JSON.stringify({
+                  schemaVersion: 1,
+                  mode: "prototype",
+                  updatedAt: Date.now(),
+                  lines: [line],
+                }),
+              );
+            }, legacyLine);
+
+            await expect(second.getByText("F16 Legacy Item")).toBeVisible();
+          });
+          '''
+          Path('tests/f16-commerce-continuity.spec.ts').write_text(tests, encoding='utf-8')
+
+          audit = r'''import fs from "node:fs";
+
+          const cart = fs.readFileSync("src/lib/cart.tsx", "utf8");
+          const continuity = fs.readFileSync("src/lib/checkout-continuity.ts", "utf8");
+          const checkout = fs.readFileSync("src/routes/checkout.tsx", "utf8");
+          const payment = fs.readFileSync("src/routes/payment.result.tsx", "utf8");
+
+          const required = [
+            [cart, "schemaVersion: CART_SCHEMA_VERSION", "cart persistence is versioned"],
+            [cart, 'window.addEventListener("storage", onStorage)', "cart cross-tab sync is installed"],
+            [cart, "normalizeCartLines", "cart restore sanitizes and deduplicates"],
+            [continuity, 'PENDING_CHECKOUT_KEY = "lbb-checkout-pending-v1"', "pending checkout record exists"],
+            [continuity, "getOrCreateCheckoutCommitKey", "checkout commit idempotency is stable"],
+            [checkout, "getOrder(continuity.orderId)", "pending order is recovered from backend authority"],
+            [checkout, "persistPendingCheckout", "committed order handoff is persisted before cart clear"],
+            [checkout, "clearCheckoutCommitKey(quote.quoteId)", "commit attempt is cleared after success"],
+            [payment, "clearPendingCheckoutForOrder(response.data.order.id)", "verified payment clears matching handoff"],
+          ];
+
+          for (const [source, token, message] of required) {
+            if (!source.includes(token)) throw new Error(`F16 audit failed: ${message}`);
+          }
+          if (checkout.includes('setOrderResult(null);\n    setActionError(null);')) {
+            throw new Error("F16 audit failed: cart/form invalidation still clears committed order state");
+          }
+          console.log("F16 commerce continuity audit: PASS");
+          '''
+          Path('scripts/audit-f16-continuity.mjs').write_text(audit, encoding='utf-8')
+
+          docs = r'''# F16 — Cart & Commerce Continuity
+
+          ## Scope
+          F16 hardens continuity on top of the accepted F14D backend integration. It does not invent a persistent-cart backend endpoint and does not change the frozen commerce contract.
+
+          ## Implemented
+          - Versioned local cart envelope with legacy-array migration.
+          - Strict live/prototype separation and live Variant validation.
+          - Restore sanitization, duplicate collapse and quantity caps.
+          - Cross-tab cart synchronization through the browser `storage` event.
+          - Stable checkout-commit idempotency key for retries of the same quote.
+          - Minimal pending-order handoff persisted after authoritative checkout commit and before cart clearing.
+          - Checkout recovery through the existing authoritative `GET /api/v1/account/orders/{id}` endpoint.
+          - Stable payment-initiation idempotency key across reload/retry for the recovered order.
+          - Pending handoff cleanup only after matching server-verified payment.
+
+          ## Truth boundary
+          Local storage never becomes authority for price, inventory, delivery totals, order status or payment success. Cart prices remain last-displayed hints; quote/commit/order/payment state remains Backend-authoritative.
+
+          ## Explicit non-goals
+          - No new Backend endpoint.
+          - No server-persistent wishlist/cart domain.
+          - No redesign of Cart/Checkout.
+          - No fake payment recovery or browser-only success.
+
+          ## Acceptance
+          F16-specific audit and Playwright continuity coverage must pass together with the inherited global quality and F14D live-contract gates.
+          '''
+          Path('docs/f16').mkdir(parents=True, exist_ok=True)
+          Path('docs/f16/README.md').write_text(docs, encoding='utf-8')
+
+          package = Path('package.json')
+          text = package.read_text(encoding='utf-8')
+          text = text.replace(
+            '"test:e2e": "playwright test",',
+            '"test:e2e": "playwright test",\n    "test:f16": "playwright test tests/f16-commerce-continuity.spec.ts",\n    "audit:f16": "node scripts/audit-f16-continuity.mjs",',
+          )
+          text = text.replace(
+            'npm run audit:a11y && npm run smoke:production && npm run test:e2e',
+            'npm run audit:a11y && npm run audit:f16 && npm run smoke:production && npm run test:e2e',
+          )
+          package.write_text(text, encoding='utf-8')
+
+          workflow = r'''name: F16 Cart & Commerce Continuity
+
+          on:
+            push:
+              branches:
+                - phase/f16-cart-commerce-continuity
+            pull_request:
+              branches:
+                - integration/wave2-reviewed
+
+          permissions:
+            contents: read
+
+          jobs:
+            continuity-gates:
+              runs-on: ubuntu-latest
+              timeout-minutes: 45
+              env:
+                VITE_SITE_URL: https://lbb.example.test
+                VITE_LBB_BACKEND_MODE: live
+                VITE_LBB_API_BASE_URL: https://api.example.test
+              steps:
+                - uses: actions/checkout@v5
+                - uses: actions/setup-node@v5
+                  with:
+                    node-version: 24
+                    cache: npm
+                - run: npm ci
+                - name: Install Chromium
+                  run: npx playwright install --with-deps chromium
+                - name: Format
+                  run: npm run format:check
+                - name: Lint
+                  run: npm run lint
+                - name: Build live mode
+                  run: npm run build
+                - name: Typecheck
+                  run: npm run typecheck
+                - name: Preserve F14D contract
+                  run: node scripts/audit-f14d-integration.mjs
+                - name: F16 continuity audit
+                  run: npm run audit:f16
+                - name: F16 browser continuity tests
+                  env:
+                    VITE_LBB_BACKEND_MODE: prototype
+                  run: npm run test:f16
+          '''
+          Path('.github/workflows/f16-commerce-continuity.yml').write_text(workflow, encoding='utf-8')
+          Path('.github/workflows/f16-apply.yml').unlink()
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Format F16 files
+        run: npx prettier --write src/lib/cart.tsx src/lib/checkout-continuity.ts src/routes/checkout.tsx src/routes/payment.result.tsx tests/f16-commerce-continuity.spec.ts scripts/audit-f16-continuity.mjs docs/f16/README.md package.json .github/workflows/f16-commerce-continuity.yml
+      - name: Typecheck before commit
+        env:
+          VITE_SITE_URL: https://lbb.example.test
+          VITE_LBB_BACKEND_MODE: live
+          VITE_LBB_API_BASE_URL: https://api.example.test
+        run: npm run typecheck
+      - name: F16 source audit before commit
+        run: node scripts/audit-f16-continuity.mjs
+      - name: Commit implementation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(f16): harden cart and checkout continuity"
+          git push origin HEAD:phase/f16-cart-commerce-continuity
