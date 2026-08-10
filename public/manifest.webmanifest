@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "LBB — فروشگاه استریت‌ویر",
   "short_name": "LBB",
   "description": "برند پوشاک استریت‌ویر ایرانی؛ هودی، شلوار، تیشرت و کتونی.",
@@ -11,6 +12,7 @@
   "background_color": "#050505",
   "theme_color": "#050505",
   "categories": ["shopping", "lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
@@ -24,6 +26,7 @@
   "shortcuts": [
     { "name": "فروشگاه", "url": "/shop" },
     { "name": "سبد خرید", "url": "/cart" },
+    { "name": "اعلان‌ها", "url": "/web-app" },
     { "name": "علاقه‌مندی‌ها", "url": "/wishlist" }
   ]
 }
