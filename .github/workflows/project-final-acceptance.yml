@@ -1,0 +1,85 @@
+name: Frontend Project Final Acceptance
+
+on:
+  push:
+    branches:
+      - integration/final-reviewed
+  pull_request:
+    branches:
+      - integration/wave5-reviewed
+
+permissions:
+  contents: read
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+
+jobs:
+  live-commerce-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      VITE_LBB_BACKEND_MODE: live
+      VITE_LBB_API_BASE_URL: https://api.example.test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Format and lint
+        run: |
+          npm run format:check
+          npm run lint
+      - name: Production build and typecheck in live mode
+        run: |
+          npm run build
+          npm run typecheck
+      - name: F14D live backend contract
+        run: node scripts/audit-f14d-integration.mjs
+      - name: F16 continuity contract
+        run: npm run audit:f16
+      - name: Production dependency audit
+        run: npm run audit:dependencies
+      - name: Live checkout accessibility contract
+        run: npm run test:f19b-live
+      - name: Prototype cart continuity regression
+        env:
+          VITE_LBB_BACKEND_MODE: prototype
+        run: npm run test:f16
+
+  specialized-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      VITE_LBB_BACKEND_MODE: prototype
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Source contracts
+        run: |
+          npm run audit:f20b
+          npm run audit:a11y
+          npm run audit:f19b
+          npm run audit:f18
+      - name: Accessibility and RTL regressions
+        run: |
+          npm run test:a11y
+          npm run test:rtl
+      - name: SEO regressions
+        run: |
+          npm run test:seo
+          npm run test:f20b
+      - name: Motion and performance regressions
+        run: |
+          npm run audit:production
+          npm run test:f18
