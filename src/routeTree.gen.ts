@@ -34,6 +34,7 @@ import { Route as CollectionsIndexRouteImport } from './routes/collections.index
 import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
 import { Route as JournalIndexRouteImport } from './routes/journal.index'
 import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
+import { Route as PaymentResultRouteImport } from './routes/payment.result'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -161,6 +162,11 @@ const JournalSlugRoute = JournalSlugRouteImport.update({
   path: '/journal/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaymentResultRoute = PaymentResultRouteImport.update({
+  id: '/payment/result',
+  path: '/payment/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/payment/result': typeof PaymentResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/collections/': typeof CollectionsIndexRoute
   '/journal/': typeof JournalIndexRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/payment/result': typeof PaymentResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/collections': typeof CollectionsIndexRoute
   '/journal': typeof JournalIndexRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/payment/result': typeof PaymentResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/collections/': typeof CollectionsIndexRoute
   '/journal/': typeof JournalIndexRoute
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/collections/$slug'
     | '/journal/$slug'
+    | '/payment/result'
     | '/product/$slug'
     | '/collections/'
     | '/journal/'
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/collections/$slug'
     | '/journal/$slug'
+    | '/payment/result'
     | '/product/$slug'
     | '/collections'
     | '/journal'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/collections/$slug'
     | '/journal/$slug'
+    | '/payment/result'
     | '/product/$slug'
     | '/collections/'
     | '/journal/'
@@ -363,6 +375,7 @@ export interface RootRouteChildren {
   WishlistRoute: typeof WishlistRoute
   CollectionsSlugRoute: typeof CollectionsSlugRoute
   JournalSlugRoute: typeof JournalSlugRoute
+  PaymentResultRoute: typeof PaymentResultRoute
   ProductSlugRoute: typeof ProductSlugRoute
   CollectionsIndexRoute: typeof CollectionsIndexRoute
   JournalIndexRoute: typeof JournalIndexRoute
@@ -545,6 +558,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payment/result': {
+      id: '/payment/result'
+      path: '/payment/result'
+      fullPath: '/payment/result'
+      preLoaderRoute: typeof PaymentResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/product/$slug': {
       id: '/product/$slug'
       path: '/product/$slug'
@@ -579,6 +599,7 @@ const rootRouteChildren: RootRouteChildren = {
   WishlistRoute: WishlistRoute,
   CollectionsSlugRoute: CollectionsSlugRoute,
   JournalSlugRoute: JournalSlugRoute,
+  PaymentResultRoute: PaymentResultRoute,
   ProductSlugRoute: ProductSlugRoute,
   CollectionsIndexRoute: CollectionsIndexRoute,
   JournalIndexRoute: JournalIndexRoute,

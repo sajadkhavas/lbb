@@ -1,0 +1,47 @@
+name: F16 Cart & Commerce Continuity
+
+on:
+  push:
+    branches:
+      - phase/f16-cart-commerce-continuity
+  pull_request:
+    branches:
+      - integration/wave2-reviewed
+
+permissions:
+  contents: read
+
+jobs:
+  continuity-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_SITE_URL: https://lbb.example.test
+      VITE_LBB_BACKEND_MODE: live
+      VITE_LBB_API_BASE_URL: https://api.example.test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Format
+        run: npm run format:check
+      - name: Lint
+        run: npm run lint
+      - name: Build live mode
+        run: npm run build
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Preserve F14D live contract
+        run: node scripts/audit-f14d-integration.mjs
+      - name: F16 continuity audit
+        run: npm run audit:f16
+      - name: F16 browser continuity tests
+        env:
+          VITE_LBB_BACKEND_MODE: prototype
+        run: npm run test:f16
