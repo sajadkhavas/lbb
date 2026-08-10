@@ -117,26 +117,40 @@ export function SearchOverlay() {
 
   const remember = (value: string) => setRecent(saveRecent(value));
 
-  const choose = (suggestion: Suggestion) => {
+  const choose = async (suggestion: Suggestion) => {
     remember(term || suggestion.label);
-    dismissForNavigation();
     if (suggestion.kind === "product") {
-      navigate({ to: "/product/$slug", params: { slug: suggestion.slug } });
+      await navigate({
+        to: "/product/$slug",
+        params: { slug: suggestion.slug },
+        replace: true,
+      });
+      dismissForNavigation();
       return;
     }
-    navigate({ to: "/$category", params: { category: suggestion.slug } });
+    await navigate({
+      to: "/$category",
+      params: { category: suggestion.slug },
+      replace: true,
+    });
+    dismissForNavigation();
+  };
+
+  const goToFullSearch = async () => {
+    if (!term) return;
+    remember(term);
+    await navigate({ to: "/search", search: { q: term }, replace: true });
+    dismissForNavigation();
   };
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!term) return;
     if (activeIndex >= 0 && suggestions[activeIndex]) {
-      choose(suggestions[activeIndex]);
+      void choose(suggestions[activeIndex]);
       return;
     }
-    remember(term);
-    dismissForNavigation();
-    navigate({ to: "/search", search: { q: term } });
+    void goToFullSearch();
   };
 
   return (
@@ -226,7 +240,7 @@ export function SearchOverlay() {
                         role="option"
                         aria-selected={activeIndex === index}
                         onMouseEnter={() => setActiveIndex(index)}
-                        onClick={() => choose(suggestion)}
+                        onClick={() => void choose(suggestion)}
                         className={`group grid w-full grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 border-b border-hairline-soft p-2 text-right transition-colors ${
                           activeIndex === index ? "bg-carbon-2" : "hover:bg-carbon"
                         }`}
@@ -333,7 +347,11 @@ export function SearchOverlay() {
               <div className="mt-4 grid gap-2">
                 <Link
                   to="/collections"
-                  onClick={dismissForNavigation}
+                  replace
+                  onClick={(event) => {
+                    event.preventDefault();
+                    void navigate({ to: "/collections", replace: true }).then(dismissForNavigation);
+                  }}
                   className="group flex min-h-12 items-center justify-between border border-hairline px-4 text-sm font-bold text-bone transition-colors hover:border-signal"
                 >
                   کالکشن‌های فعلی
@@ -345,7 +363,11 @@ export function SearchOverlay() {
                 </Link>
                 <Link
                   to="/journal"
-                  onClick={dismissForNavigation}
+                  replace
+                  onClick={(event) => {
+                    event.preventDefault();
+                    void navigate({ to: "/journal", replace: true }).then(dismissForNavigation);
+                  }}
                   className="group flex min-h-12 items-center justify-between border border-hairline px-4 text-sm font-bold text-bone transition-colors hover:border-signal"
                 >
                   راهنما و ژورنال
@@ -358,7 +380,11 @@ export function SearchOverlay() {
                 <Link
                   to="/search"
                   search={{ q: term }}
-                  onClick={dismissForNavigation}
+                  replace
+                  onClick={(event) => {
+                    event.preventDefault();
+                    void goToFullSearch();
+                  }}
                   className="group flex min-h-12 items-center justify-between bg-signal px-4 text-sm font-bold text-obsidian"
                 >
                   صفحه کامل جست‌وجو

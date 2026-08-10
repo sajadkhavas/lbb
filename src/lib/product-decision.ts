@@ -50,6 +50,9 @@ export type DecisionVariant = {
   sizeId: string;
   availability: DecisionAvailability;
   mediaIds: string[];
+  /** Present for backend-backed variants. Prototype variants deliberately leave this unset. */
+  priceToman?: number;
+  originalPriceToman?: number | null;
 };
 
 export type GarmentMeasurementRow = {
@@ -95,6 +98,8 @@ export type ProductDecisionViewModel = {
   pricing: {
     priceToman: number | null;
     originalPriceToman: number | null;
+    fromToman?: number | null;
+    toToman?: number | null;
   };
   stock: {
     availability: DecisionAvailability;
@@ -213,6 +218,8 @@ export function buildProductDecisionViewModel(
     pricing: {
       priceToman: has("price") ? product.price : null,
       originalPriceToman: has("originalPrice") ? (product.originalPrice ?? null) : null,
+      fromToman: has("price") ? product.price : null,
+      toToman: has("price") ? product.price : null,
     },
     stock: {
       availability: has("stock") ? (product.inStock ? "available" : "sold-out") : "unknown",

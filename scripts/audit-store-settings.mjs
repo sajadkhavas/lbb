@@ -91,13 +91,13 @@ for (const forbidden of [
   }
 }
 
+// Public store settings alone are not proof that transactional backend capabilities are ready.
+// F14D owns actual order/payment execution through the versioned backend contract instead.
 if (!commerce.includes("orderSubmissionReady: false")) {
-  failures.push("Frontend must not claim order-submission readiness before backend integration.");
+  failures.push("Public settings alone must not claim order-submission readiness.");
 }
 if (!commerce.includes("paymentVerificationReady: false")) {
-  failures.push(
-    "Frontend must not claim payment verification readiness before backend integration.",
-  );
+  failures.push("Public settings alone must not claim payment-verification readiness.");
 }
 
 for (const required of ["getPublicShippingMethods", "canPublishReturns"]) {
@@ -117,11 +117,69 @@ if (/<form\b/i.test(contact) || contact.includes("پیام شما ارسال ش�
 }
 
 if (!checkout.includes("getCommerceReadiness") || !checkout.includes("getPublicPaymentSettings")) {
-  failures.push("Checkout must use explicit public commerce/payment readiness boundaries.");
+  failures.push("Checkout must preserve explicit public commerce/payment readiness boundaries.");
 }
-if (/<form\b/i.test(checkout) || /saveDemoOrder|createDemoOrderRef|shippingFeeFor/.test(checkout)) {
-  failures.push("Checkout must not collect or submit fake order data before backend integration.");
+
+for (const forbidden of [
+  "saveDemoOrder",
+  "createDemoOrderRef",
+  "shippingFeeFor",
+  "findDemoOrder",
+]) {
+  if (checkout.includes(forbidden)) {
+    failures.push(`Checkout still contains invented/demo commerce behavior: ${forbidden}`);
+  }
 }
+
+for (const required of [
+  "isLiveBackend() ? <LiveCheckout /> : <PrototypeCheckout />",
+  "cartLinesToBackendItems",
+  "getDeliveryOptions",
+  "createCheckoutQuote",
+  "commitCheckout",
+  "createIdempotencyKey",
+  "initiatePayment",
+  "ensureBackendCsrf",
+]) {
+  if (!checkout.includes(required)) {
+    failures.push(`F14D live checkout boundary is missing: ${required}`);
+  }
+}
+
+const liveStart = checkout.indexOf("function LiveCheckout()");
+const prototypeStart = checkout.indexOf("function PrototypeCheckout()");
+const chromeStart = checkout.indexOf("function CheckoutChrome", prototypeStart);
+if (liveStart < 0 || prototypeStart < 0 || prototypeStart <= liveStart) {
+  failures.push("Checkout must keep explicit live and prototype implementations separated.");
+} else {
+  const liveCheckout = checkout.slice(liveStart, prototypeStart);
+  const prototypeCheckout = checkout.slice(
+    prototypeStart,
+    chromeStart > prototypeStart ? chromeStart : checkout.length,
+  );
+
+  if (!/<form\b/i.test(liveCheckout)) {
+    failures.push(
+      "Live checkout must collect recipient data only for authoritative backend quote.",
+    );
+  }
+  for (const required of ["createCheckoutQuote", "commitCheckout", "initiatePayment"]) {
+    if (!liveCheckout.includes(required)) {
+      failures.push(`Live checkout does not use backend operation: ${required}`);
+    }
+  }
+  if (/<form\b/i.test(prototypeCheckout)) {
+    failures.push("Prototype checkout must not collect order submission data.");
+  }
+  if (
+    /createCheckoutQuote|commitCheckout|initiatePayment|window\.location\.assign/.test(
+      prototypeCheckout,
+    )
+  ) {
+    failures.push("Prototype checkout must not execute live commerce operations.");
+  }
+}
+
 if (!orderConfirmation.includes("SERVER VERIFICATION REQUIRED")) {
   failures.push("Order confirmation must require server-side verification.");
 }
@@ -134,4 +192,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Store settings and F14E trust boundary audit passed.");
+console.log("Store settings, F14E trust boundary, and F14D live-commerce separation audit passed.");

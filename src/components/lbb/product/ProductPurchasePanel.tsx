@@ -54,8 +54,14 @@ export function ProductPurchasePanel({
     () => model.colors.find((color) => color.id === colorId) ?? null,
     [colorId, model.colors],
   );
+  const selectedSize = useMemo(
+    () => model.sizes.find((size) => size.id === sizeId) ?? null,
+    [model.sizes, sizeId],
+  );
   const selectedVariant = variantForSelection(model, colorId, sizeId);
   const canAdd = canAddSelection(model, colorId, sizeId);
+  const selectedPrice =
+    selectedVariant?.priceToman ?? model.pricing.priceToman ?? model.pricing.fromToman ?? null;
 
   const statusLabel = (() => {
     if (!model.readyForCommerce) return "خرید تا تأیید اطلاعات اصلی محصول غیرفعال است";
@@ -85,16 +91,33 @@ export function ProductPurchasePanel({
   };
 
   const onAdd = () => {
-    if (!canAdd || !colorId || !sizeId) {
+    if (!canAdd || !colorId || !sizeId || !selectedVariant) {
       setSelectionError(true);
       focusDecision();
       return;
     }
     const name = model.identity.name;
-    const price = model.pricing.priceToman;
-    if (!name || price === null) return;
-    add({ slug: model.slug, name, price, color: colorId, size: sizeId, qty: 1 });
-    toast.success("به سبد خرید اضافه شد", { description: `${name} — سایز ${sizeId}` });
+    if (!name || selectedPrice === null) return;
+
+    const backendVariant =
+      selectedVariant.id.length === 26 && selectedVariant.priceToman !== undefined;
+    const swatch = selectedColor?.swatch?.type === "solid" ? selectedColor.swatch.value : undefined;
+
+    add({
+      slug: model.slug,
+      name,
+      price: selectedPrice,
+      variantId: backendVariant ? selectedVariant.id : undefined,
+      source: backendVariant ? "backend" : "prototype",
+      color: swatch ?? selectedColor?.label,
+      colorLabel: selectedColor?.label,
+      size: selectedSize?.label ?? sizeId,
+      sizeLabel: selectedSize?.label ?? sizeId,
+      qty: 1,
+    });
+    toast.success("به سبد خرید اضافه شد", {
+      description: `${name} — سایز ${selectedSize?.label ?? sizeId}`,
+    });
     openDrawer();
   };
 
@@ -199,9 +222,9 @@ export function ProductPurchasePanel({
       <StickyBuyBar
         visible={stickyVisible}
         name={model.identity.name ?? "محصول"}
-        price={model.pricing.priceToman}
+        price={selectedPrice}
         selectedColor={selectedColor?.label}
-        selectedSize={sizeId}
+        selectedSize={selectedSize?.label}
         canAdd={canAdd}
         statusLabel={statusLabel}
         onAdd={onAdd}

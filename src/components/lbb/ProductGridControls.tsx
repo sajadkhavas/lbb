@@ -27,6 +27,8 @@ type Props = {
   filterSlot: (filters: Filters, onChange: (filters: Filters) => void) => ReactNode;
   getResultCount: (filters: Filters) => number;
   lockedCategory?: boolean;
+  supportedSorts?: readonly SortKey[];
+  categoryLabels?: Record<string, string>;
 };
 
 export function ProductGridControls({
@@ -36,6 +38,8 @@ export function ProductGridControls({
   filterSlot,
   getResultCount,
   lockedCategory,
+  supportedSorts,
+  categoryLabels,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [draftFilters, setDraftFilters] = useState(filters);
@@ -46,6 +50,7 @@ export function ProductGridControls({
   const count = activeCount(filters);
   const draftCount = activeCount(draftFilters);
   const draftResultCount = getResultCount(draftFilters);
+  const sortKeys = supportedSorts ?? (Object.keys(SORT_LABELS) as SortKey[]);
 
   const openFilters = () => {
     setDraftFilters(filters);
@@ -66,7 +71,10 @@ export function ProductGridControls({
     filters.cats.forEach((category) =>
       chips.push({
         key: `cat-${category}`,
-        label: CATEGORIES[category as keyof typeof CATEGORIES]?.nameFa ?? category,
+        label:
+          categoryLabels?.[category] ??
+          CATEGORIES[category as keyof typeof CATEGORIES]?.nameFa ??
+          category,
         onRemove: () =>
           onChange({ ...filters, cats: filters.cats.filter((item) => item !== category) }),
       }),
@@ -75,7 +83,7 @@ export function ProductGridControls({
   filters.colors.forEach((color) =>
     chips.push({
       key: `color-${color}`,
-      label: colorName(color),
+      label: colorName(color) || color,
       onRemove: () =>
         onChange({ ...filters, colors: filters.colors.filter((item) => item !== color) }),
     }),
@@ -135,7 +143,7 @@ export function ProductGridControls({
           </button>
 
           <Select
-            value={filters.sort}
+            value={sortKeys.includes(filters.sort) ? filters.sort : "newest"}
             onValueChange={(value: string) => onChange({ ...filters, sort: value as SortKey })}
           >
             <SelectTrigger
@@ -145,7 +153,7 @@ export function ProductGridControls({
               <SelectValue />
             </SelectTrigger>
             <SelectContent dir="rtl">
-              {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+              {sortKeys.map((key) => (
                 <SelectItem key={key} value={key} className="text-xs">
                   {key === "best" ? "منتخب LBB" : SORT_LABELS[key]}
                 </SelectItem>

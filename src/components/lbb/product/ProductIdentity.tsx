@@ -5,12 +5,19 @@ import type { ProductDecisionViewModel } from "@/lib/product-decision";
 export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) {
   const { identity, pricing, stock } = model;
   const hasIdentity = Boolean(identity.name);
+  const effectivePrice = pricing.priceToman ?? pricing.fromToman ?? null;
+  const priceRange =
+    pricing.fromToman !== null &&
+    pricing.fromToman !== undefined &&
+    pricing.toToman !== null &&
+    pricing.toToman !== undefined &&
+    pricing.fromToman !== pricing.toToman;
   const discount =
-    pricing.priceToman !== null &&
+    effectivePrice !== null &&
     pricing.originalPriceToman !== null &&
-    pricing.originalPriceToman > pricing.priceToman
+    pricing.originalPriceToman > effectivePrice
       ? Math.round(
-          ((pricing.originalPriceToman - pricing.priceToman) / pricing.originalPriceToman) * 100,
+          ((pricing.originalPriceToman - effectivePrice) / pricing.originalPriceToman) * 100,
         )
       : 0;
 
@@ -42,9 +49,13 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
         {discount > 0 ? <StatusTag tone="bone">{discount}٪ تخفیف</StatusTag> : null}
       </div>
 
-      {pricing.priceToman !== null ? (
+      {effectivePrice !== null ? (
         <div className="mt-5 flex flex-wrap items-baseline gap-3" aria-label="قیمت محصول">
-          <span className="num text-2xl font-bold text-bone">{fmtToman(pricing.priceToman)}</span>
+          <span className="num text-2xl font-bold text-bone">
+            {priceRange && pricing.toToman
+              ? `${fmtToman(pricing.fromToman!)} تا ${fmtToman(pricing.toToman)}`
+              : fmtToman(effectivePrice)}
+          </span>
           {pricing.originalPriceToman !== null ? (
             <span className="num text-sm text-mute line-through">
               {fmtToman(pricing.originalPriceToman)}
