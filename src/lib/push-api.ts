@@ -72,12 +72,13 @@ export function getWebPushStatus() {
 
 export function registerWebPushSubscription(subscription: PushSubscription) {
   const json = subscription.toJSON();
+  const manager = PushManager as unknown as { supportedContentEncodings?: string[] };
   return request<{ subscriptionId: string; activeCount: number }>("/api/web-push/subscriptions", {
     method: "POST",
     body: JSON.stringify({
       endpoint: subscription.endpoint,
       keys: json.keys,
-      contentEncoding: PushManager.supportedContentEncodings?.[0] ?? "aes128gcm",
+      contentEncoding: manager.supportedContentEncodings?.[0] ?? "aes128gcm",
     }),
   });
 }
