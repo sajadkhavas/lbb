@@ -161,7 +161,7 @@ export function CartDrawer() {
                             aria-label={`کاهش تعداد ${line.name}`}
                             onClick={() => setQty(index, line.qty - 1)}
                             disabled={line.qty <= 1}
-                            className="grid h-9 w-9 place-items-center text-bone disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                            className="grid h-11 w-11 place-items-center text-bone disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                           >
                             <Minus size={13} aria-hidden="true" />
                           </button>
@@ -172,7 +172,7 @@ export function CartDrawer() {
                             type="button"
                             aria-label={`افزایش تعداد ${line.name}`}
                             onClick={() => setQty(index, line.qty + 1)}
-                            className="grid h-9 w-9 place-items-center text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                            className="grid h-11 w-11 place-items-center text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                           >
                             <Plus size={13} aria-hidden="true" />
                           </button>

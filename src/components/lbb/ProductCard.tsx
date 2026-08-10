@@ -10,6 +10,7 @@ import { useWishlist } from "@/lib/wishlist";
 import { useQuickView } from "@/lib/quickview";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
 import { isLiveBackend } from "@/lib/backend-api";
+import { colorName } from "@/lib/color-names";
 import { Frame, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
 
 export type ProductCardModel = Product | BackendCatalogCard;
@@ -174,7 +175,15 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             <span className="num text-xs text-mute line-through">{fmtToman(p.originalPrice)}</span>
           ) : null}
         </div>
-        <div role="group" className="mt-1 flex gap-1.5" aria-label={`${p.colors.length} رنگ موجود`}>
+        <div
+          role="group"
+          className="mt-1 flex gap-1.5"
+          aria-label={`رنگ‌های موجود: ${
+            backend
+              ? p.colors.map((color) => color.name).join("، ")
+              : p.colors.map(colorName).join("، ")
+          }`}
+        >
           {backend
             ? p.colors.map((color) => (
                 <span
@@ -182,7 +191,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
                   title={color.name}
                   className="h-2.5 w-2.5 rounded-full border border-hairline"
                   style={color.hex ? { background: color.hex } : undefined}
-                  aria-label={color.name}
+                  aria-hidden="true"
                 />
               ))
             : p.colors.map((color) => (

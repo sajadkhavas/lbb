@@ -8,6 +8,7 @@ const REQUIRED_DOCS = [
   "docs/f19/touch-zoom-audit.md",
   "docs/f19/reduced-motion-audit.md",
   "docs/f19/f19b-remediation-backlog.md",
+  "docs/f19/f19b-completion.md",
 ];
 
 const REQUIRED_AXE_ROUTES = [
@@ -73,11 +74,19 @@ requireTokens("tests/f19-interactions.spec.ts", interactions, [
   "ArrowDown",
   "Home",
   "End",
-  "aria-invalid",
-  "aria-describedby",
   "lookbook",
   "Quick View",
   "filter drawer",
+]);
+
+const liveCheckout = await text("tests/f19b-live-checkout.spec.ts");
+requireTokens("tests/f19b-live-checkout.spec.ts", liveCheckout, [
+  "aria-invalid",
+  "aria-describedby",
+  "toBeFocused",
+  '["name", "province", "city", "address"]',
+  "#co-${field}",
+  "co-${field}-error",
 ]);
 
 const rtl = await text("tests/f19-rtl.spec.ts");
@@ -96,21 +105,25 @@ requireTokens("tests/f19-rtl.spec.ts", rtl, [
 for (const [path, source] of [
   ["tests/accessibility.spec.ts", axe],
   ["tests/f19-interactions.spec.ts", interactions],
+  ["tests/f19b-live-checkout.spec.ts", liveCheckout],
   ["tests/f19-rtl.spec.ts", rtl],
 ]) {
   for (const forbidden of ["test.skip(", "test.fixme("]) {
     if (source.includes(forbidden))
-      failures.push(`${path}: ${forbidden} is not allowed in F19-A gates`);
+      failures.push(`${path}: ${forbidden} is not allowed in F19 accessibility gates`);
   }
 }
 
 const packageJson = JSON.parse(await text("package.json"));
 const scripts = packageJson.scripts ?? {};
-for (const command of ["test:a11y", "test:rtl", "audit:a11y"]) {
+for (const command of ["test:a11y", "test:rtl", "test:f19b-live", "audit:a11y", "audit:f19b"]) {
   if (!scripts[command]) failures.push(`package.json: missing ${command} script`);
 }
 if (!String(scripts.quality ?? "").includes("audit:a11y")) {
   failures.push("package.json: quality must execute audit:a11y");
+}
+if (!String(scripts.quality ?? "").includes("audit:f19b")) {
+  failures.push("package.json: quality must execute audit:f19b");
 }
 
 if (failures.length > 0) {
@@ -120,6 +133,6 @@ if (failures.length > 0) {
 } else {
   console.log(
     `F19 accessibility audit gate passed: ${REQUIRED_AXE_ROUTES.length} required Axe routes, ` +
-      `${REQUIRED_DOCS.length} audit documents, keyboard/RTL/touch/reduced-motion contracts present.`,
+      `${REQUIRED_DOCS.length} audit documents, keyboard/RTL/touch/reduced-motion/live-checkout contracts present.`,
   );
 }

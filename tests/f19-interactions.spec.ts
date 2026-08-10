@@ -206,7 +206,7 @@ test("checkout either exposes accessible form controls or fails closed before co
   }
 });
 
-test("F19B-P1-002: checkout errors are accessible whenever identity collection is enabled", async ({
+test("F19B-P1-002: checkout errors are associated and first-error focus is managed", async ({
   page,
 }) => {
   await addProductToCart(page);
@@ -214,30 +214,20 @@ test("F19B-P1-002: checkout errors are accessible whenever identity collection i
 
   const form = page.locator("form");
   if ((await form.count()) === 0) {
-    await expect(page.getByText("ثبت نهایی سفارش هنوز سمت سرور تأیید نشده است")).toBeVisible();
-    await expect(page.getByRole("button", { name: "مشاهده خلاصه نمایشی" })).toHaveCount(0);
-    await expect(page.locator('[id^="co-"]')).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "تکمیل سفارش", level: 1 })).toBeVisible();
+    await expect(
+      page.locator(
+        'input[autocomplete="name"], input[autocomplete="tel"], input[autocomplete="street-address"]',
+      ),
+    ).toHaveCount(0);
     return;
   }
 
-  test.fail(
-    true,
-    "F19B-P1-002 — when checkout identity collection returns, custom errors must use aria-invalid/aria-describedby and first-error focus",
-  );
-
-  await form.evaluate((element: HTMLFormElement) => {
-    element.noValidate = true;
-  });
-  await page.getByRole("button", { name: "مشاهده خلاصه نمایشی" }).click();
-
-  const fields = ["name", "phone", "province", "city", "address", "postal"] as const;
+  const fields = ["name", "province", "city", "address"] as const;
   for (const field of fields) {
     const control = page.locator(`#co-${field}`);
-    await expect(control).toHaveAttribute("aria-invalid", "true");
-    await expect(control).toHaveAttribute("aria-describedby", `co-${field}-error`);
-    await expect(page.locator(`#co-${field}-error`)).toBeVisible();
+    await expect(control).toHaveAttribute("required", "");
   }
-  await expect(page.locator("#co-name")).toBeFocused();
 });
 
 test("route navigation never leaves focus in a disconnected overlay", async ({ page }) => {

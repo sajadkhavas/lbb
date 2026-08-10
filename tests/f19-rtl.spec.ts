@@ -101,7 +101,7 @@ test("RTL pages keep external contact labels readable and directional media isla
 
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
   const gallery = page.locator('[aria-roledescription="carousel"]');
-  await expect(gallery).toHaveAttribute("dir", "ltr");
+  await expect(gallery).toHaveAttribute("dir", "rtl");
   await expect(gallery).toHaveAttribute("aria-label", /گالری تصاویر/);
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 });
@@ -133,8 +133,6 @@ test("F19B-P1-003: PDP mobile gallery selectors meet the 44px touch contract", a
 });
 
 test("F19B-P1-004: Quick View thumbnails must meet the 44px touch contract", async ({ page }) => {
-  test.fail(true, "F19B-P1-004 — Quick View thumbnails are 36px wide");
-
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
   await page
@@ -145,8 +143,6 @@ test("F19B-P1-004: Quick View thumbnails must meet the 44px touch contract", asy
 });
 
 test("F19B-P2-001: Cart quantity controls must meet the 44px touch contract", async ({ page }) => {
-  test.fail(true, "F19B-P2-001 — Cart Drawer quantity controls are currently 36px square");
-
   await page.setViewportSize({ width: 390, height: 844 });
   await addProductToCart(page);
   const cart = page.getByRole("dialog", { name: "سبد خرید" });
@@ -155,8 +151,6 @@ test("F19B-P2-001: Cart quantity controls must meet the 44px touch contract", as
 });
 
 test("F19B-P2-002: active filter chips must meet the 44px touch contract", async ({ page }) => {
-  test.fail(true, "F19B-P2-002 — active filter chips currently use a 40px minimum height");
-
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/shop", { waitUntil: "networkidle" });
   await page
@@ -228,4 +222,12 @@ test("viewport metadata permits zoom and WCAG text spacing does not create page 
   await expectNoPageOverflow(page);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.locator("summary").first()).toBeVisible();
+});
+
+test("F19B-P2-004: FAQ and 404 secondary chips meet the 44px target", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/faq", { waitUntil: "networkidle" });
+  await expectTouchTarget(page.getByRole("link", { name: "محصول و موجودی" }));
+  await page.goto("/f19-secondary-route-does-not-exist", { waitUntil: "networkidle" });
+  await expectTouchTarget(page.getByRole("link", { name: "فروشگاه" }).first());
 });
