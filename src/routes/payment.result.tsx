@@ -12,6 +12,7 @@ import {
   type PaymentVerificationDto,
 } from "@/lib/backend-api";
 import { ensureBackendCsrf } from "@/lib/backend-session";
+import { clearPendingCheckoutForOrder } from "@/lib/checkout-continuity";
 import { canonical, pageMeta } from "@/lib/site";
 
 const TITLE = "نتیجه پرداخت | LBB";
@@ -56,6 +57,7 @@ function PaymentResultPage() {
       try {
         await ensureBackendCsrf();
         const response = await verifyPayment(search.Authority!, search.Status!);
+        if (response.data.verified) clearPendingCheckoutForOrder(response.data.order.id);
         if (!cancelled) setResult(response.data);
       } catch (cause) {
         if (!cancelled) setError(backendErrorMessage(cause));

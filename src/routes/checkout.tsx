@@ -21,6 +21,7 @@ import {
   createCheckoutQuote,
   createIdempotencyKey,
   getCurrentCustomer,
+  getOrder,
   initiatePayment,
   isAuthenticationError,
   isLiveBackend,
@@ -31,6 +32,14 @@ import {
 } from "@/lib/backend-api";
 import { getDeliveryOptions, type DeliveryOptionDto } from "@/lib/backend-delivery";
 import { ensureBackendCsrf } from "@/lib/backend-session";
+import {
+  clearCheckoutCommitKey,
+  clearPendingCheckoutForOrder,
+  getOrCreateCheckoutCommitKey,
+  persistPendingCheckout,
+  readPendingCheckout,
+  type PendingCheckout,
+} from "@/lib/checkout-continuity";
 
 const TITLE = "تکمیل سفارش | LBB";
 const DESC =
@@ -67,6 +76,10 @@ function LiveCheckout() {
   const [orderResult, setOrderResult] = useState<CheckoutCommitDto | null>(null);
   const [busy, setBusy] = useState<"quote" | "commit" | "payment" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [continuity, setContinuity] = useState<PendingCheckout | null>(null);
+  const [continuityHydrated, setContinuityHydrated] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
 
   const backendItems = useMemo(() => cartLinesToBackendItems(lines), [lines]);
   const cartCompatible = backendItems.length > 0 && backendItems.length === lines.length;
@@ -78,9 +91,17 @@ function LiveCheckout() {
     Boolean(customer?.mobile) &&
     Boolean(deliveryMethod) &&
     (!needsAddress || (province.trim() && city.trim() && address.trim()));
+  const shouldRecoverPending = lines.length === 0 && Boolean(continuity);
 
   useEffect(() => {
-    if (!hydrated || lines.length === 0) {
+    if (!hydrated) return;
+    setContinuity(readPendingCheckout());
+    setContinuityHydrated(true);
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!hydrated || !continuityHydrated) return;
+    if (lines.length === 0 && !continuity) {
       setSessionLoading(false);
       return;
     }
@@ -107,7 +128,53 @@ function LiveCheckout() {
     return () => {
       cancelled = true;
     };
-  }, [hydrated, lines.length]);
+  }, [hydrated, continuityHydrated, continuity, lines.length]);
+
+  useEffect(() => {
+    if (!continuityHydrated || !customer || !continuity || orderResult) return;
+    if (!shouldRecoverPending) {
+      setRecoveryLoading(false);
+      setRecoveryError(null);
+      return;
+    }
+    let cancelled = false;
+    setRecoveryLoading(true);
+    setRecoveryError(null);
+    getOrder(continuity.orderId)
+      .then((response) => {
+        if (cancelled) return;
+        const order = response.data.order;
+        if (order.paidAt || order.cancelledAt) {
+          clearPendingCheckoutForOrder(order.id);
+          setContinuity(null);
+          setOrderResult(null);
+          return;
+        }
+        const paymentAvailable = continuity.paymentAvailable;
+        setOrderResult({
+          order,
+          payment: {
+            available: paymentAvailable,
+            state: paymentAvailable ? "ready" : "disabled",
+            initiationEndpoint: null,
+          },
+        });
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        if (isAuthenticationError(error)) {
+          setCustomer(null);
+          return;
+        }
+        setRecoveryError(backendErrorMessage(error));
+      })
+      .finally(() => {
+        if (!cancelled) setRecoveryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [continuityHydrated, customer, continuity, orderResult, shouldRecoverPending]);
 
   useEffect(() => {
     if (!customer || !cartCompatible) return;
@@ -142,7 +209,6 @@ function LiveCheckout() {
 
   useEffect(() => {
     setQuote(null);
-    setOrderResult(null);
     setActionError(null);
   }, [fullName, province, city, address, postalCode, notes, deliveryMethod, lines]);
 
@@ -166,6 +232,7 @@ function LiveCheckout() {
         deliveryMethod,
         items: backendItems,
       });
+      getOrCreateCheckoutCommitKey(response.data.quoteId, () => createIdempotencyKey("checkout"));
       setQuote(response.data);
     } catch (error) {
       setQuote(null);
@@ -181,7 +248,18 @@ function LiveCheckout() {
     setActionError(null);
     try {
       await ensureBackendCsrf();
-      const response = await commitCheckout(quote.quoteId, createIdempotencyKey("checkout"));
+      const idempotencyKey = getOrCreateCheckoutCommitKey(quote.quoteId, () =>
+        createIdempotencyKey("checkout"),
+      );
+      const response = await commitCheckout(quote.quoteId, idempotencyKey);
+      const pending = persistPendingCheckout({
+        orderId: response.data.order.id,
+        orderNumber: response.data.order.number,
+        paymentAvailable: response.data.payment.available,
+        paymentIdempotencyKey: createIdempotencyKey("payment"),
+      });
+      clearCheckoutCommitKey(quote.quoteId);
+      setContinuity(pending);
       setOrderResult(response.data);
       clear();
     } catch (error) {
@@ -197,7 +275,13 @@ function LiveCheckout() {
     setActionError(null);
     try {
       await ensureBackendCsrf();
-      const response = await initiatePayment(orderResult.order.id, createIdempotencyKey("payment"));
+      const persisted =
+        continuity?.orderId === orderResult.order.id ? continuity : readPendingCheckout();
+      const paymentIdempotencyKey =
+        persisted?.orderId === orderResult.order.id
+          ? persisted.paymentIdempotencyKey
+          : createIdempotencyKey("payment");
+      const response = await initiatePayment(orderResult.order.id, paymentIdempotencyKey);
       const redirectUrl = response.data.payment.redirectUrl;
       if (typeof redirectUrl !== "string" || !redirectUrl.startsWith("https://")) {
         throw new Error("payment_redirect_missing");
@@ -215,12 +299,16 @@ function LiveCheckout() {
 
   return (
     <CheckoutChrome>
-      {!hydrated || sessionLoading ? (
+      {!hydrated ||
+      !continuityHydrated ||
+      sessionLoading ||
+      recoveryLoading ||
+      (shouldRecoverPending && customer && !orderResult && !recoveryError) ? (
         <p className="mt-8 flex items-center gap-2 text-sm text-metal" role="status">
           <Loader2 size={16} className="animate-spin" aria-hidden="true" />
           در حال بررسی سبد و نشست مشتری…
         </p>
-      ) : lines.length === 0 && !orderResult ? (
+      ) : lines.length === 0 && !orderResult && !continuity ? (
         <EmptyState
           className="mt-8"
           title="سبد خرید خالی است"
@@ -236,6 +324,15 @@ function LiveCheckout() {
           <StatePanel title="Backend قابل تأیید نیست" tone="warning">
             {sessionError}
           </StatePanel>
+        </div>
+      ) : shouldRecoverPending && recoveryError ? (
+        <div className="mt-8 space-y-4">
+          <StatePanel title="بازیابی سفارش ناتمام کامل نشد" tone="warning">
+            {recoveryError}
+          </StatePanel>
+          <Link to="/account" className={CtaClasses("line")}>
+            بررسی سفارش‌ها در حساب
+          </Link>
         </div>
       ) : !customer ? (
         <div className="mt-8">
