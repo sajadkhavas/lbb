@@ -530,119 +530,325 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
   );
 }
 
+function highlight(text: string, query: string) {
+  const token = normalizeSearchTerm(query).split(" ").filter(Boolean)[0];
+  if (!token) return text;
+  const index = text.toLocaleLowerCase("fa-IR").indexOf(token.toLocaleLowerCase("fa-IR"));
+  if (index === -1) return text;
+  return (
+    <>
+      {text.slice(0, index)}
+      <mark className="rounded bg-signal/15 text-signal">
+        {text.slice(index, index + token.length)}
+      </mark>
+      {text.slice(index + token.length)}
+    </>
+  );
+}
+
 function PrototypeSearch() {
   const routeSearch = Route.useSearch();
   const query = routeSearch.q;
-  const scope = useMemo(() => createDiscoveryScope(products, true), []);
+  const filterScope = useMemo(() => createDiscoveryScope(products, true), []);
   const filters = useMemo(
-    () => normalizeFilters(parseFilters(routeSearch as Record<string, unknown>), scope),
-    [routeSearch, scope],
+    () =>
+      normalizeFilters(
+        parseFilters(routeSearch as unknown as Record<string, unknown>),
+        filterScope,
+      ),
+    [filterScope, routeSearch],
   );
   const navigate = useNavigate({ from: "/search" });
   const [draft, setDraft] = useState(query ?? "");
   const [recent, setRecent] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
-  const baseResults = useMemo(() => localMatches(query ?? ""), [query]);
-  const results = useMemo(() => applyFilters(baseResults, filters), [baseResults, filters]);
-  const expectedSearch = serializeSearch(query, filters);
+  const expectedSearch = useMemo(() => serializeSearch(query, filters), [query, filters]);
+  const searchKey = stableSearchString(expectedSearch);
+
   useEffect(() => setDraft(query ?? ""), [query]);
   useEffect(() => setRecent(getRecentSearches()), []);
+
   useEffect(() => {
-    if (query) {
-      addRecentSearch(query);
-      setRecent(getRecentSearches());
-    }
+    if (!query) return;
+    addRecentSearch(query);
+    setRecent(getRecentSearches());
   }, [query]);
+
   useEffect(() => {
-    if (typeof window !== "undefined" && !isCanonicalSearch(window.location.search, expectedSearch))
+    if (typeof window === "undefined") return;
+    if (!isCanonicalSearch(window.location.search, expectedSearch)) {
       navigate({ search: expectedSearch, replace: true });
+    }
   }, [expectedSearch, navigate]);
-  const commitQuery = (value: string) => {
-    const next = normalizeSearchTerm(value) || undefined;
-    startTransition(() => navigate({ search: serializeSearch(next, filters), replace: false }));
+
+  useEffect(() => {
+    const nextQuery = normalizeSearchTerm(draft) || undefined;
+    if (nextQuery === query) return;
+    const timer = window.setTimeout(() => {
+      startTransition(() =>
+        navigate({ search: serializeSearch(nextQuery, filters), replace: true }),
+      );
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [draft, filters, navigate, query]);
+
+  const baseResults = useMemo(() => localMatches(query ?? ""), [query]);
+  const results = useMemo(() => applyFilters(baseResults, filters), [baseResults, filters]);
+
+  const commitQuery = (nextValue: string, replace = false) => {
+    const nextQuery = normalizeSearchTerm(nextValue) || undefined;
+    startTransition(() => navigate({ search: serializeSearch(nextQuery, filters), replace }));
   };
-  const setFilters = (next: Filters) => {
-    const normalized = normalizeFilters(next, scope);
+
+  const setFilters = (nextFilters: Filters) => {
+    const normalized = normalizeFilters(nextFilters, filterScope);
     startTransition(() => navigate({ search: serializeSearch(query, normalized), replace: false }));
   };
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    commitQuery(draft);
+  };
+
+  const getResultCount = (candidate: Filters) =>
+    countDiscoveryResults(baseResults, candidate, filterScope);
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
       filters={candidate}
       onChange={onChange}
-      colors={scope.colors}
-      sizes={scope.sizes}
-      priceCeil={scope.priceCeil}
+      colors={filterScope.colors}
+      sizes={filterScope.sizes}
+      priceCeil={filterScope.priceCeil}
       showCategory
-      facetCounts={createFacetCounts(baseResults, candidate, scope)}
+      facetCounts={createFacetCounts(baseResults, candidate, filterScope)}
     />
   );
-  const getResultCount = (candidate: Filters) =>
-    countDiscoveryResults(baseResults, candidate, scope);
+  const desktopFilters = renderFilters(filters, setFilters);
+
   return (
-    <SearchChrome>
-      <SearchHeader
-        query={query}
-        draft={draft}
-        setDraft={setDraft}
-        submit={(event) => {
-          event.preventDefault();
-          commitQuery(draft);
-        }}
-        clear={() => {
-          setDraft("");
-          if (query) commitQuery("");
-        }}
-      />
-      {!query ? <RecentSearches recent={recent} onPick={commitQuery} onChange={setRecent} /> : null}
-      {!query ? (
-        <section className="mt-8">
-          <h2 className="text-[13px] font-semibold text-metal">دسته‌بندی‌های کاتالوگ</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {CATEGORY_SLUGS.map((category) => (
-              <Link
-                key={category}
-                to="/$category"
-                params={{ category }}
-                className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal"
-              >
-                {CATEGORIES[category].nameFa}
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
-      {query ? (
-        <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
-          <aside className="hidden lg:block">{renderFilters(filters, setFilters)}</aside>
-          <section>
-            <ProductGridControls
-              filters={filters}
-              onChange={setFilters}
-              resultCount={results.length}
-              filterSlot={renderFilters}
-              getResultCount={getResultCount}
+    <>
+      <Navbar theme="dark" />
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian px-5 pb-bottombar pt-[calc(var(--lbb-nav-h)+32px)] md:px-10 md:pb-16"
+      >
+        <Shell>
+          <TechLabel tone="signal">DISCOVERY / SEARCH</TechLabel>
+          <h1 className="text-display-2 mt-3 text-bone">جستجو در کاتالوگ</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">
+            نام، دسته، SKU، توضیح یا ویژگی محصول را بنویس. نتایج و فیلترهای اعمال‌شده در URL قابل
+            اشتراک باقی می‌مانند.
+          </p>
+
+          <form onSubmit={submit} className="relative mt-6" role="search">
+            <label htmlFor="site-search" className="sr-only">
+              جستجو در محصولات
+            </label>
+            <input
+              id="site-search"
+              type="search"
+              aria-label="جست‌وجوی محصولات"
+              value={draft}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setDraft(event.target.value)
+              }
+              placeholder="مثلاً هودی مشکی، DROP 001 یا LBB-HD-001"
+              autoComplete="off"
+              className="h-14 w-full rounded-xl border border-hairline bg-carbon ps-14 pe-28 text-sm text-bone outline-none tap-target placeholder:text-mute focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/40"
             />
-            {isPending ? (
-              <div className="mt-6">
-                <GridSkeleton count={6} />
+            <SearchIcon
+              size={18}
+              className="pointer-events-none absolute start-5 top-1/2 -translate-y-1/2 text-mute"
+              aria-hidden="true"
+            />
+            {draft ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setDraft("");
+                  if (query) commitQuery("");
+                }}
+                aria-label="پاک کردن جستجو"
+                className="tap-target absolute end-[76px] top-1/2 grid -translate-y-1/2 place-items-center text-mute hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            ) : null}
+            <button
+              type="submit"
+              className={`${CtaClasses("signal")} absolute end-1.5 top-1.5 h-11 px-4`}
+            >
+              جستجو
+            </button>
+          </form>
+
+          {!query && recent.length > 0 ? (
+            <section className="mt-6" aria-labelledby="recent-searches-title">
+              <div className="flex items-center justify-between gap-3">
+                <h2
+                  id="recent-searches-title"
+                  className="flex items-center gap-1.5 text-[13px] font-semibold text-metal"
+                >
+                  <Clock size={14} aria-hidden="true" /> جستجوهای اخیر
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearRecentSearches();
+                    setRecent([]);
+                  }}
+                  className="min-h-11 text-xs text-signal hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                >
+                  پاک کردن همه
+                </button>
               </div>
-            ) : results.length === 0 ? (
-              <EmptyState
-                className="mt-6"
-                icon={<PackageSearch size={40} />}
-                title={`نتیجه‌ای برای «${query}» پیدا نشد`}
-                body="عبارت یا فیلترها را تغییر بده."
-              />
-            ) : (
-              <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3">
-                {results.map((product) => (
-                  <ProductCard key={product.id} p={product} />
+              <div className="mt-3 flex flex-wrap gap-2">
+                {recent.map((item) => (
+                  <span
+                    key={item}
+                    className="flex min-h-11 items-center gap-1.5 rounded-full border border-hairline bg-carbon px-3 text-xs text-bone"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => commitQuery(item)}
+                      className="min-h-9 hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    >
+                      {item}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`حذف ${item}`}
+                      onClick={() => {
+                        removeRecentSearch(item);
+                        setRecent(getRecentSearches());
+                      }}
+                      className="grid h-9 w-9 place-items-center text-mute hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    >
+                      <X size={12} aria-hidden="true" />
+                    </button>
+                  </span>
                 ))}
               </div>
-            )}
-          </section>
-        </div>
-      ) : null}
-    </SearchChrome>
+            </section>
+          ) : null}
+
+          {!query ? (
+            <section className="mt-8" aria-labelledby="catalog-categories-title">
+              <h2 id="catalog-categories-title" className="text-[13px] font-semibold text-metal">
+                دسته‌بندی‌های کاتالوگ
+              </h2>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {CATEGORY_SLUGS.map((category) => (
+                  <Link
+                    key={category}
+                    to="/$category"
+                    params={{ category }}
+                    className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  >
+                    {CATEGORIES[category].nameFa}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {query ? (
+            <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
+              <aside className="hidden lg:block" aria-label="فیلتر نتایج جستجو">
+                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{desktopFilters}</div>
+              </aside>
+              <section aria-labelledby="search-results-title">
+                <h2 id="search-results-title" className="sr-only">
+                  نتایج جستجو برای {query}
+                </h2>
+                <ProductGridControls
+                  filters={filters}
+                  onChange={setFilters}
+                  resultCount={results.length}
+                  filterSlot={renderFilters}
+                  getResultCount={getResultCount}
+                />
+                <p
+                  className="mt-4 text-[13px] text-metal"
+                  role="status"
+                  aria-live="polite"
+                  key={searchKey}
+                >
+                  «{query}» · {results.length.toLocaleString("fa-IR")} نتیجه از{" "}
+                  {baseResults.length.toLocaleString("fa-IR")} تطابق متنی
+                </p>
+
+                {isPending ? (
+                  <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی نتایج">
+                    <GridSkeleton count={6} />
+                  </div>
+                ) : results.length === 0 ? (
+                  <EmptyState
+                    className="mt-6"
+                    icon={<PackageSearch size={40} aria-hidden="true" />}
+                    title={`نتیجه‌ای برای «${query}» پیدا نشد`}
+                    body={
+                      baseResults.length > 0
+                        ? "تطابق متنی وجود دارد، اما فیلترهای انتخاب‌شده همه نتایج را حذف کرده‌اند."
+                        : "املای عبارت را بررسی کن، از نام کوتاه‌تر استفاده کن یا یکی از دسته‌ها را باز کن."
+                    }
+                    action={
+                      baseResults.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFilters({
+                              ...filters,
+                              cats: [],
+                              colors: [],
+                              sizes: [],
+                              max: 0,
+                              instock: false,
+                              sale: false,
+                            })
+                          }
+                          className={CtaClasses("signal")}
+                        >
+                          حذف فیلترهای نتایج
+                        </button>
+                      ) : (
+                        <div className="flex flex-wrap justify-center gap-2">
+                          {(["hoodies", "pants", "shoes"] as const).map((category) => (
+                            <Link
+                              key={category}
+                              to="/$category"
+                              params={{ category }}
+                              className="tap-target rounded-full border border-hairline px-4 py-2 text-xs text-bone hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                            >
+                              {CATEGORIES[category].nameFa}
+                            </Link>
+                          ))}
+                        </div>
+                      )
+                    }
+                  />
+                ) : (
+                  <div
+                    className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3"
+                    aria-busy={isPending}
+                  >
+                    {results.map((product, index) => (
+                      <div key={product.id}>
+                        <ProductCard p={product} priority={index < 2} />
+                        <p className="mt-2 line-clamp-1 px-1 text-[11px] text-metal">
+                          تطابق: {highlight(product.name, query)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
+          ) : null}
+        </Shell>
+      </main>
+      <Footer theme="dark" />
+      <MobileBottomBar />
+    </>
   );
 }

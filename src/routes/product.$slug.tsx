@@ -355,14 +355,22 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
 }
 
 function PrototypeProductPage({ loader }: { loader: PrototypeLoader }) {
-  const p = loader.product;
+  const { product, related } = loader;
+  const p: Product = product;
+  const relatedItems: Product[] = related;
   const cat = CATEGORIES[p.category];
   const model = useMemo(() => buildProductDecisionViewModel(p), [p]);
   const [galleryMedia, setGalleryMedia] = useState<DecisionMedia[]>(model.media);
+
   const updateGallery = useCallback((media: DecisionMedia[]) => setGalleryMedia(media), []);
 
-  useEffect(() => recordRecentlyViewed(p.slug), [p.slug]);
-  useEffect(() => setGalleryMedia(model.media), [model]);
+  useEffect(() => {
+    recordRecentlyViewed(p.slug);
+  }, [p.slug]);
+
+  useEffect(() => {
+    setGalleryMedia(model.media);
+  }, [model]);
 
   const completeTheLook = model.completeTheLookSlugs
     .map((slug) => productBySlug(slug))
@@ -370,55 +378,95 @@ function PrototypeProductPage({ loader }: { loader: PrototypeLoader }) {
     .filter((item) => evaluateProductEvidence(item).publishable)
     .slice(0, 4);
 
+  const breadcrumbName = model.identity.name ?? "محصول";
+
   return (
-    <PageChrome theme="light">
-      <Shell className="py-4">
-        <Breadcrumb
-          items={[
-            { label: "خانه", to: "/" },
-            { label: "فروشگاه", to: "/shop" },
-            { label: cat.nameFa, to: "/$category", params: { category: cat.slug } },
-            { label: model.identity.name ?? "محصول" },
-          ]}
-        />
-      </Shell>
-      <Shell
-        as="section"
-        aria-label="تصمیم‌گیری محصول"
-        className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
+    <>
+      <Navbar theme="light" />
+      <main
+        dir="rtl"
+        className="min-h-screen overflow-x-clip bg-obsidian pb-[calc(9rem+env(safe-area-inset-bottom))] pt-16 md:pb-0"
       >
-        <Gallery media={galleryMedia} name={model.identity.name ?? "محصول"} />
-        <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
-      </Shell>
-      <Band label="PRODUCT DECISION FACTS">
-        <Shell className="max-w-[980px]">
-          <ProductFacts model={model} />
-          {!model.readyForCommerce ? (
-            <div className="mt-8">
-              <StatePanel title="این رکورد هنوز برای تجارت عمومی منتشر نشده است" tone="warning">
-                داده‌های موجود در کد برای توسعه رابط نگه داشته شده‌اند و تا تکمیل Evidence به‌عنوان
-                قیمت، موجودی، سایز، رنگ یا مشخصات قطعی فروشگاه استفاده نمی‌شوند.
-              </StatePanel>
-            </div>
-          ) : null}
+        <Shell className="py-4">
+          <Breadcrumb
+            items={[
+              { label: "خانه", to: "/" },
+              { label: "فروشگاه", to: "/shop" },
+              { label: cat.nameFa, to: "/$category", params: { category: cat.slug } },
+              { label: breadcrumbName },
+            ]}
+          />
         </Shell>
-      </Band>
-      {completeTheLook.length > 0 ? (
-        <Band label="COMPLETE THE LOOK">
-          <Shell>
-            <CompleteTheLook products={completeTheLook} />
+
+        <Shell
+          as="section"
+          aria-label="تصمیم‌گیری محصول"
+          className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
+        >
+          <Gallery media={galleryMedia} name={model.identity.name ?? "محصول"} />
+          <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
+        </Shell>
+
+        <Band label="PRODUCT DECISION FACTS">
+          <Shell className="max-w-[980px]">
+            <div className="mb-8">
+              <TechLabel tone="signal">SHOW TRUTH / HIDE UNCERTAINTY</TechLabel>
+              <h2 className="mt-2 text-display-3 text-bone">اطلاعات تصمیم‌گیری</h2>
+              <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
+                هر بخش فقط زمانی نمایش داده می‌شود که داده همان محصول منبع قابل استناد و وضعیت
+                تأییدشده داشته باشد.
+              </p>
+            </div>
+            <ProductFacts model={model} />
+
+            {!model.readyForCommerce ? (
+              <div className="mt-8">
+                <StatePanel title="این رکورد هنوز برای تجارت عمومی منتشر نشده است" tone="warning">
+                  داده‌های موجود در کد برای توسعه رابط نگه داشته شده‌اند و تا تکمیل Evidence
+                  به‌عنوان قیمت، موجودی، سایز، رنگ یا مشخصات قطعی فروشگاه استفاده نمی‌شوند.
+                </StatePanel>
+              </div>
+            ) : null}
+
+            <div className="mt-8 border-t border-hairline pt-6">
+              <p className="text-sm leading-7 text-metal">
+                وضعیت ارسال، مرجوعی و راه‌های پشتیبانی مستقل از مشخصات محصول نگهداری می‌شوند.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link to="/shipping-returns" className={CtaClasses("line")}>
+                  ارسال و مرجوعی
+                  <ArrowUpLeft size={16} aria-hidden="true" />
+                </Link>
+                <Link to="/contact" className={CtaClasses("line")}>
+                  تماس و پشتیبانی
+                  <ArrowUpLeft size={16} aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
           </Shell>
         </Band>
-      ) : null}
-      {loader.related.length > 0 ? (
-        <Band label="RELATED PRODUCTS">
-          <Shell>
-            <RelatedProducts products={loader.related} />
-          </Shell>
-        </Band>
-      ) : null}
-      <RecentlyViewed excludeSlug={p.slug} />
-    </PageChrome>
+
+        {completeTheLook.length > 0 ? (
+          <Band label="COMPLETE THE LOOK">
+            <Shell>
+              <CompleteTheLook products={completeTheLook} />
+            </Shell>
+          </Band>
+        ) : null}
+
+        {relatedItems.length > 0 ? (
+          <Band label="RELATED PRODUCTS">
+            <Shell>
+              <RelatedProducts products={relatedItems} />
+            </Shell>
+          </Band>
+        ) : null}
+
+        <RecentlyViewed excludeSlug={p.slug} />
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
   );
 }
 

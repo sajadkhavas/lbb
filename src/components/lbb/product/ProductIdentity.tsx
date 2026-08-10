@@ -33,7 +33,12 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
       </h1>
       {identity.shortDescription ? (
         <p className="mt-3 text-sm leading-7 text-metal">{identity.shortDescription}</p>
-      ) : null}
+      ) : (
+        <p className="mt-3 max-w-[52ch] text-sm leading-7 text-metal">
+          این رکورد برای توسعه رابط حفظ شده است، اما هویت و مشخصات آن هنوز برای نمایش عمومی تأیید
+          نشده‌اند.
+        </p>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2" aria-label="وضعیت محصول">
         {stock.availability === "available" ? <StatusTag tone="success">موجود</StatusTag> : null}
@@ -58,7 +63,9 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
           ) : null}
         </div>
       ) : (
-        <p className="mt-5 text-sm font-semibold text-metal">قیمت عمومی در دسترس نیست.</p>
+        <p className="mt-5 text-sm font-semibold text-metal">
+          قیمت عمومی این محصول هنوز تأیید نشده است.
+        </p>
       )}
     </section>
   );

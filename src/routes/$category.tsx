@@ -547,17 +547,20 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
   const searchKey = stableSearchString(serializeFilters(filters));
 
   useEffect(() => setVisible(PAGE_SIZE), [searchKey, cat.slug]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const expected = serializeFilters(filters);
-    if (!isCanonicalSearch(window.location.search, expected))
+    if (!isCanonicalSearch(window.location.search, expected)) {
       navigate({ search: expected, replace: true });
+    }
   }, [filters, navigate]);
 
-  const setFilters = (next: Filters) => {
-    const normalized = normalizeFilters(next, scope);
+  const setFilters = (nextFilters: Filters) => {
+    const normalized = normalizeFilters(nextFilters, scope);
     startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
   };
+
   const filtered = useMemo(() => applyFilters(items, filters), [items, filters]);
   const shown = filtered.slice(0, visible);
   const getResultCount = (candidate: Filters) => countDiscoveryResults(items, candidate, scope);
@@ -571,6 +574,7 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
       facetCounts={createFacetCounts(items, candidate, scope)}
     />
   );
+  const desktopFilters = renderFilters(filters, setFilters);
 
   return (
     <>
@@ -588,6 +592,7 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
             ]}
           />
         </Shell>
+
         <section className="border-b border-hairline">
           <Shell className="grid grid-cols-1 gap-7 py-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:items-center md:py-12">
             <div className="overflow-hidden rounded-2xl border border-hairline bg-carbon">
@@ -606,16 +611,26 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
               <h1 className="text-display-2 mt-3 text-bone">{cat.h1}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">{cat.heroTagline}</p>
               <p className="tech mt-4 text-signal">{inventory.label}</p>
+              <ul className="mt-5 grid gap-2 text-sm text-metal sm:grid-cols-2">
+                {cat.bullets.map((bullet: string) => (
+                  <li key={bullet} className="flex items-start gap-2">
+                    <span
+                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-signal"
+                      aria-hidden="true"
+                    />
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </Shell>
         </section>
+
         <Band hairline={false} className="!py-10 md:!py-14">
           <Shell>
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
-              <aside className="hidden lg:block">
-                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
-                  {renderFilters(filters, setFilters)}
-                </div>
+              <aside className="hidden lg:block" aria-label="فیلتر محصولات">
+                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{desktopFilters}</div>
               </aside>
               <section aria-labelledby="category-grid-title">
                 <h2 id="category-grid-title" className="sr-only">
@@ -630,7 +645,7 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
                   lockedCategory
                 />
                 {isPending ? (
-                  <div className="mt-6" aria-busy="true">
+                  <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی محصولات">
                     <GridSkeleton count={8} />
                   </div>
                 ) : filtered.length === 0 ? (
@@ -638,7 +653,25 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
                     className="mt-6"
                     icon={<PackageSearch size={40} aria-hidden="true" />}
                     title={`قطعه‌ای از ${cat.nameFaPlural} با این فیلترها پیدا نشد`}
-                    body="فیلترهای این دسته را تغییر بده."
+                    body="فیلترهای این دسته را تغییر بده یا به نمای کامل دسته برگرد."
+                    action={
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            colors: [],
+                            sizes: [],
+                            max: 0,
+                            instock: false,
+                            sale: false,
+                          })
+                        }
+                        className={CtaClasses("signal")}
+                      >
+                        نمایش همه {cat.nameFaPlural}
+                      </button>
+                    }
                   />
                 ) : (
                   <>
@@ -657,21 +690,41 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
                           نمایش قطعه‌های بیشتر
                         </button>
                       </div>
-                    ) : null}
+                    ) : (
+                      <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>
+                    )}
                   </>
                 )}
               </section>
             </div>
           </Shell>
         </Band>
+
         <Band label="CATEGORY GUIDE">
           <Shell className="max-w-[900px]">
             <h2 className="text-display-3 text-bone">
               {cat.nameFaPlural} استریت‌ویر LBB چه ویژگی‌هایی دارن؟
             </h2>
             <p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>
+            <div className="mt-8 divide-y divide-hairline border-t border-hairline">
+              {cat.faqs.map((faq: { q: string; a: string }) => (
+                <details key={faq.q} className="group py-4">
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-4 text-sm font-semibold text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal">
+                    {faq.q}
+                    <span
+                      className="shrink-0 transition-transform group-open:rotate-180"
+                      aria-hidden="true"
+                    >
+                      ▾
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-sm leading-8 text-metal">{faq.a}</p>
+                </details>
+              ))}
+            </div>
           </Shell>
         </Band>
+
         <Band label="MORE CATEGORIES">
           <Shell>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -682,7 +735,7 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
                     key={slug}
                     to="/$category"
                     params={{ category: slug }}
-                    className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone hover:border-signal hover:text-signal"
+                    className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                   >
                     {CATEGORIES[slug].nameFa}
                   </Link>

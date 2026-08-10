@@ -601,60 +601,132 @@ function PrototypeCheckout() {
   const payment = getPublicPaymentSettings();
 
   return (
-    <CheckoutChrome>
-      {!hydrated ? (
-        <p className="mt-8 text-sm text-metal" role="status">
-          در حال خواندن سبد خرید…
-        </p>
-      ) : lines.length === 0 ? (
-        <EmptyState
-          className="mt-8"
-          title="سبد خرید خالی است"
-          body="برای بررسی Checkout ابتدا یک محصول به سبد اضافه کنید."
-          action={
-            <Link to="/shop" className={CtaClasses("signal")}>
-              رفتن به فروشگاه
-            </Link>
-          }
-        />
-      ) : (
-        <div className="mt-8 space-y-6">
-          <section className="border border-hairline bg-carbon p-5">
-            <h2 className="text-base font-bold text-bone">خلاصه اقلام نمونه</h2>
-            <p className="mt-3 text-sm text-metal">جمع محلی نمونه: {fmtToman(subtotal)}</p>
-          </section>
-          {shippingMethods.length > 0 ? (
-            <StatePanel title="روش ارسال عمومی تأیید شده است" tone="success">
-              {shippingMethods.map((method) => method.title).join("، ")}
-            </StatePanel>
-          ) : (
-            <StatePanel
-              title={
-                STORE_SETTINGS.shipping.verification === "pending"
-                  ? "تنظیمات ارسال در حال بررسی است"
-                  : "روش ارسال عمومی در دسترس نیست"
+    <>
+      <Navbar />
+      <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian px-4 pb-28 pt-24 md:px-6">
+        <div className="mx-auto w-full max-w-[760px]">
+          <TechLabel tone="signal">CHECKOUT / TRUST BOUNDARY</TechLabel>
+          <h1 className="mt-3 text-display-2 text-bone">تکمیل سفارش</h1>
+          <p className="mt-3 max-w-[62ch] text-sm leading-8 text-metal">
+            این صفحه قبل از جمع‌آوری اطلاعات هویتی یا شروع پرداخت، آماده‌بودن سرویس‌های عمومی و سمت
+            سرور را بررسی می‌کند. نبودن یک سرویس با دادهٔ فرضی جبران نمی‌شود.
+          </p>
+
+          {!hydrated ? (
+            <p className="mt-8 text-sm text-metal" role="status">
+              در حال خواندن سبد خرید…
+            </p>
+          ) : lines.length === 0 ? (
+            <EmptyState
+              className="mt-8"
+              title="سبد خرید خالی است"
+              body="برای بررسی Checkout ابتدا یک محصول به سبد اضافه کنید."
+              action={
+                <Link to="/shop" className={CtaClasses("signal")}>
+                  رفتن به فروشگاه
+                </Link>
               }
-              tone="info"
-            >
-              Checkout نمونه هزینه فرضی تولید نمی‌کند.
-            </StatePanel>
-          )}
-          {payment ? (
-            <StatePanel title={`روش پرداخت عمومی: ${payment.displayName}`} tone="success">
-              شروع تراکنش و Verify در حالت نمونه انجام نمی‌شود.
-            </StatePanel>
+            />
           ) : (
-            <StatePanel title="روش پرداخت عمومی هنوز فعال نیست" tone="info">
-              هیچ Merchant یا Success فرضی نمایش داده نمی‌شود.
-            </StatePanel>
+            <div className="mt-8 space-y-6">
+              <section
+                className="rounded-2xl border border-hairline bg-carbon p-5"
+                aria-labelledby="checkout-summary"
+              >
+                <h2 id="checkout-summary" className="text-base font-bold text-bone">
+                  خلاصه اقلام
+                </h2>
+                <div className="mt-4 space-y-2 text-sm">
+                  {lines.map((line) => (
+                    <div
+                      key={`${line.slug}-${line.color ?? ""}-${line.size ?? ""}`}
+                      className="flex min-w-0 items-start justify-between gap-4 border-t border-hairline pt-3 first:border-t-0 first:pt-0"
+                    >
+                      <span className="min-w-0 text-metal">
+                        {line.name} × {line.qty.toLocaleString("fa-IR")}
+                      </span>
+                      <span className="shrink-0 font-semibold text-bone">
+                        {fmtToman(line.price * line.qty)}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="mt-4 flex items-center justify-between gap-4 border-t border-hairline pt-4 text-base font-bold text-bone">
+                    <span>جمع کالاها</span>
+                    <span>{fmtToman(subtotal)}</span>
+                  </div>
+                </div>
+                <p className="mt-3 text-xs leading-6 text-mute">
+                  این مبلغ فقط جمع اقلام سبد است؛ هزینه ارسال یا Total نهایی تا وجود دادهٔ
+                  قابل‌اعتماد اضافه نمی‌شود.
+                </p>
+              </section>
+
+              {shippingMethods.length > 0 ? (
+                <StatePanel title="روش ارسال عمومی تأیید شده است" tone="success">
+                  روش‌های فعال: {shippingMethods.map((method) => method.title).join("، ")}. انتخاب
+                  روش و محاسبه قابل‌اعتماد هزینه به فرایند واقعی سفارش وابسته است.
+                </StatePanel>
+              ) : (
+                <StatePanel
+                  title={
+                    STORE_SETTINGS.shipping.verification === "pending"
+                      ? "تنظیمات ارسال در حال بررسی است"
+                      : "روش ارسال عمومی در دسترس نیست"
+                  }
+                  tone={STORE_SETTINGS.shipping.verification === "pending" ? "warning" : "info"}
+                >
+                  Checkout هیچ هزینه، ارسال رایگان یا زمان تحویل فرضی تولید نمی‌کند.
+                </StatePanel>
+              )}
+
+              {payment ? (
+                <StatePanel title={`روش پرداخت عمومی: ${payment.displayName}`} tone="success">
+                  این اطلاعات فقط سطح عمومی پرداخت است. شروع تراکنش و نتیجهٔ پرداخت باید سمت سرور
+                  پیاده‌سازی و Verify شوند؛ Callback مرورگر به‌تنهایی Success نیست.
+                </StatePanel>
+              ) : (
+                <StatePanel
+                  title={
+                    STORE_SETTINGS.payment.verification === "pending"
+                      ? "تنظیمات پرداخت در حال بررسی است"
+                      : "روش پرداخت عمومی هنوز فعال نیست"
+                  }
+                  tone={STORE_SETTINGS.payment.verification === "pending" ? "warning" : "info"}
+                >
+                  نام درگاه، روش پرداخت، Merchant ID یا دادهٔ حساس دیگری از روی حدس نمایش داده
+                  نمی‌شود.
+                </StatePanel>
+              )}
+
+              <StatePanel title="ثبت نهایی سفارش هنوز سمت سرور تأیید نشده است" tone="warning">
+                <p>
+                  آماده‌بودن عمومی Shipping: {readiness.shippingPublic ? "بله" : "خیر"}؛ Payment:{" "}
+                  {readiness.paymentPublic ? "بله" : "خیر"}. حتی با آماده‌شدن این دو، Order
+                  submission و Payment verification باید Backend تأییدشده داشته باشند.
+                </p>
+                <p className="mt-2">
+                  به همین دلیل این صفحه فعلاً نام، تلفن، نشانی یا کدپستی جمع‌آوری نمی‌کند و هیچ
+                  دکمهٔ موفقیت ساختگی ندارد.
+                </p>
+              </StatePanel>
+
+              <div className="flex flex-wrap gap-3">
+                <Link to="/cart" className={CtaClasses("line")}>
+                  بازگشت به سبد
+                </Link>
+                <Link to="/shipping-returns" className={CtaClasses("line")}>
+                  ارسال و مرجوعی
+                </Link>
+                <Link to="/contact" className={CtaClasses("signal")}>
+                  تماس و پشتیبانی
+                </Link>
+              </div>
+            </div>
           )}
-          <StatePanel title="حالت Prototype" tone="warning">
-            Shipping: {readiness.shippingPublic ? "آماده" : "ناآماده"}؛ Payment:{" "}
-            {readiness.paymentPublic ? "آماده" : "ناآماده"}. ثبت واقعی سفارش فقط در Backend mode
-            live انجام می‌شود.
-          </StatePanel>
         </div>
-      )}
-    </CheckoutChrome>
+      </main>
+      <Footer />
+      <MobileBottomBar />
+    </>
   );
 }
