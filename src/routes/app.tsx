@@ -128,7 +128,8 @@ function AppPage() {
               </fieldset>
               {state === "subscribed" ? (
                 <p className="mt-3 text-xs leading-6 text-metal">
-                  برای تغییر نوع اعلان‌ها، ابتدا اعلان‌ها را غیرفعال و سپس با انتخاب جدید فعال کنید.
+                  برای تغییر نوع اعلان‌ها، ابتدا اعلان‌ها را غیرفعال و سپس با
+                  انتخاب جدید فعال کنید.
                 </p>
               ) : null}
               <button
