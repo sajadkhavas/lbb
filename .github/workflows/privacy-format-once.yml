@@ -1,0 +1,32 @@
+name: Privacy Format Once
+
+on:
+  push:
+    branches:
+      - phase/web-app-push-notifications
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: phase/web-app-push-notifications
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write src/routes/privacy.tsx
+      - name: Commit formatted privacy disclosure
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/routes/privacy.tsx
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'style(push): format privacy disclosure'
+          git push origin HEAD:phase/web-app-push-notifications
