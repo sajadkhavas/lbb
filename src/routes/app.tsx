@@ -19,13 +19,9 @@ function AppPage() {
   const [state, setState] = useState<PushState>("unsupported");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-  const [preferences, setPreferences] = useState<PushPreference[]>([
-    "product_updates",
-  ]);
+  const [preferences, setPreferences] = useState<PushPreference[]>(["product_updates"]);
   useEffect(() => {
-    void currentPushSubscription().then((subscription) =>
-      setState(getPushState(subscription)),
-    );
+    void currentPushSubscription().then((subscription) => setState(getPushState(subscription)));
   }, []);
   const toggle = (preference: PushPreference) =>
     setPreferences((items) =>
@@ -76,16 +72,15 @@ function AppPage() {
           <p className="tech text-signal">LBB / WEB APP</p>
           <h1 className="mt-4 text-display-1">وب‌اپ و اعلان‌ها</h1>
           <p className="mt-4 max-w-2xl text-sm leading-8 text-metal">
-            LBB را روی دستگاه نصب کنید و انتخاب کنید چه اعلان‌هایی دریافت شوند.
-            اجازه اعلان فقط بعد از فشردن دکمه فعال‌سازی درخواست می‌شود.
+            LBB را روی دستگاه نصب کنید و انتخاب کنید چه اعلان‌هایی دریافت شوند. اجازه اعلان فقط بعد
+            از فشردن دکمه فعال‌سازی درخواست می‌شود.
           </p>
           <section className="mt-10 grid gap-4 md:grid-cols-2">
             <article className="rounded-2xl border border-hairline bg-carbon p-6">
               <Smartphone className="text-signal" aria-hidden="true" />
               <h2 className="mt-4 text-xl">نصب روی دستگاه</h2>
               <p className="mt-3 text-sm leading-7 text-metal">
-                از گزینه Install در مرورگر یا Add to Home Screen در iOS استفاده
-                کنید.
+                از گزینه Install در مرورگر یا Add to Home Screen در iOS استفاده کنید.
               </p>
               <span className="mt-5 inline-flex items-center gap-2 text-xs text-bone">
                 <Download size={16} aria-hidden="true" />
@@ -113,10 +108,7 @@ function AppPage() {
                   ["product_updates", "به‌روزرسانی محصولات"],
                   ["editorial", "محتوای تازه ژورنال"],
                 ].map(([value, label]) => (
-                  <label
-                    key={value}
-                    className="flex min-h-11 items-center gap-3 text-sm"
-                  >
+                  <label key={value} className="flex min-h-11 items-center gap-3 text-sm">
                     <input
                       type="checkbox"
                       checked={preferences.includes(value as PushPreference)}
@@ -128,8 +120,7 @@ function AppPage() {
               </fieldset>
               {state === "subscribed" ? (
                 <p className="mt-3 text-xs leading-6 text-metal">
-                  برای تغییر نوع اعلان‌ها، ابتدا اعلان‌ها را غیرفعال و سپس با
-                  انتخاب جدید فعال کنید.
+                  برای تغییر نوع اعلان‌ها، ابتدا اعلان‌ها را غیرفعال و سپس با انتخاب جدید فعال کنید.
                 </p>
               ) : null}
               <button
@@ -158,9 +149,8 @@ function AppPage() {
             </article>
           </section>
           <p className="mt-6 rounded-xl border border-hairline p-4 text-xs leading-7 text-metal">
-            اعلان آزمایشی یا سفارش ساختگی نمایش داده نمی‌شود. ارسال اعلان فقط پس
-            از اتصال امن Backend، احراز هویت و ثبت subscription واقعی انجام
-            خواهد شد.
+            اعلان آزمایشی یا سفارش ساختگی نمایش داده نمی‌شود. ارسال اعلان فقط پس از اتصال امن
+            Backend، احراز هویت و ثبت subscription واقعی انجام خواهد شد.
           </p>
         </div>
       </main>
