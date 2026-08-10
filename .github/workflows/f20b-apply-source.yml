@@ -1,0 +1,119 @@
+name: F20B Apply Production SEO Source
+
+on:
+  push:
+    branches:
+      - phase/f20b-production-seo-integration
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: phase/f20b-production-seo-integration
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Apply F20-B production SEO integration
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          Path('src/lib/seo-live.ts').write_text('''import type { SeoDto } from "@/lib/backend-api";\n\nfunction normalizeFallback(path: string) {\n  const value = path.startsWith("/") ? path : `/${path}`;\n  return value === "/" ? "/" : value.replace(/\\/+$/, "");\n}\n\nexport function backendCanonicalPath(\n  seo: Pick<SeoDto, "canonicalPath"> | null | undefined,\n  fallback: string,\n) {\n  const safeFallback = normalizeFallback(fallback);\n  const candidate = seo?.canonicalPath?.trim();\n  if (!candidate || !candidate.startsWith("/") || candidate.startsWith("//")) return safeFallback;\n  if (candidate.includes("?") || candidate.includes("#") || candidate.includes("\\\\")) {\n    return safeFallback;\n  }\n  try {\n    const url = new URL(candidate, "https://lbb.invalid");\n    if (url.origin !== "https://lbb.invalid" || url.search || url.hash) return safeFallback;\n    const normalized = url.pathname === "/" ? "/" : url.pathname.replace(/\\/+$/, "");\n    return normalized || safeFallback;\n  } catch {\n    return safeFallback;\n  }\n}\n\nexport function sitemapLastmod(value: string | null | undefined) {\n  const raw = value?.trim();\n  if (!raw || !/^\\d{4}-\\d{2}-\\d{2}(?:T|$)/.test(raw)) return null;\n  const date = new Date(raw);\n  if (Number.isNaN(date.getTime())) return null;\n  return date.toISOString();\n}\n\nexport function xmlEscape(value: string) {\n  return value\n    .replaceAll("&", "&amp;")\n    .replaceAll("<", "&lt;")\n    .replaceAll(">", "&gt;")\n    .replaceAll('"', "&quot;")\n    .replaceAll("'", "&apos;");\n}\n''', encoding='utf-8')
+
+          # Product: Backend canonicalPath is authoritative SEO path, with safe route fallback.
+          p = Path('src/routes/product.$slug.tsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('''import { recordRecentlyViewed } from "@/lib/recently-viewed";''', '''import { recordRecentlyViewed } from "@/lib/recently-viewed";\nimport { backendCanonicalPath } from "@/lib/seo-live";''')
+          text = text.replace('''      const path = `/product/${product.slug}`;''', '''      const path = backendCanonicalPath(product.seo, `/product/${product.slug}`);''', 1)
+          p.write_text(text, encoding='utf-8')
+
+          # Category: canonical and live ItemList both come from published Backend data.
+          p = Path('src/routes/$category.tsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('''import { evaluateProductEvidence } from "@/lib/product-evidence";''', '''import { evaluateProductEvidence } from "@/lib/product-evidence";\nimport { backendCanonicalPath } from "@/lib/seo-live";''')
+          text = text.replace('''      const path = `/${category.slug}`;''', '''      const path = backendCanonicalPath(category.seo, `/${category.slug}`);''', 1)
+          marker = '''        {\n          type: "application/ld+json",\n          children: JSON.stringify({\n            "@context": "https://schema.org",\n            "@type": "CollectionPage",\n            name: category.name,\n            description,\n            url: absUrl(path),\n          }),\n        },\n      ];'''
+          replacement = '''        {\n          type: "application/ld+json",\n          children: JSON.stringify({\n            "@context": "https://schema.org",\n            "@type": "CollectionPage",\n            name: category.name,\n            description,\n            url: absUrl(path),\n          }),\n        },\n        ...(loaderData.items.length > 0\n          ? [\n              {\n                type: "application/ld+json",\n                children: JSON.stringify({\n                  "@context": "https://schema.org",\n                  "@type": "ItemList",\n                  name: category.name,\n                  numberOfItems: loaderData.items.length,\n                  itemListElement: loaderData.items.map((product, index) => ({\n                    "@type": "ListItem",\n                    position: index + 1,\n                    url: absUrl(`/product/${product.slug}`),\n                    name: product.name,\n                  })),\n                }),\n              },\n            ]\n          : []),\n      ];'''
+          if marker not in text: raise SystemExit('category schema anchor missing')
+          p.write_text(text.replace(marker, replacement, 1), encoding='utf-8')
+
+          # Collection: preserve real 404 and use Backend canonicalPath safely.
+          p = Path('src/routes/collections.$slug.tsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('''  backendErrorMessage,\n  getCollection,''', '''  BackendApiError,\n  backendErrorMessage,\n  getCollection,''')
+          text = text.replace('''import { pageMeta, canonical, breadcrumbLd, absUrl } from "@/lib/site";''', '''import { pageMeta, canonical, breadcrumbLd, absUrl } from "@/lib/site";\nimport { backendCanonicalPath } from "@/lib/seo-live";''')
+          old_catch = '''    } catch (error) {\n      return {\n        mode: "live",\n        collection: null,\n        products: [],\n        error: backendErrorMessage(error),\n      };\n    }'''
+          new_catch = '''    } catch (error) {\n      if (error instanceof BackendApiError && error.status === 404) {\n        throw notFound({ routeId: "/collections/$slug" });\n      }\n      return {\n        mode: "live",\n        collection: null,\n        products: [],\n        error: backendErrorMessage(error),\n      };\n    }'''
+          if old_catch not in text: raise SystemExit('collection catch anchor missing')
+          text = text.replace(old_catch, new_catch, 1)
+          text = text.replace('''      const path = `/collections/${params.slug}`;''', '''      const routePath = `/collections/${params.slug}`;''', 1)
+          text = text.replace('''            path: "/shop",''', '''            path: routePath,''', 1) if False else text
+          text = text.replace('''          links: canonical(path),''', '''          links: canonical(routePath),''', 1)
+          text = text.replace('''      const title = collection.seo.metaTitle || `${collection.name} | LBB`;''', '''      const path = backendCanonicalPath(collection.seo, routePath);\n      const title = collection.seo.metaTitle || `${collection.name} | LBB`;''', 1)
+          p.write_text(text, encoding='utf-8')
+
+          # Sitemap: dynamic published commerce entries in live mode, static/editorial contract retained.
+          sitemap = '''import { createFileRoute } from "@tanstack/react-router";\nimport type {} from "@tanstack/react-start";\nimport { products } from "@/lib/products";\nimport { CATEGORY_SLUGS } from "@/lib/categories";\nimport { COLLECTIONS } from "@/lib/collections";\nimport { JOURNAL_ARTICLES } from "@/lib/journal";\nimport { evaluateProductEvidence } from "@/lib/product-evidence";\nimport { absUrl } from "@/lib/site";\nimport {\n  isLiveBackend,\n  listCategories,\n  listCollections,\n  listProducts,\n  type CategoryDto,\n  type CollectionDto,\n  type ProductSummaryDto,\n} from "@/lib/backend-api";\nimport { backendCanonicalPath, sitemapLastmod, xmlEscape } from "@/lib/seo-live";\n\ntype Entry = { path: string; priority: string; changefreq?: string; lastmod?: string | null };\n\nconst editorialEntries: Entry[] = [\n  { path: "/collections", priority: "0.7", changefreq: "weekly" },\n  { path: "/journal", priority: "0.6", changefreq: "weekly" },\n  ...JOURNAL_ARTICLES.map((article) => ({ path: `/journal/${article.slug}`, priority: "0.6" })),\n  { path: "/lookbook", priority: "0.5", changefreq: "monthly" },\n  { path: "/about", priority: "0.5" },\n  { path: "/contact", priority: "0.5" },\n  { path: "/size-guide", priority: "0.5" },\n  { path: "/faq", priority: "0.5" },\n  { path: "/shipping-returns", priority: "0.4" },\n  { path: "/terms", priority: "0.3" },\n  { path: "/privacy", priority: "0.3" },\n];\n\nfunction prototypeCommerceEntries(): Entry[] {\n  return [\n    ...CATEGORY_SLUGS.map((slug) => ({ path: `/${slug}`, priority: "0.9", changefreq: "weekly" })),\n    ...products\n      .filter((product) => evaluateProductEvidence(product).publishable)\n      .map((product) => ({ path: `/product/${product.slug}`, priority: "0.8", changefreq: "weekly" })),\n    ...COLLECTIONS.map((collection) => ({ path: `/collections/${collection.slug}`, priority: "0.7" })),\n  ];\n}\n\nasync function fetchAllPublishedProducts() {\n  const result: ProductSummaryDto[] = [];\n  for (let page = 1; page <= 100; page += 1) {\n    const response = await listProducts({ page, per_page: 48, sort: "newest" });\n    result.push(...response.data);\n    const pagination = response.meta.pagination;\n    if (!pagination?.hasMore) return result;\n  }\n  throw new Error("Published product sitemap pagination exceeded safety limit.");\n}\n\nfunction categoryEntry(category: CategoryDto): Entry {\n  return {\n    path: backendCanonicalPath(category.seo, `/${category.slug}`),\n    priority: "0.9",\n    changefreq: "weekly",\n    lastmod: sitemapLastmod(category.seo.updatedAt),\n  };\n}\n\nfunction productEntry(product: ProductSummaryDto): Entry {\n  return {\n    path: backendCanonicalPath(product.seo, `/product/${product.slug}`),\n    priority: "0.8",\n    changefreq: "weekly",\n    lastmod: sitemapLastmod(product.seo.updatedAt),\n  };\n}\n\nfunction collectionEntry(collection: CollectionDto): Entry {\n  return {\n    path: backendCanonicalPath(collection.seo, `/collections/${collection.slug}`),\n    priority: "0.7",\n    lastmod: sitemapLastmod(collection.seo.updatedAt),\n  };\n}\n\nasync function liveCommerceEntries(): Promise<Entry[]> {\n  const [categories, collections, publishedProducts] = await Promise.all([\n    listCategories(),\n    listCollections(),\n    fetchAllPublishedProducts(),\n  ]);\n  return [\n    ...categories.data.map(categoryEntry),\n    ...publishedProducts.map(productEntry),\n    ...collections.data.map(collectionEntry),\n  ];\n}\n\nfunction uniqueEntries(entries: Entry[]) {\n  const unique = new Map<string, Entry>();\n  for (const entry of entries) if (!unique.has(entry.path)) unique.set(entry.path, entry);\n  return [...unique.values()];\n}\n\nfunction renderSitemap(entries: Entry[]) {\n  const urls = uniqueEntries(entries)\n    .map((entry) => {\n      const loc = xmlEscape(absUrl(entry.path));\n      const lastmod = entry.lastmod ? `\\n    <lastmod>${xmlEscape(entry.lastmod)}</lastmod>` : "";\n      const changefreq = entry.changefreq ? `\\n    <changefreq>${entry.changefreq}</changefreq>` : "";\n      return `  <url>\\n    <loc>${loc}</loc>${lastmod}${changefreq}\\n    <priority>${entry.priority}</priority>\\n  </url>`;\n    })\n    .join("\\n");\n  return `<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\\n${urls}\\n</urlset>`;\n}\n\nexport const Route = createFileRoute("/sitemap.xml")({\n  server: {\n    handlers: {\n      GET: async () => {\n        try {\n          const commerceEntries = isLiveBackend()\n            ? await liveCommerceEntries()\n            : prototypeCommerceEntries();\n          const entries: Entry[] = [\n            { path: "/", priority: "1.0", changefreq: "weekly" },\n            { path: "/shop", priority: "0.9", changefreq: "weekly" },\n            ...commerceEntries,\n            ...editorialEntries,\n          ];\n          return new Response(renderSitemap(entries), {\n            headers: {\n              "Content-Type": "application/xml; charset=utf-8",\n              "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",\n            },\n          });\n        } catch (error) {\n          console.error("Live sitemap generation failed", error);\n          if (!isLiveBackend()) throw error;\n          return new Response("Sitemap temporarily unavailable.", {\n            status: 503,\n            headers: {\n              "Content-Type": "text/plain; charset=utf-8",\n              "Cache-Control": "no-store",\n              "Retry-After": "300",\n            },\n          });\n        }\n      },\n    },\n  },\n});\n'''
+          Path('src/routes/sitemap[.]xml.ts').write_text(sitemap, encoding='utf-8')
+
+          Path('tests/f20b-seo-helpers.spec.ts').write_text('''import { expect, test } from "@playwright/test";\nimport { backendCanonicalPath, sitemapLastmod, xmlEscape } from "../src/lib/seo-live";\n\ntest("backend canonical paths accept only clean internal paths", () => {\n  expect(backendCanonicalPath({ canonicalPath: "/product/verified" }, "/product/fallback")).toBe(\n    "/product/verified",\n  );\n  expect(backendCanonicalPath({ canonicalPath: "https://evil.example/x" }, "/product/fallback")).toBe(\n    "/product/fallback",\n  );\n  expect(backendCanonicalPath({ canonicalPath: "//evil.example/x" }, "/product/fallback")).toBe(\n    "/product/fallback",\n  );\n  expect(backendCanonicalPath({ canonicalPath: "/product/x?q=1" }, "/product/fallback")).toBe(\n    "/product/fallback",\n  );\n  expect(backendCanonicalPath({ canonicalPath: "/product/x#fragment" }, "/product/fallback")).toBe(\n    "/product/fallback",\n  );\n});\n\ntest("sitemap helpers emit validated timestamps and escaped XML", () => {\n  expect(sitemapLastmod("2026-08-09T12:30:00Z")).toBe("2026-08-09T12:30:00.000Z");\n  expect(sitemapLastmod("not-a-date")).toBeNull();\n  expect(xmlEscape('/product/a&b<"c"')).toBe("/product/a&amp;b&lt;&quot;c&quot;");\n});\n''', encoding='utf-8')
+
+          Path('scripts/audit-f20b-seo.mjs').write_text('''import fs from "node:fs";\n\nconst read = (path) => fs.readFileSync(path, "utf8");\nconst product = read("src/routes/product.$slug.tsx");\nconst category = read("src/routes/$category.tsx");\nconst collection = read("src/routes/collections.$slug.tsx");\nconst sitemap = read("src/routes/sitemap[.]xml.ts");\nconst helper = read("src/lib/seo-live.ts");\n\nconst required = [\n  [product, "backendCanonicalPath(product.seo", "Product consumes Backend canonicalPath"],\n  [category, "backendCanonicalPath(category.seo", "Category consumes Backend canonicalPath"],\n  [category, '\"@type\": \"ItemList\"', "live Category publishes ItemList"],\n  [collection, "backendCanonicalPath(collection.seo", "Collection consumes Backend canonicalPath"],\n  [collection, "error instanceof BackendApiError && error.status === 404", "Collection preserves real 404"],\n  [sitemap, "isLiveBackend()", "sitemap switches on production backend mode"],\n  [sitemap, "listCategories()", "sitemap uses Backend categories"],\n  [sitemap, "listCollections()", "sitemap uses Backend collections"],\n  [sitemap, "listProducts({ page, per_page: 48", "sitemap paginates Backend products"],\n  [sitemap, "<lastmod>", "sitemap supports lastmod"],\n  [sitemap, '\"Retry-After\": \"300\"', "live sitemap fails closed with retry semantics"],\n  [helper, "candidate.startsWith(\"//\")", "canonical helper rejects protocol-relative paths"],\n];\nfor (const [source, token, message] of required) {\n  if (!source.includes(token)) throw new Error(`F20-B audit failed: ${message}`);\n}\nif (sitemap.includes("evaluateProductEvidence(product).publishable") && !sitemap.includes("prototypeCommerceEntries")) {\n  throw new Error("F20-B audit failed: production sitemap still depends on prototype evidence registry");\n}\nconsole.log("F20-B production SEO audit: PASS");\n''', encoding='utf-8')
+
+          Path('docs/f20/f20b-completion.md').write_text('''# F20-B — Production SEO Integration\n\nF20-B maps the accepted F20-A SEO contract onto the frozen F14D Backend data already available in the storefront.\n\n## Completed\n- Product, Category and Collection canonical URLs consume Backend `seo.canonicalPath` through a defensive internal-path validator.\n- Live Category emits BreadcrumbList, CollectionPage and published-product ItemList structured data.\n- Live Collection preserves a true 404 when the Backend returns 404.\n- `/sitemap.xml` switches to Backend-published Categories, Products and Collections in live mode.\n- Backend `seo.updatedAt` is emitted as `<lastmod>` only when it is a valid timestamp.\n- Product pagination is exhausted safely for sitemap generation with a hard upper bound.\n- Live sitemap generation never falls back to prototype commerce data; Backend failure returns HTTP 503, `no-store`, and `Retry-After`.\n- Existing static/editorial routes remain in the sitemap because the frozen Backend contract exposes no public Journal/Article endpoint.\n\n## Truth boundaries\n- No redirect-history endpoint is invented. Canonical slug history remains unavailable until Backend exposes a frozen redirect contract.\n- Journal remains frontend/editorial data; no fake Backend article DTO or publication feed is created.\n- Search and faceted listing states retain F20-A `noindex, follow` behavior and clean canonicals.\n- Product price/availability structured data remains sourced from Backend-authoritative published DTOs only.\n\n## Deferred external operations\nSearch Console submission, crawl-log analysis and intentional faceted landing pages require a deployed production origin and real search data; they are deployment/operations work, not fabricated in code.\n''', encoding='utf-8')
+
+          p = Path('package.json')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('''"test:seo": "playwright test tests/seo-contract.spec.ts tests/seo-pwa.spec.ts",''', '''"test:seo": "playwright test tests/seo-contract.spec.ts tests/seo-pwa.spec.ts",\n    "test:f20b": "playwright test tests/f20b-seo-helpers.spec.ts",''')
+          text = text.replace('''"audit:source": "node scripts/audit-source.mjs",''', '''"audit:source": "node scripts/audit-source.mjs",\n    "audit:f20b": "node scripts/audit-f20b-seo.mjs",''')
+          text = text.replace('''npm run audit:product-evidence && npm run audit:source && npm run audit:a11y''', '''npm run audit:product-evidence && npm run audit:source && npm run audit:f20b && npm run audit:a11y''')
+          p.write_text(text, encoding='utf-8')
+          PY
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Format changed source
+        run: npx prettier --write src/lib/seo-live.ts src/routes/product.$slug.tsx src/routes/$category.tsx src/routes/collections.$slug.tsx 'src/routes/sitemap[.]xml.ts' tests/f20b-seo-helpers.spec.ts scripts/audit-f20b-seo.mjs docs/f20/f20b-completion.md package.json
+      - name: Lint
+        run: npm run lint
+      - name: Build before typecheck
+        env:
+          VITE_SITE_URL: https://lbb.example.test
+          VITE_LBB_BACKEND_MODE: prototype
+        run: npm run build
+      - name: Typecheck
+        env:
+          VITE_SITE_URL: https://lbb.example.test
+          VITE_LBB_BACKEND_MODE: prototype
+        run: npm run typecheck
+      - name: F20-B source audit
+        run: npm run audit:f20b
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Existing SEO regressions
+        env:
+          VITE_SITE_URL: https://lbb.example.test
+          VITE_LBB_BACKEND_MODE: prototype
+        run: npm run test:seo
+      - name: F20-B helper regressions
+        env:
+          VITE_SITE_URL: https://lbb.example.test
+          VITE_LBB_BACKEND_MODE: prototype
+        run: npm run test:f20b
+      - name: Commit validated F20-B source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src tests scripts docs/f20 package.json
+          git diff --cached --quiet && { echo "No F20-B source changes"; exit 1; }
+          git commit -m "feat(f20b): integrate production SEO data"
+          git push origin HEAD:phase/f20b-production-seo-integration
