@@ -1,0 +1,47 @@
+name: F18 Motion Performance Polish
+
+on:
+  push:
+    branches:
+      - phase/f18-motion-performance-polish
+  pull_request:
+    branches:
+      - integration/wave4-reviewed
+
+permissions:
+  contents: read
+
+jobs:
+  motion-performance-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      VITE_SITE_URL: https://lbb.example.test
+      VITE_LBB_BACKEND_MODE: prototype
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Format
+        run: npm run format:check
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Production dependency audit
+        run: npm run audit:dependencies
+      - name: Production bundle audit
+        run: npm run audit:production
+      - name: F18 source audit
+        run: npm run audit:f18
+      - name: F18 browser regressions
+        run: npm run test:f18
+      - name: Reduced-motion and RTL regressions
+        run: npm run test:rtl
