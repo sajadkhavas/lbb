@@ -1,3 +1,4 @@
+# Temporary inventory trigger: rerun F18 implementation after the reduced-motion CSS hardening.
 name: F18 Motion Runtime Inventory
 
 on:
