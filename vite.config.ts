@@ -34,7 +34,9 @@ export default defineConfig({
           "brand/lbb-logo.svg",
         ],
         workbox: {
-          globPatterns: ["**/*.{js,css,woff2,svg}"],
+          globPatterns: ["**/*.{js,css,html,woff2,svg}"],
+          navigateFallback: "/offline.html",
+          importScripts: ["/push-sw.js"],
           globIgnores: ["**/*.map"],
           maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
           navigateFallbackDenylist: [sensitivePath, /^\/sitemap\.xml$/, /^\/robots\.txt$/],
