@@ -171,7 +171,7 @@ export function ProductGridControls({
               type="button"
               onClick={chip.onRemove}
               aria-label={`حذف فیلتر ${chip.label}`}
-              className="flex min-h-10 items-center gap-1.5 border border-hairline px-3 py-1.5 text-xs text-metal transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              className="flex min-h-11 items-center gap-1.5 border border-hairline px-3 py-1.5 text-xs text-metal transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
             >
               {chip.label}
               <X size={12} aria-hidden="true" />
@@ -180,7 +180,7 @@ export function ProductGridControls({
           <button
             type="button"
             onClick={() => onChange({ ...EMPTY_FILTERS, sort: filters.sort })}
-            className="min-h-10 tech text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="min-h-11 inline-flex items-center tech text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
           >
             پاک کردن همه
           </button>
@@ -231,7 +231,7 @@ export function ProductGridControls({
                 <button
                   type="button"
                   onClick={resetDraft}
-                  className="min-h-10 text-xs text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  className="min-h-11 inline-flex items-center text-xs text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                 >
                   پاک کردن فیلترها
                 </button>

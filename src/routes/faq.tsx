@@ -165,7 +165,7 @@ function FaqPage() {
                 <a
                   key={group.id}
                   href={`#${group.id}`}
-                  className="rounded-full border border-hairline px-4 py-2 text-xs text-metal transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  className="inline-flex min-h-11 items-center rounded-full border border-hairline px-4 py-2 text-xs text-metal transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                 >
                   {group.title}
                 </a>

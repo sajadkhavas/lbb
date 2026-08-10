@@ -11,6 +11,7 @@ import { productGallery } from "@/lib/product-images";
 import { colorName } from "@/lib/color-names";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { CtaClasses, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
+import { Identifier } from "@/components/lbb/ui/Identifier";
 
 const MAX_QTY = 10;
 
@@ -89,6 +90,25 @@ export function ProductQuickView() {
         <div className="shrink-0 md:w-[46%]">
           <div
             className="relative aspect-[4/3] w-full overflow-hidden bg-carbon touch-pan-y md:aspect-[3/4] md:h-full"
+            tabIndex={gallery.length > 1 ? 0 : -1}
+            role="region"
+            aria-label={`گالری نمای سریع ${p.name}`}
+            onKeyDown={(event) => {
+              if (gallery.length <= 1) return;
+              if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                setImage(img + 1);
+              } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                setImage(img - 1);
+              } else if (event.key === "Home") {
+                event.preventDefault();
+                setImg(0);
+              } else if (event.key === "End") {
+                event.preventDefault();
+                setImg(gallery.length - 1);
+              }
+            }}
             onTouchStart={(event: React.TouchEvent<HTMLDivElement>) => {
               touchStart.current = event.touches[0]?.clientX ?? null;
             }}
@@ -143,7 +163,7 @@ export function ProductQuickView() {
                   onClick={() => setImg(index)}
                   aria-label={`نمایش تصویر ${index + 1}`}
                   aria-current={index === img ? "true" : undefined}
-                  className={`h-11 w-9 overflow-hidden border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
+                  className={`h-11 w-11 overflow-hidden border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
                     index === img ? "border-signal" : "border-bone/40 opacity-70"
                   }`}
                 >
@@ -306,7 +326,7 @@ export function ProductQuickView() {
           </Link>
 
           <p className="mt-4 border-t border-hairline pt-4 text-[11px] text-mute">
-            کد کالا: <span className="num">{p.sku}</span> — جنس: {p.material}
+            کد کالا: <Identifier>{p.sku}</Identifier> — جنس: {p.material}
           </p>
         </div>
 

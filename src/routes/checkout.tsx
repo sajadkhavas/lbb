@@ -57,6 +57,9 @@ function Checkout() {
   return isLiveBackend() ? <LiveCheckout /> : <PrototypeCheckout />;
 }
 
+type RecipientFieldKey = "name" | "province" | "city" | "address";
+type RecipientErrors = Partial<Record<RecipientFieldKey, string>>;
+
 function LiveCheckout() {
   const { lines, clear, hydrated } = useCart();
   const [customer, setCustomer] = useState<CustomerDto | null>(null);
@@ -80,18 +83,40 @@ function LiveCheckout() {
   const [continuityHydrated, setContinuityHydrated] = useState(false);
   const [recoveryLoading, setRecoveryLoading] = useState(false);
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<RecipientErrors>({});
 
   const backendItems = useMemo(() => cartLinesToBackendItems(lines), [lines]);
   const cartCompatible = backendItems.length > 0 && backendItems.length === lines.length;
   const enabledMethods = methods.filter((method) => method.enabled);
   const selectedMethod = enabledMethods.find((method) => method.method === deliveryMethod) ?? null;
   const needsAddress = deliveryMethod === "standard";
-  const recipientReady =
-    fullName.trim().length >= 2 &&
-    Boolean(customer?.mobile) &&
-    Boolean(deliveryMethod) &&
-    (!needsAddress || (province.trim() && city.trim() && address.trim()));
   const shouldRecoverPending = lines.length === 0 && Boolean(continuity);
+
+  const clearFieldError = (field: RecipientFieldKey) => {
+    setFieldErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const validateRecipient = () => {
+    const next: RecipientErrors = {};
+    if (fullName.trim().length < 2) next.name = "نام و نام خانوادگی را کامل وارد کنید.";
+    if (needsAddress && !province.trim()) next.province = "استان را وارد کنید.";
+    if (needsAddress && !city.trim()) next.city = "شهر را وارد کنید.";
+    if (needsAddress && !address.trim()) next.address = "نشانی کامل را وارد کنید.";
+    setFieldErrors(next);
+    const first = (["name", "province", "city", "address"] as RecipientFieldKey[]).find(
+      (field) => next[field],
+    );
+    if (first) {
+      requestAnimationFrame(() => document.getElementById(`co-${first}`)?.focus());
+      return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
     if (!hydrated) return;
@@ -214,7 +239,8 @@ function LiveCheckout() {
 
   const requestQuote = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!customer || !cartCompatible || !recipientReady || !deliveryMethod) return;
+    if (!customer || !cartCompatible || !deliveryMethod) return;
+    if (!validateRecipient()) return;
     setBusy("quote");
     setActionError(null);
     try {
@@ -353,7 +379,7 @@ function LiveCheckout() {
           onPayment={startPayment}
         />
       ) : (
-        <form onSubmit={requestQuote} className="mt-8 space-y-6">
+        <form onSubmit={requestQuote} noValidate className="mt-8 space-y-6">
           {!cartCompatible ? (
             <StatePanel title="سبد قدیمی با Backend سازگار نیست" tone="warning">
               یکی از اقلام شناسه Variant معتبر Backend ندارد. آن قلم را حذف و دوباره از صفحه محصول
@@ -400,45 +426,79 @@ function LiveCheckout() {
             </h2>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <Field
+                id="co-name"
                 label="نام و نام خانوادگی"
                 value={fullName}
-                onChange={setFullName}
+                onChange={(value) => {
+                  setFullName(value);
+                  clearFieldError("name");
+                }}
                 autoComplete="name"
                 required
+                error={fieldErrors.name}
               />
-              <Field label="شماره موبایل تأییدشده" value={customer.mobile} readOnly dir="ltr" />
               <Field
+                id="co-phone"
+                label="شماره موبایل تأییدشده"
+                value={customer.mobile}
+                readOnly
+                autoComplete="tel"
+                dir="ltr"
+              />
+              <Field
+                id="co-province"
                 label="استان"
                 value={province}
-                onChange={setProvince}
+                onChange={(value) => {
+                  setProvince(value);
+                  clearFieldError("province");
+                }}
                 autoComplete="address-level1"
                 required={needsAddress}
+                error={fieldErrors.province}
               />
               <Field
+                id="co-city"
                 label="شهر"
                 value={city}
-                onChange={setCity}
+                onChange={(value) => {
+                  setCity(value);
+                  clearFieldError("city");
+                }}
                 autoComplete="address-level2"
                 required={needsAddress}
+                error={fieldErrors.city}
               />
               {needsAddress ? (
                 <div className="md:col-span-2">
                   <Field
+                    id="co-address"
                     label="نشانی"
                     value={address}
-                    onChange={setAddress}
+                    onChange={(value) => {
+                      setAddress(value);
+                      clearFieldError("address");
+                    }}
                     autoComplete="street-address"
                     required
+                    error={fieldErrors.address}
                   />
                 </div>
               ) : null}
               <Field
+                id="co-postal"
                 label="کدپستی (اختیاری)"
                 value={postalCode}
                 onChange={setPostalCode}
+                autoComplete="postal-code"
                 inputMode="numeric"
               />
-              <Field label="یادداشت سفارش (اختیاری)" value={notes} onChange={setNotes} />
+              <Field
+                id="co-notes"
+                label="یادداشت سفارش (اختیاری)"
+                value={notes}
+                onChange={setNotes}
+              />
             </div>
           </section>
 
@@ -511,7 +571,7 @@ function LiveCheckout() {
             {!quote ? (
               <button
                 type="submit"
-                disabled={busy !== null || !cartCompatible || !recipientReady || !selectedMethod}
+                disabled={busy !== null || !cartCompatible || !selectedMethod}
                 className={`${CtaClasses("signal")} disabled:opacity-50`}
               >
                 {busy === "quote" ? (
@@ -624,6 +684,7 @@ function OrderCreated({
 }
 
 function Field({
+  id,
   label,
   value,
   onChange,
@@ -632,7 +693,9 @@ function Field({
   autoComplete,
   dir,
   inputMode,
+  error,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange?: (value: string) => void;
@@ -641,11 +704,14 @@ function Field({
   autoComplete?: string;
   dir?: "ltr" | "rtl";
   inputMode?: "numeric" | "tel" | "text";
+  error?: string;
 }) {
+  const errorId = `${id}-error`;
   return (
-    <label className="grid gap-2 text-xs font-semibold text-metal">
-      <span>{label}</span>
+    <div className="grid gap-2 text-xs font-semibold text-metal">
+      <label htmlFor={id}>{label}</label>
       <input
+        id={id}
         value={value}
         onChange={onChange ? (event) => onChange(event.target.value) : undefined}
         required={required}
@@ -653,9 +719,16 @@ function Field({
         autoComplete={autoComplete}
         dir={dir}
         inputMode={inputMode}
+        aria-invalid={error ? "true" : undefined}
+        aria-describedby={error ? errorId : undefined}
         className="min-h-12 border border-hairline bg-obsidian px-4 text-sm text-bone outline-none read-only:opacity-70 focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
       />
-    </label>
+      {error ? (
+        <p id={errorId} role="alert" className="text-xs font-semibold leading-6 text-danger">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
