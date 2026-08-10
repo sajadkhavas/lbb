@@ -45,20 +45,20 @@ function NotFoundComponent() {
           <nav aria-label="مسیرهای پیشنهادی" className="mt-6 flex flex-wrap justify-center gap-2">
             <Link
               to="/shop"
-              className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
+              className="inline-flex min-h-11 items-center rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
             >
               فروشگاه
             </Link>
             <Link
               to="/$category"
               params={{ category: "hoodies" }}
-              className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
+              className="inline-flex min-h-11 items-center rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
             >
               هودی
             </Link>
             <Link
               to="/contact"
-              className="rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
+              className="inline-flex min-h-11 items-center rounded-xl border border-hairline px-4 py-2 text-xs transition-colors hover:border-signal hover:text-signal"
             >
               تماس
             </Link>

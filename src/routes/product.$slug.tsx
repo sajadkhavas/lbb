@@ -17,6 +17,7 @@ import { evaluateProductEvidence } from "@/lib/product-evidence";
 import { productImage } from "@/lib/product-images";
 import { fmtToman, productBySlug, productsByCategory, type Product } from "@/lib/products";
 import { recordRecentlyViewed } from "@/lib/recently-viewed";
+import { backendCanonicalPath } from "@/lib/seo-live";
 import {
   absAsset,
   absUrl,
@@ -111,7 +112,7 @@ export const Route = createFileRoute("/product/$slug")({
           }),
         };
       }
-      const path = `/product/${product.slug}`;
+      const path = backendCanonicalPath(product.seo, `/product/${product.slug}`);
       const title = product.seo.metaTitle?.trim() || `${product.name} | LBB`;
       const description =
         product.seo.metaDescription?.trim() || product.shortDescription || "مشاهده محصول LBB";

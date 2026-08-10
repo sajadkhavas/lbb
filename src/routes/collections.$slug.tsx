@@ -10,6 +10,7 @@ import { collectionBySlug, type Collection } from "@/lib/collections";
 import { CATEGORIES } from "@/lib/categories";
 import { getCollectionEditorialView } from "@/lib/editorial-commerce";
 import {
+  BackendApiError,
   backendErrorMessage,
   getCollection,
   isLiveBackend,
@@ -27,6 +28,7 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd, absUrl } from "@/lib/site";
+import { backendCanonicalPath } from "@/lib/seo-live";
 
 type LiveLoader = {
   mode: "live";
@@ -59,6 +61,9 @@ export const Route = createFileRoute("/collections/$slug")({
         error: null,
       };
     } catch (error) {
+      if (error instanceof BackendApiError && error.status === 404) {
+        throw notFound({ routeId: "/collections/$slug" });
+      }
       return {
         mode: "live",
         collection: null,
@@ -76,17 +81,18 @@ export const Route = createFileRoute("/collections/$slug")({
 
     if (loaderData.mode === "live") {
       const collection = loaderData.collection;
-      const path = `/collections/${params.slug}`;
+      const routePath = `/collections/${params.slug}`;
       if (!collection) {
         return {
           meta: [
             { title: "کالکشن در دسترس نیست | LBB" },
             { name: "robots", content: "noindex, nofollow" },
           ],
-          links: canonical(path),
+          links: canonical(routePath),
         };
       }
 
+      const path = backendCanonicalPath(collection.seo, routePath);
       const title = collection.seo.metaTitle || `${collection.name} | LBB`;
       const description =
         collection.seo.metaDescription ||
