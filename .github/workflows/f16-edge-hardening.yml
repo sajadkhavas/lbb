@@ -1,0 +1,223 @@
+name: F16 Edge Hardening One-Shot
+
+on:
+  push:
+    branches:
+      - phase/f16-cart-commerce-continuity
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: phase/f16-cart-commerce-continuity
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Harden terminal-order and fresh-cart recovery edges
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          p = Path('src/routes/checkout.tsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+            '  clearCheckoutCommitKey,\n',
+            '  clearCheckoutCommitKey,\n  clearPendingCheckoutForOrder,\n',
+            1,
+          )
+          anchor = '''  const recipientReady =
+    fullName.trim().length >= 2 &&
+    Boolean(customer?.mobile) &&
+    Boolean(deliveryMethod) &&
+    (!needsAddress || (province.trim() && city.trim() && address.trim()));
+'''
+          replacement = anchor + '''  const shouldRecoverPending = lines.length === 0 && Boolean(continuity);
+'''
+          if anchor not in text:
+              raise SystemExit('recipient anchor missing')
+          text = text.replace(anchor, replacement, 1)
+
+          old = '''  useEffect(() => {
+    if (!continuityHydrated || !customer || !continuity || orderResult) return;
+    let cancelled = false;
+    setRecoveryLoading(true);
+    setRecoveryError(null);
+    getOrder(continuity.orderId)
+      .then((response) => {
+        if (cancelled) return;
+        const order = response.data.order;
+        const paymentAvailable = continuity.paymentAvailable && !order.paidAt && !order.cancelledAt;
+        setOrderResult({
+          order,
+          payment: {
+            available: paymentAvailable,
+            state: paymentAvailable ? "ready" : "disabled",
+            initiationEndpoint: null,
+          },
+        });
+      })
+'''
+          new = '''  useEffect(() => {
+    if (!continuityHydrated || !customer || !continuity || orderResult) return;
+    if (!shouldRecoverPending) {
+      setRecoveryLoading(false);
+      setRecoveryError(null);
+      return;
+    }
+    let cancelled = false;
+    setRecoveryLoading(true);
+    setRecoveryError(null);
+    getOrder(continuity.orderId)
+      .then((response) => {
+        if (cancelled) return;
+        const order = response.data.order;
+        if (order.paidAt || order.cancelledAt) {
+          clearPendingCheckoutForOrder(order.id);
+          setContinuity(null);
+          setOrderResult(null);
+          return;
+        }
+        const paymentAvailable = continuity.paymentAvailable;
+        setOrderResult({
+          order,
+          payment: {
+            available: paymentAvailable,
+            state: paymentAvailable ? "ready" : "disabled",
+            initiationEndpoint: null,
+          },
+        });
+      })
+'''
+          if old not in text:
+              raise SystemExit('recovery block anchor missing')
+          text = text.replace(old, new, 1)
+          text = text.replace(
+            '  }, [continuityHydrated, customer, continuity, orderResult]);',
+            '  }, [continuityHydrated, customer, continuity, orderResult, shouldRecoverPending]);',
+            1,
+          )
+          text = text.replace(
+            '      (continuity && customer && !orderResult && !recoveryError) ? (',
+            '      (shouldRecoverPending && customer && !orderResult && !recoveryError) ? (',
+            1,
+          )
+          text = text.replace(
+            '      ) : recoveryError ? (',
+            '      ) : shouldRecoverPending && recoveryError ? (',
+            1,
+          )
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('src/lib/checkout-continuity.ts')
+          text = p.read_text(encoding='utf-8')
+          old = '''export function persistPendingCheckout(
+  input: Omit<PendingCheckout, "schemaVersion" | "committedAt">,
+  storage = browserStorage(),
+): PendingCheckout | null {
+  if (!storage) return null;
+  const record: PendingCheckout = {
+    schemaVersion: SCHEMA_VERSION,
+    ...input,
+    committedAt: Date.now(),
+  };
+  try {
+    storage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify(record));
+    return record;
+  } catch {
+    return null;
+  }
+}
+'''
+          new = '''export function persistPendingCheckout(
+  input: Omit<PendingCheckout, "schemaVersion" | "committedAt">,
+  storage = browserStorage(),
+): PendingCheckout {
+  const record: PendingCheckout = {
+    schemaVersion: SCHEMA_VERSION,
+    ...input,
+    committedAt: Date.now(),
+  };
+  if (!storage) return record;
+  try {
+    storage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify(record));
+  } catch {
+    // Keep the in-memory handoff usable for this session when persistence is unavailable.
+  }
+  return record;
+}
+'''
+          if old not in text:
+              raise SystemExit('persist anchor missing')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          p = Path('scripts/audit-f16-continuity.mjs')
+          text = p.read_text(encoding='utf-8')
+          anchor = '''  [checkout, "clearCheckoutCommitKey(quote.quoteId)", "commit attempt is cleared after success"],
+'''
+          insert = anchor + '''  [
+    checkout,
+    "const shouldRecoverPending = lines.length === 0 && Boolean(continuity)",
+    "a fresh cart is never blocked by an older pending order",
+  ],
+  [
+    checkout,
+    "if (order.paidAt || order.cancelledAt)",
+    "terminal recovered orders are retired from checkout continuity",
+  ],
+  [
+    checkout,
+    "clearPendingCheckoutForOrder(order.id)",
+    "terminal pending handoff is cleared by backend order truth",
+  ],
+'''
+          if anchor not in text:
+              raise SystemExit('audit anchor missing')
+          p.write_text(text.replace(anchor, insert, 1), encoding='utf-8')
+          PY
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Format changed files
+        run: npx prettier --write src/routes/checkout.tsx src/lib/checkout-continuity.ts scripts/audit-f16-continuity.mjs
+      - name: Lint
+        run: npm run lint
+      - name: Build live mode
+        env:
+          VITE_SITE_URL: https://lbb.example.test
+          VITE_LBB_BACKEND_MODE: live
+          VITE_LBB_API_BASE_URL: https://api.example.test
+        run: npm run build
+      - name: Typecheck
+        env:
+          VITE_SITE_URL: https://lbb.example.test
+          VITE_LBB_BACKEND_MODE: live
+          VITE_LBB_API_BASE_URL: https://api.example.test
+        run: npm run typecheck
+      - name: Preserve F14D contract
+        run: node scripts/audit-f14d-integration.mjs
+      - name: F16 continuity audit
+        run: npm run audit:f16
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: F16 browser tests
+        env:
+          VITE_SITE_URL: https://lbb.example.test
+          VITE_LBB_BACKEND_MODE: prototype
+        run: npm run test:f16
+      - name: Commit validated edge hardening
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/routes/checkout.tsx src/lib/checkout-continuity.ts scripts/audit-f16-continuity.mjs src/routeTree.gen.ts
+          git diff --cached --quiet && { echo "No edge changes to commit"; exit 1; }
+          git commit -m "fix(f16): retire terminal checkout recovery state"
+          git push origin HEAD:phase/f16-cart-commerce-continuity
