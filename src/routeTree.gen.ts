@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategoryRouteImport } from './routes/$category'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -55,6 +56,11 @@ const AboutRoute = AboutRouteImport.update({
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/$category': typeof CategoryRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/app': typeof AppRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/$category': typeof CategoryRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/app': typeof AppRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/$category': typeof CategoryRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/app': typeof AppRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/$category'
     | '/about'
     | '/account'
+    | '/app'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/$category'
     | '/about'
     | '/account'
+    | '/app'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/$category'
     | '/about'
     | '/account'
+    | '/app'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   CategoryRoute: typeof CategoryRoute
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  AppRoute: typeof AppRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -580,6 +600,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoryRoute: CategoryRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  AppRoute: AppRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
