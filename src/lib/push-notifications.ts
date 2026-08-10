@@ -76,11 +76,16 @@ export async function subscribeToPush(
       userVisibleOnly: true,
       applicationServerKey: toBytes(PUBLIC_KEY),
     }));
-  await syncSubscription("PUT", {
+  try {
+    await syncSubscription("PUT", {
     subscription: subscription.toJSON() as PushSubscriptionRecord,
-    preferences,
-  });
-  return subscription;
+      preferences,
+    });
+    return subscription;
+  } catch (error) {
+    if (!existing) await subscription.unsubscribe();
+    throw error;
+  }
 }
 
 export async function unsubscribeFromPush(
