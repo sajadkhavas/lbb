@@ -1,0 +1,28 @@
+name: F18 Motion Runtime Inventory
+
+on:
+  push:
+    branches:
+      - phase/f18-motion-performance-polish
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Motion runtime references
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '===== IMPORT / SYMBOL REFERENCES ====='
+          grep -RInE 'SmoothScroll|CustomCursor|MagneticButton|useReveal|requestAnimationFrame|from "gsap|import\("gsap|from "lenis|import\("lenis|from "motion|import\("motion' src tests --exclude='*.map' || true
+          echo
+          echo '===== PACKAGE REFERENCES ====='
+          grep -RInE '"(gsap|lenis|motion)"' package.json package-lock.json | head -80 || true
+          echo
+          echo '===== MOTION DATA ATTRIBUTES ====='
+          grep -RInE 'data-reveal|marquee-track|frame-zoom|animate-' src --exclude='styles.css' | head -200 || true
