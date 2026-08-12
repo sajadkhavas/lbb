@@ -20,6 +20,7 @@ import { products } from "@/lib/product-catalog";
 import { evaluateProductEvidence } from "@/lib/product-evidence";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import { categoryImage } from "@/lib/category-images";
+import { homeCategoryImage } from "@/lib/home-category-images";
 import {
   catalogueInventorySummary,
   countDiscoveryResults,
@@ -604,7 +605,7 @@ function ShopChrome({
                   className="group relative aspect-[4/5] w-[72vw] max-w-[290px] shrink-0 snap-start overflow-hidden rounded-[20px] border border-white/10 bg-white shadow-raised transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-signal/60 hover:shadow-overlay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:w-auto md:max-w-none"
                 >
                   <img
-                    src={categoryImage(category.slug as keyof typeof CATEGORIES)}
+                    src={homeCategoryImage(category.slug as keyof typeof CATEGORIES)}
                     alt=""
                     width={640}
                     height={800}

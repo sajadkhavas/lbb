@@ -51,34 +51,34 @@ function DecisionCard({
 }
 
 const CARD_CLASS =
-  "group flex min-h-[250px] flex-col justify-between rounded-2xl border border-hairline-ink bg-bone p-5 shadow-[0_16px_45px_rgba(0,0,0,0.08)] transition-[transform,background-color,box-shadow] hover:-translate-y-1 hover:bg-steam hover:shadow-[0_22px_60px_rgba(0,0,0,0.13)] md:p-6";
+  "group flex min-h-[220px] flex-col justify-between rounded-2xl border border-hairline-ink bg-bone p-5 shadow-[0_16px_45px_rgba(0,0,0,0.08)] transition-[transform,background-color,box-shadow] hover:-translate-y-1 hover:bg-steam hover:shadow-[0_22px_60px_rgba(0,0,0,0.13)]";
 
 export function DecisionSupport() {
   return (
     <section
       dir="rtl"
       aria-labelledby="decision-support-title"
-      className="border-t border-hairline bg-bone py-14 text-obsidian md:py-20"
+      className="border-t border-hairline bg-carbon py-12 text-bone md:py-16"
     >
       <Shell>
-        <header className="grid gap-5 border-b border-hairline-ink pb-7 md:grid-cols-[auto_minmax(0,1fr)] md:items-end md:gap-10">
+        <header className="grid gap-5 border-b border-hairline pb-7 md:grid-cols-[auto_minmax(0,1fr)] md:items-end md:gap-10">
           <div className="flex items-center gap-3">
-            <TechLabel tone="inverse">05</TechLabel>
-            <span aria-hidden="true" className="h-px w-8 bg-obsidian/45" />
-            <TechLabel tone="inverse">راهنمای انتخاب</TechLabel>
+            <TechLabel tone="signal">04</TechLabel>
+            <span aria-hidden="true" className="h-px w-8 bg-hairline" />
+            <TechLabel>راهنمای انتخاب</TechLabel>
           </div>
           <div className="md:justify-self-end md:text-left">
-            <h2 id="decision-support-title" className="text-display-3 text-obsidian">
+            <h2 id="decision-support-title" className="text-display-3 text-bone">
               قبل از انتخاب، جواب‌ها را داشته باش
             </h2>
-            <p className="mt-3 max-w-[58ch] text-sm leading-7 text-graphite">
+            <p className="mt-3 max-w-[58ch] text-sm leading-7 text-metal">
               اگر بین دو سایز یا مدل مرددی، این راهنماها انتخاب را سریع‌تر و مطمئن‌تر می‌کنند.
             </p>
           </div>
         </header>
 
-        <div className="mt-9 grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-          <div className="rounded-2xl border border-hairline-ink bg-obsidian p-5 text-bone shadow-raised md:p-7">
+        <div className="mt-8 grid gap-4 lg:grid-cols-[minmax(300px,0.72fr)_minmax(0,1.28fr)]">
+          <div className="rounded-2xl border border-hairline bg-obsidian p-5 text-bone shadow-raised md:p-6">
             <TechLabel tone="signal">قبل از خرید بررسی کن</TechLabel>
             <ul className="mt-5 space-y-4">
               {CHECKS.map((item) => (

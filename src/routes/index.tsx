@@ -10,7 +10,6 @@ import { DecisionSupport } from "@/components/lbb/home/DecisionSupport";
 import { DropStory } from "@/components/lbb/home/DropStory";
 import { HeroNarrative } from "@/components/lbb/home/HeroNarrative";
 import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
-import { Newsletter } from "@/components/lbb/home/Newsletter";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
@@ -101,7 +100,6 @@ function Home() {
         <DropStory />
         <DecisionSupport />
         <LocalStoreVisit />
-        <Newsletter />
         <InstagramStrip />
       </main>
       <Footer theme="dark" />

@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpLeft, ChevronDown, Instagram, MapPin } from "lucide-react";
+import { ChevronDown, Instagram, MapPin } from "lucide-react";
 import {
   BRAND_NAVIGATION,
   EDITORIAL_NAVIGATION,
@@ -59,39 +59,8 @@ function FooterList({ title, items }: { title: string; items: typeof SHOP_NAVIGA
 export function Footer(_props: { theme?: "dark" | "light" } = {}) {
   return (
     <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
-      <div className="lbb-shell py-12 md:py-16">
-        <div className="grid gap-8 border-b border-hairline pb-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:items-end">
-          <div>
-            <TechLabel tone="signal">LBB / KARAJ / MAHESTAN</TechLabel>
-            <p className="mt-3 max-w-[16ch] text-display-2 text-bone">{BRAND.slogan}</p>
-            <p className="mt-4 max-w-[54ch] text-sm leading-8 text-metal">
-              پوشاک شهری با اطلاعات روشن دربارهٔ جنس، تن‌خور، اندازه و موجودی؛ برای انتخابی که به
-              ظاهر و حرکت روزمرهٔ شما نزدیک باشد.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Link
-              to="/shop"
-              className="group flex min-h-14 items-center justify-between rounded-2xl bg-signal px-5 text-sm font-black text-obsidian transition-transform hover:-translate-y-0.5"
-            >
-              {BRAND_COPY.primaryCta}
-              <ArrowUpLeft size={18} aria-hidden="true" />
-            </Link>
-            <Link
-              to="/account"
-              className="group flex min-h-14 items-center justify-between rounded-2xl border border-hairline px-5 text-sm font-black text-bone transition-[transform,border-color] hover:-translate-y-0.5 hover:border-signal"
-            >
-              حساب کاربری
-              <ArrowUpLeft
-                size={18}
-                aria-hidden="true"
-                className="text-mute group-hover:text-signal"
-              />
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid gap-0 py-8 md:gap-10 md:py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
+      <div className="lbb-shell py-10 md:py-12">
+        <div className="grid gap-0 pb-8 md:gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
           <div className="min-w-0 border-b border-hairline pb-8 sm:col-span-2 lg:col-span-1 lg:border-0 lg:pb-0">
             <Logo size={48} withWordmark />
             <p className="mt-4 max-w-xs text-sm leading-7 text-metal">{BRAND.descriptor}</p>

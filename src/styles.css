@@ -219,10 +219,14 @@
 }
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--lbb-nav-h) + 12px);
   background: var(--lbb-surface-canvas);
   scrollbar-color: var(--lbb-action-primary) var(--lbb-surface-subtle);
   scrollbar-width: thin;
   text-size-adjust: 100%;
+}
+[id] {
+  scroll-margin-top: calc(var(--lbb-nav-h) + 12px);
 }
 body {
   margin: 0;

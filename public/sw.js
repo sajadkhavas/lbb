@@ -1,7 +1,7 @@
 /* LBB production service worker — bounded public caches and push extension. */
 importScripts("/push-sw.js");
 
-const VERSION = "lbb-2026-08-f8b";
+const VERSION = "lbb-2026-08-home-stable-v1";
 const PAGE_CACHE = `${VERSION}-pages`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const OWN_CACHES = new Set([PAGE_CACHE, ASSET_CACHE]);

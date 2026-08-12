@@ -9,10 +9,10 @@ export function LocalStoreVisit() {
     <section
       dir="rtl"
       aria-labelledby="local-store-title"
-      className="border-t border-hairline bg-carbon py-14 md:py-20"
+      className="border-t border-hairline bg-carbon py-12 md:py-16"
     >
       <Shell className="grid overflow-hidden rounded-3xl border border-hairline bg-obsidian shadow-overlay lg:grid-cols-2">
-        <div className="relative min-h-[420px] overflow-hidden lg:min-h-[620px]">
+        <div className="relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
           <img
             src={lifestyle2}
             alt="استایل پوشاک شهری LBB"
@@ -32,7 +32,7 @@ export function LocalStoreVisit() {
           </span>
         </div>
 
-        <div className="flex flex-col justify-center p-6 md:p-10 lg:p-14">
+        <div className="flex flex-col justify-center p-6 md:p-9 lg:p-11">
           <TechLabel tone="signal">فروشگاه حضوری LBB</TechLabel>
           <h2 id="local-store-title" className="mt-5 text-display-2 text-bone">
             آنلاین ببین، در مهستان از نزدیک انتخاب کن.

@@ -11,12 +11,16 @@ const SHOTS = [
 
 export function InstagramStrip() {
   return (
-    <section dir="rtl" className="bg-black px-6 py-24 md:px-10" aria-label="اینستاگرام LBB">
+    <section
+      dir="rtl"
+      className="border-t border-hairline bg-black px-6 py-12 md:px-10 md:py-16"
+      aria-label="اینستاگرام LBB"
+    >
       <div className="mx-auto max-w-[1600px] text-center">
         <p className="tech text-white/50">@lbbclo</p>
         <div
           dir="rtl"
-          className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-5 md:overflow-visible md:pb-0"
+          className="mt-7 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-3 md:grid md:grid-cols-5 md:overflow-visible md:pb-0"
         >
           {SHOTS.map((src, i) => (
             <a
@@ -39,7 +43,7 @@ export function InstagramStrip() {
             </a>
           ))}
         </div>
-        <div className="mt-10">
+        <div className="mt-7">
           <a
             href="https://www.instagram.com/lbbclo"
             target="_blank"

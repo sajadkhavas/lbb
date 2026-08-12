@@ -71,12 +71,8 @@ export async function registerPwa(): Promise<void> {
         }
       });
     });
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    });
+    // Never reload behind the shopper's back. The update banner above is the
+    // explicit hand-off; the next normal navigation receives the new worker.
   } catch {
     // Offline support is progressive enhancement and must never break the app.
   }

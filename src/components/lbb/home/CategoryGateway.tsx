@@ -3,7 +3,7 @@ import type { PointerEvent } from "react";
 import { ArrowUpLeft } from "lucide-react";
 import { CategoryIcon } from "@/components/lbb/BrandIcon";
 import { Frame, SectionHead, Shell, TechLabel } from "@/components/lbb/ui/primitives";
-import { categoryImage } from "@/lib/category-images";
+import { homeCategoryImage } from "@/lib/home-category-images";
 import { CATEGORIES } from "@/lib/categories";
 import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { fmtNum, productsByCategory } from "@/lib/products";
@@ -28,7 +28,7 @@ export function CategoryGateway() {
       id="home-categories"
       dir="rtl"
       aria-labelledby="home-categories-title"
-      className="border-t border-hairline bg-obsidian py-14 md:py-20"
+      className="border-t border-hairline bg-obsidian py-12 md:py-16"
     >
       <Shell>
         <SectionHead
@@ -44,17 +44,12 @@ export function CategoryGateway() {
           }
         />
 
-        <div className="mt-9 grid gap-3 md:grid-cols-6 md:grid-rows-2 lg:gap-4">
+        <div className="mt-8 grid gap-3 md:grid-cols-6 lg:gap-4">
           {HOME_CATEGORY_ORDER.map((slug, index) => {
             const category = CATEGORIES[slug];
             const count = productsByCategory(slug).length;
-            const placement =
-              index === 0
-                ? "md:col-span-3 md:row-span-2"
-                : index === 1
-                  ? "md:col-span-3"
-                  : "md:col-span-2";
-            const ratio = index === 0 ? "4/5" : index === 1 ? "16/9" : "4/3";
+            const placement = index < 3 ? "md:col-span-2" : "md:col-span-3";
+            const ratio = index < 3 ? "4/5" : "16/10";
 
             return (
               <Link
@@ -67,18 +62,14 @@ export function CategoryGateway() {
                 className={`category-tilt group relative min-w-0 overflow-hidden rounded-[24px] border border-hairline bg-white shadow-raised hover:border-signal/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${placement}`}
               >
                 <Frame
-                  src={categoryImage(slug)}
+                  src={homeCategoryImage(slug)}
                   alt={`نمای دسته ${category.nameFaPlural} LBB`}
                   ratio={ratio}
-                  width={index === 0 ? 1000 : 900}
-                  height={index === 0 ? 1250 : 720}
-                  sizes={
-                    index === 0
-                      ? "(max-width: 767px) 100vw, 50vw"
-                      : "(max-width: 767px) 100vw, 33vw"
-                  }
-                  className="h-full min-h-[260px] w-full rounded-[24px] bg-white sm:min-h-[280px]"
-                  imgClassName="object-contain p-5 opacity-100 transition-transform duration-500 group-hover:scale-[1.045] sm:p-8"
+                  width={900}
+                  height={1125}
+                  sizes="(max-width: 767px) 100vw, 33vw"
+                  className="h-full min-h-[270px] w-full rounded-[24px] bg-white"
+                  imgClassName="object-contain p-6 opacity-100 transition-transform duration-500 group-hover:scale-[1.045] sm:p-9"
                   zoom={false}
                 >
                   <span
@@ -98,9 +89,7 @@ export function CategoryGateway() {
                           <TechLabel tone="signal">0{index + 1}</TechLabel>
                           <TechLabel tone="bone">LBB / MAHESTAN</TechLabel>
                         </div>
-                        <h3
-                          className={`mt-2 font-black text-bone ${index === 0 ? "text-display-2" : "text-display-3"}`}
-                        >
+                        <h3 className="mt-2 text-display-3 font-black text-bone">
                           {category.nameFaPlural}
                         </h3>
                         <p className="mt-2 line-clamp-2 max-w-[42ch] text-xs leading-6 text-metal">

@@ -17,8 +17,8 @@ export function DropStory() {
       data-f17-editorial="home-drop-story"
     >
       <div aria-hidden="true" className="absolute inset-0 grid-marks opacity-35" />
-      <Shell className="relative grid gap-0 py-14 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)]">
-        <div className="relative min-h-[520px] overflow-hidden border border-hairline bg-obsidian lg:min-h-[760px]">
+      <Shell className="relative grid gap-0 py-12 md:py-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)]">
+        <div className="relative min-h-[440px] overflow-hidden border border-hairline bg-obsidian lg:min-h-[600px]">
           <img
             src={view.media}
             alt={`روایت تصویری ${collection.nameFa}`}
@@ -39,7 +39,7 @@ export function DropStory() {
           </div>
         </div>
 
-        <div className="flex flex-col border border-t-0 border-hairline bg-obsidian p-5 md:p-8 lg:border-r-0 lg:border-t lg:p-10">
+        <div className="flex flex-col justify-center border border-t-0 border-hairline bg-obsidian p-5 md:p-8 lg:border-r-0 lg:border-t lg:p-10">
           <div>
             <TechLabel tone="signal">استایل پیشنهادی LBB</TechLabel>
             <h2 id="drop-story-title" className="mt-4 text-display-2 text-bone">
@@ -114,7 +114,7 @@ export function DropStory() {
             </Link>
           </div>
 
-          <p className="mt-auto border-t border-hairline pt-7 text-xs leading-6 text-mute">
+          <p className="mt-7 border-t border-hairline pt-6 text-xs leading-6 text-mute">
             برای دیدن موجودی و سایزهای هر قطعه وارد صفحه همان محصول شو.
           </p>
         </div>

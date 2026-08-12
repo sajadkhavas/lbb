@@ -421,7 +421,12 @@ const clean = (value: string | undefined) => value?.trim().replace(/\/$/, "") ??
 export function getBackendMode(): BackendMode {
   const explicit = clean(import.meta.env.VITE_LBB_BACKEND_MODE);
   if (explicit === "live" || explicit === "prototype") return explicit;
-  return import.meta.env.PROD ? "live" : "prototype";
+  // A production frontend without an API URL is still a storefront prototype.
+  // Entering live mode implicitly used to replace every curated product with a
+  // BACKEND PRODUCT ONLY placeholder on deployments where the backend is not
+  // connected yet. Supplying the API origin (or the explicit live flag) is the
+  // intentional cut-over signal.
+  return clean(import.meta.env.VITE_LBB_API_BASE_URL) ? "live" : "prototype";
 }
 
 export function isLiveBackend(): boolean {
