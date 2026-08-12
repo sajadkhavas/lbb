@@ -34,9 +34,9 @@ export function ProductMoments() {
       <Shell>
         <SectionHead
           index="02"
-          label="PRODUCT MOMENTS"
-          title={<span id="home-products-title">چهار نقطه شروع برای دراپ ۰۰۱</span>}
-          lede="منتخب‌ها بر اساس جایگاه Merchandising در کاتالوگ نمایش داده می‌شوند؛ نه فروش ساختگی یا شمارنده اجتماعی."
+          label="انتخاب‌های LBB"
+          title={<span id="home-products-title">تازه‌ها و انتخاب‌های این هفته</span>}
+          lede="چند انتخاب آماده برای شروع؛ قیمت، رنگ و سایز موجود همین‌جا مشخص است."
           action={
             <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
               کاتالوگ کامل
@@ -47,10 +47,7 @@ export function ProductMoments() {
 
         <div className="mt-9 grid grid-cols-2 gap-x-3 gap-y-8 lg:grid-cols-4 lg:gap-x-5">
           {curated.map((product, index) => (
-            <div
-              key={product.slug}
-              className={index === 0 ? "col-span-2 lg:col-span-2 lg:row-span-2" : "min-w-0"}
-            >
+            <div key={product.slug} className="min-w-0">
               <ProductCard p={product} priority={index === 0} />
             </div>
           ))}
@@ -67,7 +64,7 @@ export function ProductMoments() {
                   <Icon size={18} aria-hidden="true" />
                 </span>
                 <div>
-                  <TechLabel tone="signal">0{index + 1} / PRODUCT TRUTH</TechLabel>
+                  <TechLabel tone="signal">0{index + 1} / راهنمای خرید</TechLabel>
                   <h3 className="mt-2 text-sm font-black text-bone">{title}</h3>
                   <p className="mt-2 text-xs leading-6 text-metal">{body}</p>
                 </div>

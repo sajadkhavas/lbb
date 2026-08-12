@@ -2,10 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 import { BRAND_COPY } from "@/lib/brand";
-import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
+import { CATEGORIES } from "@/lib/categories";
 import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { heroMain, productImage } from "@/lib/product-images";
-import { PRODUCT_COUNT, fmtNum, fmtToman, productBySlug } from "@/lib/products";
+import { fmtToman, productBySlug } from "@/lib/products";
 
 export function HeroNarrative() {
   const heroProduct = productBySlug("lbb-classic-hoodie");
@@ -31,10 +31,10 @@ export function HeroNarrative() {
               <TechLabel>URBAN CLOTHING</TechLabel>
             </div>
 
-            <h1 id="home-hero-title" className="mt-7 max-w-[10ch] text-hero leading-[0.88]">
-              <span className="block text-bone">از مهستان،</span>
-              <span className="block text-signal">برای</span>
-              <span className="block text-metal">خیابان.</span>
+            <h1 id="home-hero-title" className="mt-7 max-w-[12ch] text-hero leading-[0.9]">
+              <span className="block text-bone">استایل روزمره،</span>
+              <span className="block text-signal">از مهستان</span>
+              <span className="block text-metal">کرج.</span>
             </h1>
 
             <p className="mt-7 max-w-[58ch] text-lede">{BRAND_COPY.heroBody}</p>
@@ -44,34 +44,18 @@ export function HeroNarrative() {
                 {BRAND_COPY.primaryCta}
                 <ArrowUpLeft size={17} aria-hidden="true" />
               </Link>
-              <Link to="/size-guide" className={CtaClasses("line", "lg")}>
+              <Link to="/contact" className={CtaClasses("line", "lg")}>
                 {BRAND_COPY.secondaryCta}
               </Link>
             </div>
 
             <p className="mt-4 max-w-[55ch] text-xs leading-6 text-mute">
-              قیمت، رنگ، اندازه‌های موجود و توضیح تن‌خور هر قطعه در صفحهٔ محصول نمایش داده می‌شود.
+              قیمت، رنگ، سایزهای موجود و تن‌خور هر محصول را قبل از انتخاب بررسی کن.
             </p>
           </div>
 
-          <div className="mt-10 grid gap-6 border-t border-hairline pt-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-end">
-            <dl className="grid grid-cols-3 gap-5">
-              <div>
-                <dt className="tech text-mute">PIECES</dt>
-                <dd className="num mt-1 text-xl font-black text-bone">{fmtNum(PRODUCT_COUNT)}</dd>
-              </div>
-              <div>
-                <dt className="tech text-mute">CATEGORIES</dt>
-                <dd className="num mt-1 text-xl font-black text-bone">
-                  {fmtNum(CATEGORY_SLUGS.length)}
-                </dd>
-              </div>
-              <div>
-                <dt className="tech text-mute">DROP</dt>
-                <dd className="num mt-1 text-xl font-black text-bone">001</dd>
-              </div>
-            </dl>
-
+          <div className="mt-10 border-t border-hairline pt-6">
+            <p className="mb-4 text-xs font-bold text-metal">دسته موردنظرت را سریع پیدا کن:</p>
             <nav aria-label="دسترسی سریع به دسته‌های محصول" className="min-w-0">
               <ul className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {HOME_CATEGORY_ORDER.map((slug) => (
@@ -142,7 +126,7 @@ export function HeroNarrative() {
             href="#home-categories"
             className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 border border-hairline-strong bg-obsidian/85 px-3 text-xs font-bold text-bone backdrop-blur transition-colors hover:border-signal hover:text-signal md:left-8 md:top-8"
           >
-            مسیر انتخاب
+            دیدن دسته‌بندی‌ها
             <ArrowDownLeft size={15} aria-hidden="true" />
           </a>
         </div>

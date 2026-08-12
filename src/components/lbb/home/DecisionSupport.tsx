@@ -4,10 +4,10 @@ import { Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { HOME_DECISION_LINKS } from "@/lib/homepage";
 
 const CHECKS = [
-  "فیت هر محصول با واژه مشخص و توضیح عملی ثبت شده است",
-  "سایز ناموجود قبل از افزودن به سبد قابل مشاهده است",
-  "متریال، گرماژ و نگهداری برای تصمیم طولانی‌مدت نمایش داده می‌شود",
-  "این نسخه سفارش یا پرداخت واقعی را شبیه‌سازی نمی‌کند",
+  "تن‌خور و جدول اندازه را پیش از انتخاب ببین",
+  "رنگ و سایزهای موجود هر محصول را همان لحظه بررسی کن",
+  "جنس پارچه و روش نگهداری را در صفحه محصول بخوان",
+  "برای پرو و خرید حضوری به فروشگاه مهستان سر بزن",
 ];
 
 function DecisionCard({
@@ -57,22 +57,21 @@ export function DecisionSupport() {
           <div className="flex items-center gap-3">
             <TechLabel tone="inverse">05</TechLabel>
             <span aria-hidden="true" className="h-px w-8 bg-obsidian/45" />
-            <TechLabel tone="inverse">DECISION SUPPORT</TechLabel>
+            <TechLabel tone="inverse">راهنمای انتخاب</TechLabel>
           </div>
           <div className="md:justify-self-end md:text-left">
             <h2 id="decision-support-title" className="text-display-3 text-obsidian">
               قبل از انتخاب، جواب‌ها را داشته باش
             </h2>
             <p className="mt-3 max-w-[58ch] text-sm leading-7 text-graphite">
-              صفحه اصلی فقط الهام نمی‌دهد؛ مسیر رسیدن به اطلاعاتی که تصمیم خرید را عوض می‌کنند نیز
-              مستقیم است.
+              اگر بین دو سایز یا مدل مرددی، این راهنماها انتخاب را سریع‌تر و مطمئن‌تر می‌کنند.
             </p>
           </div>
         </header>
 
         <div className="mt-9 grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
           <div className="border border-hairline-ink bg-obsidian p-5 text-bone md:p-7">
-            <TechLabel tone="signal">PRODUCT TRUTH CHECKLIST</TechLabel>
+            <TechLabel tone="signal">قبل از خرید بررسی کن</TechLabel>
             <ul className="mt-5 space-y-4">
               {CHECKS.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm leading-7 text-metal">

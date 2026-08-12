@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft } from "lucide-react";
-import { CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import { CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { getCollectionEditorialViewBySlug } from "@/lib/editorial-commerce";
 
 export function DropStory() {
@@ -41,7 +41,7 @@ export function DropStory() {
 
         <div className="flex flex-col border border-t-0 border-hairline bg-obsidian p-5 md:p-8 lg:border-r-0 lg:border-t lg:p-10">
           <div>
-            <TechLabel tone="signal">03 / DROP NARRATIVE</TechLabel>
+            <TechLabel tone="signal">استایل پیشنهادی LBB</TechLabel>
             <h2 id="drop-story-title" className="mt-4 text-display-2 text-bone">
               {collection.nameFa}
             </h2>
@@ -86,7 +86,7 @@ export function DropStory() {
                           {reference.product.name}
                         </span>
                         <span className="mt-1 block text-xs leading-6 text-metal">
-                          مشاهده جزئیات عمومی محصول
+                          دیدن رنگ، سایز و جزئیات محصول
                         </span>
                       </span>
                       <ArrowUpLeft
@@ -99,12 +99,7 @@ export function DropStory() {
                 ))}
               </ul>
             </div>
-          ) : (
-            <StatePanel className="mt-8" title="این دراپ فعلاً لینک مستقیم محصول ندارد">
-              روایت و مسیرهای کشف فعال‌اند؛ لینک محصول زمانی نمایش داده می‌شود که وضعیت انتشار آن
-              برای نمایش عمومی آماده باشد.
-            </StatePanel>
-          )}
+          ) : null}
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -112,16 +107,15 @@ export function DropStory() {
               params={{ slug: collection.slug }}
               className={CtaClasses("signal")}
             >
-              مشاهده روایت {collection.nameFa}
+              دیدن کالکشن {collection.nameFa}
             </Link>
             <Link to="/lookbook" className={CtaClasses("line")}>
-              دیدن لوک‌بوک
+              ایده‌های بیشتر برای استایل
             </Link>
           </div>
 
           <p className="mt-auto border-t border-hairline pt-7 text-xs leading-6 text-mute">
-            وضعیت زمانی یا موجودی دراپ در این روایت حدس زده نمی‌شود؛ اطلاعات زمانی فقط با داده
-            منتشرشده نمایش داده خواهد شد.
+            برای دیدن موجودی و سایزهای هر قطعه وارد صفحه همان محصول شو.
           </p>
         </div>
       </Shell>

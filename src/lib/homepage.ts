@@ -20,7 +20,7 @@ export const HOME_DECISION_LINKS = [
     kind: "static" as const,
     label: "ارسال و مرجوعی",
     latin: "DELIVERY / RETURNS",
-    description: "شرایط نسخه نمایشی، هزینه و محدودیت‌ها را شفاف ببین.",
+    description: "پیش از سفارش، شرایط ارسال و امکان مرجوعی را بررسی کن.",
     to: "/shipping-returns" as const,
   },
   {

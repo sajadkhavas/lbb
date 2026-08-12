@@ -5,15 +5,13 @@ import { Footer } from "@/components/lbb/Footer";
 import { InstagramStrip } from "@/components/lbb/InstagramStrip";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Navbar } from "@/components/lbb/Navbar";
-import { BrandStatement } from "@/components/lbb/home/BrandStatement";
 import { CategoryGateway } from "@/components/lbb/home/CategoryGateway";
 import { DecisionSupport } from "@/components/lbb/home/DecisionSupport";
 import { DropStory } from "@/components/lbb/home/DropStory";
-import { EditorialGateway } from "@/components/lbb/home/EditorialGateway";
 import { HeroNarrative } from "@/components/lbb/home/HeroNarrative";
+import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { Newsletter } from "@/components/lbb/home/Newsletter";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
-import { ShopTheLook } from "@/components/lbb/home/ShopTheLook";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
 import { BRAND, BRAND_COPY } from "@/lib/brand";
@@ -100,10 +98,8 @@ function Home() {
         <CategoryGateway />
         <ProductMoments />
         <DropStory />
-        <ShopTheLook />
         <DecisionSupport />
-        <EditorialGateway />
-        <BrandStatement />
+        <LocalStoreVisit />
         <Newsletter />
         <InstagramStrip />
       </main>

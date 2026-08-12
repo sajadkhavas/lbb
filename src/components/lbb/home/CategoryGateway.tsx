@@ -17,9 +17,9 @@ export function CategoryGateway() {
       <Shell>
         <SectionHead
           index="01"
-          label="SHOP BY CATEGORY"
-          title={<span id="home-categories-title">از چیزی که می‌خوای شروع کن</span>}
-          lede="هر دسته یک صفحه مستقل با فیلتر، Sort، فیت، متریال و موجودی واقعی همان محصولات دارد."
+          label="دسته‌بندی محصولات"
+          title={<span id="home-categories-title">دنبال چی می‌گردی؟</span>}
+          lede="مستقیم وارد دسته دلخواهت شو و مدل‌ها، رنگ‌ها و سایزهای موجود را با هم مقایسه کن."
           action={
             <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
               همه محصولات
@@ -72,7 +72,7 @@ export function CategoryGateway() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <TechLabel tone="signal">0{index + 1}</TechLabel>
-                          <TechLabel tone="bone">{slug.toUpperCase()}</TechLabel>
+                          <TechLabel tone="bone">LBB / MAHESTAN</TechLabel>
                         </div>
                         <h3
                           className={`mt-2 font-black text-bone ${index === 0 ? "text-display-2" : "text-display-3"}`}
@@ -87,7 +87,7 @@ export function CategoryGateway() {
                         <span className="num block text-sm font-black text-bone">
                           {fmtNum(count)}
                         </span>
-                        <span className="tech mt-1 block text-mute">PRODUCTS</span>
+                        <span className="tech mt-1 block text-mute">محصول</span>
                       </span>
                     </div>
                   </div>
