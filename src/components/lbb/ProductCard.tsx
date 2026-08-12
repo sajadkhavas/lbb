@@ -81,11 +81,11 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     <Frame
       src={primaryImage}
       alt={name}
-      ratio="4/5"
+      ratio="1/1"
       width={1024}
       height={1280}
       className="product-card__media bg-white"
-      imgClassName={`object-contain p-3 transition-[opacity,transform] duration-500 sm:p-5 ${loaded ? "opacity-100" : "opacity-0"}`}
+      imgClassName={`object-contain p-4 transition-[opacity,transform] duration-500 sm:p-7 ${loaded ? "opacity-100" : "opacity-0"}`}
     >
       {!loaded ? <div className="absolute inset-0 skeleton-shimmer" aria-hidden="true" /> : null}
       <img
@@ -116,7 +116,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       />
     </Frame>
   ) : (
-    <div className="product-card__media relative aspect-[4/5] overflow-hidden bg-white">
+    <div className="product-card__media relative aspect-square overflow-hidden bg-white">
       <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">
         تصویر تأییدشده برای این محصول منتشر نشده است.
       </div>
@@ -135,15 +135,15 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   return (
     <article
       dir="rtl"
-      className="product-card group relative flex min-w-0 flex-col overflow-hidden rounded-[22px] border border-white/10 bg-[#0d0d0f] shadow-[0_18px_55px_rgba(0,0,0,0.28)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1.5 hover:border-signal/45 hover:shadow-[0_28px_80px_rgba(0,0,0,0.48)]"
+      className="product-card group relative flex min-w-0 flex-col overflow-hidden rounded-[26px] border border-white/10 bg-[#111113] shadow-[0_14px_42px_rgba(0,0,0,0.3)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-signal/55 hover:shadow-[0_24px_60px_rgba(0,0,0,0.46)]"
     >
       {cardImage}
 
-      <div className="flex min-w-0 flex-1 flex-col p-3.5 sm:p-5">
+      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
         <TechLabel tone="metal" className="truncate text-[9px] sm:text-[10px]">
           {backend ? categoryLabel : `${categoryLabel} / ${p.latinName}`}
         </TechLabel>
-        <h3 className="mt-1.5 line-clamp-2 min-h-[2.75rem] text-sm font-extrabold leading-[1.65] text-bone sm:text-base">
+        <h3 className="mt-1.5 line-clamp-2 min-h-[2.5rem] text-[13px] font-extrabold leading-[1.55] text-bone sm:text-base">
           <Link
             to="/product/$slug"
             params={{ slug: p.slug }}
@@ -166,6 +166,25 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             <span className="num text-xs text-mute line-through">{fmtToman(p.originalPrice)}</span>
           ) : null}
         </div>
+        {!backend && p.sizes.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-1.5 md:hidden" aria-label="سایزهای محصول">
+            {p.sizes.map((size) => {
+              const sizeAvailable = isSizeAvailable(p, size);
+              return (
+                <span
+                  key={size}
+                  className={`grid min-h-7 min-w-8 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
+                    sizeAvailable
+                      ? "bg-signal text-obsidian"
+                      : "border border-white/10 bg-white/5 text-mute line-through"
+                  }`}
+                >
+                  {size}
+                </span>
+              );
+            })}
+          </div>
+        ) : null}
         <div
           role="group"
           className="mt-3 flex gap-2"
@@ -206,7 +225,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
           <button
             type="button"
             onClick={(event) => openQuickView(p, event.currentTarget)}
-            className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-bone px-2 text-[11px] font-bold text-obsidian transition hover:bg-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:hidden"
+            className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-signal/40 bg-signal/10 px-2 text-[11px] font-bold text-signal transition hover:bg-signal hover:text-obsidian focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:hidden"
           >
             <Eye size={15} aria-hidden="true" />
             {p.inStock ? "انتخاب سایز و خرید" : "مشاهده محصول"}
@@ -290,7 +309,7 @@ function CardOverlay({
       ) : null}
 
       {!backend && p.sizes.length > 0 ? (
-        <div className="pointer-events-none absolute inset-x-2 bottom-2 z-20 hidden translate-y-2 flex-wrap justify-center gap-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 md:flex">
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20 hidden translate-y-3 flex-wrap justify-center gap-1.5 rounded-2xl border border-white/15 bg-obsidian/88 p-2.5 opacity-0 shadow-raised backdrop-blur-xl transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 md:flex">
           {p.sizes.map((size) => {
             const sizeAvailable = isSizeAvailable(p, size);
             return (
@@ -303,7 +322,7 @@ function CardOverlay({
                   if (sizeAvailable) onAddWithSize(size);
                 }}
                 aria-label={sizeAvailable ? `افزودن سایز ${size} به سبد` : `سایز ${size} ناموجود`}
-                className={`pointer-events-auto size-chip ${sizeAvailable ? "hover:border-signal hover:text-signal" : "size-chip-disabled"}`}
+                className={`pointer-events-auto grid min-h-9 min-w-10 place-items-center rounded-xl border px-2 text-[11px] font-black transition ${sizeAvailable ? "border-signal bg-signal text-obsidian hover:bg-bone" : "size-chip-disabled border-white/10 bg-white/5 text-mute"}`}
               >
                 {size}
               </button>

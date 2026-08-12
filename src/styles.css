@@ -538,8 +538,7 @@ img {
 }
 .product-card > .product-card__media {
   border-radius: 0;
-  border-bottom-left-radius: var(--radius-xl);
-  border-bottom-right-radius: var(--radius-xl);
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
 }
 .product-card__media img {
   filter: none;
@@ -549,7 +548,7 @@ img {
 }
 @media (hover: hover) {
   .product-card:hover .product-card__media img {
-    transform: scale(1.025);
+    transform: scale(1.045) rotate(-0.6deg);
   }
 }
 .category-tilt {

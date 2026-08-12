@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Lightweight inline LBB monogram.
+ * Persian client wordmark, kept as live text for crisp rendering at every size.
  *
  * Keeping the mark in the component removes the 1 MB preview-only Lovable
  * asset dependency and guarantees that the brand renders in every deployment.
@@ -17,29 +17,13 @@ export function Logo({
 }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <svg
+      <span
         aria-hidden="true"
-        viewBox="0 0 64 64"
-        width={size}
-        height={size}
-        className="shrink-0 rounded-xl"
-        style={{ width: size, height: size }}
+        className="grid shrink-0 place-items-center rounded-[14px] bg-signal font-display font-black leading-none text-white shadow-[inset_0_-3px_0_rgba(0,0,0,.14)]"
+        style={{ width: size, height: size, fontSize: Math.max(11, size * 0.32) }}
       >
-        <rect width="64" height="64" rx="14" fill="var(--lbb-signal)" />
-        <text
-          x="32"
-          y="39"
-          textAnchor="middle"
-          fill="var(--lbb-bone)"
-          fontFamily="JetBrains Mono, ui-monospace, monospace"
-          fontSize="20"
-          fontWeight="900"
-          letterSpacing="-2"
-        >
-          LBB
-        </text>
-        <path d="M13 49h38" stroke="var(--lbb-bone)" strokeWidth="2" opacity="0.7" />
-      </svg>
+        ال‌بی‌بی
+      </span>
       {withWordmark ? (
         <span className="text-[15px] font-black leading-none tracking-tight text-bone">
           ال‌بی‌بی

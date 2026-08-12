@@ -67,10 +67,14 @@ export function Navbar({
           className="lbb-shell flex items-center justify-between gap-3 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto]"
           style={{ height: "var(--lbb-nav-h)" }}
         >
-          <Link to="/" aria-label="LBB — خانه" className="flex min-w-0 shrink-0 items-center gap-2">
+          <Link
+            to="/"
+            aria-label="ال‌بی‌بی — خانه"
+            className="flex min-w-0 shrink-0 items-center gap-2"
+          >
             <Logo size={34} />
             <span className="hidden font-display text-xl font-black leading-none tracking-[-0.05em] text-signal sm:inline md:text-2xl">
-              LBB
+              ال‌بی‌بی
             </span>
           </Link>
 

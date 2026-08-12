@@ -5,7 +5,15 @@ import { SectionHead, Shell } from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/products";
 
 export function ProductMoments() {
-  const curated = [...products].sort((a, b) => a.rank - b.rank).slice(0, 4);
+  const currentSlugs = [
+    "lbb-signature-tee",
+    "denim-baggy-jean",
+    "urban-runner-sneaker",
+    "lbb-crew-socks",
+  ];
+  const curated = currentSlugs.flatMap((slug) =>
+    products.filter((product) => product.slug === slug),
+  );
 
   return (
     <section
@@ -16,7 +24,7 @@ export function ProductMoments() {
       <Shell>
         <SectionHead
           index="02"
-          label="انتخاب‌های LBB"
+          label="انتخاب‌های ال‌بی‌بی"
           title={<span id="home-products-title">تازه‌ها و انتخاب‌های این هفته</span>}
           lede="چند انتخاب آماده برای شروع؛ قیمت، رنگ و سایز موجود همین‌جا مشخص است."
           action={

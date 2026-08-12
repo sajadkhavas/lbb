@@ -91,7 +91,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
 
         <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <p className="tech">© 2026 LBB — KARAJ / MAHESTAN</p>
+            <p className="tech">© ۲۰۲۶ ال‌بی‌بی — کرج / مهستان</p>
             <p className="mt-2 text-[11px] leading-6">{BRAND.shortIntroduction}</p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2">

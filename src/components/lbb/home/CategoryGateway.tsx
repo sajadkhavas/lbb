@@ -9,6 +9,7 @@ import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { fmtNum, productsByCategory } from "@/lib/products";
 
 export function CategoryGateway() {
+  const activeCategories = HOME_CATEGORY_ORDER.filter((slug) => slug !== "hoodies");
   const tilt = (event: PointerEvent<HTMLAnchorElement>) => {
     if (event.pointerType === "touch") return;
     const box = event.currentTarget.getBoundingClientRect();
@@ -45,11 +46,11 @@ export function CategoryGateway() {
         />
 
         <div className="mt-8 grid gap-3 md:grid-cols-6 lg:gap-4">
-          {HOME_CATEGORY_ORDER.map((slug, index) => {
+          {activeCategories.map((slug, index) => {
             const category = CATEGORIES[slug];
             const count = productsByCategory(slug).length;
-            const placement = index < 3 ? "md:col-span-2" : "md:col-span-3";
-            const ratio = index < 3 ? "4/5" : "16/10";
+            const placement = "md:col-span-3";
+            const ratio = "4/3";
 
             return (
               <Link
@@ -69,7 +70,7 @@ export function CategoryGateway() {
                   height={1125}
                   sizes="(max-width: 767px) 100vw, 33vw"
                   className="h-full min-h-[270px] w-full rounded-[24px] bg-white"
-                  imgClassName="object-contain p-6 opacity-100 transition-transform duration-500 group-hover:scale-[1.045] sm:p-9"
+                  imgClassName="object-contain p-5 opacity-100 drop-shadow-[0_18px_18px_rgba(0,0,0,0.16)] transition-transform duration-500 group-hover:scale-[1.045] sm:p-8"
                   zoom={false}
                 >
                   <span
@@ -87,7 +88,7 @@ export function CategoryGateway() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <TechLabel tone="signal">0{index + 1}</TechLabel>
-                          <TechLabel tone="bone">LBB / MAHESTAN</TechLabel>
+                          <TechLabel tone="bone">ال‌بی‌بی / مهستان</TechLabel>
                         </div>
                         <h3 className="mt-2 text-display-3 font-black text-bone">
                           {category.nameFaPlural}
