@@ -25,7 +25,9 @@ export function TickerStrip() {
     if (!track || typeof window === "undefined") return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let inViewport = false;
+    // It is directly below the hero and must already be alive on the first paint.
+    // The observer only pauses it later when it is genuinely far off-screen.
+    let inViewport = true;
 
     const updatePlayback = () => {
       const shouldRun = !reducedMotion.matches && inViewport && !document.hidden;
@@ -58,7 +60,7 @@ export function TickerStrip() {
         ref={trackRef}
         data-f18-motion="viewport-ticker"
         className="marquee-track flex h-11 w-max items-center group-hover:[animation-play-state:paused]"
-        style={{ animationPlayState: "paused" }}
+        style={{ animationPlayState: "running" }}
       >
         {row}
         {row}

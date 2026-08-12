@@ -64,15 +64,12 @@ export function Navbar({
         style={{ top: offsetTop }}
       >
         <div
-          className="lbb-shell grid items-center gap-3"
-          style={{
-            height: "var(--lbb-nav-h)",
-            gridTemplateColumns: "auto minmax(0,1fr) auto",
-          }}
+          className="lbb-shell flex items-center justify-between gap-3 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto]"
+          style={{ height: "var(--lbb-nav-h)" }}
         >
           <Link to="/" aria-label="LBB — خانه" className="flex min-w-0 shrink-0 items-center gap-2">
             <Logo size={34} />
-            <span className="font-display text-xl font-black leading-none tracking-[-0.05em] text-signal md:text-2xl">
+            <span className="hidden font-display text-xl font-black leading-none tracking-[-0.05em] text-signal sm:inline md:text-2xl">
               LBB
             </span>
           </Link>
@@ -122,7 +119,7 @@ export function Navbar({
             </ul>
           </div>
 
-          <div className="flex shrink-0 items-center gap-0.5">
+          <div className="flex shrink-0 items-center gap-0.5 [&_svg]:block [&_svg]:shrink-0">
             <button
               type="button"
               aria-label="جست‌وجو"
@@ -170,7 +167,7 @@ export function Navbar({
               aria-haspopup="dialog"
               aria-expanded={active === "menu"}
               onClick={() => open("menu")}
-              className={`${iconClass} ms-1`}
+              className={`${iconClass} ms-0.5`}
             >
               <Menu size={20} strokeWidth={1.6} aria-hidden="true" />
             </button>

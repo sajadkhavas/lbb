@@ -601,7 +601,7 @@ function ShopChrome({
                   key={category.slug}
                   to="/$category"
                   params={{ category: category.slug }}
-                  className="group relative aspect-[4/5] w-[72vw] max-w-[290px] shrink-0 snap-start overflow-hidden rounded-[20px] bg-carbon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:w-auto md:max-w-none"
+                  className="group relative aspect-[4/5] w-[72vw] max-w-[290px] shrink-0 snap-start overflow-hidden rounded-[20px] border border-white/10 bg-white shadow-raised transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-signal/60 hover:shadow-overlay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:w-auto md:max-w-none"
                 >
                   <img
                     src={categoryImage(category.slug as keyof typeof CATEGORIES)}
@@ -609,7 +609,7 @@ function ShopChrome({
                     width={640}
                     height={800}
                     loading={index < 2 ? "eager" : "lazy"}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    className="absolute inset-0 h-full w-full object-contain p-5 transition-transform duration-700 group-hover:scale-[1.05]"
                   />
                   <span className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent" />
                   <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">

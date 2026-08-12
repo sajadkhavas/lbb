@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import type { PointerEvent } from "react";
 import { ArrowUpLeft } from "lucide-react";
 import { CategoryIcon } from "@/components/lbb/BrandIcon";
 import { Frame, SectionHead, Shell, TechLabel } from "@/components/lbb/ui/primitives";
@@ -8,6 +9,20 @@ import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { fmtNum, productsByCategory } from "@/lib/products";
 
 export function CategoryGateway() {
+  const tilt = (event: PointerEvent<HTMLAnchorElement>) => {
+    if (event.pointerType === "touch") return;
+    const box = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - box.left) / box.width - 0.5;
+    const y = (event.clientY - box.top) / box.height - 0.5;
+    event.currentTarget.style.setProperty("--tilt-x", `${(-y * 8).toFixed(2)}deg`);
+    event.currentTarget.style.setProperty("--tilt-y", `${(x * 10).toFixed(2)}deg`);
+  };
+
+  const resetTilt = (event: PointerEvent<HTMLAnchorElement>) => {
+    event.currentTarget.style.setProperty("--tilt-x", "0deg");
+    event.currentTarget.style.setProperty("--tilt-y", "0deg");
+  };
+
   return (
     <section
       id="home-categories"
@@ -47,7 +62,9 @@ export function CategoryGateway() {
                 to="/$category"
                 params={{ category: slug }}
                 aria-label={`مشاهده ${category.nameFaPlural} — ${fmtNum(count)} محصول`}
-                className={`group relative min-w-0 overflow-hidden rounded-2xl border border-hairline bg-carbon shadow-raised transition-[transform,border-color] duration-300 hover:-translate-y-1 hover:border-hairline-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${placement}`}
+                onPointerMove={tilt}
+                onPointerLeave={resetTilt}
+                className={`category-tilt group relative min-w-0 overflow-hidden rounded-[24px] border border-hairline bg-white shadow-raised hover:border-signal/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${placement}`}
               >
                 <Frame
                   src={categoryImage(slug)}
@@ -60,21 +77,21 @@ export function CategoryGateway() {
                       ? "(max-width: 767px) 100vw, 50vw"
                       : "(max-width: 767px) 100vw, 33vw"
                   }
-                  className="h-full min-h-[260px] w-full rounded-2xl sm:min-h-[280px]"
-                  imgClassName="opacity-80 transition-[transform,opacity] duration-500 group-hover:scale-[1.035] group-hover:opacity-100"
+                  className="h-full min-h-[260px] w-full rounded-[24px] bg-white sm:min-h-[280px]"
+                  imgClassName="object-contain p-5 opacity-100 transition-transform duration-500 group-hover:scale-[1.045] sm:p-8"
                   zoom={false}
                 >
                   <span
                     aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/15 to-transparent"
+                    className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/5 to-transparent"
                   />
                   <span
                     aria-hidden="true"
-                    className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-white/20 bg-obsidian/80 text-bone shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal group-hover:text-signal md:right-5 md:top-5 md:size-16"
+                    className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-black/10 bg-white/90 text-obsidian shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal group-hover:text-signal md:right-5 md:top-5 md:size-16"
                   >
                     <CategoryIcon category={slug} className="size-9 md:size-10" />
                   </span>
-                  <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
+                  <div className="category-tilt__content absolute inset-x-0 bottom-0 p-4 md:p-5">
                     <div className="flex items-end justify-between gap-4">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">

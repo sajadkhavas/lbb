@@ -142,7 +142,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
-    scripts: [{ type: "application/ld+json", children: JSON.stringify(orgJsonLd) }],
+    scripts: [
+      {
+        children:
+          "history.scrollRestoration='manual';if(performance.getEntriesByType('navigation')[0]?.type==='reload')scrollTo(0,0)",
+      },
+      { type: "application/ld+json", children: JSON.stringify(orgJsonLd) },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

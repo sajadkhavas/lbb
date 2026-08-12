@@ -84,8 +84,8 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       ratio="4/5"
       width={1024}
       height={1280}
-      className="product-card__media bg-carbon"
-      imgClassName={`transition-[opacity,transform] duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+      className="product-card__media bg-white"
+      imgClassName={`object-contain p-3 transition-[opacity,transform] duration-500 sm:p-5 ${loaded ? "opacity-100" : "opacity-0"}`}
     >
       {!loaded ? <div className="absolute inset-0 skeleton-shimmer" aria-hidden="true" /> : null}
       <img
@@ -116,7 +116,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       />
     </Frame>
   ) : (
-    <div className="product-card__media relative aspect-[4/5] overflow-hidden bg-carbon">
+    <div className="product-card__media relative aspect-[4/5] overflow-hidden bg-white">
       <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">
         تصویر تأییدشده برای این محصول منتشر نشده است.
       </div>
@@ -135,15 +135,15 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   return (
     <article
       dir="rtl"
-      className="product-card group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-hairline bg-carbon shadow-[0_18px_50px_rgba(0,0,0,0.22)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-hairline-strong hover:shadow-[0_24px_70px_rgba(0,0,0,0.38)]"
+      className="product-card group relative flex min-w-0 flex-col overflow-hidden rounded-[22px] border border-white/10 bg-[#0d0d0f] shadow-[0_18px_55px_rgba(0,0,0,0.28)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1.5 hover:border-signal/45 hover:shadow-[0_28px_80px_rgba(0,0,0,0.48)]"
     >
       {cardImage}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1 p-3.5 sm:p-4">
-        <TechLabel tone="metal" className="truncate text-[10px]">
+      <div className="flex min-w-0 flex-1 flex-col p-3.5 sm:p-5">
+        <TechLabel tone="metal" className="truncate text-[9px] sm:text-[10px]">
           {backend ? categoryLabel : `${categoryLabel} / ${p.latinName}`}
         </TechLabel>
-        <h3 className="text-sm font-semibold leading-snug text-bone">
+        <h3 className="mt-1.5 line-clamp-2 min-h-[2.75rem] text-sm font-extrabold leading-[1.65] text-bone sm:text-base">
           <Link
             to="/product/$slug"
             params={{ slug: p.slug }}
@@ -152,9 +152,9 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             {name}
           </Link>
         </h3>
-        <div className="mt-0.5 flex flex-wrap items-baseline gap-2">
+        <div className="mt-2 flex flex-wrap items-baseline gap-2">
           {priceFrom !== null ? (
-            <span className="num text-sm font-bold text-bone">
+            <span className="num text-[13px] font-bold text-bone sm:text-sm">
               {priceTo !== null && priceTo !== priceFrom
                 ? `${fmtToman(priceFrom)} تا ${fmtToman(priceTo)}`
                 : fmtToman(priceFrom)}
@@ -168,7 +168,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         </div>
         <div
           role="group"
-          className="mt-1 flex gap-1.5"
+          className="mt-3 flex gap-2"
           aria-label={`رنگ‌های موجود: ${
             backend
               ? p.colors.map((color) => color.name).join("، ")
@@ -180,7 +180,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
                 <span
                   key={color.publicId}
                   title={color.name}
-                  className="h-2.5 w-2.5 rounded-full border border-hairline"
+                  className="h-3 w-3 rounded-full border border-white/30 ring-1 ring-black"
                   style={color.hex ? { background: color.hex } : undefined}
                   aria-hidden="true"
                 />
@@ -189,7 +189,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
                 <span
                   key={color}
                   aria-hidden="true"
-                  className="h-2.5 w-2.5 rounded-full border border-hairline"
+                  className="h-3 w-3 rounded-full border border-white/30 ring-1 ring-black"
                   style={{ background: color }}
                 />
               ))}
@@ -198,7 +198,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
           <Link
             to="/product/$slug"
             params={{ slug: p.slug }}
-            className="mt-2 inline-flex min-h-11 items-center justify-center gap-2 border border-hairline px-3 text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-hairline px-3 text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
           >
             انتخاب رنگ و سایز
           </Link>
@@ -206,7 +206,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
           <button
             type="button"
             onClick={(event) => openQuickView(p, event.currentTarget)}
-            className="mt-2 inline-flex min-h-11 items-center justify-center gap-2 border border-hairline text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:hidden"
+            className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-bone px-2 text-[11px] font-bold text-obsidian transition hover:bg-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:hidden"
           >
             <Eye size={15} aria-hidden="true" />
             {p.inStock ? "انتخاب سایز و خرید" : "مشاهده محصول"}
