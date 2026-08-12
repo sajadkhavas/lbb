@@ -45,7 +45,7 @@ export function ProductMoments() {
           }
         />
 
-        <div className="mt-9 grid grid-cols-2 gap-x-3 gap-y-8 lg:grid-cols-4 lg:gap-x-5">
+        <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
           {curated.map((product, index) => (
             <div key={product.slug} className="min-w-0">
               <ProductCard p={product} priority={index === 0} />
@@ -53,14 +53,14 @@ export function ProductMoments() {
           ))}
         </div>
 
-        <div className="mt-12 grid border-y border-hairline md:grid-cols-3 md:divide-x md:divide-x-reverse md:divide-hairline">
+        <div className="mt-12 grid gap-3 md:grid-cols-3">
           {DECISION_POINTS.map(({ icon: Icon, title, body }, index) => (
             <article
               key={title}
-              className="border-b border-hairline p-5 last:border-b-0 md:border-b-0 md:p-6"
+              className="rounded-2xl border border-hairline bg-carbon p-5 transition-colors hover:border-hairline-strong md:p-6"
             >
               <div className="flex items-start gap-4">
-                <span className="grid h-11 w-11 shrink-0 place-items-center border border-hairline text-signal">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-hairline bg-carbon-2 text-signal">
                   <Icon size={18} aria-hidden="true" />
                 </span>
                 <div>

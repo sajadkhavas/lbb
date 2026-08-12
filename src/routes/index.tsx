@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { AnnouncementBar, ANNOUNCEMENT_HEIGHT } from "@/components/lbb/AnnouncementBar";
 import { Footer } from "@/components/lbb/Footer";
 import { InstagramStrip } from "@/components/lbb/InstagramStrip";
@@ -77,7 +77,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const [barVisible, setBarVisible] = useState(true);
+  const [barVisible, setBarVisible] = useState(false);
+  const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
 
   return (
@@ -85,7 +86,7 @@ function Home() {
       <a href="#main" className="sr-focusable">
         رفتن به محتوای اصلی
       </a>
-      <AnnouncementBar onDismiss={() => setBarVisible(false)} />
+      <AnnouncementBar onVisibilityChange={handleBarVisibility} />
       <Navbar theme="dark" offsetTop={offsetTop} />
       <main
         id="main"

@@ -1,12 +1,12 @@
 import { CATEGORIES } from "./categories";
 import { collectionBySlug, type Collection } from "./collections";
 import { JOURNAL_ARTICLES, type JournalArticle } from "./journal";
-import { heroMain, lifestyle1, lifestyle2, productImage } from "./product-images";
+import { dropShabgard, heroMain, lifestyle1, lifestyle2, productImage } from "./product-images";
 import { evaluateProductEvidence, type ProductEvidenceEvaluation } from "./product-evidence";
 import { productBySlug, type CategorySlug, type Product } from "./products";
 
 export type EditorialCollectionKind = "collection" | "drop";
-export type EditorialMediaKey = "hero" | "l1" | "l2";
+export type EditorialMediaKey = "drop" | "hero" | "l1" | "l2";
 
 export type EditorialProductReference = {
   slug: string;
@@ -30,12 +30,13 @@ const COLLECTION_EDITORIAL_CONFIG: Record<
   string,
   { kind: EditorialCollectionKind; media: EditorialMediaKey; primaryCategory?: CategorySlug }
 > = {
-  "drop-01-shabgard": { kind: "drop", media: "l2", primaryCategory: "hoodies" },
+  "drop-01-shabgard": { kind: "drop", media: "drop", primaryCategory: "hoodies" },
   "drop-02-atashe-sorkh": { kind: "drop", media: "hero", primaryCategory: "tshirts" },
   "capsule-denim": { kind: "collection", media: "l1", primaryCategory: "pants" },
 };
 
 const MEDIA: Record<EditorialMediaKey, string> = {
+  drop: dropShabgard,
   hero: heroMain,
   l1: lifestyle1,
   l2: lifestyle2,

@@ -31,7 +31,7 @@ function DecisionCard({
           <TechLabel tone="inverse">
             0{index + 1} / {latin}
           </TechLabel>
-          <span className="grid size-11 shrink-0 place-items-center border border-hairline-ink text-obsidian transition-colors group-hover:border-signal group-hover:bg-signal">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-hairline-ink text-obsidian transition-colors group-hover:border-signal group-hover:bg-signal">
             <GuideIcon className="size-7" aria-hidden="true" />
           </span>
         </div>
@@ -51,7 +51,7 @@ function DecisionCard({
 }
 
 const CARD_CLASS =
-  "group flex min-h-[250px] flex-col justify-between border border-hairline-ink bg-bone p-5 transition-colors hover:bg-steam md:p-6";
+  "group flex min-h-[250px] flex-col justify-between rounded-2xl border border-hairline-ink bg-bone p-5 shadow-[0_16px_45px_rgba(0,0,0,0.08)] transition-[transform,background-color,box-shadow] hover:-translate-y-1 hover:bg-steam hover:shadow-[0_22px_60px_rgba(0,0,0,0.13)] md:p-6";
 
 export function DecisionSupport() {
   return (
@@ -78,7 +78,7 @@ export function DecisionSupport() {
         </header>
 
         <div className="mt-9 grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-          <div className="border border-hairline-ink bg-obsidian p-5 text-bone md:p-7">
+          <div className="rounded-2xl border border-hairline-ink bg-obsidian p-5 text-bone shadow-raised md:p-7">
             <TechLabel tone="signal">قبل از خرید بررسی کن</TechLabel>
             <ul className="mt-5 space-y-4">
               {CHECKS.map((item) => (

@@ -12,7 +12,13 @@ const MESSAGES = [
 const STORAGE_KEY = "lbb-announcement-f14a-v1-dismissed";
 export const ANNOUNCEMENT_HEIGHT = 32;
 
-export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
+export function AnnouncementBar({
+  onDismiss,
+  onVisibilityChange,
+}: {
+  onDismiss?: () => void;
+  onVisibilityChange?: (visible: boolean) => void;
+}) {
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [index, setIndex] = useState(0);
@@ -22,6 +28,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
     setMounted(true);
     try {
       if (localStorage.getItem(STORAGE_KEY) === "1") {
+        onVisibilityChange?.(false);
         onDismiss?.();
         return;
       }
@@ -29,7 +36,8 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
       // Storage can be unavailable; the announcement remains visible.
     }
     setVisible(true);
-  }, [onDismiss]);
+    onVisibilityChange?.(true);
+  }, [onDismiss, onVisibilityChange]);
 
   useEffect(() => {
     if (!visible || paused) return;
@@ -43,6 +51,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
 
   const dismiss = () => {
     setVisible(false);
+    onVisibilityChange?.(false);
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {

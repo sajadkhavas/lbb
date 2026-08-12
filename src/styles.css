@@ -449,8 +449,24 @@ img {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --lbb-gutter: 1rem;
+  }
+  .lbb-section,
+  .lbb-rhythm,
+  .lbb-section-major {
+    padding-block: 3.5rem;
+  }
   .text-hero {
-    line-height: 0.92;
+    font-size: clamp(2.75rem, 15vw, 4.65rem);
+    line-height: 0.94;
+  }
+  .text-display-2 {
+    font-size: clamp(2rem, 10vw, 3.25rem);
+    line-height: 1.05;
+  }
+  .text-display-3 {
+    font-size: clamp(1.55rem, 7.6vw, 2.4rem);
   }
   .tech {
     letter-spacing: 0.05em;
@@ -515,6 +531,11 @@ img {
   overflow: hidden;
   border-radius: var(--radius-lg);
   background: var(--lbb-surface-subtle);
+}
+.product-card > .product-card__media {
+  border-radius: 0;
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
 }
 .product-card__media img {
   filter: var(--lbb-image-grade);

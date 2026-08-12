@@ -8,9 +8,11 @@ import denimBaggy from "@/assets/products/denim-baggy.jpg";
 import graphicTeeRed from "@/assets/products/graphic-tee-red.jpg";
 import lifestyle1 from "@/assets/editorial/lifestyle-1.jpg";
 import lifestyle2 from "@/assets/editorial/lifestyle-2.jpg";
-import heroMain from "@/assets/editorial/hero-main.jpg";
+import heroMain from "@/assets/editorial/generated/home-hero-v2.webp";
+import dropShabgard from "@/assets/editorial/generated/drop-shabgard-v2.webp";
+import communityStudio from "@/assets/editorial/generated/community-studio-v2.webp";
 
-export { lifestyle1, lifestyle2, heroMain };
+export { communityStudio, dropShabgard, lifestyle1, lifestyle2, heroMain };
 
 const MAIN: Record<string, string> = {
   "lbb-classic-hoodie": hoodieClassic,
@@ -33,7 +35,3 @@ export const productGallery = (slug: string) => [
   lifestyle1,
   heroMain,
 ];
-
-/** Second frame shown on card hover. */
-export const productHoverImage = (slug: string) =>
-  slug.charCodeAt(0) % 2 === 0 ? lifestyle2 : lifestyle1;

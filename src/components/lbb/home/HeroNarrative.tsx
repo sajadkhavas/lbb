@@ -96,7 +96,7 @@ export function HeroNarrative() {
             <Link
               to="/product/$slug"
               params={{ slug: heroProduct.slug }}
-              className="group absolute bottom-5 right-5 grid w-[min(360px,calc(100%-2.5rem))] grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 border border-hairline-strong bg-obsidian/95 p-2 text-bone shadow-overlay backdrop-blur md:bottom-8 md:right-8"
+              className="group absolute bottom-5 right-5 grid w-[min(360px,calc(100%-2.5rem))] grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-hairline-strong bg-obsidian/95 p-2 text-bone shadow-overlay backdrop-blur md:bottom-8 md:right-8"
             >
               <img
                 src={productImage(heroProduct.slug)}
@@ -105,7 +105,7 @@ export function HeroNarrative() {
                 height={80}
                 loading="eager"
                 decoding="async"
-                className="h-20 w-16 object-cover"
+                className="h-20 w-16 rounded-xl object-cover"
               />
               <span className="min-w-0">
                 <TechLabel tone="signal">HERO PIECE</TechLabel>
@@ -124,7 +124,7 @@ export function HeroNarrative() {
 
           <a
             href="#home-categories"
-            className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 border border-hairline-strong bg-obsidian/85 px-3 text-xs font-bold text-bone backdrop-blur transition-colors hover:border-signal hover:text-signal md:left-8 md:top-8"
+            className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline-strong bg-obsidian/85 px-3 text-xs font-bold text-bone backdrop-blur transition-colors hover:border-signal hover:text-signal md:left-8 md:top-8"
           >
             دیدن دسته‌بندی‌ها
             <ArrowDownLeft size={15} aria-hidden="true" />

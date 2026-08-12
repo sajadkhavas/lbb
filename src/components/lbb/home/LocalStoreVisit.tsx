@@ -11,7 +11,7 @@ export function LocalStoreVisit() {
       aria-labelledby="local-store-title"
       className="border-t border-hairline bg-carbon py-14 md:py-20"
     >
-      <Shell className="grid overflow-hidden border border-hairline bg-obsidian lg:grid-cols-2">
+      <Shell className="grid overflow-hidden rounded-3xl border border-hairline bg-obsidian shadow-overlay lg:grid-cols-2">
         <div className="relative min-h-[420px] overflow-hidden lg:min-h-[620px]">
           <img
             src={lifestyle2}
@@ -27,7 +27,7 @@ export function LocalStoreVisit() {
             aria-hidden="true"
             className="absolute inset-0 bg-gradient-to-t from-obsidian/70 to-transparent"
           />
-          <span className="absolute bottom-5 right-5 border border-bone/30 bg-obsidian/80 px-4 py-3 text-sm font-black text-bone backdrop-blur">
+          <span className="absolute bottom-5 right-5 rounded-xl border border-bone/30 bg-obsidian/80 px-4 py-3 text-sm font-black text-bone backdrop-blur">
             از مهستان، برای خیابان
           </span>
         </div>
@@ -43,7 +43,7 @@ export function LocalStoreVisit() {
           </p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <div className="flex items-start gap-3 border border-hairline bg-carbon p-4">
+            <div className="flex items-start gap-3 rounded-2xl border border-hairline bg-carbon p-4">
               <MapPin size={20} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
               <div>
                 <p className="text-sm font-black text-bone">آدرس فروشگاه</p>
@@ -54,7 +54,7 @@ export function LocalStoreVisit() {
               href={BRAND.instagramUrl}
               target="_blank"
               rel="noreferrer"
-              className="flex items-start gap-3 border border-hairline bg-carbon p-4 transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              className="flex items-start gap-3 rounded-2xl border border-hairline bg-carbon p-4 transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
             >
               <Instagram size={20} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
               <div>

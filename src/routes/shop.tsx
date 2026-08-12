@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { PackageSearch, RefreshCcw } from "lucide-react";
+import { ArrowUpLeft, PackageSearch, RefreshCcw, Search } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
@@ -19,6 +19,7 @@ import {
 import { products } from "@/lib/product-catalog";
 import { evaluateProductEvidence } from "@/lib/product-evidence";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
+import { categoryImage } from "@/lib/category-images";
 import {
   catalogueInventorySummary,
   countDiscoveryResults,
@@ -421,136 +422,85 @@ function PrototypeShop() {
   const desktopFilters = renderFilters(filters, setFilters);
 
   return (
-    <>
-      <Navbar theme="dark" />
-      <main
-        dir="rtl"
-        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
-      >
-        <Shell className="border-b border-hairline py-4">
-          <Breadcrumb items={[{ label: "خانه", to: "/" }, { label: "فروشگاه" }]} />
-        </Shell>
+    <ShopChrome
+      categories={CATEGORY_SLUGS.map((slug) => ({ slug, label: CATEGORIES[slug].nameFa }))}
+      status={`${inventory.label} پرداخت و ارسال واقعی در این نسخه فعال نیست.`}
+    >
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
+        <aside className="hidden lg:block" aria-label="فیلتر محصولات">
+          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{desktopFilters}</div>
+        </aside>
 
-        <header className="border-b border-hairline">
-          <Shell className="grid gap-6 py-10 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.45fr)] md:items-end md:py-14">
-            <div>
-              <TechLabel tone="signal">CATALOG / ALL PIECES</TechLabel>
-              <h1 className="text-display-2 mt-3 text-bone">همه قطعه‌ها</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-metal">
-                از دسته شروع کن یا با رنگ، سایز، قیمت و وضعیت موجودی به نتیجه دقیق برس. هر تغییر در
-                URL ثبت می‌شود و لینک قابل اشتراک باقی می‌ماند.
-              </p>
+        <section aria-labelledby="shop-grid-title">
+          <h2 id="shop-grid-title" className="sr-only">
+            نتایج کاتالوگ LBB
+          </h2>
+          <ProductGridControls
+            filters={filters}
+            onChange={setFilters}
+            resultCount={filtered.length}
+            filterSlot={renderFilters}
+            getResultCount={getResultCount}
+          />
+
+          {isPending ? (
+            <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی محصولات">
+              <GridSkeleton count={8} />
             </div>
-            <div className="border-s border-hairline ps-5">
-              <p className="tech text-signal">CATALOG STATUS</p>
-              <p className="mt-2 text-sm leading-7 text-bone">{inventory.label}</p>
-              <p className="mt-1 text-xs leading-6 text-mute">
-                پرداخت و ارسال واقعی در این نسخه فعال نیست.
-              </p>
-            </div>
-          </Shell>
-          <Shell className="flex snap-x gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <Link
-              to="/shop"
-              className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-signal px-4 py-3 text-signal"
-            >
-              همه قطعه‌ها
-            </Link>
-            {CATEGORY_SLUGS.map((slug) => (
-              <Link
-                key={slug}
-                to="/$category"
-                params={{ category: slug }}
-                className="tech min-h-11 shrink-0 snap-start whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-metal transition-colors hover:text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              className="mt-6"
+              icon={<PackageSearch size={40} aria-hidden="true" />}
+              title="محصولی با این ترکیب فیلتر پیدا نشد"
+              body="یکی از فیلترها را حذف کن یا کاتالوگ را به حالت پایه برگردان."
+              action={
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      cats: [],
+                      colors: [],
+                      sizes: [],
+                      max: 0,
+                      instock: false,
+                      sale: false,
+                    })
+                  }
+                  className={CtaClasses("signal")}
+                >
+                  بازگشت به همه قطعه‌ها
+                </button>
+              }
+            />
+          ) : (
+            <>
+              <div
+                className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4"
+                aria-busy={isPending}
               >
-                {CATEGORIES[slug].nameFa}
-              </Link>
-            ))}
-          </Shell>
-        </header>
-
-        <Band hairline={false} className="!py-10 md:!py-14">
-          <Shell>
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
-              <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-                <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">{desktopFilters}</div>
-              </aside>
-
-              <section aria-labelledby="shop-grid-title">
-                <h2 id="shop-grid-title" className="sr-only">
-                  نتایج کاتالوگ LBB
-                </h2>
-                <ProductGridControls
-                  filters={filters}
-                  onChange={setFilters}
-                  resultCount={filtered.length}
-                  filterSlot={renderFilters}
-                  getResultCount={getResultCount}
-                />
-
-                {isPending ? (
-                  <div className="mt-6" aria-busy="true" aria-label="در حال به‌روزرسانی محصولات">
-                    <GridSkeleton count={8} />
-                  </div>
-                ) : filtered.length === 0 ? (
-                  <EmptyState
-                    className="mt-6"
-                    icon={<PackageSearch size={40} aria-hidden="true" />}
-                    title="محصولی با این ترکیب فیلتر پیدا نشد"
-                    body="یکی از فیلترها را حذف کن یا کاتالوگ را به حالت پایه برگردان."
-                    action={
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setFilters({
-                            ...filters,
-                            cats: [],
-                            colors: [],
-                            sizes: [],
-                            max: 0,
-                            instock: false,
-                            sale: false,
-                          })
-                        }
-                        className={CtaClasses("signal")}
-                      >
-                        بازگشت به همه قطعه‌ها
-                      </button>
-                    }
-                  />
-                ) : (
-                  <>
-                    <div
-                      className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4"
-                      aria-busy={isPending}
-                    >
-                      {shown.map((product, index) => (
-                        <ProductCard key={product.id} p={product} priority={index < 2} />
-                      ))}
-                    </div>
-                    {visible < filtered.length ? (
-                      <div className="mt-10 flex justify-center">
-                        <button
-                          type="button"
-                          onClick={() => setVisible((value) => value + PAGE_SIZE)}
-                          className={CtaClasses("line")}
-                        >
-                          نمایش قطعه‌های بیشتر
-                        </button>
-                      </div>
-                    ) : (
-                      <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>
-                    )}
-                  </>
-                )}
-              </section>
-            </div>
-          </Shell>
-        </Band>
-      </main>
-      <Footer theme="dark" />
-      <MobileBottomBar />
-    </>
+                {shown.map((product, index) => (
+                  <ProductCard key={product.id} p={product} priority={index < 2} />
+                ))}
+              </div>
+              {visible < filtered.length ? (
+                <div className="mt-10 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisible((value) => value + PAGE_SIZE)}
+                    className={CtaClasses("line")}
+                  >
+                    نمایش قطعه‌های بیشتر
+                  </button>
+                </div>
+              ) : (
+                <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>
+              )}
+            </>
+          )}
+        </section>
+      </div>
+    </ShopChrome>
   );
 }
 
@@ -563,6 +513,15 @@ function ShopChrome({
   status: string;
   children: React.ReactNode;
 }) {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+
+  const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const q = query.trim();
+    if (q) void navigate({ to: "/search", search: { q } });
+  };
+
   return (
     <>
       <Navbar theme="dark" />
@@ -570,24 +529,103 @@ function ShopChrome({
         dir="rtl"
         className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
       >
-        <Shell className="border-b border-hairline py-4">
+        <Shell className="py-4">
           <Breadcrumb items={[{ label: "خانه", to: "/" }, { label: "فروشگاه" }]} />
         </Shell>
-        <header className="border-b border-hairline">
-          <Shell className="grid gap-6 py-10 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.45fr)] md:items-end md:py-14">
-            <div>
-              <TechLabel tone="signal">CATALOG / ALL PIECES</TechLabel>
-              <h1 className="text-display-2 mt-3 text-bone">همه قطعه‌ها</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-metal">
-                از دسته شروع کن یا با رنگ، سایز، قیمت و وضعیت موجودی به نتیجه دقیق برس. هر تغییر در
-                URL ثبت می‌شود و لینک قابل اشتراک باقی می‌ماند.
-              </p>
-            </div>
-            <div className="border-s border-hairline ps-5">
-              <p className="tech text-signal">CATALOG STATUS</p>
-              <p className="mt-2 text-sm leading-7 text-bone">{status}</p>
+        <header className="border-y border-hairline">
+          <Shell className="py-3 md:py-5">
+            <div className="relative isolate min-h-[520px] overflow-hidden rounded-[24px] bg-carbon md:min-h-[590px] md:rounded-[32px]">
+              <img
+                src={categoryImage("hoodies")}
+                alt="استایل شهری LBB برای شروع مرور فروشگاه"
+                width={1600}
+                height={2000}
+                fetchPriority="high"
+                className="absolute inset-0 h-full w-full object-cover object-center md:object-[center_42%]"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,9,11,.12)_0%,rgba(9,9,11,.38)_42%,rgba(9,9,11,.94)_100%)] md:bg-[linear-gradient(90deg,rgba(9,9,11,.94)_0%,rgba(9,9,11,.68)_42%,rgba(9,9,11,.08)_78%)]" />
+              <div className="relative flex min-h-[520px] flex-col justify-end p-5 md:min-h-[590px] md:max-w-[680px] md:justify-center md:p-12 lg:p-16">
+                <TechLabel tone="signal">SHOP / LBB MAHESTAN</TechLabel>
+                <h1 className="mt-4 max-w-xl text-[clamp(2.75rem,7vw,6.5rem)] font-black leading-[.92] tracking-[-.06em] text-bone">
+                  استایل تو،
+                  <span className="block text-signal">قانون تو.</span>
+                </h1>
+                <p className="mt-5 max-w-lg text-sm leading-7 text-bone/78 md:text-base md:leading-8">
+                  قطعه‌های LBB را بر اساس دسته، رنگ، سایز و موجودی کشف کن؛ یا مستقیم چیزی را که
+                  می‌خواهی جست‌وجو کن.
+                </p>
+
+                <form
+                  onSubmit={submitSearch}
+                  role="search"
+                  className="mt-7 flex min-h-14 w-full max-w-xl items-center gap-2 rounded-full border border-white/20 bg-obsidian/75 p-1.5 ps-5 shadow-overlay backdrop-blur-xl focus-within:border-signal"
+                >
+                  <Search size={19} className="shrink-0 text-signal" aria-hidden="true" />
+                  <label htmlFor="shop-search" className="sr-only">
+                    جست‌وجو در فروشگاه
+                  </label>
+                  <input
+                    id="shop-search"
+                    type="search"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="چی می‌خوای؟ هودی، بگی، کتونی…"
+                    autoComplete="off"
+                    className="min-w-0 flex-1 bg-transparent text-sm text-bone outline-none placeholder:text-metal"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!query.trim()}
+                    className="grid size-11 shrink-0 place-items-center rounded-full bg-signal text-bone transition-transform hover:scale-105 disabled:opacity-45"
+                    aria-label="نمایش نتایج جست‌وجو"
+                  >
+                    <ArrowUpLeft size={18} aria-hidden="true" />
+                  </button>
+                </form>
+                <p className="tech mt-4 text-bone/55">{status}</p>
+              </div>
             </div>
           </Shell>
+
+          <Shell className="py-8 md:py-12">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div>
+                <TechLabel tone="signal">SHOP BY CATEGORY</TechLabel>
+                <h2 className="mt-2 text-2xl font-black text-bone md:text-4xl">از دسته شروع کن</h2>
+              </div>
+              <span className="tech hidden text-mute md:block">SWIPE / EXPLORE</span>
+            </div>
+            <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
+              {categories.map((category, index) => (
+                <Link
+                  key={category.slug}
+                  to="/$category"
+                  params={{ category: category.slug }}
+                  className="group relative aspect-[4/5] w-[72vw] max-w-[290px] shrink-0 snap-start overflow-hidden rounded-[20px] bg-carbon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:w-auto md:max-w-none"
+                >
+                  <img
+                    src={categoryImage(category.slug as keyof typeof CATEGORIES)}
+                    alt=""
+                    width={640}
+                    height={800}
+                    loading={index < 2 ? "eager" : "lazy"}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
+                  <span className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent" />
+                  <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
+                    <span>
+                      <span className="block text-xl font-black text-bone">{category.label}</span>
+                      <span className="tech mt-1 block text-bone/60">0{index + 1}</span>
+                    </span>
+                    <span className="grid size-10 place-items-center rounded-full border border-white/25 bg-obsidian/45 text-bone backdrop-blur transition-colors group-hover:border-signal group-hover:bg-signal">
+                      <ArrowUpLeft size={16} aria-hidden="true" />
+                    </span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </Shell>
+
           <Shell className="flex snap-x gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Link
               to="/shop"

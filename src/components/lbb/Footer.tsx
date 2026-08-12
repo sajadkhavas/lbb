@@ -1,5 +1,6 @@
+import { useId, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpLeft, Instagram, MapPin } from "lucide-react";
+import { ArrowUpLeft, ChevronDown, Instagram, MapPin } from "lucide-react";
 import {
   BRAND_NAVIGATION,
   EDITORIAL_NAVIGATION,
@@ -14,18 +15,38 @@ import { TrustMarks } from "@/components/lbb/TrustMarks";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 
 function FooterList({ title, items }: { title: string; items: typeof SHOP_NAVIGATION }) {
-  const id = `footer-${title.replace(/\s+/g, "-")}`;
+  const reactId = useId();
+  const id = `footer-${reactId.replace(/:/g, "")}`;
+  const [open, setOpen] = useState(false);
   return (
-    <nav aria-labelledby={id}>
-      <h2 id={id} className="tech text-bone">
-        {title}
+    <nav aria-labelledby={`${id}-title`} className="border-b border-hairline md:border-0">
+      <h2 id={`${id}-title`} className="md:mb-4">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={id}
+          onClick={() => setOpen((current) => !current)}
+          className="flex min-h-14 w-full items-center justify-between text-right md:pointer-events-none md:min-h-0"
+        >
+          <span className="tech text-bone">{title}</span>
+          <span className="grid size-9 place-items-center rounded-xl border border-hairline bg-carbon-2 text-metal md:hidden">
+            <ChevronDown
+              size={16}
+              aria-hidden="true"
+              className={`transition-transform duration-300 ${open ? "rotate-180 text-signal" : ""}`}
+            />
+          </span>
+        </button>
       </h2>
-      <ul className="mt-4 space-y-2.5">
+      <ul
+        id={id}
+        className={`${open ? "grid grid-rows-[1fr] pb-5" : "hidden"} space-y-2.5 md:block md:pb-0`}
+      >
         {items.map((item) => (
           <li key={`${String(item.to)}-${item.label}`}>
             <NavigationLink
               item={item}
-              className="text-sm leading-7 text-metal transition-colors hover:text-signal"
+              className="inline-flex min-h-10 items-center text-sm leading-7 text-metal transition-colors hover:text-signal"
             />
           </li>
         ))}
@@ -51,14 +72,14 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
           <div className="grid gap-3 sm:grid-cols-2">
             <Link
               to="/shop"
-              className="group flex min-h-14 items-center justify-between bg-signal px-5 text-sm font-black text-obsidian"
+              className="group flex min-h-14 items-center justify-between rounded-2xl bg-signal px-5 text-sm font-black text-obsidian transition-transform hover:-translate-y-0.5"
             >
               {BRAND_COPY.primaryCta}
               <ArrowUpLeft size={18} aria-hidden="true" />
             </Link>
             <Link
               to="/account"
-              className="group flex min-h-14 items-center justify-between border border-hairline px-5 text-sm font-black text-bone transition-colors hover:border-signal"
+              className="group flex min-h-14 items-center justify-between rounded-2xl border border-hairline px-5 text-sm font-black text-bone transition-[transform,border-color] hover:-translate-y-0.5 hover:border-signal"
             >
               حساب کاربری
               <ArrowUpLeft
@@ -70,8 +91,8 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
           </div>
         </div>
 
-        <div className="grid gap-10 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
-          <div className="min-w-0">
+        <div className="grid gap-0 py-8 md:gap-10 md:py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
+          <div className="min-w-0 border-b border-hairline pb-8 sm:col-span-2 lg:col-span-1 lg:border-0 lg:pb-0">
             <Logo size={48} withWordmark />
             <p className="mt-4 max-w-xs text-sm leading-7 text-metal">{BRAND.descriptor}</p>
             <p className="mt-4 flex items-start gap-2 text-sm leading-7 text-metal">
@@ -82,7 +103,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
               href={BRAND.instagramUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-6 inline-flex min-h-11 items-center gap-2 border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal"
+              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal"
             >
               <Instagram size={16} aria-hidden="true" />
               <span className="tech">{BRAND.instagramHandle.toUpperCase()}</span>
@@ -93,7 +114,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
           <FooterList title="خرید" items={SHOP_NAVIGATION} />
           <FooterList title="کالکشن و محتوا" items={EDITORIAL_NAVIGATION} />
           <FooterList title="پشتیبانی" items={SERVICE_NAVIGATION} />
-          <div className="grid grid-cols-2 gap-6 sm:col-span-2 lg:col-span-1 lg:grid-cols-1">
+          <div className="grid sm:col-span-2 lg:col-span-1 lg:grid-cols-1 lg:gap-6">
             <FooterList title="شخصی" items={PERSONAL_NAVIGATION} />
             <FooterList title="برند" items={BRAND_NAVIGATION} />
           </div>

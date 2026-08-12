@@ -47,7 +47,7 @@ export function CategoryGateway() {
                 to="/$category"
                 params={{ category: slug }}
                 aria-label={`مشاهده ${category.nameFaPlural} — ${fmtNum(count)} محصول`}
-                className={`group relative min-w-0 overflow-hidden border border-hairline bg-carbon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${placement}`}
+                className={`group relative min-w-0 overflow-hidden rounded-2xl border border-hairline bg-carbon shadow-raised transition-[transform,border-color] duration-300 hover:-translate-y-1 hover:border-hairline-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${placement}`}
               >
                 <Frame
                   src={categoryImage(slug)}
@@ -60,7 +60,7 @@ export function CategoryGateway() {
                       ? "(max-width: 767px) 100vw, 50vw"
                       : "(max-width: 767px) 100vw, 33vw"
                   }
-                  className="h-full min-h-[280px] w-full"
+                  className="h-full min-h-[260px] w-full rounded-2xl sm:min-h-[280px]"
                   imgClassName="opacity-80 transition-[transform,opacity] duration-500 group-hover:scale-[1.035] group-hover:opacity-100"
                   zoom={false}
                 >
@@ -70,7 +70,7 @@ export function CategoryGateway() {
                   />
                   <span
                     aria-hidden="true"
-                    className="absolute right-4 top-4 grid size-14 place-items-center border border-white/20 bg-obsidian/80 text-bone shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal group-hover:text-signal md:right-5 md:top-5 md:size-16"
+                    className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-white/20 bg-obsidian/80 text-bone shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal group-hover:text-signal md:right-5 md:top-5 md:size-16"
                   >
                     <CategoryIcon category={slug} className="size-9 md:size-10" />
                   </span>
@@ -90,7 +90,7 @@ export function CategoryGateway() {
                           {category.heroTagline}
                         </p>
                       </div>
-                      <span className="shrink-0 border border-hairline-strong bg-obsidian/90 px-3 py-2 text-left backdrop-blur">
+                      <span className="shrink-0 rounded-xl border border-hairline-strong bg-obsidian/90 px-3 py-2 text-left backdrop-blur">
                         <span className="num block text-sm font-black text-bone">
                           {fmtNum(count)}
                         </span>

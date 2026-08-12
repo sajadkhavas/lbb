@@ -4,7 +4,7 @@ import { Heart, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { fmtToman, discountPercent, isSizeAvailable, type Product } from "@/lib/products";
 import { CATEGORIES } from "@/lib/categories";
-import { productImage, productHoverImage } from "@/lib/product-images";
+import { productImage } from "@/lib/product-images";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { useQuickView } from "@/lib/quickview";
@@ -84,8 +84,8 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       ratio="4/5"
       width={1024}
       height={1280}
-      className="bg-carbon"
-      imgClassName={`transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"} ${backend ? "" : "md:group-hover:opacity-0"}`}
+      className="product-card__media bg-carbon"
+      imgClassName={`transition-[opacity,transform] duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
     >
       {!loaded ? <div className="absolute inset-0 skeleton-shimmer" aria-hidden="true" /> : null}
       <img
@@ -99,18 +99,6 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}
       />
-      {!backend ? (
-        <img
-          src={productHoverImage(p.slug)}
-          alt=""
-          aria-hidden="true"
-          width={1600}
-          height={1200}
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 hidden h-full w-full scale-[1.035] object-cover opacity-0 transition-opacity duration-500 ease-[var(--ease-lbb)] md:block md:group-hover:opacity-100"
-        />
-      ) : null}
       <CardOverlay
         p={p}
         liked={liked}
@@ -128,7 +116,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       />
     </Frame>
   ) : (
-    <div className="relative aspect-[4/5] overflow-hidden bg-carbon">
+    <div className="product-card__media relative aspect-[4/5] overflow-hidden bg-carbon">
       <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">
         تصویر تأییدشده برای این محصول منتشر نشده است.
       </div>
@@ -145,10 +133,13 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   );
 
   return (
-    <article dir="rtl" className="group relative flex min-w-0 flex-col bg-obsidian">
+    <article
+      dir="rtl"
+      className="product-card group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-hairline bg-carbon shadow-[0_18px_50px_rgba(0,0,0,0.22)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-hairline-strong hover:shadow-[0_24px_70px_rgba(0,0,0,0.38)]"
+    >
       {cardImage}
 
-      <div className="flex min-w-0 flex-col gap-1 pt-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 p-3.5 sm:p-4">
         <TechLabel tone="metal" className="truncate text-[10px]">
           {backend ? categoryLabel : `${categoryLabel} / ${p.latinName}`}
         </TechLabel>
@@ -274,7 +265,7 @@ function CardOverlay({
         }}
         aria-label={liked ? `حذف ${p.name} از علاقه‌مندی‌ها` : `افزودن ${p.name} به علاقه‌مندی‌ها`}
         aria-pressed={liked}
-        className="tap-target absolute end-1 top-1 z-20 grid place-items-center bg-obsidian/75 text-bone backdrop-blur transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+        className="tap-target absolute end-2 top-2 z-20 grid place-items-center rounded-xl border border-white/10 bg-obsidian/75 text-bone shadow-raised backdrop-blur transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
       >
         <Heart
           size={16}
@@ -292,7 +283,7 @@ function CardOverlay({
             onQuickView(event.currentTarget);
           }}
           aria-label={`نمای سریع ${p.name}`}
-          className="tap-target absolute end-1 top-12 z-20 grid place-items-center bg-obsidian/75 text-bone backdrop-blur transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+          className="tap-target absolute end-2 top-14 z-20 grid place-items-center rounded-xl border border-white/10 bg-obsidian/75 text-bone shadow-raised backdrop-blur transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
         >
           <Eye size={16} strokeWidth={1.6} aria-hidden="true" />
         </button>
