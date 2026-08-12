@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft, CheckCircle2 } from "lucide-react";
+import { DeliveryIcon, TeeIcon } from "@/components/lbb/BrandIcon";
 import { Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { HOME_DECISION_LINKS } from "@/lib/homepage";
 
@@ -21,12 +22,19 @@ function DecisionCard({
   latin: string;
   description: string;
 }) {
+  const GuideIcon = index === 1 ? DeliveryIcon : TeeIcon;
+
   return (
     <>
       <div>
-        <TechLabel tone="inverse">
-          0{index + 1} / {latin}
-        </TechLabel>
+        <div className="flex items-start justify-between gap-4">
+          <TechLabel tone="inverse">
+            0{index + 1} / {latin}
+          </TechLabel>
+          <span className="grid size-11 shrink-0 place-items-center border border-hairline-ink text-obsidian transition-colors group-hover:border-signal group-hover:bg-signal">
+            <GuideIcon className="size-7" aria-hidden="true" />
+          </span>
+        </div>
         <h3 className="mt-5 text-title text-obsidian">{label}</h3>
         <p className="mt-3 text-sm leading-7 text-graphite">{description}</p>
       </div>

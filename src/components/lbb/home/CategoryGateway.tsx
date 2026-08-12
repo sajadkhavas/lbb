@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft } from "lucide-react";
+import { CategoryIcon } from "@/components/lbb/BrandIcon";
 import { Frame, SectionHead, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { categoryImage } from "@/lib/category-images";
 import { CATEGORIES } from "@/lib/categories";
@@ -67,6 +68,12 @@ export function CategoryGateway() {
                     aria-hidden="true"
                     className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/15 to-transparent"
                   />
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-4 top-4 grid size-14 place-items-center border border-white/20 bg-obsidian/80 text-bone shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal group-hover:text-signal md:right-5 md:top-5 md:size-16"
+                  >
+                    <CategoryIcon category={slug} className="size-9 md:size-10" />
+                  </span>
                   <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
                     <div className="flex items-end justify-between gap-4">
                       <div className="min-w-0">
