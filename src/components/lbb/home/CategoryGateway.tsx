@@ -5,11 +5,10 @@ import { CategoryIcon } from "@/components/lbb/BrandIcon";
 import { Frame, SectionHead, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { homeCategoryImage } from "@/lib/home-category-images";
 import { CATEGORIES } from "@/lib/categories";
-import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
+import { ACTIVE_HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { fmtNum, productsByCategory } from "@/lib/products";
 
 export function CategoryGateway() {
-  const activeCategories = HOME_CATEGORY_ORDER.filter((slug) => slug !== "hoodies");
   const tilt = (event: PointerEvent<HTMLAnchorElement>) => {
     if (event.pointerType === "touch") return;
     const box = event.currentTarget.getBoundingClientRect();
@@ -46,7 +45,7 @@ export function CategoryGateway() {
         />
 
         <div className="mt-8 grid gap-3 md:grid-cols-6 lg:gap-4">
-          {activeCategories.map((slug, index) => {
+          {ACTIVE_HOME_CATEGORY_ORDER.map((slug, index) => {
             const category = CATEGORIES[slug];
             const count = productsByCategory(slug).length;
             const placement = "md:col-span-3";
@@ -64,7 +63,7 @@ export function CategoryGateway() {
               >
                 <Frame
                   src={homeCategoryImage(slug)}
-                  alt={`نمای دسته ${category.nameFaPlural} LBB`}
+                  alt={`نمای دسته ${category.nameFaPlural} ال‌بی‌بی`}
                   ratio={ratio}
                   width={900}
                   height={1125}

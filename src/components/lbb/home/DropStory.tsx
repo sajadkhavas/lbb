@@ -2,9 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft } from "lucide-react";
 import { CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { getCollectionEditorialViewBySlug } from "@/lib/editorial-commerce";
+import { productImage } from "@/lib/product-images";
 
 export function DropStory() {
-  const view = getCollectionEditorialViewBySlug("drop-01-shabgard");
+  const view = getCollectionEditorialViewBySlug("capsule-denim");
   if (!view) return null;
 
   const { collection } = view;
@@ -20,14 +21,14 @@ export function DropStory() {
       <Shell className="relative grid gap-0 py-12 md:py-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)]">
         <div className="relative min-h-[440px] overflow-hidden border border-hairline bg-obsidian lg:min-h-[600px]">
           <img
-            src={view.media}
+            src={productImage("denim-baggy-jean")}
             alt={`روایت تصویری ${collection.nameFa}`}
             width={1200}
             height={1500}
             loading="lazy"
             decoding="async"
             sizes="(max-width: 1023px) 100vw, 52vw"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full bg-white object-contain p-6 md:p-10"
           />
           <span
             aria-hidden="true"
@@ -41,7 +42,7 @@ export function DropStory() {
 
         <div className="flex flex-col justify-center border border-t-0 border-hairline bg-obsidian p-5 md:p-8 lg:border-r-0 lg:border-t lg:p-10">
           <div>
-            <TechLabel tone="signal">استایل پیشنهادی LBB</TechLabel>
+            <TechLabel tone="signal">استایل پیشنهادی ال‌بی‌بی</TechLabel>
             <h2 id="drop-story-title" className="mt-4 text-display-2 text-bone">
               {collection.nameFa}
             </h2>

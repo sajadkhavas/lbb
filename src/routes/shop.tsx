@@ -18,9 +18,9 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { products } from "@/lib/product-catalog";
 import { evaluateProductEvidence } from "@/lib/product-evidence";
-import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
-import { categoryImage } from "@/lib/category-images";
+import { CATEGORIES } from "@/lib/categories";
 import { homeCategoryImage } from "@/lib/home-category-images";
+import { ACTIVE_HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import {
   catalogueInventorySummary,
   countDiscoveryResults,
@@ -59,14 +59,15 @@ import {
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
 
-const TITLE = "فروشگاه | خرید هودی، شلوار، تیشرت و کتونی — LBB";
+const TITLE = "فروشگاه | خرید تیشرت، شلوار، کتونی و جوراب — ال‌بی‌بی";
 const DESC =
-  "کاتالوگ استریت‌ویر LBB شامل هودی، شلوار، تیشرت، کتونی و جوراب با فیلترهای قابل اشتراک و اطلاعات شفاف موجودی.";
+  "کاتالوگ پوشاک شهری ال‌بی‌بی شامل تیشرت، شلوار، کتونی و جوراب با فیلترهای قابل اشتراک و اطلاعات شفاف موجودی.";
 const PAGE_SIZE = 12;
 const BACKEND_PAGE_SIZE = 48;
+const seasonalProducts = products.filter((product) => product.category !== "hoodies");
 
 function createItemListLd() {
-  const publishedProducts = products.filter(
+  const publishedProducts = seasonalProducts.filter(
     (product) => evaluateProductEvidence(product).publishable,
   );
   return {
@@ -375,8 +376,8 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
 
 function PrototypeShop() {
   const routeFilters = Route.useSearch();
-  const filterScope = useMemo(() => createDiscoveryScope(products, true), []);
-  const inventory = useMemo(() => catalogueInventorySummary(products), []);
+  const filterScope = useMemo(() => createDiscoveryScope(seasonalProducts, true), []);
+  const inventory = useMemo(() => catalogueInventorySummary(seasonalProducts), []);
   const filters = useMemo(
     () =>
       normalizeFilters(
@@ -405,10 +406,10 @@ function PrototypeShop() {
     startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
   };
 
-  const filtered = useMemo(() => applyFilters(products, filters), [filters]);
+  const filtered = useMemo(() => applyFilters(seasonalProducts, filters), [filters]);
   const shown = filtered.slice(0, visible);
   const getResultCount = (candidate: Filters) =>
-    countDiscoveryResults(products, candidate, filterScope);
+    countDiscoveryResults(seasonalProducts, candidate, filterScope);
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
       filters={candidate}
@@ -417,14 +418,17 @@ function PrototypeShop() {
       sizes={filterScope.sizes}
       priceCeil={filterScope.priceCeil}
       showCategory
-      facetCounts={createFacetCounts(products, candidate, filterScope)}
+      facetCounts={createFacetCounts(seasonalProducts, candidate, filterScope)}
     />
   );
   const desktopFilters = renderFilters(filters, setFilters);
 
   return (
     <ShopChrome
-      categories={CATEGORY_SLUGS.map((slug) => ({ slug, label: CATEGORIES[slug].nameFa }))}
+      categories={ACTIVE_HOME_CATEGORY_ORDER.map((slug) => ({
+        slug,
+        label: CATEGORIES[slug].nameFa,
+      }))}
       status={`${inventory.label} پرداخت و ارسال واقعی در این نسخه فعال نیست.`}
     >
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
@@ -537,22 +541,22 @@ function ShopChrome({
           <Shell className="py-3 md:py-5">
             <div className="relative isolate min-h-[520px] overflow-hidden rounded-[24px] bg-carbon md:min-h-[590px] md:rounded-[32px]">
               <img
-                src={categoryImage("hoodies")}
-                alt="استایل شهری LBB برای شروع مرور فروشگاه"
+                src={homeCategoryImage("tshirts")}
+                alt="تیشرت ال‌بی‌بی برای شروع مرور فروشگاه"
                 width={1600}
                 height={2000}
                 fetchPriority="high"
-                className="absolute inset-0 h-full w-full object-cover object-center md:object-[center_42%]"
+                className="absolute inset-0 h-full w-full bg-white object-contain p-8 md:p-14"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,9,11,.12)_0%,rgba(9,9,11,.38)_42%,rgba(9,9,11,.94)_100%)] md:bg-[linear-gradient(90deg,rgba(9,9,11,.94)_0%,rgba(9,9,11,.68)_42%,rgba(9,9,11,.08)_78%)]" />
               <div className="relative flex min-h-[520px] flex-col justify-end p-5 md:min-h-[590px] md:max-w-[680px] md:justify-center md:p-12 lg:p-16">
-                <TechLabel tone="signal">SHOP / LBB MAHESTAN</TechLabel>
+                <TechLabel tone="signal">فروشگاه / ال‌بی‌بی / مهستان</TechLabel>
                 <h1 className="mt-4 max-w-xl text-[clamp(2.75rem,7vw,6.5rem)] font-black leading-[.92] tracking-[-.06em] text-bone">
                   استایل تو،
                   <span className="block text-signal">قانون تو.</span>
                 </h1>
                 <p className="mt-5 max-w-lg text-sm leading-7 text-bone/78 md:text-base md:leading-8">
-                  قطعه‌های LBB را بر اساس دسته، رنگ، سایز و موجودی کشف کن؛ یا مستقیم چیزی را که
+                  قطعه‌های ال‌بی‌بی را بر اساس دسته، رنگ، سایز و موجودی کشف کن؛ یا مستقیم چیزی را که
                   می‌خواهی جست‌وجو کن.
                 </p>
 
@@ -570,7 +574,7 @@ function ShopChrome({
                     type="search"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="چی می‌خوای؟ هودی، بگی، کتونی…"
+                    placeholder="چی می‌خوای؟ تیشرت، بگی، کتونی…"
                     autoComplete="off"
                     className="min-w-0 flex-1 bg-transparent text-sm text-bone outline-none placeholder:text-metal"
                   />

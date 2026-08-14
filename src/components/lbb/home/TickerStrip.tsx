@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const ITEMS = ["LBB", "پوشاک شهری", "دراپ ۰۰۱", "هودی", "شلوار", "کرج", "پاساژ مهستان", "LBB"];
+const ITEMS = ["ال‌بی‌بی", "پوشاک شهری", "تیشرت", "شلوار", "کتونی", "جوراب", "کرج", "پاساژ مهستان"];
 
 export function TickerStrip() {
   const trackRef = useRef<HTMLDivElement>(null);

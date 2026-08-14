@@ -1,12 +1,12 @@
-import { categoryImage } from "@/lib/category-images";
-import { communityStudio, dropShabgard, heroMain } from "@/lib/product-images";
+import { homeCategoryImage } from "@/lib/home-category-images";
+import { communityStudio } from "@/lib/product-images";
 
 const SHOTS = [
-  heroMain,
+  homeCategoryImage("tshirts"),
+  homeCategoryImage("pants"),
   communityStudio,
-  categoryImage("hoodies"),
-  dropShabgard,
-  categoryImage("shoes"),
+  homeCategoryImage("shoes"),
+  homeCategoryImage("socks"),
 ];
 
 export function InstagramStrip() {

@@ -15,7 +15,7 @@ export function LocalStoreVisit() {
         <div className="relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
           <img
             src={lifestyle2}
-            alt="استایل پوشاک شهری LBB"
+            alt="استایل پوشاک شهری ال‌بی‌بی"
             width={1200}
             height={1500}
             loading="lazy"
@@ -33,13 +33,13 @@ export function LocalStoreVisit() {
         </div>
 
         <div className="flex flex-col justify-center p-6 md:p-9 lg:p-11">
-          <TechLabel tone="signal">فروشگاه حضوری LBB</TechLabel>
+          <TechLabel tone="signal">فروشگاه حضوری ال‌بی‌بی</TechLabel>
           <h2 id="local-store-title" className="mt-5 text-display-2 text-bone">
             آنلاین ببین، در مهستان از نزدیک انتخاب کن.
           </h2>
           <p className="mt-5 max-w-[52ch] text-sm leading-8 text-metal">
             مدل‌ها را در سایت مقایسه کن و اگر دوست داشتی برای دیدن رنگ، جنس و تن‌خور از نزدیک به
-            فروشگاه LBB در پاساژ مهستان کرج سر بزن.
+            فروشگاه ال‌بی‌بی در پاساژ مهستان کرج سر بزن.
           </p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">

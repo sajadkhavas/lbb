@@ -8,6 +8,9 @@ export const HOME_CATEGORY_ORDER: CategorySlug[] = [
   "socks",
 ];
 
+/** Categories currently promoted on the storefront; inventory routes remain intact. */
+export const ACTIVE_HOME_CATEGORY_ORDER = HOME_CATEGORY_ORDER.filter((slug) => slug !== "hoodies");
+
 export const HOME_DECISION_LINKS = [
   {
     kind: "static" as const,
@@ -38,7 +41,7 @@ export const HOME_EDITORIAL_PATHS = [
     kind: "collection" as const,
     eyebrow: "DROP STORY",
     title: "شبگرد؛ یک ست تیره برای حرکت شبانه",
-    description: "هودی، کارگو، کتونی و جزئیات قرمز در یک مسیر خرید هماهنگ.",
+    description: "تیشرت، شلوار، کتونی و جزئیات روشن در یک مسیر خرید هماهنگ.",
     to: "/collections/$slug" as const,
     params: { slug: "drop-01-shabgard" },
     cover: "hero" as const,
@@ -54,8 +57,8 @@ export const HOME_EDITORIAL_PATHS = [
   {
     kind: "journal" as const,
     eyebrow: "FIT GUIDE",
-    title: "چطور هودی اورسایز را متعادل ست کنیم؟",
-    description: "راهنمای عملی برای حجم، قد لباس و انتخاب پایین‌تنه.",
+    title: "چطور یک تیشرت آزاد را متعادل ست کنیم؟",
+    description: "راهنمای عملی برای حجم، قد لباس و انتخاب پایین‌تنه مناسب.",
     to: "/journal/$slug" as const,
     params: { slug: "chetori-hoodie-eversayz-ro-bepoosim" },
     cover: "l2" as const,

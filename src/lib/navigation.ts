@@ -11,7 +11,7 @@ export type NavigationItem = {
 
 export const SHOP_NAVIGATION: NavigationItem[] = [
   { label: "همه محصولات", latin: "SHOP ALL", description: "مشاهده کامل کاتالوگ", to: "/shop" },
-  ...CATEGORY_SLUGS.map((slug) => ({
+  ...CATEGORY_SLUGS.filter((slug) => slug !== "hoodies").map((slug) => ({
     label: CATEGORIES[slug].nameFa,
     latin: slug.toUpperCase(),
     description: CATEGORIES[slug].heroTagline,

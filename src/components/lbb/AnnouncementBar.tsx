@@ -9,7 +9,7 @@ const MESSAGES = [
   { text: "تن‌خور، جنس و اندازه؛ پیش از انتخاب روشن ببینید", to: "/size-guide" as const },
 ];
 
-const STORAGE_KEY = "lbb-announcement-f14a-v1-dismissed";
+const STORAGE_KEY = "lbb-announcement-seasonal-v2-dismissed";
 export const ANNOUNCEMENT_HEIGHT = 32;
 
 export function AnnouncementBar({
@@ -66,7 +66,7 @@ export function AnnouncementBar({
   return (
     <aside
       dir="rtl"
-      aria-label="اطلاعیه‌های LBB"
+      aria-label="اطلاعیه‌های ال‌بی‌بی"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -75,7 +75,7 @@ export function AnnouncementBar({
       style={{ height: ANNOUNCEMENT_HEIGHT }}
     >
       <span aria-hidden="true" className="tech ps-3 text-obsidian">
-        LBB / INFO
+        ال‌بی‌بی / خبر
       </span>
       <Link
         to={current.to}

@@ -14,14 +14,16 @@ import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
 import { BRAND, BRAND_COPY } from "@/lib/brand";
-import { heroMain } from "@/lib/product-images";
+import { productImage } from "@/lib/product-images";
 import { absUrl, canonical, pageMeta } from "@/lib/site";
+
+const heroMain = productImage("lbb-signature-tee");
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: BRAND.name,
-  alternateName: BRAND.nameFa,
+  name: BRAND.nameFa,
+  alternateName: BRAND.name,
   url: absUrl("/"),
   inLanguage: "fa-IR",
   potentialAction: {
@@ -37,8 +39,8 @@ const websiteJsonLd = {
 const storeJsonLd = {
   "@context": "https://schema.org",
   "@type": "ClothingStore",
-  name: BRAND.name,
-  alternateName: BRAND.nameFa,
+  name: BRAND.nameFa,
+  alternateName: BRAND.name,
   url: absUrl("/"),
   logo: absUrl("/icons/icon-512.png"),
   description: BRAND.shortIntroduction,

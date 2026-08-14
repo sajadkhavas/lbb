@@ -3,12 +3,12 @@ import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 import { BRAND_COPY } from "@/lib/brand";
 import { CATEGORIES } from "@/lib/categories";
-import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
-import { heroMain, productImage } from "@/lib/product-images";
+import { ACTIVE_HOME_CATEGORY_ORDER } from "@/lib/homepage";
+import { productImage } from "@/lib/product-images";
 import { fmtToman, productBySlug } from "@/lib/products";
 
 export function HeroNarrative() {
-  const heroProduct = productBySlug("lbb-classic-hoodie");
+  const heroProduct = productBySlug("lbb-signature-tee");
 
   return (
     <section
@@ -58,7 +58,7 @@ export function HeroNarrative() {
             <p className="mb-4 text-xs font-bold text-metal">دسته موردنظرت را سریع پیدا کن:</p>
             <nav aria-label="دسترسی سریع به دسته‌های محصول" className="min-w-0">
               <ul className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {HOME_CATEGORY_ORDER.map((slug) => (
+                {ACTIVE_HOME_CATEGORY_ORDER.map((slug) => (
                   <li key={slug} className="shrink-0 snap-start">
                     <Link
                       to="/$category"
@@ -74,17 +74,17 @@ export function HeroNarrative() {
           </div>
         </div>
 
-        <div className="relative order-1 min-h-[58svh] overflow-hidden bg-carbon lg:order-2 lg:min-h-full">
+        <div className="relative order-1 min-h-[58svh] overflow-hidden bg-[#f3f1ec] lg:order-2 lg:min-h-full">
           <img
-            src={heroMain}
-            alt="استایل پوشاک شهری LBB از دراپ ۰۰۱"
+            src={productImage("lbb-signature-tee")}
+            alt="تیشرت مشکی ال‌بی‌بی روی زمینه روشن"
             width={1200}
             height={1500}
             sizes="(max-width: 1023px) 100vw, 48vw"
             loading="eager"
             fetchPriority="high"
             decoding="async"
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="absolute inset-0 h-full w-full object-contain p-8 sm:p-12 lg:p-16"
           />
           <span
             aria-hidden="true"
