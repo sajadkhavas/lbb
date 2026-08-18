@@ -233,10 +233,10 @@ test("canonical and social metadata basics use absolute production-origin URLs",
     "content",
     `${siteOrigin}/`,
   );
-  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", /LBB/);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", /ال‌بی‌بی/);
   await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /.+/);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /^https:\/\//);
-  await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute("content", /LBB/);
+  await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute("content", /ال‌بی‌بی/);
   await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute("content", /.+/);
   await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
     "content",

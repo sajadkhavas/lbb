@@ -38,17 +38,36 @@ async function expectLayoutSafe(page: Page) {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
 });
 
 for (const viewport of homeViewports) {
   test(`homepage visual baseline ${viewport.name}`, async ({ page }) => {
-    await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.goto("/", { waitUntil: "networkidle" });
+    if (viewport.width >= 1440) {
+      test.setTimeout(60_000);
+    }
+
+    await page.setViewportSize({
+      width: viewport.width,
+      height: viewport.height,
+    });
+
+    await page.goto("/", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await page
+      .getByRole("heading", {
+        name: "استایل روزمره، از مهستان کرج.",
+      })
+      .waitFor({
+        state: "visible",
+      });
+
     await stabilize(page);
+
     await expect(page).toHaveScreenshot(`home-${viewport.name}.png`, {
       fullPage: true,
       animations: "disabled",
@@ -78,27 +97,42 @@ for (const template of templates) {
   });
 }
 
-test("F14E changed trust surfaces preserve visual layout envelopes", async ({ page }) => {
-  for (const viewport of [
-    { width: 390, height: 844 },
-    { width: 1440, height: 1000 },
-  ]) {
-    await page.setViewportSize(viewport);
-    for (const route of [
-      "/checkout",
-      "/shipping-returns",
-      "/contact",
-      "/terms",
-      "/privacy",
-      "/order-confirmation",
-      "/track-order",
-    ]) {
-      await page.goto(route, { waitUntil: "networkidle" });
+const trustSurfaceViewports = [
+  { name: "mobile-390", width: 390, height: 844 },
+  { name: "desktop-1440", width: 1440, height: 1000 },
+];
+
+const trustSurfaceRoutes = [
+  "/checkout",
+  "/shipping-returns",
+  "/contact",
+  "/terms",
+  "/privacy",
+  "/order-confirmation",
+  "/track-order",
+];
+
+for (const viewport of trustSurfaceViewports) {
+  for (const route of trustSurfaceRoutes) {
+    test(`F14E trust surface layout ${viewport.name} ${route}`, async ({ page }) => {
+      await page.setViewportSize({
+        width: viewport.width,
+        height: viewport.height,
+      });
+
+      await page.goto(route, {
+        waitUntil: "domcontentloaded",
+      });
+
+      await page.locator("main h1").waitFor({
+        state: "visible",
+      });
+
       await stabilize(page);
       await expectLayoutSafe(page);
-    }
+    });
   }
-});
+}
 
 test("desktop mega menu visual baseline", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });

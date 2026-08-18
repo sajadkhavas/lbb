@@ -15,8 +15,7 @@ const SNAPSHOT_VIEWPORTS = [
 
 async function prepare(page: Page) {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
 }
@@ -69,16 +68,29 @@ for (const item of ROUTES) {
   }
 }
 
-for (const viewport of [
-  { width: 768, height: 1024 },
-  { width: 1920, height: 1080 },
-]) {
-  test(`F17 editorial layout envelope ${viewport.width}px`, async ({ page }) => {
-    await page.setViewportSize(viewport);
-    for (const item of ROUTES) {
-      await page.goto(item.route, { waitUntil: "networkidle" });
+const EDITORIAL_ENVELOPE_VIEWPORTS = [
+  { name: "tablet-768", width: 768, height: 1024 },
+  { name: "wide-1920", width: 1920, height: 1080 },
+] as const;
+
+for (const viewport of EDITORIAL_ENVELOPE_VIEWPORTS) {
+  for (const item of ROUTES) {
+    test(`F17 editorial layout envelope ${viewport.name} ${item.name}`, async ({ page }) => {
+      await page.setViewportSize({
+        width: viewport.width,
+        height: viewport.height,
+      });
+
+      await page.goto(item.route, {
+        waitUntil: "domcontentloaded",
+      });
+
+      await page.locator("main h1").waitFor({
+        state: "visible",
+      });
+
       await stabilize(page);
       await expectLayoutSafe(page);
-    }
-  });
+    });
+  }
 }
