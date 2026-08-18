@@ -600,7 +600,7 @@ function ShopChrome({
               </div>
               <span className="tech hidden text-mute md:block">SWIPE / EXPLORE</span>
             </div>
-            <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
+            <div className="mx-[calc(0px_-_var(--lbb-gutter))] flex snap-x snap-mandatory gap-3 overflow-x-auto px-[var(--lbb-gutter)] pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
               {categories.map((category, index) => (
                 <Link
                   key={category.slug}

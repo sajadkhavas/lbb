@@ -19,8 +19,7 @@ async function expectNoDraftProductLinks(page: Page, root = "main") {
 
 async function prepare(page: Page) {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
 }
 

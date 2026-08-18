@@ -17,8 +17,7 @@ async function stabilize(page: Page) {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
 });
@@ -68,12 +67,15 @@ test("F13 drop story desktop visual contract", async ({ page }) => {
   );
 });
 
-test("F13 shop the look mobile visual contract", async ({ page }) => {
+test("F13 local store mobile visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "networkidle" });
   await stabilize(page);
-  await expect(page.locator('section[aria-labelledby="shop-look-title"]')).toHaveScreenshot(
-    "f13-shop-the-look-mobile.png",
-    { animations: "disabled" },
+
+  await expect(page.locator('[aria-labelledby="local-store-title"]')).toHaveScreenshot(
+    "f13-local-store-mobile.png",
+    {
+      animations: "disabled",
+    },
   );
 });

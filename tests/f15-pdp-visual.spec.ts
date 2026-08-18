@@ -24,8 +24,7 @@ async function stabilize(page: Page) {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
 });
@@ -50,9 +49,35 @@ for (const viewport of viewports) {
 test("F15 mobile sticky blocked state visual", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  await page.getByText("اطلاعات تصمیم‌گیری").scrollIntoViewIfNeeded();
-  await expect(page.getByTestId("pdp-sticky-buy-bar")).toHaveAttribute("aria-hidden", "false");
+
+  const sticky = page.getByTestId("pdp-sticky-buy-bar");
+  const buyButton = page.getByRole("button", {
+    name: "خرید در دسترس نیست",
+  });
+
+  await page.getByRole("heading", { name: "اطلاعات تصمیم‌گیری" }).evaluate((element) => {
+    element.scrollIntoView({
+      block: "start",
+      behavior: "auto",
+    });
+  });
+
+  const viewportHeight = page.viewportSize()?.height ?? 844;
+
+  await expect
+    .poll(async () => {
+      const box = await buyButton.boundingBox();
+
+      if (!box) return true;
+
+      return box.y + box.height <= 0 || box.y >= viewportHeight;
+    })
+    .toBe(true);
+
+  await expect(sticky).toHaveAttribute("aria-hidden", "false");
+
   await stabilize(page);
+
   await expect(page).toHaveScreenshot("f15-pdp-sticky-blocked-mobile.png", {
     animations: "disabled",
   });

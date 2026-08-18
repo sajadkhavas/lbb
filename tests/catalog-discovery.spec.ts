@@ -2,8 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function preparePage(page: import("@playwright/test").Page) {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
 }
@@ -16,7 +15,7 @@ test("catalogue inventory and merchandising labels stay evidence-safe", async ({
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/shop", { waitUntil: "networkidle" });
 
-  await expect(page.getByText(/۸ قطعه در کاتالوگ.*۷ موجود.*۱ ناموجود/)).toBeVisible();
+  await expect(page.getByText(/۶ قطعه در کاتالوگ.*۵ موجود.*۱ ناموجود/)).toBeVisible();
   await expect(page.getByText("پرفروش‌ترین", { exact: true })).toHaveCount(0);
 
   const sort = page.getByRole("combobox", { name: "مرتب‌سازی محصولات" });
@@ -46,7 +45,7 @@ test("mobile filter drawer stages, cancels and applies URL changes", async ({ pa
   let dialog = page.getByRole("dialog", { name: /فیلتر محصولات/ });
   await expect(dialog).toBeVisible();
   await dialog.getByRole("checkbox", { name: "فقط کالاهای موجود" }).click();
-  await expect(dialog.getByText(/۷ نتیجه پیش‌نمایش/)).toBeVisible();
+  await expect(dialog.getByText(/۵ نتیجه پیش‌نمایش/)).toBeVisible();
   await expect(page).not.toHaveURL(/instock/);
 
   await dialog.getByRole("button", { name: "بستن فیلترها بدون اعمال تغییرات" }).click();
@@ -90,7 +89,7 @@ test("empty catalogue state resets to the complete result set", async ({ page })
 
   await page.getByRole("button", { name: "بازگشت به همه قطعه‌ها" }).click();
   await expect(page).toHaveURL(/\/shop$/);
-  await expect(page.getByText("۸ نتیجه", { exact: true })).toBeVisible();
+  await expect(page.getByText("۶ نتیجه", { exact: true })).toBeVisible();
 });
 
 test("search typing replaces the current history entry and remains refresh-safe", async ({

@@ -9,8 +9,7 @@ import {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
 });
 
@@ -149,7 +148,29 @@ test("sticky purchase surface stays above mobile navigation and reflects blocked
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
-  await page.getByText("اطلاعات تصمیم‌گیری").scrollIntoViewIfNeeded();
+  const buyButton = page.getByRole("button", {
+    name: "خرید در دسترس نیست",
+  });
+
+  await page.getByText("اطلاعات تصمیم‌گیری").evaluate((element) => {
+    element.scrollIntoView({
+      block: "start",
+      behavior: "auto",
+    });
+  });
+
+  const viewportHeight = page.viewportSize()?.height ?? 844;
+
+  await expect
+    .poll(async () => {
+      const box = await buyButton.boundingBox();
+
+      if (!box) return true;
+
+      return box.y + box.height <= 0 || box.y >= viewportHeight;
+    })
+    .toBe(true);
+
   const sticky = page.getByTestId("pdp-sticky-buy-bar");
   await expect(sticky).toHaveAttribute("aria-hidden", "false");
   const stickyBox = await sticky.boundingBox();

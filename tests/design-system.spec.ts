@@ -8,7 +8,9 @@ const viewports = [
 ];
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("lbb-announcement-dismissed", "1"));
+  await page.addInitScript(() => {
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
+  });
   await page.goto("/design-system", { waitUntil: "networkidle" });
 });
 
