@@ -1,5 +1,4 @@
 import type { LinkProps } from "@tanstack/react-router";
-import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
 
 export type NavigationItem = {
   label: string;
@@ -10,14 +9,47 @@ export type NavigationItem = {
 };
 
 export const SHOP_NAVIGATION: NavigationItem[] = [
-  { label: "همه محصولات", latin: "SHOP ALL", description: "مشاهده کامل کاتالوگ", to: "/shop" },
-  ...CATEGORY_SLUGS.filter((slug) => slug !== "hoodies").map((slug) => ({
-    label: CATEGORIES[slug].nameFa,
-    latin: slug.toUpperCase(),
-    description: CATEGORIES[slug].heroTagline,
-    to: "/$category" as const,
-    params: { category: slug },
-  })),
+  {
+    label: "همه محصولات",
+    latin: "SHOP ALL",
+    description: "مشاهده کامل کاتالوگ",
+    to: "/shop",
+  },
+  {
+    label: "تیشرت",
+    latin: "T-SHIRTS",
+    description: "اورسایز، باکس، یقه‌دار، آستین‌بلند و حلقه‌ای",
+    to: "/$category",
+    params: { category: "tshirts" },
+  },
+  {
+    label: "سویشرت / هودی",
+    latin: "SWEATSHIRTS",
+    description: "در موجودی فعلی، هودی فعال است",
+    to: "/$category",
+    params: { category: "hoodies" },
+  },
+  {
+    label: "شلوار",
+    latin: "PANTS",
+    description: "جین، پارچه‌ای، اسلش، جورتز و شرت",
+    to: "/$category",
+    params: { category: "pants" },
+  },
+  {
+    label: "کتونی",
+    latin: "SNEAKERS",
+    description: "دسته فیلترمحور بر اساس برند، سایز، رنگ و استایل",
+    to: "/$category",
+    params: { category: "shoes" },
+  },
+  {
+    label: "جوراب",
+    latin: "SOCKS",
+    description: "موجودی فعلی کاتالوگ",
+    to: "/$category",
+    params: { category: "socks" },
+  },
 ];
 
 export const EDITORIAL_NAVIGATION: NavigationItem[] = [

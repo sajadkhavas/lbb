@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowUpLeft, Instagram, X } from "lucide-react";
 import { useRef } from "react";
-import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
 import {
   BRAND_NAVIGATION,
   EDITORIAL_NAVIGATION,
@@ -13,6 +12,7 @@ import { useNavigationOverlay } from "@/lib/navigation-overlay";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { Logo } from "@/components/lbb/Logo";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
+import { CatalogTaxonomyMenu } from "@/components/lbb/navigation/CatalogTaxonomyMenu";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 
 export function MobileMenuOverlay() {
@@ -56,7 +56,7 @@ export function MobileMenuOverlay() {
           <section aria-labelledby="mobile-categories">
             <div className="flex items-end justify-between gap-4 border-b border-hairline pb-3">
               <div>
-                <TechLabel tone="signal">PRODUCT FIRST</TechLabel>
+                <TechLabel tone="signal">LBB / CATALOG</TechLabel>
                 <h2 id="mobile-categories" className="mt-2 text-display-3 text-bone">
                   دسته‌های محصول
                 </h2>
@@ -71,30 +71,7 @@ export function MobileMenuOverlay() {
               </Link>
             </div>
 
-            <ol className="mt-2">
-              {CATEGORY_SLUGS.map((slug, index) => {
-                const active = pathname === `/${slug}`;
-                return (
-                  <li key={slug}>
-                    <Link
-                      to="/$category"
-                      params={{ category: slug }}
-                      onClick={dismissForNavigation}
-                      aria-current={active ? "page" : undefined}
-                      className="group grid min-h-[72px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 border-b border-hairline-soft"
-                    >
-                      <span className="num text-xs text-mute">0{index + 1}</span>
-                      <span
-                        className={`text-2xl font-black transition-colors md:text-4xl ${active ? "text-signal" : "text-bone group-hover:text-signal"}`}
-                      >
-                        {CATEGORIES[slug].nameFa}
-                      </span>
-                      <span className="tech text-mute">{slug.toUpperCase()}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ol>
+            <CatalogTaxonomyMenu compact pathname={pathname} onNavigate={dismissForNavigation} />
           </section>
 
           <aside className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1">

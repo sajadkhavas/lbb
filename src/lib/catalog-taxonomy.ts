@@ -198,3 +198,85 @@ export const CATALOG_TAXONOMY_COMPATIBILITY = {
 export function taxonomyGroup(slug: string) {
   return APPROVED_CATALOG_TAXONOMY.find((group) => group.slug === slug);
 }
+
+export type CatalogNavigationAvailability = "live" | "partial" | "planned";
+
+export type CatalogNavigationEntry = {
+  groupSlug: CatalogTaxonomyGroup["slug"];
+  availability: CatalogNavigationAvailability;
+  currentRoute?: CategorySlug;
+  ctaLabel?: string;
+  note: string;
+};
+
+/**
+ * Navigation contract:
+ *
+ * `live`:
+ * the approved merchandising group has a real current route.
+ *
+ * `partial`:
+ * only part of the approved group has real current inventory/route support.
+ *
+ * `planned`:
+ * the approved group is visible as merchandising taxonomy but MUST NOT
+ * generate a public link or indexable empty route.
+ */
+export const CATALOG_NAVIGATION: readonly CatalogNavigationEntry[] = [
+  {
+    groupSlug: "tshirts",
+    availability: "live",
+    currentRoute: "tshirts",
+    ctaLabel: "مشاهده تیشرت‌ها",
+    note: "دسته فعال",
+  },
+  {
+    groupSlug: "sweatshirts",
+    availability: "partial",
+    currentRoute: "hoodies",
+    ctaLabel: "مشاهده هودی‌های موجود",
+    note: "فعلاً هودی دارای مسیر و موجودی واقعی است",
+  },
+  {
+    groupSlug: "pants",
+    availability: "live",
+    currentRoute: "pants",
+    ctaLabel: "مشاهده شلوارها",
+    note: "دسته فعال",
+  },
+  {
+    groupSlug: "shirts",
+    availability: "planned",
+    note: "با ورود موجودی واقعی فعال می‌شود",
+  },
+  {
+    groupSlug: "jackets",
+    availability: "planned",
+    note: "با ورود موجودی واقعی فعال می‌شود",
+  },
+  {
+    groupSlug: "shoes",
+    availability: "live",
+    currentRoute: "shoes",
+    ctaLabel: "مشاهده کتونی‌ها",
+    note: "فیلترمحور؛ بدون ساخت دسته‌های اضافی",
+  },
+] as const;
+
+export const RETAINED_CURRENT_CATEGORY_NAVIGATION = [
+  {
+    route: "socks",
+    label: "جوراب",
+    latin: "SOCKS",
+    note: "موجودی فعلی کاتالوگ",
+  },
+] as const satisfies readonly {
+  route: CategorySlug;
+  label: string;
+  latin: string;
+  note: string;
+}[];
+
+export function catalogNavigationGroup(entry: CatalogNavigationEntry) {
+  return taxonomyGroup(entry.groupSlug);
+}
