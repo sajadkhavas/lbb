@@ -4,6 +4,21 @@ const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL;
 
 const baseURL = externalBaseURL ?? "http://127.0.0.1:4173";
 
+const defaultStorageState = {
+  cookies: [],
+  origins: [
+    {
+      origin: new URL(baseURL).origin,
+      localStorage: [
+        {
+          name: "lbb_brand_intro_v1_seen",
+          value: "1",
+        },
+      ],
+    },
+  ],
+};
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: false,
@@ -21,6 +36,7 @@ export default defineConfig({
 
   use: {
     baseURL,
+    storageState: defaultStorageState,
     locale: "fa-IR",
     timezoneId: "Asia/Tehran",
     trace: "retain-on-failure",

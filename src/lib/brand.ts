@@ -9,6 +9,7 @@ export const BRAND = {
   instagramHandle: "@lbbclo",
   instagramUrl: "https://www.instagram.com/lbbclo",
   slogan: "الهام‌گرفته از ذهنی خلاق",
+  storyTitle: "از رگال تا فروشگاه",
   descriptor:
     "پوشاک خیابانی، استریت‌ویر و آیتم‌های وارداتی منتخب LBB در کرج؛ با راهنمای سایز و جزئیات روشن محصول.",
   shortIntroduction:
