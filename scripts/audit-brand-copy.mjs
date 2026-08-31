@@ -24,7 +24,26 @@ const sourceFiles = (await walk(sourceRoot)).filter((file) =>
 );
 
 function isAllowedTehranReference(relative, line) {
-  return relative === "src/routes/checkout.tsx" && line.trim() === '"تهران",';
+  const trimmed = line.trim();
+
+  if (relative === "src/routes/checkout.tsx" && trimmed === '"تهران",') {
+    return true;
+  }
+
+  // Internal shipping identifier: not user-facing brand copy.
+  if (relative === "src/lib/store-settings.ts" && trimmed === 'id: "courier-karaj-tehran",') {
+    return true;
+  }
+
+  // Tehran is a verified delivery geography, not a brand-location claim.
+  if (
+    (relative === "src/lib/store-settings.ts" || relative === "src/routes/faq.tsx") &&
+    /ارسال فوری.*کرج و تهران/.test(trimmed)
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 for (const file of sourceFiles) {
@@ -47,7 +66,8 @@ const brandModule = await readFile(brandModulePath, "utf8").catch(() => "");
 for (const required of [
   'city: "کرج"',
   'physicalLocation: "پاساژ مهستان"',
-  'slogan: "از مهستان، برای خیابان"',
+  'category: "پوشاک خیابانی و استریت‌ویر"',
+  'slogan: "الهام‌گرفته از ذهنی خلاق"',
 ]) {
   if (!brandModule.includes(required)) {
     failures.push(`Verified brand identity is missing from src/lib/brand.ts: ${required}`);

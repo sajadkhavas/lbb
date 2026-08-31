@@ -19,9 +19,9 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 
-const TITLE = "درباره LBB | فروشگاه پوشاک شهری در پاساژ مهستان کرج";
+const TITLE = "درباره LBB | از رگال تا فروشگاه | استریت‌ویر کرج";
 const DESC =
-  "LBB فروشگاه پوشاک شهری در پاساژ مهستان کرج است؛ با تمرکز بر اطلاعات روشن محصول، تن‌خور، اندازه، جنس و انتخاب آگاهانه.";
+  "داستان LBB؛ برند پوشاک خیابانی و استریت‌ویر در کرج، از شروع مسیر در سال ۱۴۰۰ تا فروشگاه حضوری و فروش آنلاین.";
 
 const PRINCIPLES = [
   {
@@ -74,13 +74,21 @@ function AboutPage() {
         <Band hairline={false} className="pb-10 pt-8 md:pb-14 md:pt-12">
           <Shell className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div>
-              <TechLabel tone="signal">ABOUT / KARAJ / MAHESTAN</TechLabel>
-              <h1 className="mt-5 max-w-[14ch] text-display-1 text-bone">{BRAND.slogan}</h1>
-              <p className="text-lede mt-5 max-w-[58ch]">{BRAND_COPY.heroBody}</p>
+              <TechLabel tone="signal">ABOUT / FROM RACK TO STORE</TechLabel>
+              <h1 className="mt-5 max-w-[14ch] text-display-1 text-bone">از رگال تا فروشگاه</h1>
+              <p className="text-lede mt-5 max-w-[58ch]">{BRAND.slogan}</p>
               <p className="mt-6 max-w-[62ch] text-sm leading-8 text-metal">
-                LBB از پاساژ مهستان کرج کار می‌کند و تجربهٔ آنلاین آن برای دیدن، مقایسه و انتخاب
-                پوشاک شهری ساخته شده است. ظاهر هر قطعه اهمیت دارد، اما تصمیم خرید باید بر پایهٔ
-                اطلاعات روشن دربارهٔ جنس، تن‌خور، اندازه، رنگ و موجودی باشد.
+                LBB در سال ۱۴۰۰ و پس از سال‌ها فعالیت در حوزه پوشاک، با هدف شکل‌دادن به یک برند شخصی
+                و متفاوت آغاز شد.
+              </p>
+              <p className="mt-4 max-w-[62ch] text-sm leading-8 text-metal">
+                مسیر ما از تولید تا عرضه محصولات منتخب خارجی ادامه پیدا کرد و امروز با مجموعه‌ای
+                محدود، خاص و انتخاب‌شده در کنار شما هستیم؛ هم در فروشگاه حضوری LBB و هم از طریق
+                فروشگاه آنلاین LBB.
+              </p>
+              <p className="mt-4 max-w-[62ch] text-sm leading-8 text-metal">
+                پوشاک خیابانی، استریت‌ویر، استایل و آیتم‌های وارداتی بخش اصلی هویت انتخاب‌های LBB
+                هستند.
               </p>
               <p className="mt-4 flex items-start gap-2 text-sm leading-7 text-bone">
                 <MapPin size={17} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
