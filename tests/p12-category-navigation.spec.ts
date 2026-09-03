@@ -7,13 +7,25 @@ const approvedGroups = ["تیشرت", "سویشرت", "شلوار", "پیراه�
 test("desktop shop menu exposes approved taxonomy without empty planned routes", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.setViewportSize({
+    width: 1440,
+    height: 1000,
+  });
 
-  await page
-    .getByRole("button", {
-      name: "فروشگاه",
-    })
-    .click();
+  await page.emulateMedia({
+    reducedMotion: "reduce",
+  });
+
+  await page.goto("/", {
+    waitUntil: "networkidle",
+  });
+
+  const shopTrigger = page.getByRole("button", {
+    name: "فروشگاه",
+  });
+
+  await expect(shopTrigger).toBeVisible();
+  await shopTrigger.click();
 
   const menu = page.getByRole("dialog", {
     name: "منوی فروشگاه",

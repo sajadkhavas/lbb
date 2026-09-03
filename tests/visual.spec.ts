@@ -22,6 +22,85 @@ async function stabilize(page: Page) {
   await page.waitForTimeout(250);
 }
 
+async function settleHomepageFullPage(page: Page) {
+  await page.evaluate(async () => {
+    const doubleFrame = () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve());
+        });
+      });
+
+    const timeout = (milliseconds: number) =>
+      new Promise<void>((resolve) => {
+        window.setTimeout(resolve, milliseconds);
+      });
+
+    const step = Math.max(window.innerHeight, 640);
+
+    let y = 0;
+
+    while (y < document.documentElement.scrollHeight) {
+      window.scrollTo({
+        top: y,
+        left: 0,
+        behavior: "auto",
+      });
+
+      await doubleFrame();
+      y += step;
+    }
+
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      left: 0,
+      behavior: "auto",
+    });
+
+    await doubleFrame();
+
+    const images = Array.from(document.images);
+
+    await Promise.all(
+      images.map(async (image) => {
+        if (!image.complete) {
+          await Promise.race([
+            new Promise<void>((resolve) => {
+              const done = () => resolve();
+
+              image.addEventListener("load", done, { once: true });
+
+              image.addEventListener("error", done, { once: true });
+            }),
+            timeout(5_000),
+          ]);
+        }
+
+        if (image.complete && image.naturalWidth > 0) {
+          try {
+            await Promise.race([image.decode(), timeout(5_000)]);
+          } catch {
+            // A failed decode must not make
+            // visual stabilization itself fail.
+          }
+        }
+      }),
+    );
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+
+    await doubleFrame();
+  });
+
+  await page.evaluate(() => document.fonts.ready);
+
+  await page.waitForTimeout(400);
+}
+
 async function expectLayoutSafe(page: Page) {
   const metrics = await page.evaluate(() => ({
     direction: getComputedStyle(document.documentElement).direction,
@@ -45,9 +124,7 @@ test.beforeEach(async ({ page }) => {
 
 for (const viewport of homeViewports) {
   test(`homepage visual baseline ${viewport.name}`, async ({ page }) => {
-    if (viewport.width >= 1440) {
-      test.setTimeout(60_000);
-    }
+    test.setTimeout(120_000);
 
     await page.setViewportSize({
       width: viewport.width,
@@ -60,17 +137,19 @@ for (const viewport of homeViewports) {
 
     await page
       .getByRole("heading", {
-        name: "استایل روزمره، از مهستان کرج.",
+        name: "از پینترست تا رگال LBB",
       })
       .waitFor({
         state: "visible",
       });
 
     await stabilize(page);
+    await settleHomepageFullPage(page);
 
     await expect(page).toHaveScreenshot(`home-${viewport.name}.png`, {
       fullPage: true,
       animations: "disabled",
+      timeout: 45_000,
     });
   });
 }

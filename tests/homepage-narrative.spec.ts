@@ -29,12 +29,12 @@ test("homepage communicates current identity, catalog and primary action", async
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "networkidle" });
 
-  await expect(page).toHaveTitle(/ال‌بی‌بی \| فروشگاه پوشاک شهری در کرج، پاساژ مهستان/);
+  await expect(page).toHaveTitle("LBB | پوشاک خیابانی و استریت‌ویر در کرج");
 
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /استایل روزمره.*از مهستان.*کرج/,
+      name: "از پینترست تا رگال LBB",
     }),
   ).toBeVisible();
 
