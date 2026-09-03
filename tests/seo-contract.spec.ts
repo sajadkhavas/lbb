@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const siteOrigin = "https://lbb.example.test";
-const localOrigin = "http://127.0.0.1:4173";
+const localOrigin = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:4173";
 
 function parseJsonLd(source: string[]) {
   return source.flatMap((entry) => {
@@ -193,7 +193,8 @@ test("homepage local schema stays on verified Karaj identity without invented NA
     `${siteOrigin}/search?q={search_term_string}`,
   );
   expect(store).toBeTruthy();
-  expect(store?.description).toContain("پاساژ مهستان");
+  expect(store?.description).toContain("پوشاک خیابانی");
+  expect(store?.description).toContain("کرج");
   expect(store?.address?.["addressLocality"]).toBe("کرج");
   expect(store?.address?.["addressRegion"]).toBe("البرز");
   expect(store?.address?.["addressCountry"]).toBe("IR");
@@ -233,10 +234,10 @@ test("canonical and social metadata basics use absolute production-origin URLs",
     "content",
     `${siteOrigin}/`,
   );
-  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", /ال‌بی‌بی/);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", /LBB/);
   await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /.+/);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /^https:\/\//);
-  await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute("content", /ال‌بی‌بی/);
+  await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute("content", /LBB/);
   await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute("content", /.+/);
   await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
     "content",

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
-import { BRAND_COPY } from "@/lib/brand";
+import { BRAND, BRAND_COPY } from "@/lib/brand";
 import { CATEGORIES } from "@/lib/categories";
 import { ACTIVE_HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { productImage } from "@/lib/product-images";
@@ -28,13 +28,14 @@ export function HeroNarrative() {
             <div className="flex flex-wrap items-center gap-3">
               <TechLabel tone="signal">{BRAND_COPY.heroEyebrow}</TechLabel>
               <span aria-hidden="true" className="h-px w-10 bg-hairline" />
-              <TechLabel>URBAN CLOTHING</TechLabel>
+              <TechLabel>{BRAND.slogan}</TechLabel>
             </div>
 
-            <h1 id="home-hero-title" className="mt-7 max-w-[12ch] text-hero leading-[0.9]">
-              <span className="block text-bone">استایل روزمره،</span>
-              <span className="block text-signal">از مهستان</span>
-              <span className="block text-metal">کرج.</span>
+            <h1
+              id="home-hero-title"
+              className="mt-7 max-w-[12ch] text-hero leading-[0.95] text-bone"
+            >
+              {BRAND_COPY.heroTitle}
             </h1>
 
             <p className="mt-7 max-w-[58ch] text-lede">{BRAND_COPY.heroBody}</p>

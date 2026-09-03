@@ -1,8 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowUpLeft, X } from "lucide-react";
 import { useRef } from "react";
-import { categoryImage } from "@/lib/category-images";
-import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
 import {
   EDITORIAL_NAVIGATION,
   PERSONAL_NAVIGATION,
@@ -13,6 +11,7 @@ import { useNavigationOverlay } from "@/lib/navigation-overlay";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
+import { CatalogTaxonomyMenu } from "@/components/lbb/navigation/CatalogTaxonomyMenu";
 
 export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
   const { close, dismissForNavigation } = useNavigationOverlay();
@@ -42,11 +41,11 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
         <div className="lbb-shell py-6 lg:py-9">
           <div className="flex items-start justify-between gap-6">
             <div>
-              <TechLabel tone="signal">SHOP INDEX / F12</TechLabel>
+              <TechLabel tone="signal">LBB / CATALOG INDEX</TechLabel>
               <h2 className="mt-2 text-display-3 text-bone">انتخاب سریع، بدون حدس</h2>
               <p className="mt-2 max-w-[54ch] text-sm leading-7 text-metal">
-                دسته‌ها در سطح اول قرار گرفته‌اند؛ هر مسیر مستقیماً به صفحه قابل‌اشتراک و
-                قابل‌جست‌وجوی خودش می‌رسد.
+                ساختار دسته‌بندی تأییدشده LBB را ببین؛ فقط دسته‌هایی که موجودی واقعی دارند لینک خرید
+                می‌گیرند و برای دسته‌های بدون موجودی صفحه خالی ساخته نمی‌شود.
               </p>
             </div>
             <button
@@ -76,45 +75,7 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                 </Link>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-5">
-                {CATEGORY_SLUGS.map((slug) => {
-                  const active = pathname === `/${slug}`;
-                  return (
-                    <Link
-                      key={slug}
-                      to="/$category"
-                      params={{ category: slug }}
-                      onClick={dismissForNavigation}
-                      aria-current={active ? "page" : undefined}
-                      className="group relative min-w-0 overflow-hidden border border-hairline bg-carbon focus-visible:ring-2 focus-visible:ring-signal"
-                    >
-                      <div className="relative aspect-[4/5] overflow-hidden">
-                        <img
-                          src={categoryImage(slug)}
-                          alt=""
-                          width={640}
-                          height={800}
-                          loading="lazy"
-                          decoding="async"
-                          className="frame-zoom h-full w-full object-cover opacity-75 transition-opacity group-hover:opacity-100"
-                        />
-                        <span
-                          aria-hidden="true"
-                          className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent"
-                        />
-                        <span className="absolute inset-x-0 bottom-0 p-3">
-                          <span
-                            className={`block text-sm font-black ${active ? "text-signal" : "text-bone"}`}
-                          >
-                            {CATEGORIES[slug].nameFa}
-                          </span>
-                          <span className="tech mt-1 block text-metal">{slug.toUpperCase()}</span>
-                        </span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
+              <CatalogTaxonomyMenu pathname={pathname} onNavigate={dismissForNavigation} />
             </section>
 
             <aside className="grid gap-6 sm:grid-cols-2 xl:grid-cols-1">

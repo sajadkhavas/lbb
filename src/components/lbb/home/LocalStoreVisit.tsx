@@ -15,7 +15,7 @@ export function LocalStoreVisit() {
         <div className="relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
           <img
             src={lifestyle2}
-            alt="استایل پوشاک شهری ال‌بی‌بی"
+            alt="استایل پوشاک خیابانی ال‌بی‌بی"
             width={1200}
             height={1500}
             loading="lazy"
@@ -28,7 +28,7 @@ export function LocalStoreVisit() {
             className="absolute inset-0 bg-gradient-to-t from-obsidian/70 to-transparent"
           />
           <span className="absolute bottom-5 right-5 rounded-xl border border-bone/30 bg-obsidian/80 px-4 py-3 text-sm font-black text-bone backdrop-blur">
-            از مهستان، برای خیابان
+            {BRAND.slogan}
           </span>
         </div>
 

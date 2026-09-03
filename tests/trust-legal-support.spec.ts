@@ -39,6 +39,9 @@ async function expectNoHorizontalOverflow(page: Page) {
 
 test("shipping remains hidden for missing, pending and disabled settings", () => {
   const missing = cloneSettings();
+  missing.shipping.isEnabled = false;
+  missing.shipping.verification = "missing";
+  missing.shipping.methods = [];
   expect(getPublicShippingMethods(missing)).toEqual([]);
   expect(canPublishShipping(missing)).toBe(false);
 
@@ -213,30 +216,99 @@ test("contacts require public verified safe channels", () => {
 test("shipping, contact, legal and privacy routes are truth-safe at mobile width", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({
+    width: 390,
+    height: 844,
+  });
 
-  await page.goto("/shipping-returns", { waitUntil: "networkidle" });
+  await page.goto("/shipping-returns", {
+    waitUntil: "networkidle",
+  });
+
   await expect(
-    page.getByRole("heading", { level: 1, name: "ارسال، تعویض و مرجوعی" }),
+    page.getByRole("heading", {
+      level: 1,
+      name: "ارسال، تعویض و مرجوعی",
+    }),
   ).toBeVisible();
-  await expect(page.getByText("روش ارسال عمومی هنوز منتشر نشده است")).toBeVisible();
-  await expect(page.getByText("سیاست مرجوعی و تعویض هنوز منتشر نشده است")).toBeVisible();
+
+  const shippingSection = page.locator('section[aria-labelledby="shipping-heading"]');
+
+  await expect(shippingSection).toBeVisible();
+
+  for (const method of [
+    "ارسال فوری با پیک",
+    "تیپاکس — پس‌کرایه",
+    "دکاپست — پس‌کرایه",
+    "پست پیشتاز",
+  ]) {
+    await expect(
+      shippingSection.getByText(method, {
+        exact: true,
+      }),
+    ).toBeVisible();
+  }
+
+  const returnsSection = page.locator('section[aria-labelledby="returns-heading"]');
+
+  await expect(returnsSection).toBeVisible();
+
+  await expect(
+    returnsSection.getByText("سیاست بازگشت در حال بررسی است", {
+      exact: true,
+    }),
+  ).toBeVisible();
+
   await expect(page.getByText(/۷ روز ضمانت بازگشت/)).toHaveCount(0);
+
   await expectNoHorizontalOverflow(page);
 
-  await page.goto("/contact", { waitUntil: "networkidle" });
-  await expect(page.getByText("کرج", { exact: true })).toBeVisible();
-  await expect(page.getByText("پاساژ مهستان", { exact: true })).toBeVisible();
+  await page.goto("/contact", {
+    waitUntil: "networkidle",
+  });
+
+  await expect(
+    page.getByText("کرج", {
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  await expect(
+    page.getByText("پاساژ مهستان", {
+      exact: true,
+    }),
+  ).toBeVisible();
+
   await expect(page.locator("main form")).toHaveCount(0);
+
   await expect(page.getByText("فرم تماس آنلاین فعال نیست")).toBeVisible();
+
   await expectNoHorizontalOverflow(page);
 
-  await page.goto("/terms", { waitUntil: "networkidle" });
-  await expect(page.getByRole("heading", { level: 1, name: "شرایط استفاده" })).toBeVisible();
+  await page.goto("/terms", {
+    waitUntil: "networkidle",
+  });
+
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "شرایط استفاده",
+    }),
+  ).toBeVisible();
+
   await expectNoHorizontalOverflow(page);
 
-  await page.goto("/privacy", { waitUntil: "networkidle" });
-  await expect(page.getByRole("heading", { level: 1, name: "حریم خصوصی" })).toBeVisible();
+  await page.goto("/privacy", {
+    waitUntil: "networkidle",
+  });
+
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "حریم خصوصی",
+    }),
+  ).toBeVisible();
+
   await expectNoHorizontalOverflow(page);
 });
 

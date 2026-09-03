@@ -618,7 +618,7 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
             <div className="overflow-hidden rounded-2xl border border-hairline bg-carbon">
               <img
                 src={categoryImage(cat.slug)}
-                alt={`مدل در حال پوشیدن ${cat.nameFaPlural} استریت‌ویر LBB`}
+                alt={`نمای دسته ${cat.nameFaPlural} ال‌بی‌بی`}
                 width={720}
                 height={540}
                 loading="eager"
@@ -723,7 +723,7 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
         <Band label="CATEGORY GUIDE">
           <Shell className="max-w-[900px]">
             <h2 className="text-display-3 text-bone">
-              {cat.nameFaPlural} استریت‌ویر LBB چه ویژگی‌هایی دارن؟
+              {`برای انتخاب ${cat.nameFa} در LBB به چه چیزهایی توجه کنیم؟`}
             </h2>
             <p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>
             <div className="mt-8 divide-y divide-hairline border-t border-hairline">

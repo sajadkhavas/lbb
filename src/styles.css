@@ -542,14 +542,8 @@ img {
 }
 .product-card__media img {
   filter: none;
-  transition:
-    opacity var(--dur-state) var(--ease-lbb-standard),
-    transform var(--dur-reveal) var(--ease-lbb);
-}
-@media (hover: hover) {
-  .product-card:hover .product-card__media img {
-    transform: scale(1.045) rotate(-0.6deg);
-  }
+  transform: none;
+  transition: opacity var(--dur-state) var(--ease-lbb-standard);
 }
 .category-tilt {
   transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));

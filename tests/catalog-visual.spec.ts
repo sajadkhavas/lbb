@@ -15,6 +15,92 @@ async function stabilize(page: Page) {
   await page.waitForTimeout(250);
 }
 
+async function settleFullPageLayout(page: Page) {
+  await page.waitForLoadState("networkidle");
+
+  await page.evaluate(async () => {
+    const sleep = (milliseconds: number) =>
+      new Promise<void>((resolve) => {
+        window.setTimeout(resolve, milliseconds);
+      });
+
+    const frame = () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve());
+        });
+      });
+
+    const step = Math.max(window.innerHeight, 640);
+
+    for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+      window.scrollTo({
+        top: y,
+        left: 0,
+        behavior: "auto",
+      });
+
+      await frame();
+    }
+
+    await Promise.all(
+      Array.from(document.images).map(async (image) => {
+        if (!image.complete) {
+          await Promise.race([
+            new Promise<void>((resolve) => {
+              const done = () => resolve();
+
+              image.addEventListener("load", done, { once: true });
+
+              image.addEventListener("error", done, { once: true });
+            }),
+            sleep(5_000),
+          ]);
+        }
+
+        if (image.complete && image.naturalWidth > 0) {
+          try {
+            await Promise.race([image.decode(), sleep(5_000)]);
+          } catch {
+            // Visual settling must fail only
+            // if layout itself remains unstable.
+          }
+        }
+      }),
+    );
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+
+    await frame();
+  });
+
+  let previousHeight = -1;
+  let stableSamples = 0;
+
+  for (let index = 0; index < 20; index += 1) {
+    const currentHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+
+    if (currentHeight === previousHeight) {
+      stableSamples += 1;
+    } else {
+      stableSamples = 0;
+    }
+
+    if (stableSamples >= 3) {
+      return;
+    }
+
+    previousHeight = currentHeight;
+    await page.waitForTimeout(200);
+  }
+
+  throw new Error("F14 full-page layout did not reach a stable height.");
+}
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
@@ -23,6 +109,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("F14 shop desktop visual contract", async ({ page }) => {
+  test.setTimeout(120_000);
+
   await page.setViewportSize({ width: 1440, height: 1000 });
 
   await page.goto("/shop", {
@@ -61,10 +149,12 @@ test("F14 shop desktop visual contract", async ({ page }) => {
   });
 
   await stabilize(page);
+  await settleFullPageLayout(page);
 
   await expect(page).toHaveScreenshot("f14-shop-desktop.png", {
     fullPage: true,
     animations: "disabled",
+    timeout: 45_000,
   });
 });
 

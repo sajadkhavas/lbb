@@ -26,8 +26,28 @@ test("ticker only spends animation work while near the viewport", async ({ page 
   await page.goto("/", { waitUntil: "networkidle" });
 
   const ticker = page.locator('[data-f18-motion="viewport-ticker"]');
-  await ticker.scrollIntoViewIfNeeded();
+
+  await expect(ticker).toBeAttached();
+
+  await ticker.evaluate((element) => {
+    element.scrollIntoView({
+      block: "center",
+      behavior: "auto",
+    });
+  });
+
   await expect(ticker).toHaveCSS("animation-play-state", "running");
-  await page.locator("footer").scrollIntoViewIfNeeded();
+
+  const footer = page.locator("footer");
+
+  await expect(footer).toBeAttached();
+
+  await footer.evaluate((element) => {
+    element.scrollIntoView({
+      block: "center",
+      behavior: "auto",
+    });
+  });
+
   await expect(ticker).toHaveCSS("animation-play-state", "paused");
 });

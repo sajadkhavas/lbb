@@ -105,12 +105,12 @@ function ContactPage() {
                 ارتباط با LBB
               </h1>
               <p className="text-lede mt-5 max-w-[58ch]">
-                فقط راه‌های ارتباطی و اطلاعات مکانی که در Store Settings عمومی و تأیید شده‌اند در
-                این صفحه نمایش داده می‌شوند.
+                برای پرسش درباره محصول، سایز، موجودی یا سفارش می‌توانید از راه‌های ارتباطی رسمی LBB
+                استفاده کنید.
               </p>
               <p className="mt-5 max-w-[64ch] text-sm leading-8 text-metal">
-                شماره واحد، طبقه، نشانی کامل، کدپستی، تلفن، ایمیل یا ساعت کاری تا زمانی که تأیید
-                عمومی نداشته باشند نمایش داده نمی‌شوند.
+                اینستاگرام، تلفن پشتیبانی و واتساپ ثبت‌شده در این صفحه کانال‌های رسمی ارتباط با LBB
+                هستند.
               </p>
 
               {contacts.length > 0 ? (
@@ -127,7 +127,19 @@ function ContactPage() {
                       className={`${CtaClasses("line")} min-w-0 justify-start overflow-hidden`}
                     >
                       <ContactIcon kind={channel.kind} />
-                      <span className="truncate">{channel.label}</span>
+                      <span className="min-w-0">
+                        <span className="block truncate">{channel.label}</span>
+                        <span
+                          className="mt-0.5 block truncate text-[11px] text-mute"
+                          dir={
+                            channel.kind === "phone" || channel.kind === "whatsapp"
+                              ? "ltr"
+                              : undefined
+                          }
+                        >
+                          {channel.value}
+                        </span>
+                      </span>
                     </a>
                   ))}
                 </div>

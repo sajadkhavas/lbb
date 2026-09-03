@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { AnnouncementBar, ANNOUNCEMENT_HEIGHT } from "@/components/lbb/AnnouncementBar";
 import { Footer } from "@/components/lbb/Footer";
+import { BrandIntro } from "@/components/lbb/BrandIntro";
 import { InstagramStrip } from "@/components/lbb/InstagramStrip";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -106,6 +107,7 @@ function Home() {
       </main>
       <Footer theme="dark" />
       <MobileBottomBar />
+      <BrandIntro />
     </>
   );
 }

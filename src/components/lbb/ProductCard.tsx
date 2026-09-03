@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, Eye } from "lucide-react";
 import { toast } from "sonner";
@@ -24,8 +23,6 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const { open: openQuickView } = useQuickView();
-  const [loaded, setLoaded] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
 
   const primaryImage = backend ? p.primaryImage : productImage(p.slug);
   const name = p.name;
@@ -35,11 +32,6 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const available = backend ? p.availability : p.inStock;
   const priceFrom = backend ? p.priceFromToman : p.price;
   const priceTo = backend ? p.priceToToman : p.price;
-
-  useEffect(() => {
-    setLoaded(false);
-    if (imgRef.current?.complete) setLoaded(true);
-  }, [primaryImage]);
 
   if (!backend && isLiveBackend()) {
     return (
@@ -84,21 +76,11 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       ratio="1/1"
       width={1024}
       height={1280}
+      priority={priority}
+      zoom={false}
       className="product-card__media bg-white"
-      imgClassName={`object-contain p-4 transition-[opacity,transform] duration-500 sm:p-7 ${loaded ? "opacity-100" : "opacity-0"}`}
+      imgClassName="object-contain p-4 sm:p-7"
     >
-      {!loaded ? <div className="absolute inset-0 skeleton-shimmer" aria-hidden="true" /> : null}
-      <img
-        ref={imgRef}
-        src={primaryImage}
-        alt=""
-        aria-hidden="true"
-        className="hidden"
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
-        onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)}
-      />
       <CardOverlay
         p={p}
         liked={liked}
