@@ -401,18 +401,21 @@ AI output هیچ‌وقت بدون human approval به‌عنوان truth محص
 - Exact-head quality gates برای closureهای P1.2 سبز شدند.
 - Production deployment در خود P1.2 انجام نشد؛ Production baseline فقط با activation پذیرفته‌شده تغییر می‌کند.
 
-### P1.3 SEO Semantic & Content Polish — **DONE / EXACT-HEAD GATED / READY TO MERGE**
+### P1.3 SEO Semantic & Content Polish — **DONE / MERGED 2026-09-05**
 
 - Tracking issue: #61
-- PR: #62
+- PR #62: **MERGED**
+- START_SHA: `1d6fd9170788e9e765c17fc4b29987b87436d283`.
+- Final exact-head pre-merge SHA: `2976daab0caa13d1b288f5da0a217c895f21e3fe`.
+- Merge SHA: `0e3512858b053ffe81aab05a4b6fe95a1811ca6a`.
+- Final Quality Gates run `33984114023`: **SUCCESS**.
 - Search-intent و route mapping بر اساس Evidence ثبت شد.
 - Categoryها به intent خرید نوع محصول منتقل شدند؛ `کرج` فقط در local surfaces واقعی نگه داشته شد.
 - هیچ gender modifier مانند `مردانه` بدون data contract معتبر به metadata تحمیل نشد.
 - Shop/About metadata، FAQ/HowTo/SearchAction legacy markup و internal linking reconcile شدند.
 - Canonical / noindex / sitemap / robots / SSR-head contracts verify شدند.
 - Dedicated P1.3 regression coverage اضافه شد.
-- Validated implementation SHA پیش از closure-doc reconciliation: `03875bec5b619239c23aa502f1749447b0b14ed4`.
-- Quality Gates run `33983418418`: **SUCCESS**.
+- Closure record: `docs/P1_3_SEO_CLOSURE.md`.
 - Production mutation: **NO**.
 
 ### P1.4 Regression QA + Frontend Freeze — **NEXT**
