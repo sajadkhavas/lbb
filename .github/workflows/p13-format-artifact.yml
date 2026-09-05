@@ -6,13 +6,16 @@ on:
       - phase/p1-3-seo-semantic-content-polish
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   format:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: phase/p1-3-seo-semantic-content-polish
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -26,13 +29,19 @@ jobs:
           src/lib/categories.ts
           tests/p12-category-content-seo.spec.ts
           tests/seo-contract.spec.ts
-      - uses: actions/upload-artifact@v4
-        with:
-          name: p13-prettier-output
-          path: |
-            docs/P1_3_SEO_RESEARCH_PLAN.md
-            docs/P1_3_SEO_ROUTE_INTENT_MAP.md
-            src/lib/categories.ts
-            tests/p12-category-content-seo.spec.ts
+      - name: Commit formatting when needed
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            docs/P1_3_SEO_RESEARCH_PLAN.md \
+            docs/P1_3_SEO_ROUTE_INTENT_MAP.md \
+            src/lib/categories.ts \
+            tests/p12-category-content-seo.spec.ts \
             tests/seo-contract.spec.ts
-          if-no-files-found: error
+          git commit -m "style(seo): apply prettier to P1.3 files"
+          git push origin HEAD:phase/p1-3-seo-semantic-content-polish
