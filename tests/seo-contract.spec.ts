@@ -172,13 +172,12 @@ test("published journal detail exposes Article and absolute breadcrumb contracts
   );
 });
 
-test("homepage local schema stays on verified Karaj identity without invented NAP", async ({
+test("homepage local schema stays verified and excludes retired search metadata", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   const schemas = await jsonLd(page);
-  const website = schemaOfType(schemas, "WebSite") as
-    { potentialAction?: { target?: { urlTemplate?: string } } } | undefined;
+  const website = schemaOfType(schemas, "WebSite") as { potentialAction?: unknown } | undefined;
   const store = schemaOfType(schemas, "ClothingStore") as
     | {
         description?: string;
@@ -189,9 +188,9 @@ test("homepage local schema stays on verified Karaj identity without invented NA
       }
     | undefined;
 
-  expect(website?.potentialAction?.target?.urlTemplate).toBe(
-    `${siteOrigin}/search?q={search_term_string}`,
-  );
+  expect(website).toBeTruthy();
+  expect(website?.potentialAction).toBeUndefined();
+  await expect(page.locator('meta[name="keywords"]')).toHaveCount(0);
   expect(store).toBeTruthy();
   expect(store?.description).toContain("پوشاک خیابانی");
   expect(store?.description).toContain("کرج");

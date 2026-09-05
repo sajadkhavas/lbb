@@ -5,25 +5,11 @@ import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
-import { pageMeta, canonical } from "@/lib/site";
+import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 
 const TITLE = "راهنمای انتخاب اندازه LBB | اندازه‌گیری و بررسی تن‌خور";
 const DESC =
   "راهنمای انتخاب اندازه پوشاک LBB؛ روش اندازه‌گیری بدن، مقایسه با لباس مناسب و بررسی تن‌خور هر محصول پیش از خرید.";
-
-const howToLd = {
-  "@context": "https://schema.org",
-  "@type": "HowTo",
-  name: "چگونه اندازه مناسب پوشاک را انتخاب کنیم",
-  step: [
-    { "@type": "HowToStep", text: "اندازه‌های بدن را با متر خیاطی و بدون کشیدن متر ثبت کنید." },
-    { "@type": "HowToStep", text: "یک لباس با تن‌خور مناسب را روی سطح صاف اندازه بگیرید." },
-    {
-      "@type": "HowToStep",
-      text: "اندازه‌ها و توضیح تن‌خور را با اطلاعات همان محصول مقایسه کنید.",
-    },
-  ],
-};
 
 const STEPS = [
   {
@@ -47,7 +33,17 @@ export const Route = createFileRoute("/size-guide")({
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESC, path: "/size-guide", type: "article" }),
     links: canonical("/size-guide"),
-    scripts: [{ type: "application/ld+json", children: JSON.stringify(howToLd) }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          breadcrumbLd([
+            { name: "خانه", path: "/" },
+            { name: "راهنمای اندازه", path: "/size-guide" },
+          ]),
+        ),
+      },
+    ],
   }),
   component: SizeGuide,
 });

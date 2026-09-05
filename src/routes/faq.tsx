@@ -109,17 +109,6 @@ const FAQ_GROUPS: FaqGroup[] = [
   },
 ];
 
-const FAQ_ITEMS = FAQ_GROUPS.flatMap((group) => group.items);
-const faqLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: FAQ_ITEMS.map((item) => ({
-    "@type": "Question",
-    name: item.question,
-    acceptedAnswer: { "@type": "Answer", text: item.answer },
-  })),
-};
-
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESC, path: "/faq" }),
@@ -134,7 +123,6 @@ export const Route = createFileRoute("/faq")({
           ]),
         ),
       },
-      { type: "application/ld+json", children: JSON.stringify(faqLd) },
     ],
   }),
   component: FaqPage,

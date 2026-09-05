@@ -393,20 +393,29 @@ AI output هیچ‌وقت بدون human approval به‌عنوان truth محص
 
 اطلاعات کارفرما در همین سند ثبت شد.
 
-### P1.2 Visual Polish — NEXT
+### P1.2 Visual + Content Polish — **DONE / MERGED 2026-09-03**
 
-- اجرای Brand Intro
-- spacing / typography / hierarchy / cards / hero / header / mobile
-- استفاده از Business Truth واقعی
-- عدم حذف Size Guide یا اطلاعات فعلی معتبر
+- PR #60 merged into `fix/lbb-local-boutique-homepage`.
+- Merge SHA: `1d6fd9170788e9e765c17fc4b29987b87436d283`.
+- Brand Intro، Business Truth copy، navigation/taxonomy و category landing reconciliation انجام شد.
+- Exact-head quality gates برای closureهای P1.2 سبز شدند.
+- Production deployment در خود P1.2 انجام نشد؛ Production baseline فقط با activation پذیرفته‌شده تغییر می‌کند.
 
-### P1.3 SEO Semantic & Content Polish
+### P1.3 SEO Semantic & Content Polish — **DONE / EXACT-HEAD GATED / READY TO MERGE**
 
-- rewrite محتوا بر اساس Business Truth و Search Intent
-- local / category / FAQ / schema reconciliation
-- بدون keyword stuffing
+- Tracking issue: #61
+- PR: #62
+- Search-intent و route mapping بر اساس Evidence ثبت شد.
+- Categoryها به intent خرید نوع محصول منتقل شدند؛ `کرج` فقط در local surfaces واقعی نگه داشته شد.
+- هیچ gender modifier مانند `مردانه` بدون data contract معتبر به metadata تحمیل نشد.
+- Shop/About metadata، FAQ/HowTo/SearchAction legacy markup و internal linking reconcile شدند.
+- Canonical / noindex / sitemap / robots / SSR-head contracts verify شدند.
+- Dedicated P1.3 regression coverage اضافه شد.
+- Validated implementation SHA پیش از closure-doc reconciliation: `03875bec5b619239c23aa502f1749447b0b14ed4`.
+- Quality Gates run `33983418418`: **SUCCESS**.
+- Production mutation: **NO**.
 
-### P1.4 Regression QA + Frontend Freeze
+### P1.4 Regression QA + Frontend Freeze — **NEXT**
 
 - responsive
 - accessibility
@@ -457,16 +466,16 @@ Backend موجود باید audit/reconcile شود؛ از صفر بازنویس�
 1. ابتدا این سند را بخواند.
 2. Production baseline را با SHA `d78d164456dabce06dc88f3cb4e9af181c6f5e3f` یا Baseline جدیدترِ صراحتاً پذیرفته‌شده تطبیق دهد.
 3. از Production مستقیم edit نکند.
-4. برای P1.2 یک Branch/Worktree تمیز از Baseline پذیرفته‌شده بسازد.
+4. برای فاز بعدی Branch/Worktree تمیز از آخرین baseline پذیرفته‌شده بسازد.
 5. Business Truth این سند را با داده ساختگی جایگزین نکند.
 6. تغییرات UI و SEO را صفحه‌به‌صفحه انجام دهد و بعد QA کند.
 7. Backend و commerce را فقط پس از audit و contract reconciliation به live ببرد.
 
 ### CURRENT NEXT
 
-**`P1.2 — Visual + Content Polish`**
+**`P1.4 — Regression QA + Frontend Freeze`**
 
-با این قاعده که SEO همان صفحه در زمان redesign همان صفحه لحاظ شود تا دوباره‌کاری کم شود؛ سپس P1.3 برای reconciliation نهایی semantic/technical SEO اجرا شود.
+P1.4 باید responsive، accessibility، SSR/hydration، performance و SEO contracts را روی baseline نهایی Frontend دوباره تأیید کند و سپس یک Frontend Freeze SHA صریح برای ورود به فازهای Backend/Live Integration ثبت شود.
 
 ---
 
