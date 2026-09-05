@@ -1,6 +1,6 @@
 # LBB P1.4 — Regression QA + Frontend Freeze Closure
 
-Status: **COMPLETED / MERGED / FRONTEND FROZEN / REGISTRATION IN PROGRESS**
+Status: **COMPLETED / MERGED / FRONTEND FROZEN / REGISTERED**
 
 ## Identity
 
@@ -51,17 +51,22 @@ No runtime/source feature regression required a P1.4 application-code change. P1
 - Temporary helper was removed before the final exact-head gate.
 - PR #65 merged with expected-head protection.
 
+## Registration evidence
+
+- Registration PR #66: **MERGED**.
+- Registration PR head: `063a0368310b8a2186549011c9d6d3f82ea38ce4`.
+- Registration Quality Gates run `33991677662`: **SUCCESS**.
+- Registration merge SHA: `f819ebbca8bed9292b60eaf867f11fea7dc367a8`.
+- Registration delta was documentation-only; no runtime/source/product/server mutation occurred.
+- Master Handoff records P1.4 as completed/merged and advances `CURRENT NEXT` to P2.
+
 ## Freeze semantics
 
 `FRONTEND_FREEZE_SHA = 2bc1347bb092172350415ac21019eb09f9dd746d`.
 
-This SHA is the frontend source merge baseline. The post-merge registration PR is documentation-only and does not redefine the runtime freeze SHA.
+This SHA is the frontend source merge baseline. Documentation-only registration commits do not redefine the runtime freeze SHA.
 
 F21 remains backlog/outside this frozen delivery baseline; adding it later invalidates this freeze and requires a new frontend acceptance cycle.
-
-## Registration gate
-
-The post-merge registration PR must pass its own complete Quality Gates before the Master Handoff update is merged and issue #64 is closed.
 
 ## NEXT
 

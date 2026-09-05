@@ -1,6 +1,6 @@
 # LBB P1.4 — Regression QA + Frontend Freeze Checkpoint
 
-Current status: **COMPLETED / MERGED / FRONTEND FROZEN**
+Current status: **COMPLETED / MERGED / FRONTEND FROZEN / REGISTERED**
 
 - Repository: `sajadkhavas/lbb`
 - Base branch: `fix/lbb-local-boutique-homepage`
@@ -12,6 +12,9 @@ Current status: **COMPLETED / MERGED / FRONTEND FROZEN**
 - P1.4 merge SHA / `FRONTEND_FREEZE_SHA`: `2bc1347bb092172350415ac21019eb09f9dd746d`
 - Final pre-merge Quality Gates run: `33991264286`
 - Result: **SUCCESS**
+- Registration PR #66: **MERGED**
+- Registration Quality Gates run: `33991677662` — **SUCCESS**
+- Registration merge SHA: `f819ebbca8bed9292b60eaf867f11fea7dc367a8`
 - Production/server mutation: **NO**
 
 ## Acceptance evidence
@@ -26,10 +29,11 @@ Current status: **COMPLETED / MERGED / FRONTEND FROZEN**
 - Runtime feature changes in P1.4: **NONE**.
 - Open review threads before merge: **0**.
 - Merge used exact expected-head protection.
+- Post-merge registration passed its own complete Quality Gates before merge.
 
 ## Freeze semantics
 
-`2bc1347bb092172350415ac21019eb09f9dd746d` is the frozen frontend source merge baseline. This post-merge registration changes documentation only and does not redefine the runtime frontend freeze SHA.
+`2bc1347bb092172350415ac21019eb09f9dd746d` is the frozen frontend source merge baseline. Documentation-only registration changes do not redefine the runtime frontend freeze SHA.
 
 ## Scope note
 
