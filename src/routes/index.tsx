@@ -27,14 +27,6 @@ const websiteJsonLd = {
   alternateName: BRAND.name,
   url: absUrl("/"),
   inLanguage: "fa-IR",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: {
-      "@type": "EntryPoint",
-      urlTemplate: `${absUrl("/search")}?q={search_term_string}`,
-    },
-    "query-input": "required name=search_term_string",
-  },
 };
 
 const storeJsonLd = {
@@ -63,10 +55,6 @@ export const Route = createFileRoute("/")({
         path: "/",
         type: "website",
       }),
-      {
-        name: "keywords",
-        content: BRAND_COPY.homepageKeywords.join("، "),
-      },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [...canonical("/"), { rel: "preload", as: "image", href: heroMain }],
