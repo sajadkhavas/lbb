@@ -1,0 +1,169 @@
+name: P1.3 Reconciliation Final Helper
+
+on:
+  push:
+    branches:
+      - phase/p1-3-seo-semantic-content-polish
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase/p1-3-seo-semantic-content-polish
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Apply semantic source changes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if text.count(old) != 1:
+                  raise SystemExit(f"expected exactly one marker in {path}: {old[:80]!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          once(
+              "src/routes/about.tsx",
+              'const TITLE = "درباره LBB | از رگال تا فروشگاه | استریت‌ویر کرج";',
+              'const TITLE = "درباره LBB | از رگال تا فروشگاه";',
+          )
+          once(
+              "src/routes/shop.tsx",
+              'const TITLE = "فروشگاه | خرید تیشرت، شلوار، کتونی و جوراب — ال‌بی‌بی";\nconst DESC =\n  "کاتالوگ پوشاک شهری ال‌بی‌بی شامل تیشرت، شلوار، کتونی و جوراب با فیلترهای قابل اشتراک و اطلاعات شفاف موجودی.";',
+              'const TITLE = "فروشگاه LBB | خرید پوشاک خیابانی و استریت‌ویر";\nconst DESC =\n  "محصولات موجود LBB را با فیلترهای دسته، سایز، رنگ، قیمت و موجودی مرور کن و برای جزئیات هر مدل وارد صفحه همان محصول شو.";',
+          )
+
+          faq = Path("src/routes/faq.tsx")
+          text = faq.read_text()
+          text, n = re.subn(
+              r'\nconst FAQ_ITEMS = FAQ_GROUPS\.flatMap\(\(group\) => group\.items\);\nconst faqLd = \{.*?\n\};\n',
+              '\n', text, count=1, flags=re.S,
+          )
+          if n != 1:
+              raise SystemExit("FAQPage constant block missing")
+          script = '      { type: "application/ld+json", children: JSON.stringify(faqLd) },\n'
+          if script not in text:
+              raise SystemExit("FAQPage script missing")
+          faq.write_text(text.replace(script, '', 1))
+
+          size = Path("src/routes/size-guide.tsx")
+          text = size.read_text()
+          imp = 'import { pageMeta, canonical } from "@/lib/site";'
+          if imp not in text:
+              raise SystemExit("size import missing")
+          text = text.replace(imp, 'import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";', 1)
+          text, n = re.subn(r'\nconst howToLd = \{.*?\n\};\n', '\n', text, count=1, flags=re.S)
+          if n != 1:
+              raise SystemExit("HowTo block missing")
+          old = '    scripts: [{ type: "application/ld+json", children: JSON.stringify(howToLd) }],'
+          new = '''    scripts: [
+              {
+                type: "application/ld+json",
+                children: JSON.stringify(
+                  breadcrumbLd([
+                    { name: "خانه", path: "/" },
+                    { name: "راهنمای اندازه", path: "/size-guide" },
+                  ]),
+                ),
+              },
+            ],'''
+          if old not in text:
+              raise SystemExit("HowTo script missing")
+          size.write_text(text.replace(old, new, 1))
+
+          category = Path("src/routes/$category.tsx")
+          text = category.read_text()
+          marker = '<p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>'
+          if text.count(marker) != 1:
+              raise SystemExit("category seoText marker missing or duplicated")
+          insert = marker + '''
+            <Link
+              to="/size-guide"
+              className="tech mt-5 inline-flex min-h-11 items-center text-signal underline-offset-4 hover:underline"
+            >
+              راهنمای انتخاب اندازه
+            </Link>'''
+          category.write_text(text.replace(marker, insert, 1))
+
+          Path("tests/p13-seo-semantic.spec.ts").write_text('''import { expect, test, type Page } from "@playwright/test";
+
+          function jsonLdTypes(page: Page) {
+            return page.locator('script[type="application/ld+json"]').evaluateAll((nodes) =>
+              nodes.flatMap((node) => {
+                try {
+                  const parsed = JSON.parse(node.textContent ?? "") as { "@type"?: string };
+                  return parsed["@type"] ? [parsed["@type"]] : [];
+                } catch {
+                  return [];
+                }
+              }),
+            );
+          }
+
+          test("local intent stays concentrated on home and contact", async ({ page }) => {
+            await page.goto("/", { waitUntil: "networkidle" });
+            await expect(page).toHaveTitle("LBB | پوشاک خیابانی و استریت‌ویر در کرج");
+            await page.goto("/contact", { waitUntil: "networkidle" });
+            await expect(page).toHaveTitle(/کرج/);
+            await page.goto("/about", { waitUntil: "networkidle" });
+            await expect(page).toHaveTitle("درباره LBB | از رگال تا فروشگاه");
+          });
+
+          test("shop uses broad commerce intent without stale brand wording", async ({ page }) => {
+            await page.goto("/shop", { waitUntil: "networkidle" });
+            await expect(page).toHaveTitle("فروشگاه LBB | خرید پوشاک خیابانی و استریت‌ویر");
+            await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /محصولات موجود LBB.*فیلترهای دسته، سایز، رنگ، قیمت و موجودی/);
+            await expect(page.locator('meta[name="description"]')).not.toHaveAttribute("content", /پوشاک شهری/);
+          });
+
+          test("useful FAQ remains visible without retired FAQPage search markup", async ({ page }) => {
+            await page.goto("/faq", { waitUntil: "networkidle" });
+            await expect(page.getByRole("heading", { level: 1 })).toContainText("پاسخ‌های روشن");
+            const types = await jsonLdTypes(page);
+            expect(types).not.toContain("FAQPage");
+            expect(types).toContain("BreadcrumbList");
+          });
+
+          test("size guide keeps useful content and breadcrumb markup without retired HowTo markup", async ({ page }) => {
+            await page.goto("/size-guide", { waitUntil: "networkidle" });
+            await expect(page.getByRole("heading", { level: 1 })).toHaveText("راهنمای انتخاب اندازه");
+            const types = await jsonLdTypes(page);
+            expect(types).not.toContain("HowTo");
+            expect(types).toContain("BreadcrumbList");
+          });
+
+          test("category pages link naturally to the size guide", async ({ page }) => {
+            await page.goto("/tshirts", { waitUntil: "networkidle" });
+            await expect(page.getByRole("link", { name: "راهنمای انتخاب اندازه" })).toHaveAttribute("href", "/size-guide");
+          });
+          ''')
+          PY
+      - name: Format source changes
+        run: >-
+          npx prettier --write
+          src/routes/about.tsx
+          src/routes/shop.tsx
+          src/routes/faq.tsx
+          src/routes/size-guide.tsx
+          'src/routes/$category.tsx'
+          tests/p13-seo-semantic.spec.ts
+      - name: Commit source changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/routes/about.tsx src/routes/shop.tsx src/routes/faq.tsx src/routes/size-guide.tsx 'src/routes/$category.tsx' tests/p13-seo-semantic.spec.ts
+          git commit -m "feat(seo): reconcile route intent schema and internal links"
+          git push origin HEAD:phase/p1-3-seo-semantic-content-polish
