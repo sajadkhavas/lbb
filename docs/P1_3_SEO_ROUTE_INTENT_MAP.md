@@ -1,40 +1,36 @@
 # LBB P1.3 — Route / Intent Map
 
-Status: **DRAFT — research in progress**
+Status: **IMPLEMENTED — exact-head quality gate pending**
 
-This document is intentionally created before final metadata/content edits so implementation follows evidence rather than assumptions.
-
-## Principles
+## Final principles
 
 - One dominant search intent per indexable route.
-- Homepage carries brand + broad streetwear + local-store context.
-- Category pages prioritize category-shopping intent; local modifiers are secondary unless SERP evidence supports local-first targeting.
-- Product pages use product-specific factual attributes only.
-- About, FAQ and Contact serve trust/navigation/support intent rather than acting as artificial keyword landing pages.
-- Filter/query states must not become competing indexable landing pages by accident.
+- Homepage carries brand, broad streetwear discovery and verified Karaj/store context.
+- Category pages prioritize transactional product-category intent and do not force `کرج` or gender modifiers without evidence.
+- Product pages use product-specific verified facts only.
+- About, FAQ and Contact serve brand, trust, support and local-navigation intent rather than artificial keyword landing pages.
+- Filter and query states remain `noindex` and canonicalize to their clean route.
+- Internal links use useful human anchors rather than repeated exact-match keyword anchors.
 
-## Working route map
+## Final route map
 
-| Route family       | Primary intent                            | Supporting semantic topics                                                    | Local modifier policy                                    | Indexation                                                  |
-| ------------------ | ----------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------- |
-| `/`                | Brand + broad commercial discovery        | LBB, streetwear, imported selected items, category discovery, size guidance   | Strong: Karaj/store context belongs here                 | Index                                                       |
-| `/tshirts`         | Buy/browse T-shirts                       | oversized/box/long-sleeve where actually represented, size, fit, price, stock | Secondary, not forced into title until evidence supports | Index                                                       |
-| `/hoodies`         | Buy/browse hoodies                        | hoodie variants, size, fit, price, stock                                      | Secondary                                                | Index                                                       |
-| `/pants`           | Buy/browse pants                          | baggy/cargo where actually represented, size, fit, price, stock               | Secondary                                                | Index                                                       |
-| `/shoes`           | Buy/browse sneakers/shoes                 | size, color, price, stock, model facts                                        | Secondary                                                | Index                                                       |
-| `/socks`           | Buy/browse socks                          | size, color, price, stock, model facts                                        | Secondary                                                | Index while real inventory exists                           |
-| `/about`           | Brand trust / story                       | LBB story, positioning, physical + online presence                            | Natural factual mention only                             | Index                                                       |
-| `/contact`         | Navigation / local store / support        | Karaj, store location, phone, WhatsApp, Instagram, shipping/support channels  | Strong                                                   | Index                                                       |
-| `/faq`             | Customer support / pre-purchase questions | sizing, product facts, shipping/returns only where verified                   | Natural only                                             | Index                                                       |
-| Product detail     | Specific product purchase/research        | real product name, category, size, color, fit/material if verified            | Avoid templated local stuffing                           | Index if real public product                                |
-| Filter/query state | Narrow browsing                           | selected filters                                                              | None                                                     | Noindex/canonical to clean category as currently contracted |
+- `/`: brand + broad commercial discovery. Strong verified Karaj/store context. Indexable.
+- `/shop`: broad ecommerce discovery across category, size, color, price and stock. No forced local modifier in the title. Indexable.
+- `/tshirts`: buy/browse T-shirts. Support with fit, size, price and stock; use oversized/box wording only when real catalog data supports it. Indexable.
+- `/hoodies`: buy/browse hoodies. Support with fit, size, price and stock. Indexable.
+- `/pants`: buy/browse pants. Support with fit, size, price and stock; use baggy/cargo wording only when real catalog data supports it. Indexable.
+- `/shoes`: buy/browse sneakers. Support with size, color, price and stock. Indexable.
+- `/socks`: buy/browse socks. Support with size, color, price and stock. Indexable while real inventory exists.
+- `/about`: brand story and trust. Local context may appear naturally in factual body copy, not as a forced title target. Indexable.
+- `/contact`: local navigation and support. Strong verified Karaj/store context. Indexable.
+- `/faq`: pre-purchase support around size, product facts, shipping and ordering truth. Indexable.
+- `/size-guide`: sizing and fit guidance. Indexable.
+- Product detail routes: specific product research/purchase using verified product facts. Index only when the product is publishable.
+- Search and filtered states: narrow browsing only. `noindex` with clean canonicals.
 
-## Open research questions before final metadata
+## Keyword decisions
 
-1. Should `کرج` remain in category title tags, or move primarily to homepage/contact/local-store surfaces?
-2. Which user wording is stronger in current Persian SERPs: `استریت ویر`, `استریت‌ویر`, or `پوشاک خیابانی`?
-3. Which category modifiers deserve dedicated semantic coverage without creating unsupported empty subcategory routes: `اورسایز`, `بگی`, `کارگو`, etc.?
-4. Are current FAQ blocks useful decision-support content, or are some too repetitive across categories?
-5. Which internal links can connect homepage → category → relevant support content naturally without optimized-anchor repetition?
-
-No final keyword-volume claim is made in this document.
+- `کرج` is strategically concentrated on Home, Contact and factual store context instead of every ecommerce title.
+- `مردانه` is not forced into category metadata because the current catalog contract has no authoritative gender field.
+- `استریت‌ویر`, `پوشاک خیابانی` and product modifiers such as `اورسایز`, `بگی` and `کارگو` are used only where natural and supported by actual brand/catalog content.
+- No KD, CPC or search-volume number is claimed without Keyword Planner or Search Console evidence.
