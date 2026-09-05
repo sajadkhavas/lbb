@@ -31,16 +31,16 @@ P1.4 is regression/freeze work, not redesign. Only demonstrated regressions or a
 
 ## Acceptance matrix
 
-| Area | Existing evidence/coverage | P1.4 acceptance rule |
-| --- | --- | --- |
-| Responsive/layout | `tests/all-routes.spec.ts` checks route rendering, RTL, one H1 and horizontal overflow; catalog/PDP visual suites include representative layouts | Key storefront routes must render without horizontal overflow and representative mobile/desktop contracts must pass |
-| Accessibility | `tests/accessibility.spec.ts`, F15/F17/F19 accessibility suites, `@axe-core/playwright`, static a11y audit | No serious/critical Axe violations on covered templates; focus return/keyboard/dialog contracts remain green; reduced-motion behavior green |
-| SSR/hydration | production Node/Nitro build + smoke + route reload/runtime-error coverage + SEO SSR/head contracts | Server-built app must boot; SSR/head content must be present; pageerror/console hydration regressions must remain absent on route matrix |
-| Performance/motion | production audit/build plus `tests/f18-motion-performance.spec.ts` and motion audit | Reduced-motion, viewport-scoped ticker work and existing runtime/bundle contracts must remain green; no new performance regression accepted without evidence |
-| SEO | P1.3 dedicated tests, SEO/PWA contracts, source/F20B audits | P1.3 title/meta/canonical/noindex/schema/robots/sitemap/SSR-head decisions must not regress |
-| Core storefront | all-routes, catalog discovery, PDP decision, commerce continuity, interactions, navigation and checkout-preview suites | Home/shop/category/product/cart/checkout/account/content/navigation behavior must remain green in prototype mode |
-| Visual | catalog/PDP/full visual snapshot suites | Every snapshot passes; any delta must be reviewed before baseline update |
-| Build/security | build, typecheck, npm production audit, production/source audits | All exact-head quality stages SUCCESS |
+| Area               | Existing evidence/coverage                                                                                                                       | P1.4 acceptance rule                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Responsive/layout  | `tests/all-routes.spec.ts` checks route rendering, RTL, one H1 and horizontal overflow; catalog/PDP visual suites include representative layouts | Key storefront routes must render without horizontal overflow and representative mobile/desktop contracts must pass                                          |
+| Accessibility      | `tests/accessibility.spec.ts`, F15/F17/F19 accessibility suites, `@axe-core/playwright`, static a11y audit                                       | No serious/critical Axe violations on covered templates; focus return/keyboard/dialog contracts remain green; reduced-motion behavior green                  |
+| SSR/hydration      | production Node/Nitro build + smoke + route reload/runtime-error coverage + SEO SSR/head contracts                                               | Server-built app must boot; SSR/head content must be present; pageerror/console hydration regressions must remain absent on route matrix                     |
+| Performance/motion | production audit/build plus `tests/f18-motion-performance.spec.ts` and motion audit                                                              | Reduced-motion, viewport-scoped ticker work and existing runtime/bundle contracts must remain green; no new performance regression accepted without evidence |
+| SEO                | P1.3 dedicated tests, SEO/PWA contracts, source/F20B audits                                                                                      | P1.3 title/meta/canonical/noindex/schema/robots/sitemap/SSR-head decisions must not regress                                                                  |
+| Core storefront    | all-routes, catalog discovery, PDP decision, commerce continuity, interactions, navigation and checkout-preview suites                           | Home/shop/category/product/cart/checkout/account/content/navigation behavior must remain green in prototype mode                                             |
+| Visual             | catalog/PDP/full visual snapshot suites                                                                                                          | Every snapshot passes; any delta must be reviewed before baseline update                                                                                     |
+| Build/security     | build, typecheck, npm production audit, production/source audits                                                                                 | All exact-head quality stages SUCCESS                                                                                                                        |
 
 ## Final freeze evidence required
 
