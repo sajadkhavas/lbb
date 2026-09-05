@@ -18,6 +18,7 @@
 - Frontend production acceptance: **PASS**
 - Backend mode در storefront فعلی: `prototype`
 - اصل مهم: این SHA، Baseline پذیرفته‌شده Frontend است و نباید بدون دلیل QA قبلی دوباره باز شود.
+- Latest GitHub frontend freeze SHA: `2bc1347bb092172350415ac21019eb09f9dd746d` — **not deployed yet**.
 
 ### Production engineering rules
 
@@ -383,6 +384,10 @@ Feature مورد بحث و پذیرفته‌شده برای بررسی/پیاد�
 
 AI output هیچ‌وقت بدون human approval به‌عنوان truth محصول publish نشود.
 
+### Current freeze scope
+
+F21 در `P1.4` وارد scope نشده و در Backlog باقی می‌ماند. `FRONTEND_FREEZE_SHA` فعلی بدون F21 ثبت شده است؛ ورود F21 در آینده نیازمند بازکردن مجدد Frontend acceptance/freeze QA است.
+
 ---
 
 # 12) Current Delivery Roadmap
@@ -418,16 +423,20 @@ AI output هیچ‌وقت بدون human approval به‌عنوان truth محص
 - Closure record: `docs/P1_3_SEO_CLOSURE.md`.
 - Production mutation: **NO**.
 
-### P1.4 Regression QA + Frontend Freeze — **NEXT**
+### P1.4 Regression QA + Frontend Freeze — **DONE / MERGED 2026-09-06**
 
-- responsive
-- accessibility
-- SSR/hydration
-- performance
-- SEO contracts
-- final frontend baseline
-
-> اگر F21 در scope همین تحویل باشد، قبل از Frontend Freeze و ترجیحاً در Branch مستقل PoC/feature انجام شود.
+- Tracking issue: #64
+- PR #65: **MERGED**
+- START_SHA: `3dfc6340a4a204f83d6131ffcc8a35a7719992be`.
+- Validated freeze-test SHA: `3b004a3b1d3f417776a1d15fbd08123167fd98f3`.
+- Final exact-head pre-merge SHA: `2f8112da04fca8e787916f82931cd53c3732f6ca`.
+- `FRONTEND_FREEZE_SHA`: `2bc1347bb092172350415ac21019eb09f9dd746d`.
+- Final Quality Gates run `33991264286`: **SUCCESS**.
+- Responsive / accessibility / SSR-hydration / performance-build / SEO / core storefront / visual regression: **PASS**.
+- Dedicated freeze regression coverage added at `tests/p14-frontend-freeze.spec.ts`.
+- Existing visual snapshots passed; no P1.4 snapshot update required.
+- Runtime feature mutation: **NONE**.
+- Production/server mutation: **NO**.
 
 ## P2 — Backend Final Audit & Production Deployment
 
@@ -437,6 +446,10 @@ AI output هیچ‌وقت بدون human approval به‌عنوان truth محص
 4. Immutable backend deploy
 
 Backend موجود باید audit/reconcile شود؛ از صفر بازنویسی یا blind deploy نشود.
+
+### P2 execution rule after frontend freeze
+
+اجرای P2 از GitHub شروع می‌شود: ابتدا Backend موجود audit/reconcile و release candidate آن freeze شود. شروع P2 به‌تنهایی مجوز deploy/activation روی سرور نیست؛ بخش Production فقط در gate صریح deployment با immutable release و rollback انجام می‌شود.
 
 ## P3 — Frontend ↔ Backend Live Integration
 
@@ -476,9 +489,9 @@ Backend موجود باید audit/reconcile شود؛ از صفر بازنویس�
 
 ### CURRENT NEXT
 
-**`P1.4 — Regression QA + Frontend Freeze`**
+**`P2 — Backend Final Audit & Production Deployment`**
 
-P1.4 باید responsive، accessibility، SSR/hydration، performance و SEO contracts را روی baseline نهایی Frontend دوباره تأیید کند و سپس یک Frontend Freeze SHA صریح برای ورود به فازهای Backend/Live Integration ثبت شود.
+ابتدا بخش GitHub-first اجرا شود: Backend موجود audit/reconcile، contractها و migrations بررسی، Quality Gate سبز و release candidate freeze شود. هیچ Production/server mutation تا gate صریح deployment/activation انجام نشود.
 
 ---
 

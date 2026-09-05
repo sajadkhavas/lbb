@@ -1,16 +1,16 @@
 # LBB P1.4 — Regression QA + Frontend Freeze Checkpoint
 
-Current status: **IMPLEMENTED / EXACT-HEAD QUALITY PASS / READY FOR FINAL MERGE GATE**
+Current status: **COMPLETED / MERGED / FRONTEND FROZEN**
 
 - Repository: `sajadkhavas/lbb`
 - Base branch: `fix/lbb-local-boutique-homepage`
 - START_SHA: `3dfc6340a4a204f83d6131ffcc8a35a7719992be`
 - Phase branch: `phase/p1-4-regression-qa-frontend-freeze`
 - Tracking issue: #64
-- PR: #65
-- QA matrix: `docs/P1_4_QA_MATRIX.md`
-- Validated implementation/freeze-test SHA: `3b004a3b1d3f417776a1d15fbd08123167fd98f3`
-- Quality Gates run: `33990808197`
+- PR #65: **MERGED**
+- Final exact-head pre-merge SHA: `2f8112da04fca8e787916f82931cd53c3732f6ca`
+- P1.4 merge SHA / `FRONTEND_FREEZE_SHA`: `2bc1347bb092172350415ac21019eb09f9dd746d`
+- Final pre-merge Quality Gates run: `33991264286`
 - Result: **SUCCESS**
 - Production/server mutation: **NO**
 
@@ -24,16 +24,18 @@ Current status: **IMPLEMENTED / EXACT-HEAD QUALITY PASS / READY FOR FINAL MERGE 
 - Core storefront: full Playwright suite PASS in prototype mode.
 - Visual: existing snapshots PASS; no P1.4 snapshot update required.
 - Runtime feature changes in P1.4: **NONE**.
+- Open review threads before merge: **0**.
+- Merge used exact expected-head protection.
 
-## Final merge rule
+## Freeze semantics
 
-Closure documentation changes the branch head after the validated implementation run. The temporary closure helper was removed. The complete `Quality gates` workflow must pass again on the clean final PR head. Merge only on that exact successful head with expected-head protection.
+`2bc1347bb092172350415ac21019eb09f9dd746d` is the frozen frontend source merge baseline. This post-merge registration changes documentation only and does not redefine the runtime frontend freeze SHA.
 
 ## Scope note
 
-F21 Interactive 3D remains an optional backlog item and is not part of this frozen frontend candidate. Introducing it later requires reopening frontend acceptance/freeze QA.
+F21 Interactive 3D remains an optional backlog item and is not part of this frozen frontend baseline. Introducing it later requires reopening frontend acceptance/freeze QA.
 
-## Next after merge/registration
+## Next
 
 `P2 — Backend Final Audit & Production Deployment`
 
