@@ -1,19 +1,22 @@
 # P1.3 — Research Findings
 
-Status: **IN PROGRESS**
+Status: **EVIDENCE RECORDED / IMPLEMENTATION APPLIED**
 
-## Finding 1 — P1.2 metadata is not automatically final
+## Findings
 
-P1.2 established a truthful and technically safer baseline. P1.3 may change titles/descriptions where evidence shows a better route-intent match.
+1. P1.2 established safe metadata, truthful category copy, clean canonicals and filtered-state `noindex` behavior, but it was not a complete keyword-research phase.
+2. Live Persian SERP checks for product-family queries such as hoodies, T-shirts, cargo pants and sneakers predominantly showed ecommerce category/product intent. That supports transactional category pages rather than forcing local-first titles.
+3. Local clothing queries around Karaj showed local-store, directory and storefront intent. This supports strong Karaj context on Home and Contact, not boilerplate geo modifiers across every category.
+4. The current prototype catalog has no authoritative gender field. Therefore `مردانه` is not used as a templated category target even if some SERPs commonly use it.
+5. Category content is most useful when it supports decisions: size, fit, price, stock, color and verified product facts rather than repeated category keywords.
+6. Google Search no longer provides the FAQ rich-result feature, and HowTo rich results were retired earlier. Visible FAQ and sizing guidance remain useful, while retired search-feature markup was removed in this phase.
+7. Google does not use `meta keywords` for ranking, and the retired Sitelinks Search Box no longer justifies homepage `SearchAction`; both legacy contracts were removed.
+8. Search and filter states remain crawlable enough to expose `noindex`, while canonical URLs point to clean indexable routes.
+9. Product structured data remains conditional on publishability so draft or insufficiently evidenced products cannot become Product/Offer search facts.
+10. Sitemap, robots and canonical contracts already followed the desired indexation model and were preserved rather than rewritten without cause.
 
-## Finding 2 — Local query result composition
+## Operational limits
 
-Representative Karaj clothing searches currently return local store pages, mall directories, listings and ecommerce storefronts. Local intent is therefore meaningful for LBB, but its strongest home is likely the homepage/contact/store-location surfaces rather than mechanically appending `کرج` to every category title.
-
-## Finding 3 — Category copy should preserve decision support
-
-The P1.2 category rewrite correctly moved away from unsupported category-wide claims and toward per-product facts: size, fit, color, price, stock, material and care when actually recorded for that product. P1.3 should preserve this truth-safety while improving semantic differentiation between category pages.
-
-## Finding 4 — Keyword repetition is not the objective
-
-P1.3 optimizes route meaning and useful coverage, not raw repetition. Exact-match anchors, headings and keyword phrases must remain natural and non-repetitive.
+- No fabricated search-volume, CPC or KD values are recorded.
+- Real demand measurement must come from Google Keyword Planner and, after indexing, Search Console query, impression and click data.
+- Metadata should be revisited from Search Console evidence after production indexing rather than treated as permanently optimal.
