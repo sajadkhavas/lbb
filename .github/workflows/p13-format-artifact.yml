@@ -1,0 +1,38 @@
+name: P1.3 Format Artifact
+
+on:
+  push:
+    branches:
+      - phase/p1-3-seo-semantic-content-polish
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format P1.3 files
+        run: >-
+          npx prettier --write
+          docs/P1_3_SEO_RESEARCH_PLAN.md
+          docs/P1_3_SEO_ROUTE_INTENT_MAP.md
+          src/lib/categories.ts
+          tests/p12-category-content-seo.spec.ts
+          tests/seo-contract.spec.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p13-prettier-output
+          path: |
+            docs/P1_3_SEO_RESEARCH_PLAN.md
+            docs/P1_3_SEO_ROUTE_INTENT_MAP.md
+            src/lib/categories.ts
+            tests/p12-category-content-seo.spec.ts
+            tests/seo-contract.spec.ts
+          if-no-files-found: error
