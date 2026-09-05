@@ -1,35 +1,27 @@
 # LBB P1.3 — Source Notes
 
-Status: **IN PROGRESS**
+Status: **FINAL RESEARCH RECORD**
 
-## Authoritative technical sources
+## Current official Google references
 
-Implementation decisions in this phase are grounded in current Google Search Central documentation, including:
+- Search Essentials / spam policies: `https://developers.google.com/search/docs/essentials/spam-policies`
+- Canonicalization: `https://developers.google.com/search/docs/crawling-indexing/canonicalization`
+- Title links: `https://developers.google.com/search/docs/appearance/title-link`
+- Snippets and meta descriptions: `https://developers.google.com/search/docs/appearance/snippet`
+- Sitemaps: `https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap`
+- Search documentation updates and deprecations: `https://developers.google.com/search/updates`
 
-- canonicalization and duplicate URL consolidation;
-- faceted/filter URL crawl/index handling;
-- structured-data eligibility and validation;
-- Search Essentials / spam policies, including avoiding keyword stuffing;
-- Search Console as the post-indexing operational source for real query/impression/click data.
+## Evidence interpretation
 
-## Evidence classification
+- Official Google documentation governs crawl, indexation, canonical and Search-feature decisions.
+- Live SERPs are used only to classify intent and page type, not to invent volume or difficulty metrics.
+- Google Keyword Planner and Search Console remain the operational sources for real query demand and post-index performance.
+- Business-truth decisions come from `docs/LBB_MASTER_HANDOFF_FA.md` and verified storefront data.
 
-- **Official implementation guidance:** current Google Search Central documentation.
-- **Live intent evidence:** current search-result composition for representative Persian query families.
-- **Business truth:** `docs/LBB_MASTER_HANDOFF_FA.md` and verified storefront data.
-- **Real search-volume evidence:** intentionally not claimed in-repository without Keyword Planner/Search Console export.
+## Live SERP families inspected
 
-## Initial live-intent findings
+- Broad product purchase queries for hoodies, T-shirts, cargo pants and sneakers.
+- Local clothing/store queries around Karaj.
+- Streetwear wording variants.
 
-Representative local Karaj clothing queries currently surface a mix of:
-
-- local boutique/store pages;
-- mall/store-directory pages;
-- ecommerce storefront/category pages;
-- local commercial listings.
-
-Examples include current Karaj store/mall results for menswear/clothing as well as ecommerce storefronts with Karaj showroom context. This supports keeping strong local relevance on the homepage/contact/store-location surfaces. It does not, by itself, prove that every category should use a local-first title.
-
-## Guardrail
-
-P1.3 must not turn observed competitor wording into copied text or unsupported claims. SERP review is used to understand intent/page type, not to imitate claims.
+Observed result types were used to separate ecommerce category intent from local-store/navigation intent. Competitor wording was not copied and no third-party numeric SEO metric is promoted as fact.
