@@ -1,4 +1,4 @@
-name: P1.3 Format Artifact
+name: P1.3 Reconciliation Helper
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  format:
+  reconcile:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     steps:
@@ -21,27 +21,316 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Format P1.3 files
+      - name: Apply P1.3 semantic and schema reconciliation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f"Expected text missing in {path}: {old[:80]!r}")
+              p.write_text(text.replace(old, new))
+
+          replace(
+              "src/routes/about.tsx",
+              'const TITLE = "درباره LBB | از رگال تا فروشگاه | استریت‌ویر کرج";',
+              'const TITLE = "درباره LBB | از رگال تا فروشگاه";',
+          )
+
+          replace(
+              "src/routes/shop.tsx",
+              'const TITLE = "فروشگاه | خرید تیشرت، شلوار، کتونی و جوراب — ال‌بی‌بی";\nconst DESC =\n  "کاتالوگ پوشاک شهری ال‌بی‌بی شامل تیشرت، شلوار، کتونی و جوراب با فیلترهای قابل اشتراک و اطلاعات شفاف موجودی.";',
+              'const TITLE = "فروشگاه LBB | خرید پوشاک خیابانی و استریت‌ویر";\nconst DESC =\n  "محصولات موجود LBB را با فیلترهای دسته، سایز، رنگ، قیمت و موجودی مرور کن و برای جزئیات هر مدل وارد صفحه همان محصول شو.";',
+          )
+
+          faq = Path("src/routes/faq.tsx")
+          text = faq.read_text()
+          text, count = re.subn(
+              r'\nconst FAQ_ITEMS = FAQ_GROUPS\.flatMap\(\(group\) => group\.items\);\nconst faqLd = \{.*?\n\};\n',
+              '\n',
+              text,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit("FAQPage JSON-LD block not found exactly once")
+          text = text.replace(
+              '      { type: "application/ld+json", children: JSON.stringify(faqLd) },\n',
+              '',
+          )
+          faq.write_text(text)
+
+          size = Path("src/routes/size-guide.tsx")
+          text = size.read_text()
+          text = text.replace(
+              'import { pageMeta, canonical } from "@/lib/site";',
+              'import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";',
+          )
+          text, count = re.subn(
+              r'\nconst howToLd = \{.*?\n\};\n',
+              '\n',
+              text,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit("HowTo JSON-LD block not found exactly once")
+          old_head = '''  head: () => ({
+              meta: pageMeta({ title: TITLE, description: DESC, path: "/size-guide", type: "article" }),
+              links: canonical("/size-guide"),
+              scripts: [{ type: "application/ld+json", children: JSON.stringify(howToLd) }],
+            }),'''
+          new_head = '''  head: () => ({
+              meta: pageMeta({ title: TITLE, description: DESC, path: "/size-guide", type: "article" }),
+              links: canonical("/size-guide"),
+              scripts: [
+                {
+                  type: "application/ld+json",
+                  children: JSON.stringify(
+                    breadcrumbLd([
+                      { name: "خانه", path: "/" },
+                      { name: "راهنمای اندازه", path: "/size-guide" },
+                    ]),
+                  ),
+                },
+              ],
+            }),'''
+          if old_head not in text:
+              raise SystemExit("Size guide head contract not found")
+          size.write_text(text.replace(old_head, new_head))
+
+          category = Path("src/routes/$category.tsx")
+          text = category.read_text()
+          old = '''            <p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>
+                        <div className="mt-8 divide-y divide-hairline border-t border-hairline">'''
+          new = '''            <p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>
+                        <Link
+                          to="/size-guide"
+                          className="tech mt-5 inline-flex min-h-11 items-center text-signal underline-offset-4 hover:underline"
+                        >
+                          راهنمای انتخاب اندازه
+                        </Link>
+                        <div className="mt-8 divide-y divide-hairline border-t border-hairline">'''
+          if old not in text:
+              raise SystemExit("Category guide insertion point not found")
+          category.write_text(text.replace(old, new))
+
+          Path("tests/p13-seo-semantic.spec.ts").write_text('''import { expect, test, type Page } from "@playwright/test";
+
+          function jsonLdTypes(page: Page) {
+            return page.locator('script[type="application/ld+json"]').evaluateAll((nodes) =>
+              nodes.flatMap((node) => {
+                try {
+                  const parsed = JSON.parse(node.textContent ?? "") as { "@type"?: string };
+                  return parsed["@type"] ? [parsed["@type"]] : [];
+                } catch {
+                  return [];
+                }
+              }),
+            );
+          }
+
+          test("local intent stays concentrated on home and contact", async ({ page }) => {
+            await page.goto("/", { waitUntil: "networkidle" });
+            await expect(page).toHaveTitle("LBB | پوشاک خیابانی و استریت‌ویر در کرج");
+
+            await page.goto("/contact", { waitUntil: "networkidle" });
+            await expect(page).toHaveTitle(/کرج/);
+
+            await page.goto("/about", { waitUntil: "networkidle" });
+            await expect(page).toHaveTitle("درباره LBB | از رگال تا فروشگاه");
+          });
+
+          test("shop uses broad commerce intent without stale brand wording", async ({ page }) => {
+            await page.goto("/shop", { waitUntil: "networkidle" });
+            await expect(page).toHaveTitle("فروشگاه LBB | خرید پوشاک خیابانی و استریت‌ویر");
+            await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+              "content",
+              /محصولات موجود LBB.*فیلترهای دسته، سایز، رنگ، قیمت و موجودی/,
+            );
+            await expect(page.locator('meta[name="description"]')).not.toHaveAttribute(
+              "content",
+              /پوشاک شهری/,
+            );
+          });
+
+          test("useful FAQ remains visible without retired FAQPage search markup", async ({ page }) => {
+            await page.goto("/faq", { waitUntil: "networkidle" });
+            await expect(page.getByRole("heading", { level: 1 })).toContainText("پاسخ‌های روشن");
+            expect(await jsonLdTypes(page)).not.toContain("FAQPage");
+            expect(await jsonLdTypes(page)).toContain("BreadcrumbList");
+          });
+
+          test("size guide keeps useful content and breadcrumb markup without retired HowTo markup", async ({
+            page,
+          }) => {
+            await page.goto("/size-guide", { waitUntil: "networkidle" });
+            await expect(page.getByRole("heading", { level: 1 })).toHaveText("راهنمای انتخاب اندازه");
+            const types = await jsonLdTypes(page);
+            expect(types).not.toContain("HowTo");
+            expect(types).toContain("BreadcrumbList");
+          });
+
+          test("category pages link naturally to the size guide", async ({ page }) => {
+            await page.goto("/tshirts", { waitUntil: "networkidle" });
+            await expect(page.getByRole("link", { name: "راهنمای انتخاب اندازه" })).toHaveAttribute(
+              "href",
+              "/size-guide",
+            );
+          });
+          ''')
+
+          Path("docs/P1_3_SEO_ROUTE_INTENT_MAP.md").write_text('''# LBB P1.3 — Route / Intent Map
+
+          Status: **IMPLEMENTED — awaiting exact-head quality gates**
+
+          ## Final principles
+
+          - One dominant search intent per indexable route.
+          - Homepage carries brand + broad streetwear + verified Karaj/store context.
+          - Category pages prioritize transactional product-category intent and do not force `کرج` or gender modifiers without evidence.
+          - Product pages use product-specific facts only.
+          - About, FAQ and Contact serve brand/trust/support/local-navigation intent rather than artificial keyword landing pages.
+          - Filter and query states remain `noindex` and canonicalize to their clean route.
+          - Internal links use useful human anchors rather than repeated exact-match keyword anchors.
+
+          ## Final route map
+
+          | Route family | Primary intent | Supporting topics | Local policy | Indexation |
+          | --- | --- | --- | --- | --- |
+          | `/` | Brand + broad commercial discovery | LBB, streetwear, imported selected items, categories, size guidance | Strong verified Karaj context | Index |
+          | `/shop` | Broad ecommerce discovery | category, size, color, price, stock | Not forced into title | Index |
+          | `/tshirts` | Buy/browse T-shirts | fit, size, price, stock; oversized/box only when real | No forced geo/gender | Index |
+          | `/hoodies` | Buy/browse hoodies | fit, size, price, stock | No forced geo/gender | Index |
+          | `/pants` | Buy/browse pants | fit, size, price, stock; baggy/cargo only when real | No forced geo/gender | Index |
+          | `/shoes` | Buy/browse sneakers | size, color, price, stock | No forced geo/gender | Index |
+          | `/socks` | Buy/browse socks | size, color, price, stock | No forced geo/gender | Index while real inventory exists |
+          | `/about` | Brand story / trust | origin, positioning, physical + online presence | Natural factual mention in body | Index |
+          | `/contact` | Local navigation / support | Karaj, verified store/contact channels | Strong | Index |
+          | `/faq` | Pre-purchase support | size, product facts, shipping and ordering truth | Natural only | Index |
+          | `/size-guide` | Sizing guidance | measurement, fit, product-level size facts | None | Index |
+          | Product detail | Specific product research/purchase | verified name, category, size, color, material/fit, price/stock | No templated local modifier | Index only when publishable |
+          | Search/filter state | Narrow browsing | selected query/facets | None | Noindex; clean canonical |
+
+          ## Keyword decisions
+
+          - `کرج` remains strategically concentrated on Home/Contact/local-store context instead of every ecommerce title.
+          - `مردانه` is not forced into category metadata because the current catalog contract has no authoritative gender field.
+          - `استریت‌ویر`, `پوشاک خیابانی`, and product modifiers such as `اورسایز`, `بگی`, `کارگو` are used only where natural and supported by actual brand/catalog content.
+          - No KD, CPC or search-volume number is claimed without Keyword Planner/Search Console evidence.
+          ''')
+
+          Path("docs/P1_3_SEO_RESEARCH_FINDINGS.md").write_text('''# LBB P1.3 — SEO Research Findings
+
+          Status: **EVIDENCE RECORDED / IMPLEMENTATION APPLIED**
+
+          ## Findings
+
+          1. P1.2 established safe metadata, truthful category copy, clean canonicals and filtered-state noindex behavior, but it was not a complete keyword-research phase.
+          2. Live Persian SERP checks for product-family queries such as hoodie, T-shirt, cargo pants and sneakers predominantly showed ecommerce category/product intent. That supports transactional category pages rather than forcing local-first titles.
+          3. Local clothing queries around Karaj showed local-store/directory/storefront intent. This supports strong Karaj context on Home and Contact, not boilerplate geo modifiers across every category.
+          4. The current prototype catalog has no authoritative gender field. Therefore `مردانه` is not used as a templated category target even if some SERPs commonly use it.
+          5. Category text is most useful when it supports decisions—size, fit, price, stock, color and verified product facts—rather than repeating category keywords.
+          6. Google Search no longer provides the FAQ rich-result feature and HowTo rich results were retired earlier. Visible FAQ and sizing guidance remain useful, while retired search-feature markup is removed from this phase.
+          7. Google does not use `meta keywords` for ranking, and the retired Sitelinks Search Box no longer justifies homepage `SearchAction`; both legacy contracts were removed.
+          8. Search and filter states remain crawlable enough to expose `noindex`, while canonical URLs point to clean indexable routes.
+
+          ## Operational limits
+
+          - No fabricated search-volume, CPC or KD values are recorded.
+          - Real demand measurement must come from Google Keyword Planner and, after indexing, Search Console query/impression/click data.
+          - Metadata should be revisited from Search Console evidence after production indexing rather than treated as permanently optimal.
+          ''')
+
+          Path("docs/P1_3_SEO_SOURCE_NOTES.md").write_text('''# LBB P1.3 — SEO Source Notes
+
+          Status: **FINAL RESEARCH RECORD**
+
+          ## Current official Google references
+
+          - Search Essentials / spam policies: https://developers.google.com/search/docs/essentials/spam-policies
+          - Canonicalization: https://developers.google.com/search/docs/crawling-indexing/canonicalization
+          - Title links: https://developers.google.com/search/docs/appearance/title-link
+          - Snippets and meta descriptions: https://developers.google.com/search/docs/appearance/snippet
+          - Sitemaps: https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap
+          - Search documentation updates/deprecations: https://developers.google.com/search/updates
+
+          ## Evidence interpretation
+
+          - Official Google documentation governs crawl, indexation, canonical and Search-feature decisions.
+          - Live SERPs are used only to classify intent/page type, not to invent volume or difficulty metrics.
+          - Google Keyword Planner and Search Console remain the operational sources for real query demand and post-index performance.
+
+          ## Live SERP families inspected
+
+          - broad product purchase queries for hoodies, T-shirts, cargo pants and sneakers
+          - local clothing/store queries around Karaj
+          - streetwear wording variants
+
+          Observed result types were used to separate ecommerce category intent from local-store/navigation intent. No third-party numeric SEO metric is promoted as fact.
+          ''')
+
+          Path("docs/P1_3_SEO_ROUTE_AUDIT_TODO.md").write_text('''# LBB P1.3 — Route SEO Audit
+
+          Status: **CODE AUDIT COMPLETE — exact-head gate pending**
+
+          - [x] Homepage title/description/local structured-data audit
+          - [x] Remove legacy meta keywords and retired SearchAction
+          - [x] Shop metadata semantic reconciliation
+          - [x] Category intent/title/H1/description reconciliation
+          - [x] Product publishability/canonical/Product+Offer audit
+          - [x] Search and filtered-state noindex/canonical audit
+          - [x] About/Contact intent separation
+          - [x] FAQ visible-content/schema reconciliation
+          - [x] Size-guide visible-content/schema reconciliation
+          - [x] Journal/Collections/Lookbook metadata review
+          - [x] Robots and sitemap route inclusion audit
+          - [x] Natural internal-link path from category guidance to size guide
+          - [ ] Exact-head formatting/lint/build/typecheck/audits
+          - [ ] Exact-head browser SEO regression suite
+          - [ ] Full Quality gates green
+          ''')
+          PY
+
+      - name: Format changed source and documentation
         run: >-
           npx prettier --write
           docs/P1_3_SEO_RESEARCH_PLAN.md
           docs/P1_3_SEO_ROUTE_INTENT_MAP.md
+          docs/P1_3_SEO_RESEARCH_FINDINGS.md
+          docs/P1_3_SEO_SOURCE_NOTES.md
+          docs/P1_3_SEO_ROUTE_AUDIT_TODO.md
           src/lib/categories.ts
+          src/routes/about.tsx
+          src/routes/shop.tsx
+          src/routes/faq.tsx
+          src/routes/size-guide.tsx
+          'src/routes/$category.tsx'
           tests/p12-category-content-seo.spec.ts
           tests/seo-contract.spec.ts
-      - name: Commit formatting when needed
+          tests/p13-seo-semantic.spec.ts
+      - name: Commit reconciliation
         run: |
           if git diff --quiet; then
-            echo "No formatting changes needed."
+            echo "No reconciliation changes needed."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
-            docs/P1_3_SEO_RESEARCH_PLAN.md \
             docs/P1_3_SEO_ROUTE_INTENT_MAP.md \
-            src/lib/categories.ts \
-            tests/p12-category-content-seo.spec.ts \
-            tests/seo-contract.spec.ts
-          git commit -m "style(seo): apply prettier to P1.3 files"
+            docs/P1_3_SEO_RESEARCH_FINDINGS.md \
+            docs/P1_3_SEO_SOURCE_NOTES.md \
+            docs/P1_3_SEO_ROUTE_AUDIT_TODO.md \
+            src/routes/about.tsx \
+            src/routes/shop.tsx \
+            src/routes/faq.tsx \
+            src/routes/size-guide.tsx \
+            'src/routes/$category.tsx' \
+            tests/p13-seo-semantic.spec.ts
+          git commit -m "feat(seo): reconcile route intent schema and internal links"
           git push origin HEAD:phase/p1-3-seo-semantic-content-polish
