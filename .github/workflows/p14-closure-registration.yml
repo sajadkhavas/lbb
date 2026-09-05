@@ -1,0 +1,212 @@
+name: P1.4 Closure Registration Helper
+
+on:
+  push:
+    branches:
+      - phase/p1-4-regression-qa-frontend-freeze
+
+permissions:
+  contents: write
+
+jobs:
+  register:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase/p1-4-regression-qa-frontend-freeze
+          fetch-depth: 0
+
+      - name: Reconcile P1.4 closure documentation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          matrix = Path('docs/P1_4_QA_MATRIX.md')
+          text = matrix.read_text()
+          text = text.replace('Status: **IN PROGRESS**', 'Status: **IMPLEMENTED / EXACT-HEAD PASS / READY FOR FINAL MERGE GATE**')
+          if '## Validated implementation evidence' not in text:
+              text = text.rstrip() + '''
+
+## Validated implementation evidence
+
+- Implementation/freeze-test candidate SHA: `3b004a3b1d3f417776a1d15fbd08123167fd98f3`
+- Full Quality Gates run: `33990808197`
+- Conclusion: **SUCCESS**
+- Runtime/source feature mutation during P1.4: **NO**
+- Dedicated freeze coverage: `tests/p14-frontend-freeze.spec.ts`
+- Representative viewports: 390x844 and 1440x1000
+- Representative routes: Home, Shop, Hoodies, Product Detail and Contact
+- Raw SSR HTML contract checks: Home, Shop, Hoodies and Contact
+- Existing full visual snapshots passed without a P1.4 baseline update.
+
+The closure-document reconciliation moves the PR head. A final complete Quality Gates run must pass after this helper is removed before merge.
+'''
+          matrix.write_text(text)
+
+          checkpoint = Path('docs/P1_4_CHECKPOINT.md')
+          checkpoint.write_text('''# LBB P1.4 — Regression QA + Frontend Freeze Checkpoint
+
+Current status: **IMPLEMENTED / EXACT-HEAD QUALITY PASS / READY FOR FINAL MERGE GATE**
+
+- Repository: `sajadkhavas/lbb`
+- Base branch: `fix/lbb-local-boutique-homepage`
+- START_SHA: `3dfc6340a4a204f83d6131ffcc8a35a7719992be`
+- Phase branch: `phase/p1-4-regression-qa-frontend-freeze`
+- Tracking issue: #64
+- PR: #65
+- Validated implementation/freeze-test SHA: `3b004a3b1d3f417776a1d15fbd08123167fd98f3`
+- Quality Gates run: `33990808197`
+- Result: **SUCCESS**
+- Production/server mutation: **NO**
+
+## Acceptance evidence
+
+- Responsive: existing route/visual suites plus explicit 390px/1440px freeze matrix PASS.
+- Accessibility: Axe, keyboard/focus, reduced-motion and static accessibility contracts PASS through the complete quality suite.
+- SSR/hydration: production Nitro build/smoke, route reload/runtime-error coverage and explicit raw-SSR/hydration freeze checks PASS.
+- Performance/build: production build, audits, motion/performance contracts and smoke PASS.
+- SEO: P1.3 semantic/technical contracts remain green.
+- Core storefront: full Playwright suite PASS in prototype mode.
+- Visual: existing snapshots PASS; no P1.4 snapshot update required.
+- Runtime feature changes in P1.4: **NONE**.
+
+## Final merge rule
+
+Closure documentation changes the branch head after the validated implementation run. Remove all temporary helpers and run the complete `Quality gates` workflow again on the final PR head. Merge only on that exact successful head with expected-head protection.
+
+## Scope note
+
+F21 Interactive 3D remains an optional backlog item and is not part of this frozen frontend candidate. Introducing it later requires reopening frontend acceptance/freeze QA.
+
+## Next after merge/registration
+
+`P2 — Backend Final Audit & Production Deployment`
+
+Execution remains GitHub-first: perform backend audit/reconciliation and release freeze before any later explicit server activation/deployment step.
+''')
+
+          Path('docs/P1_4_FRONTEND_FREEZE_CLOSURE.md').write_text('''# LBB P1.4 — Regression QA + Frontend Freeze Closure
+
+Status: **IMPLEMENTED / EXACT-HEAD GATED / READY FOR FINAL MERGE GATE**
+
+## Identity
+
+- Repository: `sajadkhavas/lbb`
+- Base: `fix/lbb-local-boutique-homepage`
+- START_SHA: `3dfc6340a4a204f83d6131ffcc8a35a7719992be`
+- Phase branch: `phase/p1-4-regression-qa-frontend-freeze`
+- Tracking issue: #64
+- PR: #65
+- Validated implementation/freeze-test SHA: `3b004a3b1d3f417776a1d15fbd08123167fd98f3`
+- Production/server mutation: **NO**
+
+## Freeze result
+
+No runtime/source feature regression required a P1.4 application-code change. P1.4 adds acceptance evidence and dedicated cross-cutting freeze coverage only.
+
+## Accepted regression domains
+
+1. Responsive/layout across the existing suite and explicit mobile/desktop representative matrix.
+2. Accessibility including automated Axe, keyboard/focus and reduced-motion contracts.
+3. SSR/hydration including production Node/Nitro smoke, reload/runtime error contracts, and raw SSR HTML checks.
+4. Performance/build including production build/audits and existing motion/performance contracts.
+5. P1.3 SEO semantic/technical contracts.
+6. Core storefront/browser flows in prototype mode.
+7. Full visual regression baselines.
+8. Dependency/security/source/product-evidence quality audits.
+
+## Dedicated P1.4 coverage
+
+`tests/p14-frontend-freeze.spec.ts` adds:
+
+- Home, Shop, Hoodies, Product Detail and Contact at 390x844 and 1440x1000.
+- initial navigation + reload stability.
+- one-H1, RTL and horizontal-overflow contracts.
+- pageerror/console hydration/runtime error rejection.
+- raw SSR HTML presence of title, H1 and canonical on representative indexable routes.
+
+## QA evidence
+
+- Initial P1.4 docs-only run `33990627552`: failed before runtime tests only because `docs/P1_4_QA_MATRIX.md` required Prettier formatting.
+- The formatting issue was corrected; it was not an application regression.
+- Validated implementation/freeze-test run `33990808197` on `3b004a3b1d3f417776a1d15fbd08123167fd98f3`: **SUCCESS**.
+- Existing visual baselines passed; no P1.4 snapshot mutation was required.
+
+## Final closure gate
+
+This registration changes documentation and therefore moves the PR head. After this temporary helper is removed, a complete exact-head `Quality gates` run must succeed. Only then may PR #65 merge.
+
+## Freeze semantics
+
+The final `FRONTEND_FREEZE_SHA` is the post-merge/registration SHA on `fix/lbb-local-boutique-homepage`, not this pre-merge candidate SHA. It will be recorded after the merge succeeds.
+
+F21 remains backlog/outside this frozen delivery candidate; adding it later invalidates this freeze and requires a new frontend acceptance cycle.
+
+## NEXT
+
+`P2 — Backend Final Audit & Production Deployment` (GitHub-first audit/reconciliation and release freeze before explicit server activation).
+''')
+
+          master = Path('docs/LBB_MASTER_HANDOFF_FA.md')
+          m = master.read_text()
+          old = '''### P1.4 Regression QA + Frontend Freeze — **NEXT**
+
+- responsive
+- accessibility
+- SSR/hydration
+- performance
+- SEO contracts
+- final frontend baseline
+
+> اگر F21 در scope همین تحویل باشد، قبل از Frontend Freeze و ترجیحاً در Branch مستقل PoC/feature انجام شود.
+'''
+          new = '''### P1.4 Regression QA + Frontend Freeze — **DONE / EXACT-HEAD GATED / READY TO MERGE**
+
+- Tracking issue: #64
+- PR: #65
+- START_SHA: `3dfc6340a4a204f83d6131ffcc8a35a7719992be`.
+- Validated implementation/freeze-test SHA: `3b004a3b1d3f417776a1d15fbd08123167fd98f3`.
+- Quality Gates run `33990808197`: **SUCCESS**.
+- Responsive / accessibility / SSR-hydration / performance-build / SEO / core storefront / visual regressions: **PASS**.
+- Dedicated frontend-freeze regression coverage added without runtime feature mutation.
+- Existing visual snapshots passed; no P1.4 snapshot change required.
+- `FRONTEND_FREEZE_SHA` will be the post-merge/registration branch SHA and is registered only after merge.
+- Production/server mutation: **NO**.
+
+> F21 remains an optional backlog item and is outside this frozen frontend candidate. If it enters scope later, frontend acceptance/freeze QA must be reopened.
+'''
+          if old not in m:
+              raise SystemExit('P1.4 roadmap block not found')
+          m = m.replace(old, new)
+          old_next = '''### CURRENT NEXT
+
+**`P1.4 — Regression QA + Frontend Freeze`**
+
+P1.4 باید responsive، accessibility، SSR/hydration، performance و SEO contracts را روی baseline نهایی Frontend دوباره تأیید کند و سپس یک Frontend Freeze SHA صریح برای ورود به فازهای Backend/Live Integration ثبت شود.
+'''
+          new_next = '''### CURRENT NEXT
+
+**`P2 — Backend Final Audit & Production Deployment`**
+
+اجرای P2 از GitHub شروع می‌شود: ابتدا Backend موجود audit/reconcile و release candidate آن freeze شود. هیچ deploy/activation روی سرور فقط به‌دلیل شروع P2 انجام نشود؛ انتقال و activation باید در gate صریح بعدی و با immutable release/rollback انجام شود.
+'''
+          if old_next not in m:
+              raise SystemExit('CURRENT NEXT P1.4 block not found')
+          master.write_text(m.replace(old_next, new_next))
+          PY
+
+          npx prettier --write docs/P1_4_QA_MATRIX.md docs/P1_4_CHECKPOINT.md docs/P1_4_FRONTEND_FREEZE_CLOSURE.md docs/LBB_MASTER_HANDOFF_FA.md
+          git diff --check
+
+      - name: Commit closure documentation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/P1_4_QA_MATRIX.md docs/P1_4_CHECKPOINT.md docs/P1_4_FRONTEND_FREEZE_CLOSURE.md docs/LBB_MASTER_HANDOFF_FA.md
+          git diff --cached --quiet && exit 0
+          git commit -m "docs(p1.4): register frontend freeze closure candidate"
+          git push origin HEAD:phase/p1-4-regression-qa-frontend-freeze
