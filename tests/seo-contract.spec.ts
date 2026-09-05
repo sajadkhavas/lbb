@@ -177,8 +177,7 @@ test("homepage local schema stays verified and excludes retired search metadata"
 }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   const schemas = await jsonLd(page);
-  const website = schemaOfType(schemas, "WebSite") as
-    { potentialAction?: unknown } | undefined;
+  const website = schemaOfType(schemas, "WebSite") as { potentialAction?: unknown } | undefined;
   const store = schemaOfType(schemas, "ClothingStore") as
     | {
         description?: string;

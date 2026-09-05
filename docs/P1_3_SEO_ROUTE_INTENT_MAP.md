@@ -15,19 +15,19 @@ This document is intentionally created before final metadata/content edits so im
 
 ## Working route map
 
-| Route family | Primary intent | Supporting semantic topics | Local modifier policy | Indexation |
-|---|---|---|---|---|
-| `/` | Brand + broad commercial discovery | LBB, streetwear, imported selected items, category discovery, size guidance | Strong: Karaj/store context belongs here | Index |
-| `/tshirts` | Buy/browse T-shirts | oversized/box/long-sleeve where actually represented, size, fit, price, stock | Secondary, not forced into title until evidence supports | Index |
-| `/hoodies` | Buy/browse hoodies | hoodie variants, size, fit, price, stock | Secondary | Index |
-| `/pants` | Buy/browse pants | baggy/cargo where actually represented, size, fit, price, stock | Secondary | Index |
-| `/shoes` | Buy/browse sneakers/shoes | size, color, price, stock, model facts | Secondary | Index |
-| `/socks` | Buy/browse socks | size, color, price, stock, model facts | Secondary | Index while real inventory exists |
-| `/about` | Brand trust / story | LBB story, positioning, physical + online presence | Natural factual mention only | Index |
-| `/contact` | Navigation / local store / support | Karaj, store location, phone, WhatsApp, Instagram, shipping/support channels | Strong | Index |
-| `/faq` | Customer support / pre-purchase questions | sizing, product facts, shipping/returns only where verified | Natural only | Index |
-| Product detail | Specific product purchase/research | real product name, category, size, color, fit/material if verified | Avoid templated local stuffing | Index if real public product |
-| Filter/query state | Narrow browsing | selected filters | None | Noindex/canonical to clean category as currently contracted |
+| Route family       | Primary intent                            | Supporting semantic topics                                                    | Local modifier policy                                    | Indexation                                                  |
+| ------------------ | ----------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------- |
+| `/`                | Brand + broad commercial discovery        | LBB, streetwear, imported selected items, category discovery, size guidance   | Strong: Karaj/store context belongs here                 | Index                                                       |
+| `/tshirts`         | Buy/browse T-shirts                       | oversized/box/long-sleeve where actually represented, size, fit, price, stock | Secondary, not forced into title until evidence supports | Index                                                       |
+| `/hoodies`         | Buy/browse hoodies                        | hoodie variants, size, fit, price, stock                                      | Secondary                                                | Index                                                       |
+| `/pants`           | Buy/browse pants                          | baggy/cargo where actually represented, size, fit, price, stock               | Secondary                                                | Index                                                       |
+| `/shoes`           | Buy/browse sneakers/shoes                 | size, color, price, stock, model facts                                        | Secondary                                                | Index                                                       |
+| `/socks`           | Buy/browse socks                          | size, color, price, stock, model facts                                        | Secondary                                                | Index while real inventory exists                           |
+| `/about`           | Brand trust / story                       | LBB story, positioning, physical + online presence                            | Natural factual mention only                             | Index                                                       |
+| `/contact`         | Navigation / local store / support        | Karaj, store location, phone, WhatsApp, Instagram, shipping/support channels  | Strong                                                   | Index                                                       |
+| `/faq`             | Customer support / pre-purchase questions | sizing, product facts, shipping/returns only where verified                   | Natural only                                             | Index                                                       |
+| Product detail     | Specific product purchase/research        | real product name, category, size, color, fit/material if verified            | Avoid templated local stuffing                           | Index if real public product                                |
+| Filter/query state | Narrow browsing                           | selected filters                                                              | None                                                     | Noindex/canonical to clean category as currently contracted |
 
 ## Open research questions before final metadata
 

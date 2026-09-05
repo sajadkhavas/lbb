@@ -35,12 +35,14 @@ P1.2 removed unsupported SEO/content claims and established safe category metada
 ## Initial query families under investigation
 
 ### Brand / category
+
 - LBB / ال‌بی‌بی
 - پوشاک خیابانی
 - استریت ویر / استریت‌ویر
 - پوشاک وارداتی
 
 ### Local commercial
+
 - فروشگاه لباس مردانه کرج
 - پوشاک مردانه کرج
 - پوشاک خیابانی کرج
@@ -50,6 +52,7 @@ P1.2 removed unsupported SEO/content claims and established safe category metada
 - پاساژ مهستان کرج
 
 ### Product/category commercial
+
 - خرید هودی / هودی استریت‌ویر / هودی اورسایز
 - خرید تیشرت / تیشرت اورسایز
 - خرید شلوار / شلوار بگی / شلوار کارگو
