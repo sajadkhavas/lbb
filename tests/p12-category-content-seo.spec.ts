@@ -6,7 +6,9 @@ const origin = "https://lbb.example.test";
 const unsupportedCategoryClaims =
   /فرنچ‌تری\s*۳۲۰|۲۲۰\s*گرم|ریپ‌استاپ|زیره\s*EVA|چرم مصنوعی|پنبه\s*۱۰۰٪|ارسال سریع|سراسر ایران|مردانه و زنانه|دوخت پریمیوم|پرینت دیجیتال|ضربه‌گیری|مقاوم در برابر خط‌وخش/i;
 
-test("category copy stays inside verified product-level truth", () => {
+test("category copy stays inside verified product-level truth and transactional intent", () => {
+  const titles = new Set<string>();
+
   for (const category of Object.values(CATEGORIES)) {
     const copy = [
       category.h1,
@@ -19,10 +21,13 @@ test("category copy stays inside verified product-level truth", () => {
     ].join(" ");
 
     expect(copy).not.toMatch(unsupportedCategoryClaims);
-
-    expect(category.metaTitle).toContain("در کرج");
-
-    expect(category.metaTitle).toMatch(/\| LBB$/);
+    expect(category.h1).toContain(`خرید ${category.nameFa}`);
+    expect(category.metaTitle).toContain(`خرید ${category.nameFa}`);
+    expect(category.metaTitle).toMatch(/\| مدل‌های موجود LBB$/);
+    expect(category.metaTitle).not.toContain("در کرج");
+    expect(category.metaTitle).not.toContain("مردانه");
+    expect(titles.has(category.metaTitle)).toBe(false);
+    titles.add(category.metaTitle);
   }
 });
 
