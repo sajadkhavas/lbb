@@ -59,9 +59,9 @@ import {
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
 
-const TITLE = "فروشگاه | خرید تیشرت، شلوار، کتونی و جوراب — ال‌بی‌بی";
+const TITLE = "فروشگاه LBB | خرید پوشاک خیابانی و استریت‌ویر";
 const DESC =
-  "کاتالوگ پوشاک شهری ال‌بی‌بی شامل تیشرت، شلوار، کتونی و جوراب با فیلترهای قابل اشتراک و اطلاعات شفاف موجودی.";
+  "محصولات موجود LBB را با فیلترهای دسته، سایز، رنگ، قیمت و موجودی مرور کن و برای جزئیات هر مدل وارد صفحه همان محصول شو.";
 const PAGE_SIZE = 12;
 const BACKEND_PAGE_SIZE = 48;
 const seasonalProducts = products.filter((product) => product.category !== "hoodies");

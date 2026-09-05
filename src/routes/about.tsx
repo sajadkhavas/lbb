@@ -19,7 +19,7 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 
-const TITLE = "درباره LBB | از رگال تا فروشگاه | استریت‌ویر کرج";
+const TITLE = "درباره LBB | از رگال تا فروشگاه";
 const DESC =
   "داستان LBB؛ برند پوشاک خیابانی و استریت‌ویر در کرج، از شروع مسیر در سال ۱۴۰۰ تا فروشگاه حضوری و فروش آنلاین.";
 

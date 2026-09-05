@@ -726,6 +726,12 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
               {`برای انتخاب ${cat.nameFa} در LBB به چه چیزهایی توجه کنیم؟`}
             </h2>
             <p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>
+            <Link
+              to="/size-guide"
+              className="tech mt-5 inline-flex min-h-11 items-center text-signal underline-offset-4 hover:underline"
+            >
+              راهنمای انتخاب اندازه
+            </Link>
             <div className="mt-8 divide-y divide-hairline border-t border-hairline">
               {cat.faqs.map((faq: { q: string; a: string }) => (
                 <details key={faq.q} className="group py-4">
