@@ -1,6 +1,6 @@
 # LBB P1.4 — Regression QA + Frontend Freeze Closure
 
-Status: **IMPLEMENTED / EXACT-HEAD GATED / READY FOR FINAL MERGE GATE**
+Status: **COMPLETED / MERGED / FRONTEND FROZEN / REGISTRATION IN PROGRESS**
 
 ## Identity
 
@@ -9,8 +9,10 @@ Status: **IMPLEMENTED / EXACT-HEAD GATED / READY FOR FINAL MERGE GATE**
 - START_SHA: `3dfc6340a4a204f83d6131ffcc8a35a7719992be`
 - Phase branch: `phase/p1-4-regression-qa-frontend-freeze`
 - Tracking issue: #64
-- PR: #65
+- PR #65: **MERGED**
 - Validated implementation/freeze-test SHA: `3b004a3b1d3f417776a1d15fbd08123167fd98f3`
+- Final exact-head pre-merge SHA: `2f8112da04fca8e787916f82931cd53c3732f6ca`
+- P1.4 merge SHA / `FRONTEND_FREEZE_SHA`: `2bc1347bb092172350415ac21019eb09f9dd746d`
 - Production/server mutation: **NO**
 
 ## Freeze result
@@ -43,18 +45,23 @@ No runtime/source feature regression required a P1.4 application-code change. P1
 - Initial P1.4 docs-only run `33990627552`: failed before runtime tests only because `docs/P1_4_QA_MATRIX.md` required Prettier formatting.
 - The formatting issue was corrected; it was not an application regression.
 - Validated implementation/freeze-test run `33990808197` on `3b004a3b1d3f417776a1d15fbd08123167fd98f3`: **SUCCESS**.
+- Final clean exact-head run `33991264286` on `2f8112da04fca8e787916f82931cd53c3732f6ca`: **SUCCESS**.
 - Existing visual baselines passed; no P1.4 snapshot mutation was required.
-- A temporary closure-helper workflow was attempted but failed before producing documentation changes; it was removed and is not part of the final tree.
-
-## Final closure gate
-
-Closure documentation moves the PR head beyond the validated implementation SHA. A complete exact-head `Quality gates` run must succeed on the clean final PR head. Only then may PR #65 merge.
+- Open review threads before merge: **0**.
+- Temporary helper was removed before the final exact-head gate.
+- PR #65 merged with expected-head protection.
 
 ## Freeze semantics
 
-The final `FRONTEND_FREEZE_SHA` is the post-merge/registration SHA on `fix/lbb-local-boutique-homepage`, not this pre-merge candidate SHA. It will be recorded after the merge succeeds.
+`FRONTEND_FREEZE_SHA = 2bc1347bb092172350415ac21019eb09f9dd746d`.
 
-F21 remains backlog/outside this frozen delivery candidate; adding it later invalidates this freeze and requires a new frontend acceptance cycle.
+This SHA is the frontend source merge baseline. The post-merge registration PR is documentation-only and does not redefine the runtime freeze SHA.
+
+F21 remains backlog/outside this frozen delivery baseline; adding it later invalidates this freeze and requires a new frontend acceptance cycle.
+
+## Registration gate
+
+The post-merge registration PR must pass its own complete Quality Gates before the Master Handoff update is merged and issue #64 is closed.
 
 ## NEXT
 
