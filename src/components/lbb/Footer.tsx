@@ -74,9 +74,10 @@ function PersonalFooterList({ title, items }: { title: string; items: Navigation
 
 /** Global dark footer. The theme prop remains for compatibility with existing routes. */
 export function Footer(_props: { theme?: "dark" | "light" } = {}) {
-  const { brand, copy, contact, navigation } = useStorefrontControl();
+  const { source, brand, copy, contact, navigation } = useStorefrontControl();
   const whatsappHref = `https://wa.me/98${contact.whatsapp.replace(/\D/g, "").replace(/^0/, "")}`;
   const phoneHref = `tel:+98${contact.phone.replace(/\D/g, "").replace(/^0/, "")}`;
+  const isPrototype = source === "prototype";
 
   return (
     <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
@@ -89,29 +90,31 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
               <MapPin size={16} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
               <span>{copy.storeLocationLabel || contact.locationLabel}</span>
             </p>
-            <div className="mt-4 grid gap-1 text-sm text-metal">
-              <a
-                href={phoneHref}
-                className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
-              >
-                <Phone size={15} aria-hidden="true" />
-                <span dir="ltr">{contact.phone}</span>
-              </a>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
-              >
-                <MessageCircle size={15} aria-hidden="true" />
-                <span dir="ltr">{contact.whatsapp}</span>
-              </a>
-            </div>
+            {!isPrototype ? (
+              <div className="mt-4 grid gap-1 text-sm text-metal">
+                <a
+                  href={phoneHref}
+                  className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
+                >
+                  <Phone size={15} aria-hidden="true" />
+                  <span dir="ltr">{contact.phone}</span>
+                </a>
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
+                >
+                  <MessageCircle size={15} aria-hidden="true" />
+                  <span dir="ltr">{contact.whatsapp}</span>
+                </a>
+              </div>
+            ) : null}
             <a
               href={brand.instagramUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal"
+              className={`${isPrototype ? "mt-6" : "mt-4"} inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal`}
             >
               <Instagram size={16} aria-hidden="true" />
               <span className="tech">{brand.instagramHandle.toUpperCase()}</span>
@@ -131,7 +134,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
         <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <p className="tech">
-              © ۲۰۲۶ {brand.nameFa} — {contact.locationLabel}
+              {isPrototype ? "© ۲۰۲۶ ال‌بی‌بی — کرج / مهستان" : `© ۲۰۲۶ ${brand.nameFa} — ${contact.locationLabel}`}
             </p>
             <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
           </div>
