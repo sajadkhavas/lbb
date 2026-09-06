@@ -15,7 +15,7 @@ function markIntroSeen(storageKey: string) {
 }
 
 export function BrandIntro() {
-  const { brand, intro } = useStorefrontControl();
+  const { source, brand, intro } = useStorefrontControl();
   const storageKey = useMemo(() => `lbb_brand_intro_${intro.version}_seen`, [intro.version]);
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -135,7 +135,9 @@ export function BrandIntro() {
               >
                 {intro.title}
               </h2>
-              <p className="mt-5 text-display-3 font-black text-signal">{intro.body}</p>
+              <p className="mt-5 text-display-3 font-black text-signal">
+                {source === "prototype" ? brand.slogan : intro.body}
+              </p>
               <p
                 id="lbb-brand-intro-description"
                 className="mt-6 max-w-[48ch] text-sm leading-8 text-metal"
