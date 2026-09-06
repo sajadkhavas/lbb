@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   apply:
-    if: contains(github.event.head_commit.message, '[p3-journal-live]')
+    if: contains(github.event.head_commit.message, '[p3-journal-detail]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -20,50 +20,55 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Wire versioned Journal index
+      - name: Wire versioned Journal detail
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('src/routes/journal.index.tsx')
+          import re
+          path = Path('src/routes/journal.$slug.tsx')
           text = path.read_text()
-          marker = 'import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";\n'
-          addition = marker + 'import { resolveStorefrontJournal, type StorefrontJournalDto } from "@/lib/storefront-control";\n'
-          if 'resolveStorefrontJournal' not in text:
-              if marker not in text: raise SystemExit('Journal import marker missing')
+          marker = 'import { absAsset, absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";\n'
+          addition = marker + 'import { BackendApiError } from "@/lib/backend-api";\nimport { resolveStorefrontJournalPost, type StorefrontJournalDto } from "@/lib/storefront-control";\n'
+          if 'resolveStorefrontJournalPost' not in text:
+              if marker not in text: raise SystemExit('Journal detail import marker missing')
               text = text.replace(marker, addition, 1)
 
-          route_marker = 'export const Route = createFileRoute("/journal/")({\n'
-          if 'loader: () => resolveStorefrontJournal(),' not in text:
-              if route_marker not in text: raise SystemExit('Journal route marker missing')
-              text = text.replace(route_marker, route_marker + '  loader: () => resolveStorefrontJournal(),\n', 1)
+          pattern = re.compile(r'  loader: \(\{ params \}\): \{ article: JournalArticle; related: JournalArticle\[\] \} => \{.*?    return \{ article, related \};\n  \},', re.S)
+          replacement = '''  loader: async ({ params }) => {\n    try {\n      const liveArticle = await resolveStorefrontJournalPost(params.slug);\n      if (liveArticle) return { source: "live" as const, article: liveArticle };\n    } catch (error) {\n      if (error instanceof BackendApiError && error.status === 404) {\n        throw notFound({ routeId: "/journal/$slug" });\n      }\n      throw error;\n    }\n\n    const article = journalBySlug(params.slug);\n    if (!article) throw notFound({ routeId: "/journal/$slug" });\n    const related = JOURNAL_ARTICLES.filter((candidate) => candidate.slug !== article.slug)\n      .sort(\n        (left, right) =>\n          Number(right.category === article.category) - Number(left.category === article.category),\n      )\n      .slice(0, 2);\n    return { source: "prototype" as const, article, related };\n  },'''
+          if 'source: "prototype" as const' not in text:
+              text2, count = pattern.subn(replacement, text, count=1)
+              if count != 1: raise SystemExit(f'Journal detail loader replacement count={count}')
+              text = text2
 
-          text = text.replace('  head: () => {\n    const itemListLd = {', '  head: ({ loaderData }) => {\n    const indexArticles = loaderData ?? JOURNAL_ARTICLES;\n    const itemListLd = {', 1)
-          text = text.replace('numberOfItems: JOURNAL_ARTICLES.length,', 'numberOfItems: indexArticles.length,', 1)
-          text = text.replace('itemListElement: JOURNAL_ARTICLES.map((article, index) => ({', 'itemListElement: indexArticles.map((article, index) => ({', 1)
+          head_marker = '    const { article } = loaderData;\n'
+          live_head = '''    if (loaderData.source === "live") {\n      const article = loaderData.article;\n      const title = `${article.title} | ژورنال LBB`;\n      const path = `/journal/${article.slug}`;\n      const articleLd = {\n        "@context": "https://schema.org",\n        "@type": "Article",\n        headline: article.title,\n        description: article.excerpt ?? article.title,\n        image: article.coverUrl ?? undefined,\n        datePublished: article.publishedAt ?? undefined,\n        articleSection: article.category ?? undefined,\n        inLanguage: "fa-IR",\n        mainEntityOfPage: absUrl(path),\n      };\n      return {\n        meta: pageMeta({ title, description: article.excerpt ?? article.title, path, image: article.coverUrl ?? undefined, type: "article" }),\n        links: canonical(path),\n        scripts: [\n          { type: "application/ld+json", children: JSON.stringify(breadcrumbLd([{ name: "خانه", path: "/" }, { name: "ژورنال", path: "/journal" }, { name: article.title, path }])) },\n          { type: "application/ld+json", children: JSON.stringify(articleLd) },\n        ],\n      };\n    }\n\n    const { article } = loaderData;\n'''
+          if 'loaderData.source === "live"' not in text:
+              if head_marker not in text: raise SystemExit('Journal detail head marker missing')
+              text = text.replace(head_marker, live_head, 1)
 
-          if 'function PrototypeJournalIndexPage()' not in text:
-              old = 'function JournalIndexPage() {\n  const [featured, ...articles] = JOURNAL_ARTICLES;'
-              new = 'function PrototypeJournalIndexPage() {\n  const [featured, ...articles] = JOURNAL_ARTICLES;'
-              if old not in text: raise SystemExit('Journal component marker missing')
-              text = text.replace(old, new, 1)
+          old_component = '''function JournalDetailPage() {\n  const { article, related }: { article: JournalArticle; related: JournalArticle[] } =\n    Route.useLoaderData();\n  const commerce = getJournalCommerceView(article);'''
+          new_component = '''function PrototypeJournalDetailPage({ article, related }: { article: JournalArticle; related: JournalArticle[] }) {\n  const commerce = getJournalCommerceView(article);'''
+          if 'function PrototypeJournalDetailPage' not in text:
+              if old_component not in text: raise SystemExit('Journal detail component marker missing')
+              text = text.replace(old_component, new_component, 1)
 
-          live = '''\nfunction JournalIndexPage() {\n  const liveArticles = Route.useLoaderData();\n  return liveArticles ? (\n    <LiveJournalIndexPage articles={liveArticles} />\n  ) : (\n    <PrototypeJournalIndexPage />\n  );\n}\n\nfunction LiveJournalIndexPage({ articles }: { articles: StorefrontJournalDto[] }) {\n  return (\n    <>\n      <Navbar theme="light" />\n      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="journal" data-storefront-source="live">\n        <Shell className="py-3">\n          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />\n        </Shell>\n        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">\n          <Shell>\n            <TechLabel tone="signal">LBB / EDITORIAL NOTES</TechLabel>\n            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">ژورنال؛ راهنماها و یادداشت‌های منتشرشده LBB</h1>\n            <p className="text-lede mt-5 max-w-[62ch]">فهرست این صفحه مستقیماً از محتوای منتشرشده در Backend می‌آید.</p>\n          </Shell>\n        </Band>\n        <Band>\n          <Shell>\n            {articles.length === 0 ? (\n              <div className="rounded-2xl border border-hairline bg-carbon p-8 text-center text-metal">هنوز مقاله‌ای منتشر نشده است.</div>\n            ) : (\n              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">\n                {articles.map((article, index) => (\n                  <article key={article.publicId || article.slug} className="overflow-hidden rounded-2xl border border-hairline bg-carbon">\n                    {article.coverUrl ? <img src={article.coverUrl} alt="" width={960} height={640} loading={index < 2 ? "eager" : "lazy"} className="aspect-[3/2] w-full object-cover" /> : null}\n                    <div className="p-6">\n                      <TechLabel tone="signal">{article.category ?? "JOURNAL"}</TechLabel>\n                      <h2 className="mt-3 text-display-3 text-bone">{article.title}</h2>\n                      {article.excerpt ? <p className="mt-3 text-sm leading-8 text-metal">{article.excerpt}</p> : null}\n                      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">\n                        {article.publishedAt ? <time dateTime={article.publishedAt} className="text-xs text-mute">{new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(new Date(article.publishedAt))}</time> : <span />}\n                        <Link to="/journal/$slug" params={{ slug: article.slug }} className={CtaClasses("line", "sm")}>خواندن مقاله <ArrowUpLeft size={15} aria-hidden="true" /></Link>\n                      </div>\n                    </div>\n                  </article>\n                ))}\n              </div>\n            )}\n          </Shell>\n        </Band>\n      </main>\n      <Footer theme="light" />\n      <MobileBottomBar />\n    </>\n  );\n}\n\n'''
-          if 'function LiveJournalIndexPage' not in text:
-              marker2 = 'function PrototypeJournalIndexPage() {'
-              if marker2 not in text: raise SystemExit('Prototype Journal marker missing')
+          live = '''\nfunction JournalDetailPage() {\n  const data = Route.useLoaderData();\n  return data.source === "live" ? (\n    <LiveJournalDetailPage article={data.article} />\n  ) : (\n    <PrototypeJournalDetailPage article={data.article} related={data.related} />\n  );\n}\n\nfunction liveArticleParagraphs(content: string | undefined) {\n  if (!content) return [];\n  return content\n    .replace(/<br\\s*\\/?>(?=.)/gi, "\\n")\n    .replace(/<\\/p>/gi, "\\n\\n")\n    .replace(/<[^>]+>/g, " ")\n    .replace(/&nbsp;/g, " ")\n    .split(/\\n+/)\n    .map((part) => part.replace(/\\s+/g, " ").trim())\n    .filter(Boolean);\n}\n\nfunction LiveJournalDetailPage({ article }: { article: StorefrontJournalDto }) {\n  const paragraphs = liveArticleParagraphs(article.content);\n  return (\n    <>\n      <Navbar theme="light" />\n      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="journal-detail" data-storefront-source="live">\n        <Shell className="py-3">\n          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال", href: "/journal" }, { label: article.title }]} />\n        </Shell>\n        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">\n          <Shell className="max-w-[980px]">\n            <TechLabel tone="signal">{article.category ?? "JOURNAL"}</TechLabel>\n            <h1 className="mt-5 max-w-[18ch] text-display-1 text-bone">{article.title}</h1>\n            {article.excerpt ? <p className="text-lede mt-5 max-w-[62ch]">{article.excerpt}</p> : null}\n            {article.publishedAt ? <time dateTime={article.publishedAt} className="mt-6 block text-xs text-mute">{new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(new Date(article.publishedAt))}</time> : null}\n          </Shell>\n        </Band>\n        {article.coverUrl ? (\n          <Band><Shell className="max-w-[1180px]"><img src={article.coverUrl} alt="" width={1600} height={900} className="aspect-[16/9] w-full rounded-2xl border border-hairline object-cover" /></Shell></Band>\n        ) : null}\n        <Band>\n          <Shell className="max-w-[760px]">\n            <article className="space-y-6">\n              {paragraphs.map((paragraph, index) => <p key={`${index}-${paragraph.slice(0, 24)}`} className="text-[15px] leading-9 text-metal">{paragraph}</p>)}\n            </article>\n          </Shell>\n        </Band>\n      </main>\n      <Footer theme="light" />\n      <MobileBottomBar />\n    </>\n  );\n}\n\n'''
+          if 'function LiveJournalDetailPage' not in text:
+              marker2 = 'function PrototypeJournalDetailPage('
+              if marker2 not in text: raise SystemExit('Prototype Journal detail marker missing')
               text = text.replace(marker2, live + marker2, 1)
           path.write_text(text)
           PY
       - run: npm ci
       - name: Format and typecheck
         run: |
-          npx prettier --write src/routes/journal.index.tsx
+          npx prettier --write 'src/routes/journal.$slug.tsx'
           npm run typecheck
-      - name: Commit tested Journal index cut-over
+      - name: Commit tested Journal detail cut-over
         run: |
           git config user.name 'lbb-p3-bot'
           git config user.email '144109918+sajadkhavas@users.noreply.github.com'
-          git add src/routes/journal.index.tsx
+          git add 'src/routes/journal.$slug.tsx'
           git diff --cached --quiet && exit 0
-          git commit -m 'feat(p3): consume backend Journal index'
+          git commit -m 'feat(p3): consume backend Journal detail'
           git push origin HEAD:phase/p3-live-integration-control-surface
