@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   apply:
-    if: contains(github.event.head_commit.message, '[p3-source-live]')
+    if: contains(github.event.head_commit.message, '[p3-faq-live]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -20,26 +20,48 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Normalize live storefront source name
+      - name: Wire versioned FAQ content
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('src/lib/storefront-control.tsx')
+          path = Path('src/routes/faq.tsx')
           text = path.read_text()
-          text = text.replace('source: "prototype" | "backend";', 'source: "prototype" | "live";')
-          text = text.replace('source: "backend",', 'source: "live",')
+          marker = 'import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";\n'
+          addition = marker + 'import { resolveStorefrontFaqs, type StorefrontFaqDto } from "@/lib/storefront-control";\n'
+          if 'resolveStorefrontFaqs' not in text:
+              if marker not in text: raise SystemExit('FAQ import marker missing')
+              text = text.replace(marker, addition, 1)
+
+          route_marker = 'export const Route = createFileRoute("/faq")({\n'
+          if 'loader: () => resolveStorefrontFaqs(),' not in text:
+              if route_marker not in text: raise SystemExit('FAQ route marker missing')
+              text = text.replace(route_marker, route_marker + '  loader: () => resolveStorefrontFaqs(),\n', 1)
+
+          helper = '''\nconst FAQ_LABELS: Record<string, { label: string; title: string }> = {\n  products: { label: "PRODUCT DATA", title: "محصول و موجودی" },\n  sizing: { label: "FIT & SIZE", title: "فیت و انتخاب سایز" },\n  ordering: { label: "ORDER FLOW", title: "قیمت و ثبت سفارش" },\n  shipping: { label: "SHIPPING", title: "ارسال و سفارش" },\n  editorial: { label: "EDITORIAL PAGES", title: "کالکشن، لوک‌بوک و ژورنال" },\n};\n\nfunction backendFaqGroups(items: StorefrontFaqDto[]): FaqGroup[] {\n  const groups = new Map<string, FaqGroup>();\n  for (const item of [...items].sort((a, b) => a.sortOrder - b.sortOrder)) {\n    const id = item.category || "general";\n    const meta = FAQ_LABELS[id] ?? { label: id.toUpperCase(), title: "سوالات عمومی" };\n    const group = groups.get(id) ?? { id, label: meta.label, title: meta.title, items: [] };\n    group.items.push({ question: item.question, answer: item.answer });\n    groups.set(id, group);\n  }\n  return [...groups.values()];\n}\n\n'''
+          if 'function backendFaqGroups' not in text:
+              export_marker = 'export const Route = createFileRoute("/faq")({'
+              if export_marker not in text: raise SystemExit('FAQ export marker missing')
+              text = text.replace(export_marker, helper + export_marker, 1)
+
+          component_marker = 'function FaqPage() {\n  return ('
+          component_replacement = 'function FaqPage() {\n  const liveFaqs = Route.useLoaderData();\n  const faqGroups = liveFaqs ? backendFaqGroups(liveFaqs) : FAQ_GROUPS;\n\n  return ('
+          if 'const liveFaqs = Route.useLoaderData();' not in text:
+              if component_marker not in text: raise SystemExit('FAQ component marker missing')
+              text = text.replace(component_marker, component_replacement, 1)
+
+          text = text.replace('FAQ_GROUPS.map((group)', 'faqGroups.map((group)')
           path.write_text(text)
           PY
       - run: npm ci
       - name: Format and typecheck
         run: |
-          npx prettier --write src/lib/storefront-control.tsx src/routes/__root.tsx src/routes/index.tsx src/components/lbb/AnnouncementBar.tsx src/components/lbb/BrandIntro.tsx src/components/lbb/Navbar.tsx src/components/lbb/Footer.tsx src/components/lbb/home/HeroNarrative.tsx src/components/lbb/navigation/MerchantNavigationLink.tsx src/components/lbb/navigation/MegaMenuOverlay.tsx src/components/lbb/navigation/MobileMenuOverlay.tsx
+          npx prettier --write src/routes/faq.tsx
           npm run typecheck
-      - name: Commit tested normalization and formatting
+      - name: Commit tested FAQ cut-over
         run: |
           git config user.name 'lbb-p3-bot'
           git config user.email '144109918+sajadkhavas@users.noreply.github.com'
-          git add src
+          git add src/routes/faq.tsx
           git diff --cached --quiet && exit 0
-          git commit -m 'feat(p3): normalize live storefront source'
+          git commit -m 'feat(p3): consume backend FAQ content'
           git push origin HEAD:phase/p3-live-integration-control-surface
