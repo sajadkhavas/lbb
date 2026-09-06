@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   apply:
-    if: contains(github.event.head_commit.message, '[p3-lookbook-live]')
+    if: contains(github.event.head_commit.message, '[p3-journal-live]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -20,46 +20,50 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Wire versioned Lookbook content
+      - name: Wire versioned Journal index
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('src/routes/lookbook.tsx')
+          path = Path('src/routes/journal.index.tsx')
           text = path.read_text()
-          marker = 'import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";\n'
-          addition = marker + 'import { resolveStorefrontLookbook, type StorefrontLookDto } from "@/lib/storefront-control";\n'
-          if 'resolveStorefrontLookbook' not in text:
-              if marker not in text: raise SystemExit('Lookbook import marker missing')
+          marker = 'import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";\n'
+          addition = marker + 'import { resolveStorefrontJournal, type StorefrontJournalDto } from "@/lib/storefront-control";\n'
+          if 'resolveStorefrontJournal' not in text:
+              if marker not in text: raise SystemExit('Journal import marker missing')
               text = text.replace(marker, addition, 1)
 
-          route_marker = 'export const Route = createFileRoute("/lookbook")({\n'
-          if 'loader: () => resolveStorefrontLookbook(),' not in text:
-              if route_marker not in text: raise SystemExit('Lookbook route marker missing')
-              text = text.replace(route_marker, route_marker + '  loader: () => resolveStorefrontLookbook(),\n', 1)
+          route_marker = 'export const Route = createFileRoute("/journal/")({\n'
+          if 'loader: () => resolveStorefrontJournal(),' not in text:
+              if route_marker not in text: raise SystemExit('Journal route marker missing')
+              text = text.replace(route_marker, route_marker + '  loader: () => resolveStorefrontJournal(),\n', 1)
 
-          if 'function PrototypeLookbookPage()' not in text:
-              old = 'function LookbookPage() {\n  const sceneViews = useMemo(() => LOOKBOOK_SCENES.map(getLookbookSceneView), []);'
-              new = 'function PrototypeLookbookPage() {\n  const sceneViews = useMemo(() => LOOKBOOK_SCENES.map(getLookbookSceneView), []);'
-              if old not in text: raise SystemExit('Lookbook component marker missing')
+          text = text.replace('  head: () => {\n    const itemListLd = {', '  head: ({ loaderData }) => {\n    const indexArticles = loaderData ?? JOURNAL_ARTICLES;\n    const itemListLd = {', 1)
+          text = text.replace('numberOfItems: JOURNAL_ARTICLES.length,', 'numberOfItems: indexArticles.length,', 1)
+          text = text.replace('itemListElement: JOURNAL_ARTICLES.map((article, index) => ({', 'itemListElement: indexArticles.map((article, index) => ({', 1)
+
+          if 'function PrototypeJournalIndexPage()' not in text:
+              old = 'function JournalIndexPage() {\n  const [featured, ...articles] = JOURNAL_ARTICLES;'
+              new = 'function PrototypeJournalIndexPage() {\n  const [featured, ...articles] = JOURNAL_ARTICLES;'
+              if old not in text: raise SystemExit('Journal component marker missing')
               text = text.replace(old, new, 1)
 
-          live = '''\nfunction LookbookPage() {\n  const liveItems = Route.useLoaderData();\n  return liveItems ? <LiveLookbookPage items={liveItems} /> : <PrototypeLookbookPage />;\n}\n\nfunction LiveLookbookPage({ items }: { items: StorefrontLookDto[] }) {\n  return (\n    <>\n      <Navbar theme="light" />\n      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="lookbook" data-storefront-source="live">\n        <Shell className="py-3">\n          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "لوک‌بوک" }]} />\n        </Shell>\n        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">\n          <Shell>\n            <TechLabel tone="signal">LBB / VISUAL STORIES</TechLabel>\n            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">لوک‌بوک؛ داستان‌های تصویری LBB</h1>\n            <p className="text-lede mt-5 max-w-[60ch]">تصاویر و مسیرهای این صفحه مستقیماً از محتوای منتشرشده فروشگاه می‌آیند.</p>\n          </Shell>\n        </Band>\n        <Band>\n          <Shell>\n            {items.length === 0 ? (\n              <StatePanel title="هنوز تصویری برای لوک‌بوک منتشر نشده است">پس از انتشار در پنل مدیریت، تصاویر اینجا نمایش داده می‌شوند.</StatePanel>\n            ) : (\n              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">\n                {items.map((item, index) => (\n                  <article key={`${item.imageUrl}-${index}`} className="overflow-hidden rounded-2xl border border-hairline bg-carbon">\n                    <figure>\n                      <img src={item.imageUrl} alt={item.title} width={900} height={1125} loading={index < 2 ? "eager" : "lazy"} className="aspect-[4/5] w-full object-cover" />\n                      <figcaption className="p-4">\n                        <TechLabel tone="signal">LOOK {String(index + 1).padStart(2, "0")}</TechLabel>\n                        <h2 className="mt-2 text-display-3 text-bone">{item.title}</h2>\n                        {item.caption ? <p className="mt-2 text-sm leading-7 text-metal">{item.caption}</p> : null}\n                        {item.linkUrl ? (\n                          <a href={item.linkUrl} className={`${CtaClasses("line", "sm")} mt-4`}>مسیر مرتبط <ArrowUpLeft size={15} aria-hidden="true" /></a>\n                        ) : null}\n                      </figcaption>\n                    </figure>\n                  </article>\n                ))}\n              </div>\n            )}\n          </Shell>\n        </Band>\n      </main>\n      <Footer theme="light" />\n      <MobileBottomBar />\n    </>\n  );\n}\n\n'''
-          if 'function LiveLookbookPage' not in text:
-              marker2 = 'function PrototypeLookbookPage() {'
-              if marker2 not in text: raise SystemExit('Prototype Lookbook marker missing')
+          live = '''\nfunction JournalIndexPage() {\n  const liveArticles = Route.useLoaderData();\n  return liveArticles ? (\n    <LiveJournalIndexPage articles={liveArticles} />\n  ) : (\n    <PrototypeJournalIndexPage />\n  );\n}\n\nfunction LiveJournalIndexPage({ articles }: { articles: StorefrontJournalDto[] }) {\n  return (\n    <>\n      <Navbar theme="light" />\n      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="journal" data-storefront-source="live">\n        <Shell className="py-3">\n          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />\n        </Shell>\n        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">\n          <Shell>\n            <TechLabel tone="signal">LBB / EDITORIAL NOTES</TechLabel>\n            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">ژورنال؛ راهنماها و یادداشت‌های منتشرشده LBB</h1>\n            <p className="text-lede mt-5 max-w-[62ch]">فهرست این صفحه مستقیماً از محتوای منتشرشده در Backend می‌آید.</p>\n          </Shell>\n        </Band>\n        <Band>\n          <Shell>\n            {articles.length === 0 ? (\n              <div className="rounded-2xl border border-hairline bg-carbon p-8 text-center text-metal">هنوز مقاله‌ای منتشر نشده است.</div>\n            ) : (\n              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">\n                {articles.map((article, index) => (\n                  <article key={article.publicId || article.slug} className="overflow-hidden rounded-2xl border border-hairline bg-carbon">\n                    {article.coverUrl ? <img src={article.coverUrl} alt="" width={960} height={640} loading={index < 2 ? "eager" : "lazy"} className="aspect-[3/2] w-full object-cover" /> : null}\n                    <div className="p-6">\n                      <TechLabel tone="signal">{article.category ?? "JOURNAL"}</TechLabel>\n                      <h2 className="mt-3 text-display-3 text-bone">{article.title}</h2>\n                      {article.excerpt ? <p className="mt-3 text-sm leading-8 text-metal">{article.excerpt}</p> : null}\n                      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">\n                        {article.publishedAt ? <time dateTime={article.publishedAt} className="text-xs text-mute">{new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(new Date(article.publishedAt))}</time> : <span />}\n                        <Link to="/journal/$slug" params={{ slug: article.slug }} className={CtaClasses("line", "sm")}>خواندن مقاله <ArrowUpLeft size={15} aria-hidden="true" /></Link>\n                      </div>\n                    </div>\n                  </article>\n                ))}\n              </div>\n            )}\n          </Shell>\n        </Band>\n      </main>\n      <Footer theme="light" />\n      <MobileBottomBar />\n    </>\n  );\n}\n\n'''
+          if 'function LiveJournalIndexPage' not in text:
+              marker2 = 'function PrototypeJournalIndexPage() {'
+              if marker2 not in text: raise SystemExit('Prototype Journal marker missing')
               text = text.replace(marker2, live + marker2, 1)
           path.write_text(text)
           PY
       - run: npm ci
       - name: Format and typecheck
         run: |
-          npx prettier --write src/routes/lookbook.tsx
+          npx prettier --write src/routes/journal.index.tsx
           npm run typecheck
-      - name: Commit tested Lookbook cut-over
+      - name: Commit tested Journal index cut-over
         run: |
           git config user.name 'lbb-p3-bot'
           git config user.email '144109918+sajadkhavas@users.noreply.github.com'
-          git add src/routes/lookbook.tsx
+          git add src/routes/journal.index.tsx
           git diff --cached --quiet && exit 0
-          git commit -m 'feat(p3): consume backend Lookbook content'
+          git commit -m 'feat(p3): consume backend Journal index'
           git push origin HEAD:phase/p3-live-integration-control-surface
