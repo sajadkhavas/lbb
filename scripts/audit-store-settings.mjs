@@ -21,7 +21,7 @@ if (!settings) failures.push("Typed public store settings are missing.");
 if (!readiness) failures.push("Launch-readiness evaluator is missing.");
 if (!trustMarks) failures.push("Controlled trust-mark component is missing.");
 if (!commerce) failures.push("Frontend commerce readiness boundary is missing.");
-if (!storefrontControl) failures.push("P3 storefront control boundary is missing.");
+if (!storefrontControl) failures.push("P3 storefront control is missing.");
 
 for (const forbidden of [
   "merchantSecret",
@@ -122,7 +122,7 @@ for (const required of [
   "control.contact.locationLabel",
 ]) {
   if (!contact.includes(required)) {
-    failures.push(`Contact route must consume Backend-authoritative P3 storefront control: ${required}`);
+    failures.push(`P3 contact control missing: ${required}`);
   }
 }
 for (const required of [
@@ -131,7 +131,7 @@ for (const required of [
   'source: "prototype"',
 ]) {
   if (!storefrontControl.includes(required)) {
-    failures.push(`P3 storefront control contract is missing: ${required}`);
+    failures.push(`P3 storefront contract missing: ${required}`);
   }
 }
 if (/<form\b/i.test(contact) || contact.includes("پیام شما ارسال شد")) {
@@ -214,4 +214,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Store settings, P3 storefront control, F14E trust boundary, and F14D live-commerce separation audit passed.");
+console.log("Store settings and P3 storefront control audit passed.");
