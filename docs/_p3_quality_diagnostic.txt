@@ -60,15 +60,330 @@ All matched files use Prettier code style!
 > build
 > node scripts/build-production.mjs
 
-file:///home/runner/work/lbb/lbb/scripts/build-production.mjs:13
-  if (!value) throw new Error("VITE_SITE_URL is required for production builds.");
-                    ^
+[33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+[36mvite v8.2.0 [32mbuilding client environment for production...[36m[39m
+[2Ktransforming...✓ 2124 modules transformed.
+rendering chunks...
+computing gzip size...
+.output/public/assets/jetbrains-mono-vietnamese-wght-normal-Bt-aOZkq.woff2    7.50 kB
+.output/public/assets/estedad-vietnamese-wght-normal-D7SXJ-q_.woff2           7.64 kB
+.output/public/assets/jetbrains-mono-greek-wght-normal-Bw9x6K1M.woff2         9.00 kB
+.output/public/assets/jetbrains-mono-cyrillic-wght-normal-D73BlboJ.woff2     12.10 kB
+.output/public/assets/jetbrains-mono-latin-ext-wght-normal-DBQx-q_a.woff2    15.19 kB
+.output/public/assets/hoodies-white-v3-Dlfq3ABY.webp                         23.83 kB
+.output/public/assets/estedad-latin-wght-normal-B5vzQVCp.woff2               27.17 kB
+.output/public/assets/estedad-latin-ext-wght-normal-F3E_gUl2.woff2           35.82 kB
+.output/public/assets/socks-client-C7RPJJ-y.webp                             38.08 kB
+.output/public/assets/drop-shabgard-v2-BCwLIxxE.webp                         38.88 kB
+.output/public/assets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2        40.40 kB
+.output/public/assets/shoes-client-by6RXyOH.webp                             50.18 kB
+.output/public/assets/community-studio-v2-D8j6HGOE.webp                      55.11 kB
+.output/public/assets/estedad-arabic-wght-normal-D6DQIq1q.woff2              57.00 kB
+.output/public/assets/signature-tee-DIxjboq8.jpg                             57.99 kB
+.output/public/assets/tshirt-client-BkkqLFz-.webp                            59.13 kB
+.output/public/assets/urban-runner-D0Um-LCl.jpg                              65.34 kB
+.output/public/assets/hoodie-classic-DaK3jPfI.jpg                            79.51 kB
+.output/public/assets/home-hero-v2-D8PAfjE8.webp                             79.79 kB
+.output/public/assets/cargo-pants-rOb6kSIS.jpg                               84.91 kB
+.output/public/assets/lbb-socks-CUGMYX-8.jpg                                113.25 kB
+.output/public/assets/oversized-black-hoodie-CBklHUcJ.jpg                   115.23 kB
+.output/public/assets/denim-baggy-BKDEkQhF.jpg                              131.83 kB
+.output/public/assets/graphic-tee-red-C9hEI0cE.jpg                          136.29 kB
+.output/public/assets/pants-client-BZqm6m3y.webp                            225.70 kB
+.output/public/assets/lifestyle-1-Ce8Za_rM.jpg                              234.59 kB
+.output/public/assets/lifestyle-2-Db6m62na.jpg                              350.51 kB
+.output/public/assets/fonts-Di8m3xjL.css                                      6.31 kB │ gzip:   3.06 kB
+.output/public/assets/styles-B48gaUYs.css                                   141.22 kB │ gzip:  23.54 kB
+.output/public/assets/not-found-i5RsCZif.js                                   0.11 kB │ gzip:   0.11 kB
+.output/public/assets/circle-check-BjKMmLn5.js                                0.17 kB │ gzip:   0.16 kB
+.output/public/assets/smartphone-Cgz4Pk5G.js                                  0.19 kB │ gzip:   0.18 kB
+.output/public/assets/refresh-ccw-BNbx4uRb.js                                 0.32 kB │ gzip:   0.22 kB
+.output/public/assets/ruler-Z3cn4nk7.js                                       0.39 kB │ gzip:   0.24 kB
+.output/public/assets/layers-RXG7TsCi.js                                      0.42 kB │ gzip:   0.24 kB
+.output/public/assets/book-open-text-BX_2jUxy.js                              0.42 kB │ gzip:   0.25 kB
+.output/public/assets/seo-live-7AnI_0HT.js                                    0.43 kB │ gzip:   0.26 kB
+.output/public/assets/package-search-D3Z4h1dp.js                              0.48 kB │ gzip:   0.32 kB
+.output/public/assets/rolldown-runtime-CbXtAM7H.js                            0.58 kB │ gzip:   0.36 kB
+.output/public/assets/backend-session-CAphkdke.js                             0.59 kB │ gzip:   0.44 kB
+.output/public/assets/Breadcrumb-Dc6fxSoL.js                                  0.89 kB │ gzip:   0.52 kB
+.output/public/assets/homepage-BcLZ6isZ.js                                    1.02 kB │ gzip:   0.62 kB
+.output/public/assets/journal._slug-BKdJyAAn.js                               1.17 kB │ gzip:   0.67 kB
+.output/public/assets/collections._slug-B1Ez9Cjr.js                           1.21 kB │ gzip:   0.67 kB
+.output/public/assets/wishlist-DEbVPqqM.js                                    1.24 kB │ gzip:   0.76 kB
+.output/public/assets/checkout-continuity-doS3nRQ6.js                         1.56 kB │ gzip:   0.62 kB
+.output/public/assets/routes-Dq8BT37-.js                                      2.03 kB │ gzip:   1.05 kB
+.output/public/assets/order-confirmation-NqMfExnG.js                          2.19 kB │ gzip:   1.23 kB
+.output/public/assets/track-order-B9qveUre.js                                 2.32 kB │ gzip:   1.25 kB
+.output/public/assets/EditorialCommerceBridge-mwkShW3e.js                     2.38 kB │ gzip:   1.18 kB
+.output/public/assets/product-evidence-De90QyMA.js                            2.43 kB │ gzip:   1.12 kB
+.output/public/assets/payment.result-C1LWKRc6.js                              3.09 kB │ gzip:   1.47 kB
+.output/public/assets/backend-storefront-DbFWB97w.js                          3.64 kB │ gzip:   1.46 kB
+.output/public/assets/collections-CVyfkJSW.js                                 4.06 kB │ gzip:   1.59 kB
+.output/public/assets/CustomerOtpAuth-BvxUEN99.js                             4.17 kB │ gzip:   1.70 kB
+.output/public/assets/editorial-commerce-CYxIL1gU.js                          4.34 kB │ gzip:   1.66 kB
+.output/public/assets/product-filter-q1dS6SPb.js                              4.48 kB │ gzip:   1.79 kB
+.output/public/assets/contact-Cuk3xQUx.js                                     5.23 kB │ gzip:   2.10 kB
+.output/public/assets/app-BDAwWi6Z.js                                         5.40 kB │ gzip:   2.31 kB
+.output/public/assets/cart-CJFOEWka.js                                        5.42 kB │ gzip:   2.19 kB
+.output/public/assets/size-guide-CXXcqVtE.js                                  5.83 kB │ gzip:   2.29 kB
+.output/public/assets/journal._slug-2SF36IHA.js                               6.88 kB │ gzip:   2.50 kB
+.output/public/assets/privacy-DdnxUz7P.js                                     7.51 kB │ gzip:   2.74 kB
+.output/public/assets/preload-helper-BALVqRIE.js                              7.63 kB │ gzip:   2.98 kB
+.output/public/assets/collections.index-CKw5cXY6.js                           7.75 kB │ gzip:   2.72 kB
+.output/public/assets/terms-C98ZH9Rm.js                                       7.80 kB │ gzip:   2.78 kB
+.output/public/assets/journal.index-BNoAUui3.js                               8.18 kB │ gzip:   2.57 kB
+.output/public/assets/ProductCard-Cm4mJakJ.js                                 8.56 kB │ gzip:   3.01 kB
+.output/public/assets/collections._slug-DpJs9JCf.js                           8.80 kB │ gzip:   2.92 kB
+.output/public/assets/faq-DFeKklHB.js                                         9.66 kB │ gzip:   3.48 kB
+.output/public/assets/account-CHJts92i.js                                    10.78 kB │ gzip:   3.37 kB
+.output/public/assets/lookbook-DkM9UFoQ.js                                   11.36 kB │ gzip:   3.83 kB
+.output/public/assets/about-Cl6wqbD8.js                                      11.63 kB │ gzip:   3.87 kB
+.output/public/assets/_category-D__8xpax.js                                  12.10 kB │ gzip:   3.82 kB
+.output/public/assets/journal-IvSGum3l.js                                    12.67 kB │ gzip:   4.07 kB
+.output/public/assets/shop-C_Gyj4wa.js                                       12.84 kB │ gzip:   4.52 kB
+.output/public/assets/shipping-returns-CFcd03y5.js                           12.95 kB │ gzip:   3.38 kB
+.output/public/assets/search-B6bJowMN.js                                     15.65 kB │ gzip:   4.57 kB
+.output/public/assets/design-system-C29wdtQh.js                              20.58 kB │ gzip:   6.31 kB
+.output/public/assets/checkout-CrTgbFqr.js                                   22.04 kB │ gzip:   7.12 kB
+.output/public/assets/Combination-C4JTVSvI.js                                33.24 kB │ gzip:  11.54 kB
+.output/public/assets/color-names-D3Pof1yg.js                                34.02 kB │ gzip:   9.74 kB
+.output/public/assets/routes-BvcO0fDB.js                                     34.84 kB │ gzip:  10.06 kB
+.output/public/assets/MobileBottomBar-BbnMRUHU.js                            39.44 kB │ gzip:  10.15 kB
+.output/public/assets/product._slug-l2MRvN6F.js                              41.58 kB │ gzip:  11.93 kB
+.output/public/assets/catalog-discovery-yp5PX1S3.js                          80.92 kB │ gzip:  27.50 kB
+.output/public/assets/category-images-CDsNyf9N.js                           116.84 kB │ gzip:  38.69 kB
+.output/public/assets/index-4cLPEYbU.js                                     359.59 kB │ gzip: 110.55 kB
 
-Error: VITE_SITE_URL is required for production builds.
-    at normalizeSiteUrl (file:///home/runner/work/lbb/lbb/scripts/build-production.mjs:13:21)
-    at file:///home/runner/work/lbb/lbb/scripts/build-production.mjs:31:17
-    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
-    at async node:internal/modules/esm/loader:647:26
-    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+[32m✓ built in 1.94s[39m
+[36mvite v8.2.0 [32mbuilding ssr environment for production...[36m[39m
+[2Ktransforming...✓ 225 modules transformed.
+rendering chunks...
+computing gzip size...
+node_modules/.nitro/vite/services/ssr/assets/jetbrains-mono-vietnamese-wght-normal-Bt-aOZkq.woff2    7.50 kB
+node_modules/.nitro/vite/services/ssr/assets/estedad-vietnamese-wght-normal-D7SXJ-q_.woff2           7.64 kB
+node_modules/.nitro/vite/services/ssr/assets/jetbrains-mono-greek-wght-normal-Bw9x6K1M.woff2         9.00 kB
+node_modules/.nitro/vite/services/ssr/assets/jetbrains-mono-cyrillic-wght-normal-D73BlboJ.woff2     12.10 kB
+node_modules/.nitro/vite/services/ssr/assets/jetbrains-mono-latin-ext-wght-normal-DBQx-q_a.woff2    15.19 kB
+node_modules/.nitro/vite/services/ssr/assets/hoodies-white-v3-Dlfq3ABY.webp                         23.83 kB
+node_modules/.nitro/vite/services/ssr/assets/estedad-latin-wght-normal-B5vzQVCp.woff2               27.17 kB
+node_modules/.nitro/vite/services/ssr/assets/estedad-latin-ext-wght-normal-F3E_gUl2.woff2           35.82 kB
+node_modules/.nitro/vite/services/ssr/assets/socks-client-C7RPJJ-y.webp                             38.08 kB
+node_modules/.nitro/vite/services/ssr/assets/drop-shabgard-v2-BCwLIxxE.webp                         38.88 kB
+node_modules/.nitro/vite/services/ssr/assets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2        40.40 kB
+node_modules/.nitro/vite/services/ssr/assets/shoes-client-by6RXyOH.webp                             50.18 kB
+node_modules/.nitro/vite/services/ssr/assets/community-studio-v2-D8j6HGOE.webp                      55.11 kB
+node_modules/.nitro/vite/services/ssr/assets/estedad-arabic-wght-normal-D6DQIq1q.woff2              57.00 kB
+node_modules/.nitro/vite/services/ssr/assets/signature-tee-DIxjboq8.jpg                             57.99 kB
+node_modules/.nitro/vite/services/ssr/assets/tshirt-client-BkkqLFz-.webp                            59.13 kB
+node_modules/.nitro/vite/services/ssr/assets/urban-runner-D0Um-LCl.jpg                              65.34 kB
+node_modules/.nitro/vite/services/ssr/assets/hoodie-classic-DaK3jPfI.jpg                            79.51 kB
+node_modules/.nitro/vite/services/ssr/assets/home-hero-v2-D8PAfjE8.webp                             79.79 kB
+node_modules/.nitro/vite/services/ssr/assets/cargo-pants-rOb6kSIS.jpg                               84.91 kB
+node_modules/.nitro/vite/services/ssr/assets/lbb-socks-CUGMYX-8.jpg                                113.25 kB
+node_modules/.nitro/vite/services/ssr/assets/oversized-black-hoodie-CBklHUcJ.jpg                   115.23 kB
+node_modules/.nitro/vite/services/ssr/assets/denim-baggy-BKDEkQhF.jpg                              131.83 kB
+node_modules/.nitro/vite/services/ssr/assets/graphic-tee-red-C9hEI0cE.jpg                          136.29 kB
+node_modules/.nitro/vite/services/ssr/assets/pants-client-BZqm6m3y.webp                            225.70 kB
+node_modules/.nitro/vite/services/ssr/assets/lifestyle-1-Ce8Za_rM.jpg                              234.59 kB
+node_modules/.nitro/vite/services/ssr/assets/lifestyle-2-Db6m62na.jpg                              350.51 kB
+node_modules/.nitro/vite/services/ssr/assets/fonts-Di8m3xjL.css                                      6.31 kB │ gzip:  3.06 kB
+node_modules/.nitro/vite/services/ssr/assets/styles-B48gaUYs.css                                   141.22 kB │ gzip: 23.54 kB
+node_modules/.nitro/vite/services/ssr/assets/empty-plugin-adapters-D9UWiqvJ.js                       0.22 kB │ gzip:  0.16 kB
+node_modules/.nitro/vite/services/ssr/assets/createMiddleware-B_4t7rW1.js                            0.83 kB │ gzip:  0.32 kB
+node_modules/.nitro/vite/services/ssr/assets/payment.result-D6ySzCOv.js                              0.87 kB │ gzip:  0.50 kB
+node_modules/.nitro/vite/services/ssr/assets/backend-session-7xakMXCH.js                             1.07 kB │ gzip:  0.60 kB
+node_modules/.nitro/vite/services/ssr/assets/faq-DZJCnzFU.js                                         1.16 kB │ gzip:  0.67 kB
+node_modules/.nitro/vite/services/ssr/assets/lookbook-CIqtr8jq.js                                    1.25 kB │ gzip:  0.70 kB
+node_modules/.nitro/vite/services/ssr/assets/seo-live-DmLBVP-S.js                                    1.30 kB │ gzip:  0.57 kB
+node_modules/.nitro/vite/services/ssr/assets/Breadcrumb-DHtf0Rt9.js                                  1.35 kB │ gzip:  0.65 kB
+node_modules/.nitro/vite/services/ssr/assets/collections.index-BNrSMpLc.js                           1.42 kB │ gzip:  0.74 kB
+node_modules/.nitro/vite/services/ssr/assets/start-BcSBlhe9.js                                       1.43 kB │ gzip:  0.66 kB
+node_modules/.nitro/vite/services/ssr/assets/homepage-xzkeP26M.js                                    1.50 kB │ gzip:  0.84 kB
+node_modules/.nitro/vite/services/ssr/assets/about-COIRtOoD.js                                       1.77 kB │ gzip:  0.92 kB
+node_modules/.nitro/vite/services/ssr/assets/journal.index-BijmP3CN.js                               1.89 kB │ gzip:  0.96 kB
+node_modules/.nitro/vite/services/ssr/assets/journal2._slug-J1dTP9BN.js                              1.92 kB │ gzip:  0.89 kB
+node_modules/.nitro/vite/services/ssr/assets/collections._slug-C1iPZQ6i.js                           1.97 kB │ gzip:  0.90 kB
+node_modules/.nitro/vite/services/ssr/assets/wishlist-Dmeb3UBO.js                                    2.03 kB │ gzip:  0.99 kB
+node_modules/.nitro/vite/services/ssr/assets/contact-vHyFEU5S.js                                     2.24 kB │ gzip:  1.08 kB
+node_modules/.nitro/vite/services/ssr/assets/routes-CsLd5FG8.js                                      2.44 kB │ gzip:  1.01 kB
+node_modules/.nitro/vite/services/ssr/assets/color-names-DvAuCdaW.js                                 2.56 kB │ gzip:  1.07 kB
+node_modules/.nitro/vite/services/ssr/assets/order-confirmation-Tvuac2dW.js                          2.78 kB │ gzip:  1.28 kB
+node_modules/.nitro/vite/services/ssr/assets/track-order-wtwAN6oO.js                                 3.11 kB │ gzip:  1.39 kB
+node_modules/.nitro/vite/services/ssr/assets/site-DEs541OT.js                                        3.16 kB │ gzip:  1.32 kB
+node_modules/.nitro/vite/services/ssr/assets/checkout-continuity-1TXDon7c.js                         3.24 kB │ gzip:  0.94 kB
+node_modules/.nitro/vite/services/ssr/index.js                                                       3.41 kB │ gzip:  1.46 kB
+node_modules/.nitro/vite/services/ssr/assets/product-evidence-qqlLqrcl.js                            3.61 kB │ gzip:  1.43 kB
+node_modules/.nitro/vite/services/ssr/assets/EditorialCommerceBridge-SA8adEUN.js                     3.77 kB │ gzip:  1.49 kB
+node_modules/.nitro/vite/services/ssr/assets/shop-dl-7GSoS.js                                        3.86 kB │ gzip:  1.67 kB
+node_modules/.nitro/vite/services/ssr/assets/journal._slug-Jp2l8rmS.js                               4.12 kB │ gzip:  1.46 kB
+node_modules/.nitro/vite/services/ssr/assets/collections-DAdiBQ7K.js                                 4.45 kB │ gzip:  1.70 kB
+node_modules/.nitro/vite/services/ssr/assets/search-DdnnVjnK.js                                      4.68 kB │ gzip:  1.75 kB
+node_modules/.nitro/vite/services/ssr/assets/payment.result-CGPDmWu7.js                              4.89 kB │ gzip:  1.80 kB
+node_modules/.nitro/vite/services/ssr/assets/collections._slug-BTiC6dX-.js                           5.28 kB │ gzip:  1.67 kB
+node_modules/.nitro/vite/services/ssr/assets/CustomerOtpAuth-zjMphT1x.js                             5.99 kB │ gzip:  1.85 kB
+node_modules/.nitro/vite/services/ssr/assets/backend-storefront-BPh03vL7.js                          6.18 kB │ gzip:  1.98 kB
+node_modules/.nitro/vite/services/ssr/assets/_category-D2AJBaFq.js                                   6.23 kB │ gzip:  2.13 kB
+node_modules/.nitro/vite/services/ssr/assets/editorial-commerce-Q12u6Htt.js                          6.64 kB │ gzip:  2.09 kB
+node_modules/.nitro/vite/services/ssr/assets/size-guide-LMwLvyXS.js                                  7.03 kB │ gzip:  2.41 kB
+node_modules/.nitro/vite/services/ssr/assets/product._slug-tf2VINld.js                               7.11 kB │ gzip:  2.45 kB
+node_modules/.nitro/vite/services/ssr/assets/contact-DqNEr-a8.js                                     7.60 kB │ gzip:  2.36 kB
+node_modules/.nitro/vite/services/ssr/assets/app-Cceid6hZ.js                                         7.74 kB │ gzip:  2.52 kB
+node_modules/.nitro/vite/services/ssr/assets/cart-2sLuYzzA.js                                        8.24 kB │ gzip:  2.76 kB
+node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-BWqwIxK8.js                  8.99 kB │ gzip:  1.67 kB
+node_modules/.nitro/vite/services/ssr/assets/privacy-DB6rw-iO.js                                     9.48 kB │ gzip:  3.14 kB
+node_modules/.nitro/vite/services/ssr/assets/product-filter-DCEfeKvd.js                              9.64 kB │ gzip:  2.91 kB
+node_modules/.nitro/vite/services/ssr/assets/terms-CM2axo_A.js                                      10.47 kB │ gzip:  3.24 kB
+node_modules/.nitro/vite/services/ssr/assets/journal._slug-BNIEh2Vr.js                              10.93 kB │ gzip:  3.14 kB
+node_modules/.nitro/vite/services/ssr/assets/collections.index-1OOUlZsN.js                          11.28 kB │ gzip:  3.36 kB
+node_modules/.nitro/vite/services/ssr/assets/ProductCard-CR2QuYcP.js                                11.71 kB │ gzip:  3.48 kB
+node_modules/.nitro/vite/services/ssr/assets/faq-B2wCtG4N.js                                        12.37 kB │ gzip:  4.00 kB
+node_modules/.nitro/vite/services/ssr/assets/journal.index-BqQIajCX.js                              12.69 kB │ gzip:  3.28 kB
+node_modules/.nitro/vite/services/ssr/assets/journal-IzatdmEq.js                                    13.48 kB │ gzip:  4.23 kB
+node_modules/.nitro/vite/services/ssr/assets/collections._slug-DeAsVRIw.js                          13.58 kB │ gzip:  3.68 kB
+node_modules/.nitro/vite/services/ssr/assets/about-BmEOpBja.js                                      16.46 kB │ gzip:  4.33 kB
+node_modules/.nitro/vite/services/ssr/assets/account-DQCj5kl4.js                                    16.94 kB │ gzip:  4.31 kB
+node_modules/.nitro/vite/services/ssr/assets/lookbook-CJe2k6YW.js                                   17.51 kB │ gzip:  4.73 kB
+node_modules/.nitro/vite/services/ssr/assets/shipping-returns-DPiRc3Rz.js                           18.31 kB │ gzip:  3.80 kB
+node_modules/.nitro/vite/services/ssr/assets/_category-YKg7NRC6.js                                  20.62 kB │ gzip:  5.07 kB
+node_modules/.nitro/vite/services/ssr/assets/shop-B4M2x704.js                                       21.40 kB │ gzip:  5.77 kB
+node_modules/.nitro/vite/services/ssr/assets/catalog-discovery-DfUdhgEH.js                          24.21 kB │ gzip:  6.00 kB
+node_modules/.nitro/vite/services/ssr/assets/search-CL5tCYhU.js                                     26.11 kB │ gzip:  6.14 kB
+node_modules/.nitro/vite/services/ssr/assets/design-system-ra-iLeEX.js                              30.76 kB │ gzip:  7.50 kB
+node_modules/.nitro/vite/services/ssr/assets/checkout-zpCP3xC3.js                                   35.65 kB │ gzip:  8.89 kB
+node_modules/.nitro/vite/services/ssr/assets/routes-BN3ZDtWe.js                                     50.72 kB │ gzip: 12.48 kB
+node_modules/.nitro/vite/services/ssr/assets/router-BBIeF-Vv.js                                     55.55 kB │ gzip: 14.29 kB
+node_modules/.nitro/vite/services/ssr/assets/product._slug-BLhHjUP7.js                              58.71 kB │ gzip: 13.88 kB
+node_modules/.nitro/vite/services/ssr/assets/server-BmEUaC4x.js                                     58.73 kB │ gzip: 15.11 kB
+node_modules/.nitro/vite/services/ssr/assets/MobileBottomBar-CcjjvO9Q.js                            58.78 kB │ gzip: 12.20 kB
+node_modules/.nitro/vite/services/ssr/assets/category-images-oqXDFsJI.js                            72.54 kB │ gzip: 20.12 kB
 
-Node.js v24.20.0
+[32m✓ built in 1.43s[39m
+[start] [nitro] Building [[35mNitro[39m] [2m(preset: `cloudflare-module`, compatibility: `2026-09-06`)[22m
+[success] [nitro] Generated public [36m.output/public[39m
+[36mvite v8.2.0 [32mbuilding nitro environment for production...[36m[39m
+[warn] `inlineDynamicImports` option is ignored because the `codeSplitting` option is specified.
+[2Ktransforming...✓ 2066 modules transformed.
+rendering chunks...
+computing gzip size...
+.output/server/_ssr/empty-plugin-adapters-D9UWiqvJ.mjs      0.23 kB │ gzip:   0.16 kB
+.output/server/_libs/radix-ui__number.mjs                   0.32 kB │ gzip:   0.24 kB
+.output/server/_libs/clsx.mjs                               0.55 kB │ gzip:   0.31 kB
+.output/server/_chunks/ssr-renderer.mjs                     0.60 kB │ gzip:   0.36 kB
+.output/server/_libs/radix-ui__react-direction.mjs          0.76 kB │ gzip:   0.40 kB
+.output/server/_libs/tanstack__react-query.mjs              0.78 kB │ gzip:   0.38 kB
+.output/server/_ssr/backend-session-7xakMXCH.mjs            1.12 kB │ gzip:   0.63 kB
+.output/server/_libs/hookable.mjs                           1.16 kB │ gzip:   0.51 kB
+.output/server/_ssr/seo-live-DmLBVP-S.mjs                   1.35 kB │ gzip:   0.60 kB
+.output/server/_ssr/start-BcSBlhe9.mjs                      1.38 kB │ gzip:   0.65 kB
+.output/server/_runtime.mjs                                 1.44 kB │ gzip:   0.67 kB
+.output/server/_ssr/homepage-xzkeP26M.mjs                   1.52 kB │ gzip:   0.87 kB
+.output/server/_ssr/Breadcrumb-DHtf0Rt9.mjs                 1.66 kB │ gzip:   0.74 kB
+.output/server/_libs/radix-ui__primitive.mjs                1.83 kB │ gzip:   0.72 kB
+.output/server/_ssr/journal2._slug-J1dTP9BN.mjs             2.39 kB │ gzip:   0.98 kB
+.output/server/_ssr/collections._slug-C1iPZQ6i.mjs          2.44 kB │ gzip:   0.98 kB
+.output/server/_ssr/wishlist-Dmeb3UBO.mjs                   2.51 kB │ gzip:   1.08 kB
+.output/server/_ssr/site-DEs541OT.mjs                       3.21 kB │ gzip:   1.35 kB
+.output/server/_ssr/checkout-continuity-1TXDon7c.mjs        3.29 kB │ gzip:   0.97 kB
+.output/server/_ssr/order-confirmation-Tvuac2dW.mjs         3.31 kB │ gzip:   1.37 kB
+.output/server/_ssr/ssr.mjs                                 3.36 kB │ gzip:   1.46 kB
+.output/server/_ssr/product-evidence-qqlLqrcl.mjs           3.66 kB │ gzip:   1.47 kB
+.output/server/_ssr/track-order-wtwAN6oO.mjs                3.71 kB │ gzip:   1.48 kB
+.output/server/_ssr/EditorialCommerceBridge-SA8adEUN.mjs    4.34 kB │ gzip:   1.58 kB
+.output/server/_ssr/collections-DAdiBQ7K.mjs                4.50 kB │ gzip:   1.74 kB
+.output/server/_ssr/payment.result-CGPDmWu7.mjs             5.84 kB │ gzip:   1.95 kB
+.output/server/_ssr/backend-storefront-BPh03vL7.mjs         6.23 kB │ gzip:   2.02 kB
+.output/server/_ssr/editorial-commerce-Q12u6Htt.mjs         6.62 kB │ gzip:   2.11 kB
+.output/server/_ssr/CustomerOtpAuth-zjMphT1x.mjs            7.00 kB │ gzip:   2.01 kB
+.output/server/_ssr/size-guide-LMwLvyXS.mjs                 8.05 kB │ gzip:   2.50 kB
+.output/server/_ssr/app-Cceid6hZ.mjs                        8.76 kB │ gzip:   2.65 kB
+.output/server/_ssr/contact-DqNEr-a8.mjs                    8.84 kB │ gzip:   2.47 kB
+.output/server/_tanstack-start-manifest_v-BWqwIxK8.mjs      9.05 kB │ gzip:   1.71 kB
+.output/server/_libs/radix-ui__react-popper.mjs             9.46 kB │ gzip:   2.83 kB
+.output/server/_ssr/cart-2sLuYzzA.mjs                       9.55 kB │ gzip:   2.86 kB
+.output/server/_ssr/product-filter-DCEfeKvd.mjs             9.69 kB │ gzip:   2.95 kB
+.output/server/_libs/h3-v2+rou3+srvx.mjs                    9.87 kB │ gzip:   3.06 kB
+.output/server/_ssr/privacy-DB6rw-iO.mjs                   10.65 kB │ gzip:   3.25 kB
+.output/server/_ssr/terms-CM2axo_A.mjs                     11.75 kB │ gzip:   3.34 kB
+.output/server/_libs/tanstack__history.mjs                 12.09 kB │ gzip:   3.48 kB
+.output/server/_ssr/journal._slug-BNIEh2Vr.mjs             12.77 kB │ gzip:   3.25 kB
+.output/server/_ssr/ProductCard-CR2QuYcP.mjs               12.87 kB │ gzip:   3.60 kB
+.output/server/_ssr/collections.index-1OOUlZsN.mjs         13.15 kB │ gzip:   3.49 kB
+.output/server/_ssr/faq-B2wCtG4N.mjs                       13.50 kB │ gzip:   4.10 kB
+.output/server/_ssr/journal-IzatdmEq.mjs                   13.52 kB │ gzip:   4.28 kB
+.output/server/_ssr/journal.index-BqQIajCX.mjs             14.89 kB │ gzip:   3.41 kB
+.output/server/_ssr/collections._slug-DeAsVRIw.mjs         15.78 kB │ gzip:   3.80 kB
+.output/server/_libs/radix-ui__react-collection.mjs        16.57 kB │ gzip:   3.70 kB
+.output/server/_libs/h3+rou3+srvx.mjs                      16.62 kB │ gzip:   4.80 kB
+.output/server/_ssr/about-BmEOpBja.mjs                     18.99 kB │ gzip:   4.46 kB
+.output/server/_ssr/account-DQCj5kl4.mjs                   19.80 kB │ gzip:   4.50 kB
+.output/server/_ssr/lookbook-CJe2k6YW.mjs                  19.82 kB │ gzip:   4.90 kB
+.output/server/_ssr/shipping-returns-DPiRc3Rz.mjs          21.28 kB │ gzip:   3.95 kB
+.output/server/_libs/radix-ui__react-slider.mjs            22.33 kB │ gzip:   5.38 kB
+.output/server/_category-YKg7NRC6.mjs                      23.77 kB │ gzip:   5.23 kB
+.output/server/_ssr/shop-B4M2x704.mjs                      24.18 kB │ gzip:   5.93 kB
+.output/server/_libs/@floating-ui/dom+[...].mjs            25.38 kB │ gzip:   6.57 kB
+.output/server/_libs/@floating-ui/core+[...].mjs           25.55 kB │ gzip:   6.32 kB
+.output/server/_ssr/catalog-discovery-DfUdhgEH.mjs         26.60 kB │ gzip:   6.20 kB
+.output/server/_libs/lucide-react.mjs                      29.06 kB │ gzip:   5.66 kB
+.output/server/_ssr/search-CL5tCYhU.mjs                    29.54 kB │ gzip:   6.33 kB
+.output/server/_libs/@floating-ui/react-dom+[...].mjs      31.30 kB │ gzip:   7.98 kB
+.output/server/index.mjs                                   31.91 kB │ gzip:   8.22 kB
+.output/server/_libs/@radix-ui/react-checkbox+[...].mjs    32.91 kB │ gzip:   7.80 kB
+.output/server/_ssr/design-system-ra-iLeEX.mjs             35.52 kB │ gzip:   7.71 kB
+.output/server/_ssr/checkout-zpCP3xC3.mjs                  39.61 kB │ gzip:   9.08 kB
+.output/server/_libs/@radix-ui/react-select+[...].mjs      45.97 kB │ gzip:   9.71 kB
+.output/server/_libs/tanstack__query-core.mjs              48.17 kB │ gzip:  10.70 kB
+.output/server/_libs/sonner.mjs                            51.91 kB │ gzip:  11.77 kB
+.output/server/_ssr/routes-BN3ZDtWe.mjs                    56.78 kB │ gzip:  12.70 kB
+.output/server/_ssr/server-BmEUaC4x.mjs                    58.10 kB │ gzip:  15.30 kB
+.output/server/_ssr/product._slug-BLhHjUP7.mjs             64.64 kB │ gzip:  14.03 kB
+.output/server/_libs/@radix-ui/react-dialog+[...].mjs      65.05 kB │ gzip:  15.29 kB
+.output/server/_ssr/MobileBottomBar-CcjjvO9Q.mjs           65.30 kB │ gzip:  12.48 kB
+.output/server/_ssr/category-images-oqXDFsJI.mjs           73.24 kB │ gzip:  20.09 kB
+.output/server/_libs/tailwind-merge.mjs                    88.13 kB │ gzip:  15.66 kB
+.output/server/_ssr/router-BBIeF-Vv.mjs                   100.40 kB │ gzip:  23.01 kB
+.output/server/_libs/@tanstack/router-core+[...].mjs      121.16 kB │ gzip:  25.51 kB
+.output/server/_libs/@tanstack/react-router+[...].mjs     644.20 kB │ gzip: 135.77 kB
+
+[32m✓ built in 409ms[39m
+[info] [nitro] Using auto generated worker name: `sajadkhavas-lbb`
+[info] Generated [36m.output/server/wrangler.json[39m
+[info] Generated [36m.wrangler/deploy/config.json[39m
+[info] Generated [36m.output/public/_headers[39m
+[info] Generated [36m.output/nitro.json[39m
+[success] [nitro] You can preview this build using `npx vite preview`
+[success] [nitro] You can deploy this build using `npx nitro deploy --prebuilt`
+
+> typecheck
+> tsc --noEmit
+
+
+> audit:dependencies
+> npm audit --omit=dev --audit-level=high
+
+found 0 vulnerabilities
+
+> audit:production
+> node scripts/audit-production.mjs
+
+{
+  "jsFiles": 59,
+  "cssFiles": 2,
+  "fontFiles": 9,
+  "totalJavaScript": 1024327,
+  "budgets": {
+    "maxJavaScriptFile": 471040,
+    "maxCssFile": 163840,
+    "maxTotalJavaScript": 1228800
+  }
+}
+
+> audit:brand
+> node scripts/audit-brand-copy.mjs
+
+Brand copy audit passed across 182 source files.
+
+> audit:store-settings
+> node scripts/audit-store-settings.mjs
+
+Contact route must use verified public contact/location helpers.
