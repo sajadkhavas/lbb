@@ -108,9 +108,11 @@ export function HeroNarrative({
             <img
               src={heroImage}
               alt={
-                heroProduct
-                  ? `${heroProduct.name} در ویترین ${brand.nameFa}`
-                  : `ویترین ${brand.nameFa}`
+                source === "prototype"
+                  ? "تیشرت مشکی ال‌بی‌بی روی زمینه روشن"
+                  : heroProduct
+                    ? `${heroProduct.name} در ویترین ${brand.nameFa}`
+                    : `ویترین ${brand.nameFa}`
               }
               width={1200}
               height={1500}
