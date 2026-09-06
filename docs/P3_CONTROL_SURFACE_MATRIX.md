@@ -6,8 +6,10 @@ Status: **IMPLEMENTED / ACCEPTANCE CANDIDATE**
 
 - Frontend P3 START/base: `a866fc778a29f541fbccfcffaeb53cec7360acc7`
 - Historical P1.4 `FRONTEND_FREEZE_SHA`: `2bc1347bb092172350415ac21019eb09f9dd746d`
-- Backend P3 exact-head candidate: `bacfea566c347999e930a729633482166d0637aa`
-- Backend exact-head Gate: `34045191915` — **SUCCESS**
+- Backend P3 exact-head source: `a93f21a7c2c1bb2961a722c2748cf952cb4d399f`
+- Backend exact-head source Gate: `34046093131` — **SUCCESS**
+- Backend PR #18: **MERGED** after PR Gate `34046189517` — **SUCCESS**
+- Backend P3 merge SHA: `5a874d66b5d031fd1ab739a4b7bd8b7c04d4acf6`
 - P3 storefront contract: `2026-09-06-p3-storefront-v1`
 - Production/server mutation: **NO**
 
