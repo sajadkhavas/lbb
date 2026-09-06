@@ -1,4 +1,4 @@
-name: P3 Quality Diagnostic
+name: P3 Final Formatter Cleanup
 
 on:
   push:
@@ -9,12 +9,9 @@ permissions:
   contents: write
 
 jobs:
-  diagnose:
-    if: contains(github.event.head_commit.message, '[p3-quality-diagnostic]')
+  cleanup:
+    if: contains(github.event.head_commit.message, '[p3-prettier-cleanup]')
     runs-on: ubuntu-24.04
-    env:
-      VITE_SITE_URL: https://lbb.example.test
-      VITE_LBB_BACKEND_MODE: prototype
     steps:
       - uses: actions/checkout@v5
         with:
@@ -24,23 +21,15 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - name: Capture exact terminal quality failure
-        shell: bash
+      - name: Format audit and remove temporary diagnostics
         run: |
-          set +e
-          npm run quality > /tmp/p3-quality.log 2>&1
-          code=$?
-          set -e
-          {
-            echo "QUALITY_EXIT=$code"
-            echo '=== TERMINAL 120 LINES ==='
-            tail -n 120 /tmp/p3-quality.log
-          } > docs/_p3_quality_diagnostic.txt
-      - name: Commit diagnostic
+          npx prettier --write scripts/audit-store-settings.mjs
+          rm -f docs/_p3_quality_diagnostic.txt
+          rm -f .github/workflows/p3-quality-diagnostic.yml
+      - name: Commit clean acceptance tree
         run: |
           git config user.name 'lbb-p3-bot'
           git config user.email '144109918+sajadkhavas@users.noreply.github.com'
-          git add docs/_p3_quality_diagnostic.txt
-          git commit -m 'chore(p3): capture exact quality diagnostic'
+          git add -A
+          git commit -m 'chore(p3): finalize clean acceptance tree'
           git push origin HEAD:phase/p3-live-integration-control-surface
