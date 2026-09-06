@@ -18,6 +18,12 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import {
+  resolveStorefrontControl,
+  resolveStorefrontPage,
+  type StorefrontControl,
+  type StorefrontPageDto,
+} from "@/lib/storefront-control";
 
 const TITLE = "درباره LBB | از رگال تا فروشگاه";
 const DESC =
@@ -41,26 +47,144 @@ const PRINCIPLES = [
   },
 ];
 
+function contentParagraphs(content: string | null) {
+  if (!content) return [];
+  return content
+    .replace(/<br\s*\/?>(?=.)/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .split(/\n+/)
+    .map((part) => part.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESC, path: "/about", image: lifestyle1 }),
-    links: canonical("/about"),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify(
-          breadcrumbLd([
-            { name: "خانه", path: "/" },
-            { name: "درباره LBB", path: "/about" },
-          ]),
-        ),
-      },
-    ],
-  }),
+  loader: async () => {
+    const [control, page] = await Promise.all([
+      resolveStorefrontControl(),
+      resolveStorefrontPage("about"),
+    ]);
+    return { control, page };
+  },
+  head: ({ loaderData }) => {
+    const control = loaderData?.control;
+    const page = loaderData?.page;
+    const isLive = control?.source === "live" && page;
+    const title = isLive ? page.metaTitle || `${page.title} | LBB` : TITLE;
+    const description = isLive
+      ? page.metaDescription || page.excerpt || control.brand.shortIntroduction
+      : DESC;
+    const breadcrumbName = isLive ? page.title : "درباره LBB";
+
+    return {
+      meta: pageMeta({
+        title,
+        description,
+        path: "/about",
+        image: isLive ? undefined : lifestyle1,
+      }),
+      links: canonical("/about"),
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: breadcrumbName, path: "/about" },
+            ]),
+          ),
+        },
+      ],
+    };
+  },
   component: AboutPage,
 });
 
 function AboutPage() {
+  const { control, page } = Route.useLoaderData();
+  if (control.source === "live" && page) {
+    return <LiveAboutPage control={control} page={page} />;
+  }
+  return <PrototypeAboutPage />;
+}
+
+function LiveAboutPage({ control, page }: { control: StorefrontControl; page: StorefrontPageDto }) {
+  const paragraphs = contentParagraphs(page.content);
+
+  return (
+    <>
+      <Navbar theme="light" />
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-storefront-source="live"
+      >
+        <Shell className="py-3">
+          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: page.title }]} />
+        </Shell>
+
+        <Band hairline={false} className="pb-10 pt-8 md:pb-14 md:pt-12">
+          <Shell className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+            <div>
+              <TechLabel tone="signal">ABOUT / {control.brand.name}</TechLabel>
+              <h1 className="mt-5 max-w-[14ch] text-display-1 text-bone">{page.title}</h1>
+              <p className="text-lede mt-5 max-w-[58ch]">
+                {page.excerpt || control.brand.shortIntroduction}
+              </p>
+              <p className="mt-5 flex items-start gap-2 text-sm leading-7 text-bone">
+                <MapPin size={17} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
+                <span>{control.copy.storeLocationLabel}</span>
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to="/shop" search={{}} className={CtaClasses("signal")}>
+                  {control.copy.primaryCta}
+                </Link>
+                <Link to="/contact" hash="store-location" className={CtaClasses("line")}>
+                  {control.copy.secondaryCta}
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+              <TechLabel tone="signal">{control.brand.storyTitle}</TechLabel>
+              <div className="mt-5 space-y-4">
+                {(paragraphs.length > 0 ? paragraphs : [control.brand.descriptor]).map(
+                  (paragraph, index) => (
+                    <p key={`${index}-${paragraph.slice(0, 24)}`} className="text-sm leading-8 text-metal">
+                      {paragraph}
+                    </p>
+                  ),
+                )}
+              </div>
+            </div>
+          </Shell>
+        </Band>
+
+        <Band>
+          <Shell className="grid gap-6 lg:grid-cols-2">
+            <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+              <TechLabel tone="signal">BRAND IDENTITY</TechLabel>
+              <h2 className="mt-4 text-display-3 text-bone">{control.brand.slogan}</h2>
+              <p className="mt-4 text-sm leading-8 text-metal">{control.brand.descriptor}</p>
+            </section>
+            <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+              <TechLabel tone="signal">PHYSICAL / ONLINE</TechLabel>
+              <h2 className="mt-4 text-display-3 text-bone">{control.brand.physicalLocationShort}</h2>
+              <p className="mt-4 text-sm leading-8 text-metal">{control.brand.shortIntroduction}</p>
+              <Link to="/contact" className={`${CtaClasses("line")} mt-6`}>
+                اطلاعات تماس و فروشگاه
+              </Link>
+            </section>
+          </Shell>
+        </Band>
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PrototypeAboutPage() {
   const categoryCount = new Set(products.map((product) => product.category)).size;
 
   return (
