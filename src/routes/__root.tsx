@@ -21,6 +21,11 @@ import { NavigationOverlayProvider } from "@/lib/navigation-overlay";
 import { registerPwa } from "@/lib/pwa";
 import { QuickViewProvider } from "@/lib/quickview";
 import { absUrl } from "@/lib/site";
+import {
+  StorefrontControlProvider,
+  prototypeStorefrontControl,
+  resolveStorefrontControl,
+} from "@/lib/storefront-control";
 import { WishlistProvider } from "@/lib/wishlist";
 
 function NotFoundComponent() {
@@ -110,46 +115,50 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-const orgJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "LBB",
-  url: absUrl("/"),
-  logo: absUrl("/icons/icon-512.png"),
-  description: "برند پوشاک استریت‌ویر ایرانی",
-  sameAs: ["https://www.instagram.com/lbbclo"],
-};
-
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "author", content: "LBB" },
-      { name: "theme-color", content: "#050505" },
-      { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-title", content: "LBB" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { property: "og:site_name", content: "LBB" },
-      { property: "og:type", content: "website" },
-      { property: "og:locale", content: "fa_IR" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      { rel: "stylesheet", href: fontCss },
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-    ],
-    scripts: [
-      {
-        children:
-          "history.scrollRestoration='manual';if(performance.getEntriesByType('navigation')[0]?.type==='reload')scrollTo(0,0)",
-      },
-      { type: "application/ld+json", children: JSON.stringify(orgJsonLd) },
-    ],
-  }),
+  loader: () => resolveStorefrontControl(),
+  head: ({ loaderData }) => {
+    const control = loaderData ?? prototypeStorefrontControl();
+    const orgJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: control.brand.name,
+      url: absUrl("/"),
+      logo: absUrl("/icons/icon-512.png"),
+      description: control.seo.organizationDescription,
+      sameAs: [control.seo.instagramUrl],
+    };
+
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "author", content: control.brand.name },
+        { name: "theme-color", content: "#050505" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-title", content: control.brand.name },
+        { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+        { property: "og:site_name", content: control.seo.siteName },
+        { property: "og:type", content: "website" },
+        { property: "og:locale", content: control.seo.locale },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [
+        { rel: "stylesheet", href: fontCss },
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", href: "/favicon.png", type: "image/png" },
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+        { rel: "manifest", href: "/manifest.webmanifest" },
+      ],
+      scripts: [
+        {
+          children:
+            "history.scrollRestoration='manual';if(performance.getEntriesByType('navigation')[0]?.type==='reload')scrollTo(0,0)",
+        },
+        { type: "application/ld+json", children: JSON.stringify(orgJsonLd) },
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -172,26 +181,29 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const storefront = Route.useLoaderData();
 
   useEffect(() => {
     void registerPwa();
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <NavigationOverlayProvider>
-        <WishlistProvider>
-          <CartProvider>
-            <QuickViewProvider>
-              <Outlet />
-              <CartDrawer />
-              <ProductQuickView />
-              <PwaExperience />
-              <Toaster position="bottom-left" dir="rtl" richColors closeButton />
-            </QuickViewProvider>
-          </CartProvider>
-        </WishlistProvider>
-      </NavigationOverlayProvider>
-    </QueryClientProvider>
+    <StorefrontControlProvider value={storefront}>
+      <QueryClientProvider client={queryClient}>
+        <NavigationOverlayProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <QuickViewProvider>
+                <Outlet />
+                <CartDrawer />
+                <ProductQuickView />
+                <PwaExperience />
+                <Toaster position="bottom-left" dir="rtl" richColors closeButton />
+              </QuickViewProvider>
+            </CartProvider>
+          </WishlistProvider>
+        </NavigationOverlayProvider>
+      </QueryClientProvider>
+    </StorefrontControlProvider>
   );
 }
