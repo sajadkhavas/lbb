@@ -16,6 +16,7 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
+import { resolveStorefrontJournal, type StorefrontJournalDto } from "@/lib/storefront-control";
 
 const TITLE = "ژورنال LBB | راهنمای استایل، پارچه و نگهداری";
 const DESC =
@@ -24,13 +25,15 @@ const DESC =
 const COVERS = { hero: heroMain, l1: lifestyle1, l2: lifestyle2 };
 
 export const Route = createFileRoute("/journal/")({
-  head: () => {
+  loader: () => resolveStorefrontJournal(),
+  head: ({ loaderData }) => {
+    const indexArticles = loaderData ?? JOURNAL_ARTICLES;
     const itemListLd = {
       "@context": "https://schema.org",
       "@type": "ItemList",
       name: "ژورنال LBB",
-      numberOfItems: JOURNAL_ARTICLES.length,
-      itemListElement: JOURNAL_ARTICLES.map((article, index) => ({
+      numberOfItems: indexArticles.length,
+      itemListElement: indexArticles.map((article, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: article.title,
@@ -59,6 +62,99 @@ export const Route = createFileRoute("/journal/")({
 });
 
 function JournalIndexPage() {
+  const liveArticles = Route.useLoaderData();
+  return liveArticles ? (
+    <LiveJournalIndexPage articles={liveArticles} />
+  ) : (
+    <PrototypeJournalIndexPage />
+  );
+}
+
+function LiveJournalIndexPage({ articles }: { articles: StorefrontJournalDto[] }) {
+  return (
+    <>
+      <Navbar theme="light" />
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="journal"
+        data-storefront-source="live"
+      >
+        <Shell className="py-3">
+          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />
+        </Shell>
+        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
+          <Shell>
+            <TechLabel tone="signal">LBB / EDITORIAL NOTES</TechLabel>
+            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+              ژورنال؛ راهنماها و یادداشت‌های منتشرشده LBB
+            </h1>
+            <p className="text-lede mt-5 max-w-[62ch]">
+              فهرست این صفحه مستقیماً از محتوای منتشرشده در Backend می‌آید.
+            </p>
+          </Shell>
+        </Band>
+        <Band>
+          <Shell>
+            {articles.length === 0 ? (
+              <div className="rounded-2xl border border-hairline bg-carbon p-8 text-center text-metal">
+                هنوز مقاله‌ای منتشر نشده است.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {articles.map((article, index) => (
+                  <article
+                    key={article.publicId || article.slug}
+                    className="overflow-hidden rounded-2xl border border-hairline bg-carbon"
+                  >
+                    {article.coverUrl ? (
+                      <img
+                        src={article.coverUrl}
+                        alt=""
+                        width={960}
+                        height={640}
+                        loading={index < 2 ? "eager" : "lazy"}
+                        className="aspect-[3/2] w-full object-cover"
+                      />
+                    ) : null}
+                    <div className="p-6">
+                      <TechLabel tone="signal">{article.category ?? "JOURNAL"}</TechLabel>
+                      <h2 className="mt-3 text-display-3 text-bone">{article.title}</h2>
+                      {article.excerpt ? (
+                        <p className="mt-3 text-sm leading-8 text-metal">{article.excerpt}</p>
+                      ) : null}
+                      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                        {article.publishedAt ? (
+                          <time dateTime={article.publishedAt} className="text-xs text-mute">
+                            {new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(
+                              new Date(article.publishedAt),
+                            )}
+                          </time>
+                        ) : (
+                          <span />
+                        )}
+                        <Link
+                          to="/journal/$slug"
+                          params={{ slug: article.slug }}
+                          className={CtaClasses("line", "sm")}
+                        >
+                          خواندن مقاله <ArrowUpLeft size={15} aria-hidden="true" />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </Shell>
+        </Band>
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PrototypeJournalIndexPage() {
   const [featured, ...articles] = JOURNAL_ARTICLES;
 
   return (
