@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   apply:
-    if: contains(github.event.head_commit.message, '[p3-faq-live]')
+    if: contains(github.event.head_commit.message, '[p3-lookbook-live]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -20,48 +20,46 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Wire versioned FAQ content
+      - name: Wire versioned Lookbook content
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('src/routes/faq.tsx')
+          path = Path('src/routes/lookbook.tsx')
           text = path.read_text()
-          marker = 'import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";\n'
-          addition = marker + 'import { resolveStorefrontFaqs, type StorefrontFaqDto } from "@/lib/storefront-control";\n'
-          if 'resolveStorefrontFaqs' not in text:
-              if marker not in text: raise SystemExit('FAQ import marker missing')
+          marker = 'import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";\n'
+          addition = marker + 'import { resolveStorefrontLookbook, type StorefrontLookDto } from "@/lib/storefront-control";\n'
+          if 'resolveStorefrontLookbook' not in text:
+              if marker not in text: raise SystemExit('Lookbook import marker missing')
               text = text.replace(marker, addition, 1)
 
-          route_marker = 'export const Route = createFileRoute("/faq")({\n'
-          if 'loader: () => resolveStorefrontFaqs(),' not in text:
-              if route_marker not in text: raise SystemExit('FAQ route marker missing')
-              text = text.replace(route_marker, route_marker + '  loader: () => resolveStorefrontFaqs(),\n', 1)
+          route_marker = 'export const Route = createFileRoute("/lookbook")({\n'
+          if 'loader: () => resolveStorefrontLookbook(),' not in text:
+              if route_marker not in text: raise SystemExit('Lookbook route marker missing')
+              text = text.replace(route_marker, route_marker + '  loader: () => resolveStorefrontLookbook(),\n', 1)
 
-          helper = '''\nconst FAQ_LABELS: Record<string, { label: string; title: string }> = {\n  products: { label: "PRODUCT DATA", title: "محصول و موجودی" },\n  sizing: { label: "FIT & SIZE", title: "فیت و انتخاب سایز" },\n  ordering: { label: "ORDER FLOW", title: "قیمت و ثبت سفارش" },\n  shipping: { label: "SHIPPING", title: "ارسال و سفارش" },\n  editorial: { label: "EDITORIAL PAGES", title: "کالکشن، لوک‌بوک و ژورنال" },\n};\n\nfunction backendFaqGroups(items: StorefrontFaqDto[]): FaqGroup[] {\n  const groups = new Map<string, FaqGroup>();\n  for (const item of [...items].sort((a, b) => a.sortOrder - b.sortOrder)) {\n    const id = item.category || "general";\n    const meta = FAQ_LABELS[id] ?? { label: id.toUpperCase(), title: "سوالات عمومی" };\n    const group = groups.get(id) ?? { id, label: meta.label, title: meta.title, items: [] };\n    group.items.push({ question: item.question, answer: item.answer });\n    groups.set(id, group);\n  }\n  return [...groups.values()];\n}\n\n'''
-          if 'function backendFaqGroups' not in text:
-              export_marker = 'export const Route = createFileRoute("/faq")({'
-              if export_marker not in text: raise SystemExit('FAQ export marker missing')
-              text = text.replace(export_marker, helper + export_marker, 1)
+          if 'function PrototypeLookbookPage()' not in text:
+              old = 'function LookbookPage() {\n  const sceneViews = useMemo(() => LOOKBOOK_SCENES.map(getLookbookSceneView), []);'
+              new = 'function PrototypeLookbookPage() {\n  const sceneViews = useMemo(() => LOOKBOOK_SCENES.map(getLookbookSceneView), []);'
+              if old not in text: raise SystemExit('Lookbook component marker missing')
+              text = text.replace(old, new, 1)
 
-          component_marker = 'function FaqPage() {\n  return ('
-          component_replacement = 'function FaqPage() {\n  const liveFaqs = Route.useLoaderData();\n  const faqGroups = liveFaqs ? backendFaqGroups(liveFaqs) : FAQ_GROUPS;\n\n  return ('
-          if 'const liveFaqs = Route.useLoaderData();' not in text:
-              if component_marker not in text: raise SystemExit('FAQ component marker missing')
-              text = text.replace(component_marker, component_replacement, 1)
-
-          text = text.replace('FAQ_GROUPS.map((group)', 'faqGroups.map((group)')
+          live = '''\nfunction LookbookPage() {\n  const liveItems = Route.useLoaderData();\n  return liveItems ? <LiveLookbookPage items={liveItems} /> : <PrototypeLookbookPage />;\n}\n\nfunction LiveLookbookPage({ items }: { items: StorefrontLookDto[] }) {\n  return (\n    <>\n      <Navbar theme="light" />\n      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="lookbook" data-storefront-source="live">\n        <Shell className="py-3">\n          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "لوک‌بوک" }]} />\n        </Shell>\n        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">\n          <Shell>\n            <TechLabel tone="signal">LBB / VISUAL STORIES</TechLabel>\n            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">لوک‌بوک؛ داستان‌های تصویری LBB</h1>\n            <p className="text-lede mt-5 max-w-[60ch]">تصاویر و مسیرهای این صفحه مستقیماً از محتوای منتشرشده فروشگاه می‌آیند.</p>\n          </Shell>\n        </Band>\n        <Band>\n          <Shell>\n            {items.length === 0 ? (\n              <StatePanel title="هنوز تصویری برای لوک‌بوک منتشر نشده است">پس از انتشار در پنل مدیریت، تصاویر اینجا نمایش داده می‌شوند.</StatePanel>\n            ) : (\n              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">\n                {items.map((item, index) => (\n                  <article key={`${item.imageUrl}-${index}`} className="overflow-hidden rounded-2xl border border-hairline bg-carbon">\n                    <figure>\n                      <img src={item.imageUrl} alt={item.title} width={900} height={1125} loading={index < 2 ? "eager" : "lazy"} className="aspect-[4/5] w-full object-cover" />\n                      <figcaption className="p-4">\n                        <TechLabel tone="signal">LOOK {String(index + 1).padStart(2, "0")}</TechLabel>\n                        <h2 className="mt-2 text-display-3 text-bone">{item.title}</h2>\n                        {item.caption ? <p className="mt-2 text-sm leading-7 text-metal">{item.caption}</p> : null}\n                        {item.linkUrl ? (\n                          <a href={item.linkUrl} className={`${CtaClasses("line", "sm")} mt-4`}>مسیر مرتبط <ArrowUpLeft size={15} aria-hidden="true" /></a>\n                        ) : null}\n                      </figcaption>\n                    </figure>\n                  </article>\n                ))}\n              </div>\n            )}\n          </Shell>\n        </Band>\n      </main>\n      <Footer theme="light" />\n      <MobileBottomBar />\n    </>\n  );\n}\n\n'''
+          if 'function LiveLookbookPage' not in text:
+              marker2 = 'function PrototypeLookbookPage() {'
+              if marker2 not in text: raise SystemExit('Prototype Lookbook marker missing')
+              text = text.replace(marker2, live + marker2, 1)
           path.write_text(text)
           PY
       - run: npm ci
       - name: Format and typecheck
         run: |
-          npx prettier --write src/routes/faq.tsx
+          npx prettier --write src/routes/lookbook.tsx
           npm run typecheck
-      - name: Commit tested FAQ cut-over
+      - name: Commit tested Lookbook cut-over
         run: |
           git config user.name 'lbb-p3-bot'
           git config user.email '144109918+sajadkhavas@users.noreply.github.com'
-          git add src/routes/faq.tsx
+          git add src/routes/lookbook.tsx
           git diff --cached --quiet && exit 0
-          git commit -m 'feat(p3): consume backend FAQ content'
+          git commit -m 'feat(p3): consume backend Lookbook content'
           git push origin HEAD:phase/p3-live-integration-control-surface
