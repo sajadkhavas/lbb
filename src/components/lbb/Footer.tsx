@@ -134,7 +134,9 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
         <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <p className="tech">
-              {isPrototype ? "© ۲۰۲۶ ال‌بی‌بی — کرج / مهستان" : `© ۲۰۲۶ ${brand.nameFa} — ${contact.locationLabel}`}
+              {isPrototype
+                ? "© ۲۰۲۶ ال‌بی‌بی — کرج / مهستان"
+                : `© ۲۰۲۶ ${brand.nameFa} — ${contact.locationLabel}`}
             </p>
             <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
           </div>
