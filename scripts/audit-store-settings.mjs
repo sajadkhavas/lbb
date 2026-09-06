@@ -113,7 +113,7 @@ if (/2_000_000|60_000|ارسال 2 تا 3 روزه|۷ روز ضمانت بازگ
 
 for (const required of [
   "resolveStorefrontControl",
-  "resolveStorefrontPage(\"contact\")",
+  'resolveStorefrontPage("contact")',
   "control.contact.phone",
   "control.contact.whatsapp",
   "control.contact.instagramUrl",
