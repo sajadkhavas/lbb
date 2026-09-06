@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { AnnouncementBar, ANNOUNCEMENT_HEIGHT } from "@/components/lbb/AnnouncementBar";
 import { Footer } from "@/components/lbb/Footer";
 import { BrandIntro } from "@/components/lbb/BrandIntro";
@@ -14,62 +14,100 @@ import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
-import { BRAND, BRAND_COPY } from "@/lib/brand";
+import { getProduct } from "@/lib/backend-api";
 import { productImage } from "@/lib/product-images";
 import { absUrl, canonical, pageMeta } from "@/lib/site";
-
-const heroMain = productImage("lbb-signature-tee");
-
-const websiteJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: BRAND.nameFa,
-  alternateName: BRAND.name,
-  url: absUrl("/"),
-  inLanguage: "fa-IR",
-};
-
-const storeJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "ClothingStore",
-  name: BRAND.nameFa,
-  alternateName: BRAND.name,
-  url: absUrl("/"),
-  logo: absUrl("/icons/icon-512.png"),
-  description: BRAND.shortIntroduction,
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: BRAND.city,
-    addressRegion: BRAND.province,
-    addressCountry: "IR",
-  },
-  sameAs: [BRAND.instagramUrl],
-};
+import { resolveStorefrontControl } from "@/lib/storefront-control";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      ...pageMeta({
-        title: BRAND_COPY.homepageTitle,
-        description: BRAND_COPY.homepageDescription,
-        path: "/",
-        type: "website",
-      }),
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [...canonical("/"), { rel: "preload", as: "image", href: heroMain }],
-    scripts: [
-      { type: "application/ld+json", children: JSON.stringify(websiteJsonLd) },
-      { type: "application/ld+json", children: JSON.stringify(storeJsonLd) },
-    ],
-  }),
+  loader: async () => {
+    const control = await resolveStorefrontControl();
+    if (control.source !== "live") return { control, heroProduct: null };
+
+    const response = await getProduct(control.home.heroProductSlug);
+    return {
+      control,
+      heroProduct: {
+        slug: response.data.slug,
+        name: response.data.name,
+        priceToman: response.data.price.from?.amount ?? null,
+        image: response.data.primaryImage,
+      },
+    };
+  },
+  head: ({ loaderData }) => {
+    const control = loaderData?.control;
+    if (!control) return {};
+    const heroImage =
+      control.source === "live"
+        ? loaderData.heroProduct?.image ?? null
+        : productImage(control.home.heroProductSlug);
+
+    const websiteJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: control.brand.nameFa,
+      alternateName: control.brand.name,
+      url: absUrl("/"),
+      inLanguage: "fa-IR",
+    };
+    const storeJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "ClothingStore",
+      name: control.brand.nameFa,
+      alternateName: control.brand.name,
+      url: absUrl("/"),
+      logo: absUrl("/icons/icon-512.png"),
+      description: control.brand.shortIntroduction,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: control.contact.city,
+        addressRegion: control.contact.province,
+        addressCountry: "IR",
+      },
+      sameAs: [control.contact.instagramUrl],
+    };
+
+    return {
+      meta: [
+        ...pageMeta({
+          title: control.copy.homepageTitle,
+          description: control.copy.homepageDescription,
+          path: "/",
+          type: "website",
+          image: heroImage ?? undefined,
+        }),
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [
+        ...canonical("/"),
+        ...(heroImage ? [{ rel: "preload", as: "image", href: heroImage }] : []),
+      ],
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(websiteJsonLd) },
+        { type: "application/ld+json", children: JSON.stringify(storeJsonLd) },
+      ],
+    };
+  },
   component: Home,
 });
 
 function Home() {
+  const { control, heroProduct } = Route.useLoaderData();
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
+
+  const sections: Record<string, ReactNode> = {
+    ticker: <TickerStrip />,
+    trust: <TrustStrip />,
+    categories: <CategoryGateway />,
+    products: <ProductMoments />,
+    drop_story: <DropStory />,
+    decision_support: <DecisionSupport />,
+    local_store: <LocalStoreVisit />,
+    instagram: <InstagramStrip />,
+  };
 
   return (
     <>
@@ -82,16 +120,12 @@ function Home() {
         id="main"
         className="bg-obsidian pb-bottombar text-bone transition-[padding] duration-300 md:pb-0"
         style={{ paddingTop: offsetTop }}
+        data-storefront-source={control.source}
       >
-        <HeroNarrative />
-        <TickerStrip />
-        <TrustStrip />
-        <CategoryGateway />
-        <ProductMoments />
-        <DropStory />
-        <DecisionSupport />
-        <LocalStoreVisit />
-        <InstagramStrip />
+        <HeroNarrative heroProduct={heroProduct} />
+        {control.home.sections.map((key) => (
+          <div key={key}>{sections[key] ?? null}</div>
+        ))}
       </main>
       <Footer theme="dark" />
       <MobileBottomBar />
