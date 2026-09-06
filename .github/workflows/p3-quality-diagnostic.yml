@@ -13,6 +13,7 @@ jobs:
     if: contains(github.event.head_commit.message, '[p3-quality-diagnostic]')
     runs-on: ubuntu-24.04
     env:
+      VITE_SITE_URL: https://lbb.example.test
       VITE_LBB_BACKEND_MODE: prototype
     steps:
       - uses: actions/checkout@v5
