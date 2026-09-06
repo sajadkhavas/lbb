@@ -1,14 +1,42 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
-import { BRAND, BRAND_COPY } from "@/lib/brand";
 import { CATEGORIES } from "@/lib/categories";
-import { ACTIVE_HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { productImage } from "@/lib/product-images";
 import { fmtToman, productBySlug } from "@/lib/products";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
-export function HeroNarrative() {
-  const heroProduct = productBySlug("lbb-signature-tee");
+type LiveHeroProduct = {
+  slug: string;
+  name: string;
+  priceToman: number | null;
+  image: string | null;
+};
+
+export function HeroNarrative({
+  heroProduct: liveHeroProduct,
+}: {
+  heroProduct?: LiveHeroProduct | null;
+}) {
+  const { source, brand, copy, home } = useStorefrontControl();
+  const prototypeProduct = productBySlug(home.heroProductSlug);
+  const categoryOrder = home.categoryOrder.filter(
+    (slug): slug is keyof typeof CATEGORIES => slug in CATEGORIES,
+  );
+
+  const heroProduct =
+    source === "live"
+      ? liveHeroProduct
+      : prototypeProduct
+        ? {
+            slug: prototypeProduct.slug,
+            name: prototypeProduct.name,
+            priceToman: prototypeProduct.price,
+            image: productImage(prototypeProduct.slug),
+          }
+        : null;
+  const heroImage =
+    source === "live" ? (heroProduct?.image ?? null) : productImage(home.heroProductSlug);
 
   return (
     <section
@@ -26,27 +54,27 @@ export function HeroNarrative() {
         <div className="order-2 flex min-w-0 flex-col justify-between border-t border-hairline px-[var(--lbb-gutter)] py-10 lg:order-1 lg:border-l lg:border-t-0 lg:py-12 xl:py-16">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <TechLabel tone="signal">{BRAND_COPY.heroEyebrow}</TechLabel>
+              <TechLabel tone="signal">{copy.heroEyebrow}</TechLabel>
               <span aria-hidden="true" className="h-px w-10 bg-hairline" />
-              <TechLabel>{BRAND.slogan}</TechLabel>
+              <TechLabel>{brand.slogan}</TechLabel>
             </div>
 
             <h1
               id="home-hero-title"
               className="mt-7 max-w-[12ch] text-hero leading-[0.95] text-bone"
             >
-              {BRAND_COPY.heroTitle}
+              {copy.heroTitle}
             </h1>
 
-            <p className="mt-7 max-w-[58ch] text-lede">{BRAND_COPY.heroBody}</p>
+            <p className="mt-7 max-w-[58ch] text-lede">{copy.heroBody}</p>
 
             <div className="mt-7 flex flex-wrap gap-3">
               <Link to="/shop" className={CtaClasses("signal", "lg")}>
-                {BRAND_COPY.primaryCta}
+                {copy.primaryCta}
                 <ArrowUpLeft size={17} aria-hidden="true" />
               </Link>
               <Link to="/contact" className={CtaClasses("line", "lg")}>
-                {BRAND_COPY.secondaryCta}
+                {copy.secondaryCta}
               </Link>
             </div>
 
@@ -59,7 +87,7 @@ export function HeroNarrative() {
             <p className="mb-4 text-xs font-bold text-metal">دسته موردنظرت را سریع پیدا کن:</p>
             <nav aria-label="دسترسی سریع به دسته‌های محصول" className="min-w-0">
               <ul className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {ACTIVE_HOME_CATEGORY_ORDER.map((slug) => (
+                {categoryOrder.map((slug) => (
                   <li key={slug} className="shrink-0 snap-start">
                     <Link
                       to="/$category"
@@ -76,17 +104,29 @@ export function HeroNarrative() {
         </div>
 
         <div className="relative order-1 min-h-[58svh] overflow-hidden bg-[#f3f1ec] lg:order-2 lg:min-h-full">
-          <img
-            src={productImage("lbb-signature-tee")}
-            alt="تیشرت مشکی ال‌بی‌بی روی زمینه روشن"
-            width={1200}
-            height={1500}
-            sizes="(max-width: 1023px) 100vw, 48vw"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-contain p-8 sm:p-12 lg:p-16"
-          />
+          {heroImage ? (
+            <img
+              src={heroImage}
+              alt={
+                source === "prototype"
+                  ? "تیشرت مشکی ال‌بی‌بی روی زمینه روشن"
+                  : heroProduct
+                    ? `${heroProduct.name} در ویترین ${brand.nameFa}`
+                    : `ویترین ${brand.nameFa}`
+              }
+              width={1200}
+              height={1500}
+              sizes="(max-width: 1023px) 100vw, 48vw"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-contain p-8 sm:p-12 lg:p-16"
+            />
+          ) : (
+            <div className="absolute inset-0 grid place-items-center p-8 text-center text-sm text-obsidian/60">
+              تصویر محصول منتخب در حال تکمیل است.
+            </div>
+          )}
           <span
             aria-hidden="true"
             className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/10 to-transparent lg:bg-gradient-to-r lg:from-obsidian/65 lg:via-transparent"
@@ -99,20 +139,26 @@ export function HeroNarrative() {
               params={{ slug: heroProduct.slug }}
               className="group absolute bottom-5 right-5 grid w-[min(360px,calc(100%-2.5rem))] grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-hairline-strong bg-obsidian/95 p-2 text-bone shadow-overlay backdrop-blur md:bottom-8 md:right-8"
             >
-              <img
-                src={productImage(heroProduct.slug)}
-                alt=""
-                width={64}
-                height={80}
-                loading="eager"
-                decoding="async"
-                className="h-20 w-16 rounded-xl object-cover"
-              />
+              {heroProduct.image ? (
+                <img
+                  src={heroProduct.image}
+                  alt=""
+                  width={64}
+                  height={80}
+                  loading="eager"
+                  decoding="async"
+                  className="h-20 w-16 rounded-xl object-cover"
+                />
+              ) : (
+                <span aria-hidden="true" className="h-20 w-16 rounded-xl bg-carbon-2" />
+              )}
               <span className="min-w-0">
                 <TechLabel tone="signal">HERO PIECE</TechLabel>
                 <span className="mt-1 block truncate text-sm font-black">{heroProduct.name}</span>
                 <span className="num mt-1 block text-xs text-metal">
-                  {fmtToman(heroProduct.price)}
+                  {heroProduct.priceToman === null
+                    ? "قیمت در صفحه محصول"
+                    : fmtToman(heroProduct.priceToman)}
                 </span>
               </span>
               <ArrowUpLeft

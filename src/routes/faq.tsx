@@ -6,6 +6,7 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { Band, CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";
+import { resolveStorefrontFaqs, type StorefrontFaqDto } from "@/lib/storefront-control";
 
 const TITLE = "سوالات متداول LBB | سایز، قیمت، ارسال و سفارش";
 const DESC =
@@ -109,7 +110,28 @@ const FAQ_GROUPS: FaqGroup[] = [
   },
 ];
 
+const FAQ_LABELS: Record<string, { label: string; title: string }> = {
+  products: { label: "PRODUCT DATA", title: "محصول و موجودی" },
+  sizing: { label: "FIT & SIZE", title: "فیت و انتخاب سایز" },
+  ordering: { label: "ORDER FLOW", title: "قیمت و ثبت سفارش" },
+  shipping: { label: "SHIPPING", title: "ارسال و سفارش" },
+  editorial: { label: "EDITORIAL PAGES", title: "کالکشن، لوک‌بوک و ژورنال" },
+};
+
+function backendFaqGroups(items: StorefrontFaqDto[]): FaqGroup[] {
+  const groups = new Map<string, FaqGroup>();
+  for (const item of [...items].sort((a, b) => a.sortOrder - b.sortOrder)) {
+    const id = item.category || "general";
+    const meta = FAQ_LABELS[id] ?? { label: id.toUpperCase(), title: "سوالات عمومی" };
+    const group = groups.get(id) ?? { id, label: meta.label, title: meta.title, items: [] };
+    group.items.push({ question: item.question, answer: item.answer });
+    groups.set(id, group);
+  }
+  return [...groups.values()];
+}
+
 export const Route = createFileRoute("/faq")({
+  loader: () => resolveStorefrontFaqs(),
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESC, path: "/faq" }),
     links: canonical("/faq"),
@@ -129,6 +151,9 @@ export const Route = createFileRoute("/faq")({
 });
 
 function FaqPage() {
+  const liveFaqs = Route.useLoaderData();
+  const faqGroups = liveFaqs ? backendFaqGroups(liveFaqs) : FAQ_GROUPS;
+
   return (
     <>
       <Navbar theme="light" />
@@ -149,7 +174,7 @@ function FaqPage() {
             </p>
 
             <nav className="mt-8 flex flex-wrap gap-2" aria-label="دسته‌های سوالات متداول">
-              {FAQ_GROUPS.map((group) => (
+              {faqGroups.map((group) => (
                 <a
                   key={group.id}
                   href={`#${group.id}`}

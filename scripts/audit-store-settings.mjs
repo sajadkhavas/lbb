@@ -12,6 +12,8 @@ const trustMarks = await read("src/components/lbb/TrustMarks.tsx");
 const commerce = await read("src/lib/commerce.ts");
 const shippingReturns = await read("src/routes/shipping-returns.tsx");
 const contact = await read("src/routes/contact.tsx");
+const storefrontControl = await read("src/lib/storefront-control.tsx");
+const backendApi = await read("src/lib/backend-api.ts");
 const checkout = await read("src/routes/checkout.tsx");
 const orderConfirmation = await read("src/routes/order-confirmation.tsx");
 const trackOrder = await read("src/routes/track-order.tsx");
@@ -20,6 +22,8 @@ if (!settings) failures.push("Typed public store settings are missing.");
 if (!readiness) failures.push("Launch-readiness evaluator is missing.");
 if (!trustMarks) failures.push("Controlled trust-mark component is missing.");
 if (!commerce) failures.push("Frontend commerce readiness boundary is missing.");
+if (!storefrontControl) failures.push("P3 storefront control is missing.");
+if (!backendApi) failures.push("Versioned backend API contract is missing.");
 
 for (const forbidden of [
   "merchantSecret",
@@ -109,8 +113,27 @@ if (/2_000_000|60_000|ارسال 2 تا 3 روزه|۷ روز ضمانت بازگ
   failures.push("Unsupported shipping or returns promise remains in public policy surface.");
 }
 
-if (!contact.includes("getPublicContactChannels") || !contact.includes("getPublicStoreLocation")) {
-  failures.push("Contact route must use verified public contact/location helpers.");
+for (const required of [
+  "resolveStorefrontControl",
+  'resolveStorefrontPage("contact")',
+  "control.contact.phone",
+  "control.contact.whatsapp",
+  "control.contact.instagramUrl",
+  "control.contact.city",
+  "control.contact.province",
+  "control.contact.locationLabel",
+]) {
+  if (!contact.includes(required)) {
+    failures.push(`P3 contact control missing: ${required}`);
+  }
+}
+for (const required of ["/api/v1/storefront/bootstrap", 'source: "prototype"']) {
+  if (!storefrontControl.includes(required)) {
+    failures.push(`P3 storefront contract missing: ${required}`);
+  }
+}
+if (!backendApi.includes('LBB_CONTRACT_VERSION = "2026-09-06-p3-storefront-v1"')) {
+  failures.push("P3 backend contract version is not locked.");
 }
 if (/<form\b/i.test(contact) || contact.includes("پیام شما ارسال شد")) {
   failures.push("Contact route must not expose a false-success form without a transport.");
@@ -192,4 +215,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Store settings, F14E trust boundary, and F14D live-commerce separation audit passed.");
+console.log("Store settings and P3 storefront control audit passed.");

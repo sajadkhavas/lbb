@@ -1,96 +1,127 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AtSign, Instagram, Mail, MapPin, MessageCircleMore, Phone } from "lucide-react";
+import { Instagram, MapPin, MessageCircleMore, Phone } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
-import { BRAND } from "@/lib/brand";
-import {
-  STORE_SETTINGS,
-  getPublicContactChannels,
-  getPublicStoreLocation,
-  type ContactChannelKind,
-} from "@/lib/store-settings";
 import { pageMeta, canonical, absUrl, breadcrumbLd } from "@/lib/site";
+import { resolveStorefrontControl, resolveStorefrontPage } from "@/lib/storefront-control";
 
-const publicLocation = getPublicStoreLocation();
-const publicContacts = getPublicContactChannels();
-const publicSocialUrls = publicContacts
-  .filter((channel) => channel.kind === "instagram" || channel.kind === "whatsapp")
-  .map((channel) => channel.href);
+const FALLBACK_TITLE = "تماس با LBB";
+const FALLBACK_DESC = "راه‌های ارتباط عمومی و تأییدشده با LBB و اطلاعات فروشگاه حضوری در کرج.";
 
-const TITLE = publicLocation
-  ? `تماس با LBB | ${publicLocation.venue} ${publicLocation.city}`
-  : "تماس با LBB";
-const DESC = publicLocation
-  ? `راه‌های ارتباط تأییدشده با LBB و اطلاعات عمومی فروشگاه در ${publicLocation.venue} ${publicLocation.city}.`
-  : "راه‌های ارتباط عمومی و تأییدشده با LBB؛ اطلاعات تأییدنشده در این صفحه نمایش داده نمی‌شوند.";
+type ContactKind = "instagram" | "phone" | "whatsapp";
 
-const contactPageLd = {
-  "@context": "https://schema.org",
-  "@type": "ContactPage",
-  name: TITLE,
-  url: absUrl("/contact"),
-  inLanguage: "fa-IR",
-  mainEntity: {
-    "@type": "ClothingStore",
-    name: BRAND.name,
-    alternateName: BRAND.nameFa,
-    url: absUrl("/"),
-    ...(publicLocation
-      ? {
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: publicLocation.city,
-            addressRegion: publicLocation.province,
-            addressCountry: publicLocation.countryCode,
-          },
-        }
-      : {}),
-    ...(publicSocialUrls.length > 0 ? { sameAs: publicSocialUrls } : {}),
-  },
-};
+function ContactIcon({ kind }: { kind: ContactKind }) {
+  if (kind === "instagram") return <Instagram size={18} aria-hidden="true" />;
+  if (kind === "phone") return <Phone size={18} aria-hidden="true" />;
+  return <MessageCircleMore size={18} aria-hidden="true" />;
+}
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESC, path: "/contact" }),
-    links: canonical("/contact"),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify(
-          breadcrumbLd([
-            { name: "خانه", path: "/" },
-            { name: "تماس", path: "/contact" },
-          ]),
-        ),
+  loader: async () => {
+    const [control, page] = await Promise.all([
+      resolveStorefrontControl(),
+      resolveStorefrontPage("contact"),
+    ]);
+    return { control, page };
+  },
+  head: ({ loaderData }) => {
+    const control = loaderData?.control;
+    const page = loaderData?.page;
+    if (!control) return {};
+
+    const prototypeTitle = `تماس با LBB | ${control.brand.physicalLocation} ${control.contact.city}`;
+    const title =
+      page?.metaTitle ||
+      page?.title ||
+      (control.source === "prototype" ? prototypeTitle : FALLBACK_TITLE);
+    const description = page?.metaDescription || page?.excerpt || FALLBACK_DESC;
+    const sameAs = [
+      control.contact.instagramUrl,
+      `https://wa.me/98${control.contact.whatsapp.replace(/\D/g, "").replace(/^0/, "")}`,
+    ];
+    const contactPageLd = {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      name: title,
+      url: absUrl("/contact"),
+      inLanguage: "fa-IR",
+      mainEntity: {
+        "@type": "ClothingStore",
+        name: control.brand.name,
+        alternateName: control.brand.nameFa,
+        url: absUrl("/"),
+        telephone: control.contact.phone,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: control.contact.city,
+          addressRegion: control.contact.province,
+          addressCountry: "IR",
+        },
+        sameAs,
       },
-      { type: "application/ld+json", children: JSON.stringify(contactPageLd) },
-    ],
-  }),
+    };
+
+    return {
+      meta: pageMeta({ title, description, path: "/contact" }),
+      links: canonical("/contact"),
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: "تماس", path: "/contact" },
+            ]),
+          ),
+        },
+        { type: "application/ld+json", children: JSON.stringify(contactPageLd) },
+      ],
+    };
+  },
   component: ContactPage,
 });
 
-function ContactIcon({ kind }: { kind: ContactChannelKind }) {
-  if (kind === "instagram") return <Instagram size={18} aria-hidden="true" />;
-  if (kind === "email") return <Mail size={18} aria-hidden="true" />;
-  if (kind === "phone") return <Phone size={18} aria-hidden="true" />;
-  if (kind === "whatsapp") return <MessageCircleMore size={18} aria-hidden="true" />;
-  return <AtSign size={18} aria-hidden="true" />;
-}
-
 function ContactPage() {
-  const location = getPublicStoreLocation(STORE_SETTINGS);
-  const contacts = getPublicContactChannels(STORE_SETTINGS);
-  const hasPendingContact = STORE_SETTINGS.contacts.some(
-    (channel) => channel.isPublic && channel.verification === "pending",
-  );
+  const { control, page } = Route.useLoaderData();
+  const whatsappDigits = control.contact.whatsapp.replace(/\D/g, "").replace(/^0/, "");
+  const phoneDigits = control.contact.phone.replace(/\D/g, "").replace(/^0/, "");
+  const contacts: Array<{
+    kind: ContactKind;
+    label: string;
+    value: string;
+    href: string;
+  }> = [
+    {
+      kind: "instagram",
+      label: "اینستاگرام",
+      value: control.contact.instagramHandle,
+      href: control.contact.instagramUrl,
+    },
+    {
+      kind: "phone",
+      label: "تلفن",
+      value: control.contact.phone,
+      href: `tel:+98${phoneDigits}`,
+    },
+    {
+      kind: "whatsapp",
+      label: "واتساپ",
+      value: control.contact.whatsapp,
+      href: `https://wa.me/98${whatsappDigits}`,
+    },
+  ];
 
   return (
     <>
       <Navbar />
-      <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16 text-bone">
+      <main
+        dir="rtl"
+        className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16 text-bone"
+        data-storefront-source={control.source}
+      >
         <div className="hairline-b">
           <Shell className="py-3">
             <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "تماس" }]} />
@@ -102,65 +133,48 @@ function ContactPage() {
             <section aria-labelledby="contact-heading">
               <TechLabel tone="signal">CONTACT / VERIFIED CHANNELS</TechLabel>
               <h1 id="contact-heading" className="mt-4 max-w-[14ch] text-display-1 text-bone">
-                ارتباط با LBB
+                {page?.title || "ارتباط با LBB"}
               </h1>
               <p className="text-lede mt-5 max-w-[58ch]">
-                برای پرسش درباره محصول، سایز، موجودی یا سفارش می‌توانید از راه‌های ارتباطی رسمی LBB
-                استفاده کنید.
-              </p>
-              <p className="mt-5 max-w-[64ch] text-sm leading-8 text-metal">
-                اینستاگرام، تلفن پشتیبانی و واتساپ ثبت‌شده در این صفحه کانال‌های رسمی ارتباط با LBB
-                هستند.
+                {page?.excerpt ||
+                  "برای پرسش درباره محصول، سایز، موجودی یا سفارش می‌توانید از راه‌های ارتباطی رسمی LBB استفاده کنید."}
               </p>
 
-              {contacts.length > 0 ? (
-                <div
-                  className="mt-8 grid gap-3 sm:grid-cols-2"
-                  aria-label="راه‌های ارتباطی تأییدشده"
-                >
-                  {contacts.map((channel) => (
-                    <a
-                      key={`${channel.kind}-${channel.value}`}
-                      href={channel.href}
-                      target={channel.href.startsWith("https:") ? "_blank" : undefined}
-                      rel={channel.href.startsWith("https:") ? "noopener noreferrer" : undefined}
-                      className={`${CtaClasses("line")} min-w-0 justify-start overflow-hidden`}
-                    >
-                      <ContactIcon kind={channel.kind} />
-                      <span className="min-w-0">
-                        <span className="block truncate">{channel.label}</span>
-                        <span
-                          className="mt-0.5 block truncate text-[11px] text-mute"
-                          dir={
-                            channel.kind === "phone" || channel.kind === "whatsapp"
-                              ? "ltr"
-                              : undefined
-                          }
-                        >
-                          {channel.value}
-                        </span>
+              <div className="mt-8 grid gap-3 sm:grid-cols-2" aria-label="راه‌های ارتباطی تأییدشده">
+                {contacts.map((channel) => (
+                  <a
+                    key={channel.kind}
+                    href={channel.href}
+                    aria-label={
+                      channel.kind === "instagram"
+                        ? `اینستاگرام رسمی ${control.brand.name}`
+                        : undefined
+                    }
+                    target={channel.href.startsWith("https:") ? "_blank" : undefined}
+                    rel={channel.href.startsWith("https:") ? "noopener noreferrer" : undefined}
+                    className={`${CtaClasses("line")} min-w-0 justify-start overflow-hidden`}
+                  >
+                    <ContactIcon kind={channel.kind} />
+                    <span className="min-w-0">
+                      <span className="block truncate">{channel.label}</span>
+                      <span
+                        className="mt-0.5 block truncate text-[11px] text-mute"
+                        dir={
+                          channel.kind === "phone" || channel.kind === "whatsapp"
+                            ? "ltr"
+                            : undefined
+                        }
+                      >
+                        {channel.value}
                       </span>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <StatePanel
-                  className="mt-8"
-                  title={
-                    hasPendingContact
-                      ? "راه ارتباطی عمومی در حال بررسی است"
-                      : "راه ارتباطی عمومی هنوز منتشر نشده است"
-                  }
-                  tone={hasPendingContact ? "warning" : "info"}
-                >
-                  تا زمانی که یک کانال هم عمومی و هم تأییدشده نباشد، لینک تماس ساختگی در این صفحه
-                  نمایش داده نمی‌شود.
-                </StatePanel>
-              )}
+                    </span>
+                  </a>
+                ))}
+              </div>
 
               <StatePanel className="mt-4" title="فرم تماس آنلاین فعال نیست" tone="info">
-                این فرانت‌اند در حال حاضر Transport تأییدشده‌ای برای ارسال فرم پشتیبانی ندارد؛ به
-                همین دلیل فرمی که بتواند پیام «ارسال شد» بدون تحویل واقعی نشان دهد ارائه نمی‌شود.
+                تا زمانی که Transport واقعی پیام در قرارداد live فعال نشده، این صفحه موفقیت ساختگی
+                برای ارسال فرم نشان نمی‌دهد.
               </StatePanel>
             </section>
 
@@ -181,82 +195,38 @@ function ContactPage() {
                 </div>
               </div>
 
-              {location ? (
-                <dl className="mt-7 space-y-4 text-sm">
-                  <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
-                    <dt className="text-mute">شهر</dt>
-                    <dd className="font-semibold text-bone">{location.city}</dd>
-                  </div>
-                  <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
-                    <dt className="text-mute">محل فروشگاه</dt>
-                    <dd className="text-end font-semibold text-bone">{location.venue}</dd>
-                  </div>
-                  {location.floor ? (
-                    <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
-                      <dt className="text-mute">طبقه</dt>
-                      <dd className="font-semibold text-bone">{location.floor}</dd>
-                    </div>
-                  ) : null}
-                  {location.unit ? (
-                    <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
-                      <dt className="text-mute">واحد</dt>
-                      <dd className="font-semibold text-bone">{location.unit}</dd>
-                    </div>
-                  ) : null}
-                  {location.addressLine ? (
-                    <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
-                      <dt className="text-mute">نشانی</dt>
-                      <dd className="max-w-[26ch] text-end font-semibold text-bone">
-                        {location.addressLine}
-                      </dd>
-                    </div>
-                  ) : null}
-                  {location.postalCode ? (
-                    <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
-                      <dt className="text-mute">کدپستی</dt>
-                      <dd className="font-semibold text-bone" dir="ltr">
-                        {location.postalCode}
-                      </dd>
-                    </div>
-                  ) : null}
-                  {location.openingHours.length > 0 ? (
-                    <div className="flex items-start justify-between gap-5">
-                      <dt className="text-mute">ساعت کاری</dt>
-                      <dd className="text-end font-semibold text-bone">
-                        <ul className="space-y-1">
-                          {location.openingHours.map((hours) => (
-                            <li key={hours}>{hours}</li>
-                          ))}
-                        </ul>
-                      </dd>
-                    </div>
-                  ) : null}
-                </dl>
-              ) : (
-                <StatePanel className="mt-7" title="مکان عمومی منتشر نشده است" tone="info">
-                  تا تأیید عمومی موقعیت، نشانی یا جزئیات مراجعه نمایش داده نمی‌شود.
-                </StatePanel>
-              )}
-
-              {location &&
-              !location.floor &&
-              !location.unit &&
-              !location.addressLine &&
-              location.openingHours.length === 0 ? (
-                <div className="mt-7 rounded-xl border border-hairline bg-obsidian p-4">
-                  <div className="flex items-start gap-3">
-                    <MessageCircleMore
-                      size={18}
-                      className="mt-1 shrink-0 text-signal"
-                      aria-hidden="true"
-                    />
-                    <p className="text-sm leading-7 text-metal">
-                      جزئیات تکمیلی مراجعه هنوز عمومی نشده‌اند. این صفحه از روی نام مجتمع، شماره
-                      واحد یا ساعت کاری حدس نمی‌زند.
-                    </p>
-                  </div>
+              <dl className="mt-7 space-y-4 text-sm">
+                <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
+                  <dt className="text-mute">شهر</dt>
+                  <dd className="font-semibold text-bone">{control.contact.city}</dd>
                 </div>
-              ) : null}
+                <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
+                  <dt className="text-mute">استان</dt>
+                  <dd className="font-semibold text-bone">{control.contact.province}</dd>
+                </div>
+                <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
+                  <dt className="text-mute">محل فروشگاه</dt>
+                  <dd className="text-end font-semibold text-bone">
+                    {control.source === "prototype"
+                      ? control.brand.physicalLocation
+                      : control.contact.locationLabel}
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="mt-7 rounded-xl border border-hairline bg-obsidian p-4">
+                <div className="flex items-start gap-3">
+                  <MessageCircleMore
+                    size={18}
+                    className="mt-1 shrink-0 text-signal"
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm leading-7 text-metal">
+                    شماره واحد و ساعت کاری تا زمانی که به‌صورت عمومی تأیید نشوند در سایت حدس زده
+                    نمی‌شوند.
+                  </p>
+                </div>
+              </div>
             </aside>
           </div>
         </Shell>

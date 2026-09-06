@@ -18,27 +18,77 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { absAsset, absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
+import { BackendApiError } from "@/lib/backend-api";
+import { resolveStorefrontJournalPost, type StorefrontJournalDto } from "@/lib/storefront-control";
 
 const COVERS = { hero: heroMain, l1: lifestyle1, l2: lifestyle2 };
 
 export const Route = createFileRoute("/journal/$slug")({
-  loader: ({ params }): { article: JournalArticle; related: JournalArticle[] } => {
+  loader: async ({ params }) => {
+    try {
+      const liveArticle = await resolveStorefrontJournalPost(params.slug);
+      if (liveArticle) return { source: "live" as const, article: liveArticle };
+    } catch (error) {
+      if (error instanceof BackendApiError && error.status === 404) {
+        throw notFound({ routeId: "/journal/$slug" });
+      }
+      throw error;
+    }
+
     const article = journalBySlug(params.slug);
     if (!article) throw notFound({ routeId: "/journal/$slug" });
-
     const related = JOURNAL_ARTICLES.filter((candidate) => candidate.slug !== article.slug)
       .sort(
         (left, right) =>
           Number(right.category === article.category) - Number(left.category === article.category),
       )
       .slice(0, 2);
-
-    return { article, related };
+    return { source: "prototype" as const, article, related };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
         meta: [{ title: "مقاله پیدا نشد" }, { name: "robots", content: "noindex, nofollow" }],
+      };
+    }
+
+    if (loaderData.source === "live") {
+      const article = loaderData.article;
+      const title = `${article.title} | ژورنال LBB`;
+      const path = `/journal/${article.slug}`;
+      const articleLd = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: article.title,
+        description: article.excerpt ?? article.title,
+        image: article.coverUrl ?? undefined,
+        datePublished: article.publishedAt ?? undefined,
+        articleSection: article.category ?? undefined,
+        inLanguage: "fa-IR",
+        mainEntityOfPage: absUrl(path),
+      };
+      return {
+        meta: pageMeta({
+          title,
+          description: article.excerpt ?? article.title,
+          path,
+          image: article.coverUrl ?? undefined,
+          type: "article",
+        }),
+        links: canonical(path),
+        scripts: [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify(
+              breadcrumbLd([
+                { name: "خانه", path: "/" },
+                { name: "ژورنال", path: "/journal" },
+                { name: article.title, path },
+              ]),
+            ),
+          },
+          { type: "application/ld+json", children: JSON.stringify(articleLd) },
+        ],
       };
     }
 
@@ -126,8 +176,102 @@ function JournalNotFound() {
 }
 
 function JournalDetailPage() {
-  const { article, related }: { article: JournalArticle; related: JournalArticle[] } =
-    Route.useLoaderData();
+  const data = Route.useLoaderData();
+  return data.source === "live" ? (
+    <LiveJournalDetailPage article={data.article} />
+  ) : (
+    <PrototypeJournalDetailPage article={data.article} related={data.related} />
+  );
+}
+
+function liveArticleParagraphs(content: string | undefined) {
+  if (!content) return [];
+  return content
+    .replace(/<br\s*\/?>(?=.)/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .split(/\n+/)
+    .map((part) => part.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
+function LiveJournalDetailPage({ article }: { article: StorefrontJournalDto }) {
+  const paragraphs = liveArticleParagraphs(article.content);
+  return (
+    <>
+      <Navbar theme="light" />
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="journal-detail"
+        data-storefront-source="live"
+      >
+        <Shell className="py-3">
+          <Breadcrumb
+            items={[
+              { label: "خانه", href: "/" },
+              { label: "ژورنال", href: "/journal" },
+              { label: article.title },
+            ]}
+          />
+        </Shell>
+        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
+          <Shell className="max-w-[980px]">
+            <TechLabel tone="signal">{article.category ?? "JOURNAL"}</TechLabel>
+            <h1 className="mt-5 max-w-[18ch] text-display-1 text-bone">{article.title}</h1>
+            {article.excerpt ? (
+              <p className="text-lede mt-5 max-w-[62ch]">{article.excerpt}</p>
+            ) : null}
+            {article.publishedAt ? (
+              <time dateTime={article.publishedAt} className="mt-6 block text-xs text-mute">
+                {new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(
+                  new Date(article.publishedAt),
+                )}
+              </time>
+            ) : null}
+          </Shell>
+        </Band>
+        {article.coverUrl ? (
+          <Band>
+            <Shell className="max-w-[1180px]">
+              <img
+                src={article.coverUrl}
+                alt=""
+                width={1600}
+                height={900}
+                className="aspect-[16/9] w-full rounded-2xl border border-hairline object-cover"
+              />
+            </Shell>
+          </Band>
+        ) : null}
+        <Band>
+          <Shell className="max-w-[760px]">
+            <article className="space-y-6">
+              {paragraphs.map((paragraph, index) => (
+                <p
+                  key={`${index}-${paragraph.slice(0, 24)}`}
+                  className="text-[15px] leading-9 text-metal"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </article>
+          </Shell>
+        </Band>
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PrototypeJournalDetailPage({
+  article,
+  related,
+}: {
+  article: JournalArticle;
+  related: JournalArticle[];
+}) {
   const commerce = getJournalCommerceView(article);
 
   return (

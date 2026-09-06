@@ -1,19 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowUpLeft, X } from "lucide-react";
 import { useRef } from "react";
-import {
-  EDITORIAL_NAVIGATION,
-  PERSONAL_NAVIGATION,
-  SERVICE_NAVIGATION,
-  isNavigationItemActive,
-} from "@/lib/navigation";
+import { PERSONAL_NAVIGATION } from "@/lib/navigation";
 import { useNavigationOverlay } from "@/lib/navigation-overlay";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
+import {
+  isMerchantNavigationItemActive,
+  MerchantNavigationLink,
+} from "@/components/lbb/navigation/MerchantNavigationLink";
 import { CatalogTaxonomyMenu } from "@/components/lbb/navigation/CatalogTaxonomyMenu";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
 export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
+  const { navigation } = useStorefrontControl();
   const { close, dismissForNavigation } = useNavigationOverlay();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const panelRef = useRef<HTMLDivElement>(null);
@@ -74,7 +75,6 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                   <ArrowUpLeft size={14} aria-hidden="true" />
                 </Link>
               </div>
-
               <CatalogTaxonomyMenu pathname={pathname} onNavigate={dismissForNavigation} />
             </section>
 
@@ -84,28 +84,35 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                   داستان و کالکشن
                 </h3>
                 <ul className="mt-2">
-                  {EDITORIAL_NAVIGATION.map((item) => (
-                    <li key={String(item.to)}>
-                      <NavigationLink
+                  {navigation.editorial.map((item) => (
+                    <li key={`${item.href}-${item.label}`}>
+                      <MerchantNavigationLink
                         item={item}
-                        active={isNavigationItemActive(pathname, item)}
                         onNavigate={dismissForNavigation}
                         className="group flex min-h-14 items-center justify-between gap-4 border-b border-hairline-soft py-2"
                       >
                         <span>
-                          <span className="block text-sm font-bold text-bone transition-colors group-hover:text-signal">
+                          <span
+                            className={`block text-sm font-bold transition-colors group-hover:text-signal ${
+                              isMerchantNavigationItemActive(pathname, item)
+                                ? "text-signal"
+                                : "text-bone"
+                            }`}
+                          >
                             {item.label}
                           </span>
-                          <span className="mt-1 block text-[11px] text-mute">
-                            {item.description}
-                          </span>
+                          {item.description ? (
+                            <span className="mt-1 block text-[11px] text-mute">
+                              {item.description}
+                            </span>
+                          ) : null}
                         </span>
                         <ArrowUpLeft
                           size={15}
                           aria-hidden="true"
                           className="text-mute group-hover:text-signal"
                         />
-                      </NavigationLink>
+                      </MerchantNavigationLink>
                     </li>
                   ))}
                 </ul>
@@ -117,9 +124,9 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                     راهنما
                   </h3>
                   <ul className="mt-3 space-y-2">
-                    {SERVICE_NAVIGATION.slice(0, 4).map((item) => (
-                      <li key={String(item.to)}>
-                        <NavigationLink
+                    {navigation.service.slice(0, 4).map((item) => (
+                      <li key={`${item.href}-${item.label}`}>
+                        <MerchantNavigationLink
                           item={item}
                           onNavigate={dismissForNavigation}
                           className="text-xs leading-6 text-metal transition-colors hover:text-bone"

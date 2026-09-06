@@ -18,6 +18,7 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import { resolveStorefrontLookbook, type StorefrontLookDto } from "@/lib/storefront-control";
 
 const TITLE = "لوک‌بوک LBB | داستان‌های تصویری و مسیرهای مرتبط";
 const DESC =
@@ -25,6 +26,7 @@ const DESC =
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export const Route = createFileRoute("/lookbook")({
+  loader: () => resolveStorefrontLookbook(),
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESC, path: "/lookbook", image: heroMain }),
     links: canonical("/lookbook"),
@@ -44,6 +46,84 @@ export const Route = createFileRoute("/lookbook")({
 });
 
 function LookbookPage() {
+  const liveItems = Route.useLoaderData();
+  return liveItems ? <LiveLookbookPage items={liveItems} /> : <PrototypeLookbookPage />;
+}
+
+function LiveLookbookPage({ items }: { items: StorefrontLookDto[] }) {
+  return (
+    <>
+      <Navbar theme="light" />
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="lookbook"
+        data-storefront-source="live"
+      >
+        <Shell className="py-3">
+          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "لوک‌بوک" }]} />
+        </Shell>
+        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
+          <Shell>
+            <TechLabel tone="signal">LBB / VISUAL STORIES</TechLabel>
+            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+              لوک‌بوک؛ داستان‌های تصویری LBB
+            </h1>
+            <p className="text-lede mt-5 max-w-[60ch]">
+              تصاویر و مسیرهای این صفحه مستقیماً از محتوای منتشرشده فروشگاه می‌آیند.
+            </p>
+          </Shell>
+        </Band>
+        <Band>
+          <Shell>
+            {items.length === 0 ? (
+              <StatePanel title="هنوز تصویری برای لوک‌بوک منتشر نشده است">
+                پس از انتشار در پنل مدیریت، تصاویر اینجا نمایش داده می‌شوند.
+              </StatePanel>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((item, index) => (
+                  <article
+                    key={`${item.imageUrl}-${index}`}
+                    className="overflow-hidden rounded-2xl border border-hairline bg-carbon"
+                  >
+                    <figure>
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        width={900}
+                        height={1125}
+                        loading={index < 2 ? "eager" : "lazy"}
+                        className="aspect-[4/5] w-full object-cover"
+                      />
+                      <figcaption className="p-4">
+                        <TechLabel tone="signal">
+                          LOOK {String(index + 1).padStart(2, "0")}
+                        </TechLabel>
+                        <h2 className="mt-2 text-display-3 text-bone">{item.title}</h2>
+                        {item.caption ? (
+                          <p className="mt-2 text-sm leading-7 text-metal">{item.caption}</p>
+                        ) : null}
+                        {item.linkUrl ? (
+                          <a href={item.linkUrl} className={`${CtaClasses("line", "sm")} mt-4`}>
+                            مسیر مرتبط <ArrowUpLeft size={15} aria-hidden="true" />
+                          </a>
+                        ) : null}
+                      </figcaption>
+                    </figure>
+                  </article>
+                ))}
+              </div>
+            )}
+          </Shell>
+        </Band>
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PrototypeLookbookPage() {
   const sceneViews = useMemo(() => LOOKBOOK_SCENES.map(getLookbookSceneView), []);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
