@@ -115,10 +115,7 @@ function LiveAboutPage({ control, page }: { control: StorefrontControl; page: St
   return (
     <>
       <Navbar theme="light" />
-      <main
-        className="min-h-screen bg-obsidian pb-bottombar pt-16"
-        data-storefront-source="live"
-      >
+      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-storefront-source="live">
         <Shell className="py-3">
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: page.title }]} />
         </Shell>
@@ -150,7 +147,10 @@ function LiveAboutPage({ control, page }: { control: StorefrontControl; page: St
               <div className="mt-5 space-y-4">
                 {(paragraphs.length > 0 ? paragraphs : [control.brand.descriptor]).map(
                   (paragraph, index) => (
-                    <p key={`${index}-${paragraph.slice(0, 24)}`} className="text-sm leading-8 text-metal">
+                    <p
+                      key={`${index}-${paragraph.slice(0, 24)}`}
+                      className="text-sm leading-8 text-metal"
+                    >
                       {paragraph}
                     </p>
                   ),
@@ -169,7 +169,9 @@ function LiveAboutPage({ control, page }: { control: StorefrontControl; page: St
             </section>
             <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
               <TechLabel tone="signal">PHYSICAL / ONLINE</TechLabel>
-              <h2 className="mt-4 text-display-3 text-bone">{control.brand.physicalLocationShort}</h2>
+              <h2 className="mt-4 text-display-3 text-bone">
+                {control.brand.physicalLocationShort}
+              </h2>
               <p className="mt-4 text-sm leading-8 text-metal">{control.brand.shortIntroduction}</p>
               <Link to="/contact" className={`${CtaClasses("line")} mt-6`}>
                 اطلاعات تماس و فروشگاه

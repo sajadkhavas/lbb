@@ -34,7 +34,10 @@ export const Route = createFileRoute("/contact")({
 
     const title = page?.metaTitle || page?.title || FALLBACK_TITLE;
     const description = page?.metaDescription || page?.excerpt || FALLBACK_DESC;
-    const sameAs = [control.contact.instagramUrl, `https://wa.me/98${control.contact.whatsapp.replace(/\D/g, "").replace(/^0/, "")}`];
+    const sameAs = [
+      control.contact.instagramUrl,
+      `https://wa.me/98${control.contact.whatsapp.replace(/\D/g, "").replace(/^0/, "")}`,
+    ];
     const contactPageLd = {
       "@context": "https://schema.org",
       "@type": "ContactPage",
@@ -133,10 +136,7 @@ function ContactPage() {
                   "برای پرسش درباره محصول، سایز، موجودی یا سفارش می‌توانید از راه‌های ارتباطی رسمی LBB استفاده کنید."}
               </p>
 
-              <div
-                className="mt-8 grid gap-3 sm:grid-cols-2"
-                aria-label="راه‌های ارتباطی تأییدشده"
-              >
+              <div className="mt-8 grid gap-3 sm:grid-cols-2" aria-label="راه‌های ارتباطی تأییدشده">
                 {contacts.map((channel) => (
                   <a
                     key={channel.kind}
@@ -150,7 +150,11 @@ function ContactPage() {
                       <span className="block truncate">{channel.label}</span>
                       <span
                         className="mt-0.5 block truncate text-[11px] text-mute"
-                        dir={channel.kind === "phone" || channel.kind === "whatsapp" ? "ltr" : undefined}
+                        dir={
+                          channel.kind === "phone" || channel.kind === "whatsapp"
+                            ? "ltr"
+                            : undefined
+                        }
                       >
                         {channel.value}
                       </span>
@@ -193,7 +197,9 @@ function ContactPage() {
                 </div>
                 <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
                   <dt className="text-mute">محل فروشگاه</dt>
-                  <dd className="text-end font-semibold text-bone">{control.contact.locationLabel}</dd>
+                  <dd className="text-end font-semibold text-bone">
+                    {control.contact.locationLabel}
+                  </dd>
                 </div>
               </dl>
 
