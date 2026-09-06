@@ -1,4 +1,4 @@
-export const LBB_CONTRACT_VERSION = "2026-08-09-f14-be-f1" as const;
+export const LBB_CONTRACT_VERSION = "2026-09-06-p3-storefront-v1" as const;
 
 export type BackendMode = "live" | "prototype";
 export type StockState = "in_stock" | "low_stock" | "out_of_stock" | "unavailable";

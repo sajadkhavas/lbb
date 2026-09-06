@@ -178,8 +178,8 @@ const LOCAL_CONTROL: StorefrontControl = {
   brand: { ...BRAND },
   copy: { ...BRAND_COPY },
   contact: {
-    phone: STORE_SETTINGS.contact.phone?.display ?? "026-3256-0477",
-    whatsapp: STORE_SETTINGS.contact.whatsapp?.display ?? "0902-858-4879",
+    phone: STORE_SETTINGS.contacts.find((channel) => channel.kind === "phone")?.value ?? "026-3256-0477",
+    whatsapp: STORE_SETTINGS.contacts.find((channel) => channel.kind === "whatsapp")?.value ?? "0902-858-4879",
     instagramHandle: BRAND.instagramHandle,
     instagramUrl: BRAND.instagramUrl,
     locationLabel: BRAND.physicalLocationShort,
