@@ -102,7 +102,9 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                             {item.label}
                           </span>
                           {item.description ? (
-                            <span className="mt-1 block text-[11px] text-mute">{item.description}</span>
+                            <span className="mt-1 block text-[11px] text-mute">
+                              {item.description}
+                            </span>
                           ) : null}
                         </span>
                         <ArrowUpLeft

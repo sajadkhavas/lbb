@@ -89,7 +89,7 @@ export type SeoDefaults = {
 };
 
 export type StorefrontControl = {
-  source: "prototype" | "backend";
+  source: "prototype" | "live";
   contractVersion: string;
   brand: BrandIdentity;
   copy: BrandCopy;
@@ -178,8 +178,11 @@ const LOCAL_CONTROL: StorefrontControl = {
   brand: { ...BRAND },
   copy: { ...BRAND_COPY },
   contact: {
-    phone: STORE_SETTINGS.contacts.find((channel) => channel.kind === "phone")?.value ?? "026-3256-0477",
-    whatsapp: STORE_SETTINGS.contacts.find((channel) => channel.kind === "whatsapp")?.value ?? "0902-858-4879",
+    phone:
+      STORE_SETTINGS.contacts.find((channel) => channel.kind === "phone")?.value ?? "026-3256-0477",
+    whatsapp:
+      STORE_SETTINGS.contacts.find((channel) => channel.kind === "whatsapp")?.value ??
+      "0902-858-4879",
     instagramHandle: BRAND.instagramHandle,
     instagramUrl: BRAND.instagramUrl,
     locationLabel: BRAND.physicalLocationShort,
@@ -228,11 +231,7 @@ const LOCAL_CONTROL: StorefrontControl = {
   },
 };
 
-function objectSetting<T>(
-  settings: BootstrapDto["settings"],
-  group: string,
-  key: string,
-): T {
+function objectSetting<T>(settings: BootstrapDto["settings"], group: string, key: string): T {
   const value = settings[group]?.[key];
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new BackendApiError(`تنظیم ${key} در Backend معتبر نیست.`, {
@@ -242,11 +241,7 @@ function objectSetting<T>(
   return value as T;
 }
 
-function arraySetting<T>(
-  settings: BootstrapDto["settings"],
-  group: string,
-  key: string,
-): T[] {
+function arraySetting<T>(settings: BootstrapDto["settings"], group: string, key: string): T[] {
   const value = settings[group]?.[key];
   if (!Array.isArray(value)) {
     throw new BackendApiError(`تنظیم ${key} در Backend معتبر نیست.`, {
@@ -313,7 +308,7 @@ export async function resolveStorefrontControl(): Promise<StorefrontControl> {
   }
 
   return {
-    source: "backend",
+    source: "live",
     contractVersion: bootstrap.contractVersion,
     brand: objectSetting<BrandIdentity>(bootstrap.settings, "brand", "brand.identity"),
     copy: objectSetting<BrandCopy>(bootstrap.settings, "brand", "brand.copy"),
@@ -324,7 +319,11 @@ export async function resolveStorefrontControl(): Promise<StorefrontControl> {
       "announcement.messages",
     ),
     navigation: {
-      shop: arraySetting<MerchantNavigationItem>(bootstrap.settings, "navigation", "navigation.shop"),
+      shop: arraySetting<MerchantNavigationItem>(
+        bootstrap.settings,
+        "navigation",
+        "navigation.shop",
+      ),
       editorial: arraySetting<MerchantNavigationItem>(
         bootstrap.settings,
         "navigation",
@@ -349,9 +348,7 @@ export async function resolveStorefrontControl(): Promise<StorefrontControl> {
 
 export async function resolveStorefrontPage(slug: string) {
   if (!isLiveBackend()) return null;
-  return fetchStorefront<StorefrontPageDto>(
-    `/api/v1/storefront/pages/${encodeURIComponent(slug)}`,
-  );
+  return fetchStorefront<StorefrontPageDto>(`/api/v1/storefront/pages/${encodeURIComponent(slug)}`);
 }
 
 export async function resolveStorefrontFaqs() {

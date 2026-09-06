@@ -6,18 +6,9 @@ import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
 import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { Logo } from "@/components/lbb/Logo";
 import { TrustMarks } from "@/components/lbb/TrustMarks";
-import {
-  useStorefrontControl,
-  type MerchantNavigationItem,
-} from "@/lib/storefront-control";
+import { useStorefrontControl, type MerchantNavigationItem } from "@/lib/storefront-control";
 
-function FooterSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function FooterSection({ title, children }: { title: string; children: React.ReactNode }) {
   const reactId = useId();
   const id = `footer-${reactId.replace(/:/g, "")}`;
   const [open, setOpen] = useState(false);
@@ -99,7 +90,10 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
               <span>{copy.storeLocationLabel || contact.locationLabel}</span>
             </p>
             <div className="mt-4 grid gap-1 text-sm text-metal">
-              <a href={phoneHref} className="inline-flex min-h-9 items-center gap-2 hover:text-signal">
+              <a
+                href={phoneHref}
+                className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
+              >
                 <Phone size={15} aria-hidden="true" />
                 <span dir="ltr">{contact.phone}</span>
               </a>
@@ -136,7 +130,9 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
 
         <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <p className="tech">© ۲۰۲۶ {brand.nameFa} — {contact.locationLabel}</p>
+            <p className="tech">
+              © ۲۰۲۶ {brand.nameFa} — {contact.locationLabel}
+            </p>
             <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2">

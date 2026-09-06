@@ -13,7 +13,11 @@ type LiveHeroProduct = {
   image: string | null;
 };
 
-export function HeroNarrative({ heroProduct: liveHeroProduct }: { heroProduct?: LiveHeroProduct | null }) {
+export function HeroNarrative({
+  heroProduct: liveHeroProduct,
+}: {
+  heroProduct?: LiveHeroProduct | null;
+}) {
   const { source, brand, copy, home } = useStorefrontControl();
   const prototypeProduct = productBySlug(home.heroProductSlug);
   const categoryOrder = home.categoryOrder.filter(
@@ -32,7 +36,7 @@ export function HeroNarrative({ heroProduct: liveHeroProduct }: { heroProduct?: 
           }
         : null;
   const heroImage =
-    source === "live" ? heroProduct?.image ?? null : productImage(home.heroProductSlug);
+    source === "live" ? (heroProduct?.image ?? null) : productImage(home.heroProductSlug);
 
   return (
     <section
@@ -103,7 +107,11 @@ export function HeroNarrative({ heroProduct: liveHeroProduct }: { heroProduct?: 
           {heroImage ? (
             <img
               src={heroImage}
-              alt={heroProduct ? `${heroProduct.name} در ویترین ${brand.nameFa}` : `ویترین ${brand.nameFa}`}
+              alt={
+                heroProduct
+                  ? `${heroProduct.name} در ویترین ${brand.nameFa}`
+                  : `ویترین ${brand.nameFa}`
+              }
               width={1200}
               height={1500}
               sizes="(max-width: 1023px) 100vw, 48vw"

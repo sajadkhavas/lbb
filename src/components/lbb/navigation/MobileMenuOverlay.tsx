@@ -89,13 +89,17 @@ export function MobileMenuOverlay() {
                       <span>
                         <span
                           className={`block text-sm font-bold group-hover:text-signal ${
-                            isMerchantNavigationItemActive(pathname, item) ? "text-signal" : "text-bone"
+                            isMerchantNavigationItemActive(pathname, item)
+                              ? "text-signal"
+                              : "text-bone"
                           }`}
                         >
                           {item.label}
                         </span>
                         {item.description ? (
-                          <span className="mt-1 block text-[11px] text-mute">{item.description}</span>
+                          <span className="mt-1 block text-[11px] text-mute">
+                            {item.description}
+                          </span>
                         ) : null}
                       </span>
                       <ArrowUpLeft
