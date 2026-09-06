@@ -2,7 +2,7 @@
 
 > وضعیت این سند: **Source of Truth برای ادامه پروژه**
 >
-> تاریخ ثبت: **2026-08-29**
+> تاریخ ثبت: **2026-09-07**
 >
 > هدف: هر چت/مجری بعدی باید قبل از ادامه LBB این سند را بخواند تا اطلاعات کارفرما، تصمیم‌های تثبیت‌شده، وضعیت Production و NEXT پروژه از بین نرود.
 
@@ -16,12 +16,17 @@
 - Production URL: `https://lbbclo.com`
 - Runtime target: self-hosted Node / Nitro `node-server`
 - Frontend production acceptance: **PASS**
-- Backend mode در storefront فعلی: `prototype` — تا P3 به‌صورت live اعلام نشود.
-- اصل مهم: این SHA، Baseline پذیرفته‌شده Frontend است و نباید بدون دلیل QA قبلی دوباره باز شود.
-- Latest GitHub frontend freeze SHA: `2bc1347bb092172350415ac21019eb09f9dd746d` — **not deployed yet**.
+- Backend mode در storefront واقعاً Deploy‌شده: `prototype` — P3 روی GitHub کامل و Merge شده، اما هنوز روی Production Deploy/Activate نشده است.
+- اصل مهم: این SHA، Baseline پذیرفته‌شده Production است و فقط با deployment/acceptance صریح تغییر می‌کند.
+- Historical P1.4 `FRONTEND_FREEZE_SHA`: `2bc1347bb092172350415ac21019eb09f9dd746d` — **not deployed yet**.
+- P3 frontend exact source head: `eebb9dc24f7474b7348a2f94f8e7bc7d04720be9`.
+- P3 frontend source merge SHA: `ab3aa654ae7c3a19508837fa6bda383f84fa5cbc` — **not deployed yet**.
 - Backend repository: `sajadkhavas/lbb-backend`.
-- `BACKEND_RELEASE_SHA`: `dd35070ddb168833d30adabde957b86b56da0542` — **P2 audited / merged / frozen / registered; not deployed yet**.
-- Frozen backend API contract: `2026-08-09-f14-be-f1`.
+- Historical P2 `BACKEND_RELEASE_SHA`: `dd35070ddb168833d30adabde957b86b56da0542` — **audited / frozen / not deployed**.
+- P3 backend source head: `a93f21a7c2c1bb2961a722c2748cf952cb4d399f`.
+- P3 backend merge SHA: `5a874d66b5d031fd1ab739a4b7bd8b7c04d4acf6` — **not deployed yet**.
+- P2 frozen backend API contract: `2026-08-09-f14-be-f1`.
+- P3 additive storefront contract: `2026-09-06-p3-storefront-v1`.
 
 ### Production engineering rules
 
@@ -466,22 +471,46 @@ GitHub-first audit/freeze scope P2 کامل شده است. Production deployment
 
 ### P2 freeze rule
 
-`dd35070ddb168833d30adabde957b86b56da0542` تنها `BACKEND_RELEASE_SHA` runtime برای ادامه P3 است. Commitهای documentation-only بعدی این SHA را redefine نمی‌کنند. Storefront تا پایان P3 همچنان `prototype` است و صرف Freeze شدن Backend به معنی live شدن آن نیست.
+`dd35070ddb168833d30adabde957b86b56da0542` همان P2 runtime release freeze تاریخی است و documentation-only commitها آن را redefine نمی‌کنند. P3 به‌صورت additive قرارداد storefront را روی GitHub تکمیل کرده است؛ Production storefront با این حال تا gate صریح P4 همچنان روی deployment قبلی و mode `prototype` باقی می‌ماند.
 
-## P3 — Frontend ↔ Backend Live Integration
+## P3 — Frontend ↔ Backend Live Integration — **DONE / MERGED 2026-09-07**
 
-1. prototype → live mode switch
-2. Catalog integration
-3. Auth/account integration
-4. Integration QA
+GitHub-first integration و control-surface closure کامل شد؛ هیچ Production/server mutation در P3 انجام نشد.
+
+- Frontend tracking issue: #70.
+- Frontend source PR #71: **MERGED**.
+- Frontend START/base SHA: `a866fc778a29f541fbccfcffaeb53cec7360acc7`.
+- Historical P1.4 `FRONTEND_FREEZE_SHA`: `2bc1347bb092172350415ac21019eb09f9dd746d`.
+- Frontend exact source head: `eebb9dc24f7474b7348a2f94f8e7bc7d04720be9`.
+- Frontend source merge SHA: `ab3aa654ae7c3a19508837fa6bda383f84fa5cbc`.
+- P3 Live Integration run `34065175780`: **SUCCESS** (`frontend-contract` + `full-quality`).
+- Quality Gates run `34065175791`: **SUCCESS**.
+- F8-B PWA and Push validation run `34065175787`: **SUCCESS**.
+- Unresolved review threads: **0**.
+- Backend P3 source head: `a93f21a7c2c1bb2961a722c2748cf952cb4d399f`.
+- Backend P3 PR #18: **MERGED** → `5a874d66b5d031fd1ab739a4b7bd8b7c04d4acf6`.
+- Backend exact-head Gate `34046093131`: **SUCCESS**.
+- P3 additive storefront contract: `2026-09-06-p3-storefront-v1`.
+- Control-surface matrix: `docs/P3_CONTROL_SURFACE_MATRIX.md`.
+- Products/catalog و merchant-editable content/config surfaces در explicit `live` mode backend-authoritative شدند.
+- Announcement/navigation/home/Brand Intro/footer/contact/global SEO و journal/lookbook/FAQ/safe pages مالک Backend/Admin/API/Frontend consumer مشخص دارند.
+- Auth/account/cart/checkout/order/return integration seams حفظ و regression-covered شدند.
+- `prototype` همچنان mode صریح QA/frozen baseline است؛ `live` روی network/contract/backend failure fail-closed است و silently به business truth ساختگی fallback نمی‌کند.
+- Visual baseline در prototype پس از P3 compatibility patch حفظ شد و full quality کاملاً سبز است.
+- Production/server mutation: **NO**.
+
+### P3 source identity rule
+
+`ab3aa654ae7c3a19508837fa6bda383f84fa5cbc` frontend runtime-code merge پذیرفته‌شده P3 و `5a874d66b5d031fd1ab739a4b7bd8b7c04d4acf6` backend P3 merge پذیرفته‌شده هستند. Commit/mergeهای documentation-only ثبت P3 این دو runtime-code identity را redefine نمی‌کنند. Deploy/activation هنوز انجام نشده است.
 
 ## P4 — Commerce Go-Live
 
-1. Real product data
-2. Cart / checkout / shipping
-3. Production payment activation
-4. Order / inventory / notification
-5. Real E2E commerce acceptance
+1. Real product/catalog/business data readiness
+2. Live environment/domain/CORS/Sanctum and deploy-candidate wiring
+3. Cart / checkout / shipping / reservation / inventory production readiness
+4. Production payment activation behind explicit gate
+5. Order / inventory / notification and real E2E commerce acceptance
+6. Controlled deployment/activation + rollback + post-activation health acceptance
 
 ## P5 — SEO / Operations / Final Acceptance & Handoff
 
@@ -502,13 +531,13 @@ GitHub-first audit/freeze scope P2 کامل شده است. Production deployment
 4. برای فاز بعدی Branch/Worktree تمیز از آخرین baseline پذیرفته‌شده بسازد.
 5. Business Truth این سند را با داده ساختگی جایگزین نکند.
 6. تغییرات UI و SEO را صفحه‌به‌صفحه انجام دهد و بعد QA کند.
-7. Backend و commerce را فقط پس از audit و contract reconciliation به live ببرد.
+7. Live commerce و payment را فقط از gateهای صریح P4 و با rollback/acceptance واقعی فعال کند.
 
 ### CURRENT NEXT
 
-**`P3 — Frontend ↔ Backend Live Integration`**
+**`P4 — Commerce Go-Live`**
 
-P3 باید GitHub-first از `FRONTEND_FREEZE_SHA = 2bc1347bb092172350415ac21019eb09f9dd746d` و `BACKEND_RELEASE_SHA = dd35070ddb168833d30adabde957b86b56da0542` شروع شود. ابتدا prototype/live boundary، Catalog، Auth/Account و integration contracts روی branch اختصاصی reconcile و QA شوند. هیچ Production/server mutation تا gate صریح deployment/activation انجام نشود.
+P4 باید GitHub-first از runtime-code identityهای پذیرفته‌شده P3 یعنی frontend merge `ab3aa654ae7c3a19508837fa6bda383f84fa5cbc` و backend merge `5a874d66b5d031fd1ab739a4b7bd8b7c04d4acf6` ادامه یابد؛ branch عملی می‌تواند از latest accepted base شامل registration docs ساخته شود، اما docs-only commitها runtime identity را تغییر نمی‌دهند. ابتدا real data، live env/domain/CORS/Sanctum، shipping/reservation/inventory/payment readiness و deploy candidate به‌صورت fail-closed verify شوند. هیچ Production/server mutation یا payment activation قبل از gate صریح activation انجام نشود.
 
 ---
 
