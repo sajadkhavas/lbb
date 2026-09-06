@@ -19,24 +19,24 @@ Prototype data is permitted only in explicit `prototype` mode. In `live` mode a 
 
 ## Final matrix
 
-| Frontend surface | Backend/Admin owner | API / live consumer | P3 result |
-| --- | --- | --- | --- |
-| Products, variants, media, price, stock | Existing catalog/inventory domain + Admin | Existing `/api/v1` catalog transport | **PASS** |
-| Categories and category SEO | Existing Category domain + Filament | Existing versioned category API/Frontend consumers | **PASS** |
-| Collections | Existing Collection domain + Filament | Existing `/api/v1/collections*`; index/detail are Backend-authoritative in live mode | **PASS** |
-| Journal | `Post` + existing Filament | `/api/v1/storefront/journal` + detail; index/detail live consumers | **PASS** |
-| Lookbook | `GalleryItem` + existing Filament | `/api/v1/storefront/lookbook`; live consumer | **PASS** |
-| FAQ | `Faq` + existing Filament | `/api/v1/storefront/faqs`; live consumer | **PASS** |
-| Safe static pages / page SEO | `ContentPage` + existing Filament | `/api/v1/storefront/pages/{slug}`; `about` and `contact` live consumers | **PASS** |
-| Announcement bar | Typed public `StoreSetting` | storefront bootstrap + moving/dismissible existing UI | **PASS** |
-| Shop/editorial/service/brand navigation | Typed public `StoreSetting` | storefront bootstrap + Navbar/Mega/Mobile consumers | **PASS** |
-| Homepage copy, Hero selection and section order | Typed public `StoreSetting` + catalog | bootstrap + real Hero product API consumer | **PASS** |
-| First-visit Brand Intro | Typed public `StoreSetting` | bootstrap + versioned Intro consumer | **PASS** |
-| Footer/contact/social/location | Typed public `StoreSetting` + safe Contact page | bootstrap/page API + Footer/Contact consumers | **PASS** |
-| Global SEO merchant defaults | Typed public `StoreSetting` | bootstrap consumed by SSR/global surfaces | **PASS** |
-| Auth/account/cart/checkout/orders/returns | Existing customer/commerce domains | Existing `/api/v1` integrations retained and regression-covered | **PASS — activation deferred to P4** |
-| Shipping/business rules | Existing DeliveryZone/StoreSetting domains | Existing delivery/commerce contract | **PASS — real go-live deferred to P4** |
-| Payment/inventory/notifications | Existing operational domains | Existing commerce APIs | **PASS — production activation deferred to P4** |
+| Frontend surface                                | Backend/Admin owner                             | API / live consumer                                                                  | P3 result                                       |
+| ----------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| Products, variants, media, price, stock         | Existing catalog/inventory domain + Admin       | Existing `/api/v1` catalog transport                                                 | **PASS**                                        |
+| Categories and category SEO                     | Existing Category domain + Filament             | Existing versioned category API/Frontend consumers                                   | **PASS**                                        |
+| Collections                                     | Existing Collection domain + Filament           | Existing `/api/v1/collections*`; index/detail are Backend-authoritative in live mode | **PASS**                                        |
+| Journal                                         | `Post` + existing Filament                      | `/api/v1/storefront/journal` + detail; index/detail live consumers                   | **PASS**                                        |
+| Lookbook                                        | `GalleryItem` + existing Filament               | `/api/v1/storefront/lookbook`; live consumer                                         | **PASS**                                        |
+| FAQ                                             | `Faq` + existing Filament                       | `/api/v1/storefront/faqs`; live consumer                                             | **PASS**                                        |
+| Safe static pages / page SEO                    | `ContentPage` + existing Filament               | `/api/v1/storefront/pages/{slug}`; `about` and `contact` live consumers              | **PASS**                                        |
+| Announcement bar                                | Typed public `StoreSetting`                     | storefront bootstrap + moving/dismissible existing UI                                | **PASS**                                        |
+| Shop/editorial/service/brand navigation         | Typed public `StoreSetting`                     | storefront bootstrap + Navbar/Mega/Mobile consumers                                  | **PASS**                                        |
+| Homepage copy, Hero selection and section order | Typed public `StoreSetting` + catalog           | bootstrap + real Hero product API consumer                                           | **PASS**                                        |
+| First-visit Brand Intro                         | Typed public `StoreSetting`                     | bootstrap + versioned Intro consumer                                                 | **PASS**                                        |
+| Footer/contact/social/location                  | Typed public `StoreSetting` + safe Contact page | bootstrap/page API + Footer/Contact consumers                                        | **PASS**                                        |
+| Global SEO merchant defaults                    | Typed public `StoreSetting`                     | bootstrap consumed by SSR/global surfaces                                            | **PASS**                                        |
+| Auth/account/cart/checkout/orders/returns       | Existing customer/commerce domains              | Existing `/api/v1` integrations retained and regression-covered                      | **PASS — activation deferred to P4**            |
+| Shipping/business rules                         | Existing DeliveryZone/StoreSetting domains      | Existing delivery/commerce contract                                                  | **PASS — real go-live deferred to P4**          |
+| Payment/inventory/notifications                 | Existing operational domains                    | Existing commerce APIs                                                               | **PASS — production activation deferred to P4** |
 
 ## SSR / live-boundary acceptance
 
