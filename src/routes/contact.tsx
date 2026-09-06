@@ -32,7 +32,11 @@ export const Route = createFileRoute("/contact")({
     const page = loaderData?.page;
     if (!control) return {};
 
-    const title = page?.metaTitle || page?.title || FALLBACK_TITLE;
+    const prototypeTitle = `تماس با LBB | ${control.brand.physicalLocation} ${control.contact.city}`;
+    const title =
+      page?.metaTitle ||
+      page?.title ||
+      (control.source === "prototype" ? prototypeTitle : FALLBACK_TITLE);
     const description = page?.metaDescription || page?.excerpt || FALLBACK_DESC;
     const sameAs = [
       control.contact.instagramUrl,
@@ -141,6 +145,11 @@ function ContactPage() {
                   <a
                     key={channel.kind}
                     href={channel.href}
+                    aria-label={
+                      channel.kind === "instagram"
+                        ? `اینستاگرام رسمی ${control.brand.name}`
+                        : undefined
+                    }
                     target={channel.href.startsWith("https:") ? "_blank" : undefined}
                     rel={channel.href.startsWith("https:") ? "noopener noreferrer" : undefined}
                     className={`${CtaClasses("line")} min-w-0 justify-start overflow-hidden`}
@@ -198,7 +207,9 @@ function ContactPage() {
                 <div className="flex items-start justify-between gap-5 border-b border-hairline pb-4">
                   <dt className="text-mute">محل فروشگاه</dt>
                   <dd className="text-end font-semibold text-bone">
-                    {control.contact.locationLabel}
+                    {control.source === "prototype"
+                      ? control.brand.physicalLocation
+                      : control.contact.locationLabel}
                   </dd>
                 </div>
               </dl>
