@@ -1,0 +1,46 @@
+name: P3 Lint Diagnostic
+
+on:
+  push:
+    branches:
+      - phase/p3-live-integration-control-surface
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: contains(github.event.head_commit.message, '[p3-lint-diagnostic]')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Capture exact checks
+        shell: bash
+        run: |
+          set +e
+          {
+            echo '=== FORMAT ==='
+            npm run format:check
+            echo "FORMAT_EXIT=$?"
+            echo '=== LINT ==='
+            npm run lint
+            echo "LINT_EXIT=$?"
+            echo '=== TYPECHECK ==='
+            npm run typecheck
+            echo "TYPECHECK_EXIT=$?"
+          } > docs/_p3_lint_diagnostic.txt 2>&1
+          set -e
+      - name: Commit diagnostic
+        run: |
+          git config user.name 'lbb-p3-bot'
+          git config user.email '144109918+sajadkhavas@users.noreply.github.com'
+          git add docs/_p3_lint_diagnostic.txt
+          git commit -m 'chore(p3): capture lint diagnostic'
+          git push origin HEAD:phase/p3-live-integration-control-surface
