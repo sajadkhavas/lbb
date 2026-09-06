@@ -16,9 +16,12 @@
 - Production URL: `https://lbbclo.com`
 - Runtime target: self-hosted Node / Nitro `node-server`
 - Frontend production acceptance: **PASS**
-- Backend mode در storefront فعلی: `prototype`
+- Backend mode در storefront فعلی: `prototype` — تا P3 به‌صورت live اعلام نشود.
 - اصل مهم: این SHA، Baseline پذیرفته‌شده Frontend است و نباید بدون دلیل QA قبلی دوباره باز شود.
 - Latest GitHub frontend freeze SHA: `2bc1347bb092172350415ac21019eb09f9dd746d` — **not deployed yet**.
+- Backend repository: `sajadkhavas/lbb-backend`.
+- `BACKEND_RELEASE_SHA`: `dd35070ddb168833d30adabde957b86b56da0542` — **P2 audited / merged / frozen / registered; not deployed yet**.
+- Frozen backend API contract: `2026-08-09-f14-be-f1`.
 
 ### Production engineering rules
 
@@ -438,18 +441,32 @@ F21 در `P1.4` وارد scope نشده و در Backlog باقی می‌ماند
 - Runtime feature mutation: **NONE**.
 - Production/server mutation: **NO**.
 
-## P2 — Backend Final Audit & Production Deployment
+## P2 — Backend Final Audit & Release Freeze — **DONE / MERGED / BACKEND FROZEN / REGISTERED 2026-09-06**
 
-1. Backend final reconciliation audit
-2. Final backend release freeze
-3. Production infrastructure
-4. Immutable backend deploy
+GitHub-first audit/freeze scope P2 کامل شده است. Production deployment عمداً در این مرحله انجام نشد و تا gate صریح server deployment/activation پس از integration ادامه نمی‌یابد.
 
-Backend موجود باید audit/reconcile شود؛ از صفر بازنویسی یا blind deploy نشود.
+- Backend repository: `sajadkhavas/lbb-backend`.
+- Tracking issue #13: **CLOSED / COMPLETED**.
+- Source PR #14: **MERGED**.
+- Registration PR #15: **MERGED**.
+- Final closure-sync PR #16: **MERGED**.
+- START_SHA: `bc6f53f9cc9b79d8e089fe35b543ad32f5c33217`.
+- `BACKEND_RELEASE_SHA`: `dd35070ddb168833d30adabde957b86b56da0542`.
+- Frozen API contract: `2026-08-09-f14-be-f1`.
+- OpenAPI blob: `1d0c067ab23fb604c149cccfbe6273081248cfdf`.
+- Source Release Freeze run `34036465285`: **SUCCESS / both jobs**.
+- Registration Release Freeze run `34036696281`: **SUCCESS / both jobs**.
+- Final closure-sync Release Freeze run `34037705624`: **SUCCESS / both jobs**.
+- Full backend suite: **95 passed / 902 assertions / zero skips**.
+- MySQL 8.4 migration/commerce/auth/Web Push: **PASS**.
+- Real two-process oversell race: **PASS**.
+- Composer security audit: **clean** after bounded lock-only refresh.
+- Application/runtime PHP API rewrite in P2: **NONE**.
+- Production/server mutation: **NO**.
 
-### P2 execution rule after frontend freeze
+### P2 freeze rule
 
-اجرای P2 از GitHub شروع می‌شود: ابتدا Backend موجود audit/reconcile و release candidate آن freeze شود. شروع P2 به‌تنهایی مجوز deploy/activation روی سرور نیست؛ بخش Production فقط در gate صریح deployment با immutable release و rollback انجام می‌شود.
+`dd35070ddb168833d30adabde957b86b56da0542` تنها `BACKEND_RELEASE_SHA` runtime برای ادامه P3 است. Commitهای documentation-only بعدی این SHA را redefine نمی‌کنند. Storefront تا پایان P3 همچنان `prototype` است و صرف Freeze شدن Backend به معنی live شدن آن نیست.
 
 ## P3 — Frontend ↔ Backend Live Integration
 
@@ -489,9 +506,9 @@ Backend موجود باید audit/reconcile شود؛ از صفر بازنویس�
 
 ### CURRENT NEXT
 
-**`P2 — Backend Final Audit & Production Deployment`**
+**`P3 — Frontend ↔ Backend Live Integration`**
 
-ابتدا بخش GitHub-first اجرا شود: Backend موجود audit/reconcile، contractها و migrations بررسی، Quality Gate سبز و release candidate freeze شود. هیچ Production/server mutation تا gate صریح deployment/activation انجام نشود.
+P3 باید GitHub-first از `FRONTEND_FREEZE_SHA = 2bc1347bb092172350415ac21019eb09f9dd746d` و `BACKEND_RELEASE_SHA = dd35070ddb168833d30adabde957b86b56da0542` شروع شود. ابتدا prototype/live boundary، Catalog، Auth/Account و integration contracts روی branch اختصاصی reconcile و QA شوند. هیچ Production/server mutation تا gate صریح deployment/activation انجام نشود.
 
 ---
 
