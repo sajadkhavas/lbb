@@ -1,0 +1,45 @@
+name: P3 Quality Diagnostic
+
+on:
+  push:
+    branches:
+      - phase/p3-live-integration-control-surface
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: contains(github.event.head_commit.message, '[p3-quality-diagnostic]')
+    runs-on: ubuntu-24.04
+    env:
+      VITE_LBB_BACKEND_MODE: prototype
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Capture exact quality output
+        shell: bash
+        run: |
+          set +e
+          npm run quality > /tmp/p3-quality.log 2>&1
+          code=$?
+          set -e
+          {
+            echo "QUALITY_EXIT=$code"
+            echo '=== LAST 500 LINES ==='
+            tail -n 500 /tmp/p3-quality.log
+          } > docs/_p3_quality_diagnostic.txt
+      - name: Commit diagnostic
+        run: |
+          git config user.name 'lbb-p3-bot'
+          git config user.email '144109918+sajadkhavas@users.noreply.github.com'
+          git add docs/_p3_quality_diagnostic.txt
+          git commit -m 'chore(p3): capture exact quality diagnostic'
+          git push origin HEAD:phase/p3-live-integration-control-surface
