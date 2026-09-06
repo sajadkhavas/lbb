@@ -1,4 +1,4 @@
-name: P3 Frontend Contract Bump Apply
+name: P3 Frontend One-shot Patch
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   apply:
-    if: contains(github.event.head_commit.message, '[p3-contract-bump]')
+    if: contains(github.event.head_commit.message, '[p3-source-live]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -20,40 +20,26 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Apply P3 contract version and typed storefront fix
+      - name: Normalize live storefront source name
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
-          api = Path('src/lib/backend-api.ts')
-          api_text = api.read_text()
-          old = 'export const LBB_CONTRACT_VERSION = "2026-08-09-f14-be-f1" as const;'
-          new = 'export const LBB_CONTRACT_VERSION = "2026-09-06-p3-storefront-v1" as const;'
-          if old in api_text:
-              api.write_text(api_text.replace(old, new, 1))
-          elif new not in api_text:
-              raise SystemExit('expected contract marker missing')
-
-          control = Path('src/lib/storefront-control.tsx')
-          control_text = control.read_text()
-          control_text = control_text.replace(
-              'phone: STORE_SETTINGS.contact.phone?.display ?? "026-3256-0477",',
-              'phone: STORE_SETTINGS.contacts.find((channel) => channel.kind === "phone")?.value ?? "026-3256-0477",',
-          )
-          control_text = control_text.replace(
-              'whatsapp: STORE_SETTINGS.contact.whatsapp?.display ?? "0902-858-4879",',
-              'whatsapp: STORE_SETTINGS.contacts.find((channel) => channel.kind === "whatsapp")?.value ?? "0902-858-4879",',
-          )
-          control.write_text(control_text)
+          path = Path('src/lib/storefront-control.tsx')
+          text = path.read_text()
+          text = text.replace('source: "prototype" | "backend";', 'source: "prototype" | "live";')
+          text = text.replace('source: "backend",', 'source: "live",')
+          path.write_text(text)
           PY
       - run: npm ci
-      - name: Contract typecheck
-        run: npm run typecheck
-      - name: Commit tested contract bump
+      - name: Format and typecheck
+        run: |
+          npx prettier --write src/lib/storefront-control.tsx src/routes/__root.tsx src/routes/index.tsx src/components/lbb/AnnouncementBar.tsx src/components/lbb/BrandIntro.tsx src/components/lbb/Navbar.tsx src/components/lbb/Footer.tsx src/components/lbb/home/HeroNarrative.tsx src/components/lbb/navigation/MerchantNavigationLink.tsx src/components/lbb/navigation/MegaMenuOverlay.tsx src/components/lbb/navigation/MobileMenuOverlay.tsx
+          npm run typecheck
+      - name: Commit tested normalization and formatting
         run: |
           git config user.name 'lbb-p3-bot'
           git config user.email '144109918+sajadkhavas@users.noreply.github.com'
-          git add src/lib/backend-api.ts src/lib/storefront-control.tsx
+          git add src
           git diff --cached --quiet && exit 0
-          git commit -m 'feat(p3): adopt storefront contract version'
+          git commit -m 'feat(p3): normalize live storefront source'
           git push origin HEAD:phase/p3-live-integration-control-surface
