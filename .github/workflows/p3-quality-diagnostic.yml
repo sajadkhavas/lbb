@@ -25,7 +25,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Capture exact quality output
+      - name: Capture exact terminal quality failure
         shell: bash
         run: |
           set +e
@@ -34,8 +34,8 @@ jobs:
           set -e
           {
             echo "QUALITY_EXIT=$code"
-            echo '=== LAST 500 LINES ==='
-            tail -n 500 /tmp/p3-quality.log
+            echo '=== TERMINAL 120 LINES ==='
+            tail -n 120 /tmp/p3-quality.log
           } > docs/_p3_quality_diagnostic.txt
       - name: Commit diagnostic
         run: |
