@@ -1,0 +1,32 @@
+name: P4 temporary format fix
+
+on:
+  push:
+    branches:
+      - phase/lbb-p4-commerce-go-live
+    paths:
+      - .github/workflows/p4-format-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase/lbb-p4-commerce-go-live
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - name: Format P4 files and remove helper
+        run: |
+          npx prettier --write scripts/audit-store-settings.mjs scripts/p4-commerce-go-live-manifest.json
+          rm .github/workflows/p4-format-fix.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'style(p4): format commerce candidate files [p4-format]'
+          git push origin HEAD:phase/lbb-p4-commerce-go-live
