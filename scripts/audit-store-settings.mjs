@@ -73,7 +73,7 @@ for (const required of [
   }
 }
 
-if (readiness.includes('id: "payment.server"') && readiness.includes('passed: false')) {
+if (readiness.includes('id: "payment.server"') && readiness.includes("passed: false")) {
   failures.push("Payment server readiness must be evidence-driven, not a permanent false literal.");
 }
 
@@ -150,12 +150,7 @@ if (/<form\b/i.test(contact) || contact.includes("پیام شما ارسال ش�
   failures.push("Contact route must not expose a false-success form without a transport.");
 }
 
-const officialDeliveryMethods = [
-  "immediate_courier",
-  "tipax",
-  "decapost",
-  "express_post",
-];
+const officialDeliveryMethods = ["immediate_courier", "tipax", "decapost", "express_post"];
 for (const method of officialDeliveryMethods) {
   if (!backendApi.includes(`\"${method}\"`)) {
     failures.push(`Frontend DeliveryMethod contract is missing P4 method: ${method}`);
