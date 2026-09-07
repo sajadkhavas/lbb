@@ -1,6 +1,6 @@
 # LBB — P4 Final Registration
 
-> وضعیت: **MERGED CODE / PRE-ACTIVATION DEPLOY CANDIDATE / REGISTERING**
+> وضعیت: **DONE / MERGED / REGISTERED / PRE-ACTIVATION DEPLOY CANDIDATE / PRODUCTION ACTIVATION PENDING**
 >
 > تاریخ ثبت: 2026-09-07
 
@@ -36,6 +36,24 @@
   - Real two-process oversell race — PASS
 - Review threads: `0`
 
+## P4 Registration Closure
+
+- Registration branch: `phase/lbb-p4-registration`
+- Registration exact head: `433dbc49b55299602c1fd55838200ef8de7dd97c`
+- Registration PR: `#76` — MERGED
+- Registration merge SHA: `3ea4ee261b8bcf9b9a97372f7de4144b3911784b`
+- Registration Quality Gates: `34108910099` — PASS
+- Registration Live Integration: `34108910118` — PASS
+  - `frontend-contract` — PASS
+  - `full-quality` — PASS
+- Registration review threads: `0`
+- Final registration diff from the P4 frontend merge baseline contained only:
+  - `docs/LBB_MASTER_HANDOFF_FA.md`
+  - `docs/P4_FINAL_REGISTRATION_FA.md`
+- Temporary registration workflow/script were removed before PR #76.
+- Master Handoff now records P4 as `DONE / MERGED / REGISTERED` with Production Activation pending.
+- Master Handoff `CURRENT NEXT`: `P4-ACT — Controlled Production Deployment & Activation`.
+
 ## P4 Commerce Truth
 
 - Inventory reservation: **30 minutes**.
@@ -55,18 +73,18 @@
 
 ## Production Truth Boundary
 
-P4 code is merged and is a deploy candidate, but this registration **does not claim VPS activation**.
+P4 code and registration are complete, but this closure **does not claim VPS activation**.
 
-- Production/server mutation: **NO**
+- Production/server mutation during P4 GitHub closure: **NO**
 - Production deployment of P4: **NOT EXECUTED**
 - Checkout activation: **NO**
 - Payment activation: **NO**
 - Currently accepted/deployed Production SHA remains the previously recorded Production baseline until a real VPS deployment/acceptance changes it.
 
-## Status
-
-After this registration PR is green and merged, the authoritative status is:
+## Final Status
 
 **P4 — Commerce Go-Live Code & Deploy Candidate = DONE / MERGED / REGISTERED**
 
-while actual Production activation remains a separate runtime operation.
+**Production Activation = PENDING / NOT EXECUTED**
+
+The authoritative next runtime phase is **`P4-ACT — Controlled Production Deployment & Activation`**. After real VPS acceptance, the project can advance to **P5 — SEO / Operations / Final Acceptance & Handoff**.
