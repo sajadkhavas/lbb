@@ -44,7 +44,12 @@ jobs:
           if (!control.includes('source: "prototype"')) throw new Error('Explicit prototype mode missing')
           if (!control.includes('/api/v1/storefront/bootstrap')) throw new Error('Storefront bootstrap consumer missing')
           if (!root.includes('loader: () => resolveStorefrontControl()')) throw new Error('SSR root control loader missing')
-          if (!home.includes('getProduct(control.home.heroProductSlug)')) throw new Error('Live hero product consumer missing')
+          if (!home.includes('getProduct(slug)')) throw new Error('Live hero product consumer missing')
+          if (!home.includes('resolveLiveHeroProduct(control.home.heroProductSlug)')) throw new Error('Fail-safe live hero resolver missing')
+          if (!home.includes('error instanceof BackendApiError')) throw new Error('BackendApiError guard missing')
+          if (!home.includes('error.status === 404')) throw new Error('Hero 404 guard missing')
+          if (!home.includes('error.code === "resource_not_found"')) throw new Error('Hero resource_not_found guard missing')
+          if (!home.includes('return null;')) throw new Error('Hero empty-state fallback missing')
           NODE
 
   full-quality:
