@@ -14,25 +14,48 @@ import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
-import { getProduct } from "@/lib/backend-api";
+import { BackendApiError, getProduct } from "@/lib/backend-api";
 import { productImage } from "@/lib/product-images";
 import { absUrl, canonical, pageMeta } from "@/lib/site";
 import { resolveStorefrontControl } from "@/lib/storefront-control";
+
+type LiveHeroProduct = {
+  slug: string;
+  name: string;
+  priceToman: number | null;
+  image: string | null;
+};
+
+async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | null> {
+  try {
+    const response = await getProduct(slug);
+    return {
+      slug: response.data.slug,
+      name: response.data.name,
+      priceToman: response.data.price.from?.amount ?? null,
+      image: response.data.primaryImage,
+    };
+  } catch (error) {
+    if (
+      error instanceof BackendApiError &&
+      error.status === 404 &&
+      error.code === "resource_not_found"
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
+}
 
 export const Route = createFileRoute("/")({
   loader: async () => {
     const control = await resolveStorefrontControl();
     if (control.source !== "live") return { control, heroProduct: null };
 
-    const response = await getProduct(control.home.heroProductSlug);
     return {
       control,
-      heroProduct: {
-        slug: response.data.slug,
-        name: response.data.name,
-        priceToman: response.data.price.from?.amount ?? null,
-        image: response.data.primaryImage,
-      },
+      heroProduct: await resolveLiveHeroProduct(control.home.heroProductSlug),
     };
   },
   head: ({ loaderData }) => {
