@@ -89,7 +89,7 @@ function LiveCheckout() {
   const cartCompatible = backendItems.length > 0 && backendItems.length === lines.length;
   const enabledMethods = methods.filter((method) => method.enabled);
   const selectedMethod = enabledMethods.find((method) => method.method === deliveryMethod) ?? null;
-  const needsAddress = deliveryMethod === "standard";
+  const needsAddress = deliveryMethod !== "";
   const shouldRecoverPending = lines.length === 0 && Boolean(continuity);
 
   const clearFieldError = (field: RecipientFieldKey) => {

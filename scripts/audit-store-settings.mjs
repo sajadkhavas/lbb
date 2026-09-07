@@ -14,9 +14,11 @@ const shippingReturns = await read("src/routes/shipping-returns.tsx");
 const contact = await read("src/routes/contact.tsx");
 const storefrontControl = await read("src/lib/storefront-control.tsx");
 const backendApi = await read("src/lib/backend-api.ts");
+const backendDelivery = await read("src/lib/backend-delivery.ts");
 const checkout = await read("src/routes/checkout.tsx");
 const orderConfirmation = await read("src/routes/order-confirmation.tsx");
 const trackOrder = await read("src/routes/track-order.tsx");
+const envExample = await read(".env.example");
 
 if (!settings) failures.push("Typed public store settings are missing.");
 if (!readiness) failures.push("Launch-readiness evaluator is missing.");
@@ -24,6 +26,7 @@ if (!trustMarks) failures.push("Controlled trust-mark component is missing.");
 if (!commerce) failures.push("Frontend commerce readiness boundary is missing.");
 if (!storefrontControl) failures.push("P3 storefront control is missing.");
 if (!backendApi) failures.push("Versioned backend API contract is missing.");
+if (!backendDelivery) failures.push("Versioned backend delivery client is missing.");
 
 for (const forbidden of [
   "merchantSecret",
@@ -62,11 +65,16 @@ for (const required of [
   "storefrontContentReady",
   "commerceLaunchReady",
   "backend.paymentIntegration",
+  "backendEvidence.paymentServerReady",
   "VITE_SITE_URL",
 ]) {
   if (!readiness.includes(required)) {
     failures.push(`Launch-readiness contract is missing: ${required}`);
   }
+}
+
+if (readiness.includes('id: "payment.server"') && readiness.includes("passed: false")) {
+  failures.push("Payment server readiness must be evidence-driven, not a permanent false literal.");
 }
 
 if (!trustMarks.includes("getPublicEnamad(STORE_SETTINGS, placement)")) {
@@ -96,7 +104,7 @@ for (const forbidden of [
 }
 
 // Public store settings alone are not proof that transactional backend capabilities are ready.
-// F14D owns actual order/payment execution through the versioned backend contract instead.
+// The live backend contract owns actual order/payment execution.
 if (!commerce.includes("orderSubmissionReady: false")) {
   failures.push("Public settings alone must not claim order-submission readiness.");
 }
@@ -135,8 +143,34 @@ for (const required of ["/api/v1/storefront/bootstrap", 'source: "prototype"']) 
 if (!backendApi.includes('LBB_CONTRACT_VERSION = "2026-09-06-p3-storefront-v1"')) {
   failures.push("P3 backend contract version is not locked.");
 }
+if (!envExample.includes("# 2026-09-06-p3-storefront-v1")) {
+  failures.push("Frontend environment example still documents a stale backend contract.");
+}
 if (/<form\b/i.test(contact) || contact.includes("پیام شما ارسال شد")) {
   failures.push("Contact route must not expose a false-success form without a transport.");
+}
+
+const officialDeliveryMethods = ["immediate_courier", "tipax", "decapost", "express_post"];
+for (const method of officialDeliveryMethods) {
+  if (!backendApi.includes(`\"${method}\"`)) {
+    failures.push(`Frontend DeliveryMethod contract is missing P4 method: ${method}`);
+  }
+  if (!settings.includes(`id: \"${method}\"`)) {
+    failures.push(`Public shipping settings are missing canonical P4 method id: ${method}`);
+  }
+}
+for (const legacyId of [
+  "courier-karaj-tehran",
+  "tipax-collect",
+  "dekapost-collect",
+  "iran-post-express",
+]) {
+  if (settings.includes(`id: \"${legacyId}\"`)) {
+    failures.push(`Legacy frontend-only shipping id remains: ${legacyId}`);
+  }
+}
+if (!backendDelivery.includes("/api/v1/delivery/options")) {
+  failures.push("P4 live delivery methods must remain backend-authoritative.");
 }
 
 if (!checkout.includes("getCommerceReadiness") || !checkout.includes("getPublicPaymentSettings")) {
@@ -163,9 +197,10 @@ for (const required of [
   "createIdempotencyKey",
   "initiatePayment",
   "ensureBackendCsrf",
+  'const needsAddress = deliveryMethod !== "";',
 ]) {
   if (!checkout.includes(required)) {
-    failures.push(`F14D live checkout boundary is missing: ${required}`);
+    failures.push(`P4 live checkout boundary is missing: ${required}`);
   }
 }
 
@@ -215,4 +250,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Store settings and P3 storefront control audit passed.");
+console.log("Store settings, P3 storefront control and P4 commerce contract audit passed.");

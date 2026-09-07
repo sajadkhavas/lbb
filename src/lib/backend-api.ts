@@ -2,7 +2,7 @@ export const LBB_CONTRACT_VERSION = "2026-09-06-p3-storefront-v1" as const;
 
 export type BackendMode = "live" | "prototype";
 export type StockState = "in_stock" | "low_stock" | "out_of_stock" | "unavailable";
-export type DeliveryMethod = "standard" | "pickup";
+export type DeliveryMethod = "immediate_courier" | "tipax" | "decapost" | "express_post";
 
 export type Money = {
   amount: number;
@@ -417,7 +417,6 @@ export class BackendApiError extends Error {
 }
 
 const clean = (value: string | undefined) => value?.trim().replace(/\/$/, "") ?? "";
-
 export function getBackendMode(): BackendMode {
   const explicit = clean(import.meta.env.VITE_LBB_BACKEND_MODE);
   if (explicit === "live" || explicit === "prototype") return explicit;

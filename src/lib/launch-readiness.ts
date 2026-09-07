@@ -22,6 +22,10 @@ export type ReadinessArea =
   | "legal"
   | "seo";
 
+export type BackendLaunchEvidence = {
+  paymentServerReady: boolean;
+};
+
 export type ReadinessCheck = {
   id: string;
   area: ReadinessArea;
@@ -40,12 +44,17 @@ export type LaunchReadinessReport = {
   recommendedMissing: ReadinessCheck[];
 };
 
+const NO_BACKEND_LAUNCH_EVIDENCE: BackendLaunchEvidence = {
+  paymentServerReady: false,
+};
+
 function hasText(value: string | null | undefined): boolean {
   return Boolean(value?.trim());
 }
 
 export function evaluateLaunchReadiness(
   settings: StoreSettings = STORE_SETTINGS,
+  backendEvidence: BackendLaunchEvidence = NO_BACKEND_LAUNCH_EVIDENCE,
 ): LaunchReadinessReport {
   const location = getPublicStoreLocation(settings);
   const publicContacts = getPublicContactChannels(settings);
@@ -146,9 +155,9 @@ export function evaluateLaunchReadiness(
     {
       id: "payment.server",
       area: "payment",
-      label: "ایجاد تراکنش، بازگشت از درگاه و تأیید پرداخت سمت سرور پیاده‌سازی شده است",
+      label: "ایجاد تراکنش، بازگشت از درگاه و تأیید پرداخت سمت سرور پیاده‌سازی و تأیید شده است",
       severity: "blocker",
-      passed: false,
+      passed: backendEvidence.paymentServerReady,
       adminField: "backend.paymentIntegration",
     },
     {
