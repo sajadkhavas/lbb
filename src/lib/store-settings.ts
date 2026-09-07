@@ -175,7 +175,7 @@ export const STORE_SETTINGS: StoreSettings = {
     verification: "verified",
     methods: [
       {
-        id: "courier-karaj-tehran",
+        id: "immediate_courier",
         title: "ارسال فوری با پیک",
         description: "ارسال فوری با پیک برای سفارش‌های کرج و تهران.",
         feeToman: null,
@@ -186,7 +186,7 @@ export const STORE_SETTINGS: StoreSettings = {
         verification: "verified",
       },
       {
-        id: "tipax-collect",
+        id: "tipax",
         title: "تیپاکس — پس‌کرایه",
         description: "ارسال با تیپاکس به‌صورت پس‌کرایه.",
         feeToman: null,
@@ -197,7 +197,7 @@ export const STORE_SETTINGS: StoreSettings = {
         verification: "verified",
       },
       {
-        id: "dekapost-collect",
+        id: "decapost",
         title: "دکاپست — پس‌کرایه",
         description: "ارسال با دکاپست به‌صورت پس‌کرایه.",
         feeToman: null,
@@ -208,7 +208,7 @@ export const STORE_SETTINGS: StoreSettings = {
         verification: "verified",
       },
       {
-        id: "iran-post-express",
+        id: "express_post",
         title: "پست پیشتاز",
         description: "ارسال سفارش از طریق پست پیشتاز.",
         feeToman: null,
