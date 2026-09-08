@@ -5,6 +5,8 @@ import { CATEGORY_SLUGS } from "@/lib/categories";
 import { COLLECTIONS } from "@/lib/collections";
 import { JOURNAL_ARTICLES } from "@/lib/journal";
 import { evaluateProductEvidence } from "@/lib/product-evidence";
+import { resolveOptionalStorefrontPage } from "@/lib/content-page";
+import { resolveStorefrontFaqs, resolveStorefrontJournal } from "@/lib/storefront-control";
 import { absUrl } from "@/lib/site";
 import {
   isLiveBackend,
@@ -19,7 +21,7 @@ import { backendCanonicalPath, sitemapLastmod, xmlEscape } from "@/lib/seo-live"
 
 type Entry = { path: string; priority: string; changefreq?: string; lastmod?: string | null };
 
-const editorialEntries: Entry[] = [
+const prototypeEditorialEntries: Entry[] = [
   { path: "/collections", priority: "0.7", changefreq: "weekly" },
   { path: "/journal", priority: "0.6", changefreq: "weekly" },
   ...JOURNAL_ARTICLES.map((article) => ({ path: `/journal/${article.slug}`, priority: "0.6" })),
@@ -100,6 +102,45 @@ async function liveCommerceEntries(): Promise<Entry[]> {
   ];
 }
 
+async function liveEditorialEntries(): Promise<Entry[]> {
+  const [faqs, journal, terms, privacy, shippingReturns] = await Promise.all([
+    resolveStorefrontFaqs(),
+    resolveStorefrontJournal(),
+    resolveOptionalStorefrontPage("terms"),
+    resolveOptionalStorefrontPage("privacy"),
+    resolveOptionalStorefrontPage("shipping-returns"),
+  ]);
+
+  const entries: Entry[] = [
+    { path: "/collections", priority: "0.7", changefreq: "weekly" },
+    { path: "/journal", priority: "0.6", changefreq: "weekly" },
+    ...(journal ?? []).map((article) => ({
+      path: `/journal/${article.slug}`,
+      priority: "0.6",
+      lastmod: sitemapLastmod(article.publishedAt),
+    })),
+    { path: "/lookbook", priority: "0.5", changefreq: "monthly" },
+    { path: "/about", priority: "0.5" },
+    { path: "/contact", priority: "0.5" },
+    { path: "/size-guide", priority: "0.5" },
+  ];
+
+  if ((faqs ?? []).length > 0) {
+    entries.push({ path: "/faq", priority: "0.5" });
+  }
+  if (shippingReturns) {
+    entries.push({ path: "/shipping-returns", priority: "0.4" });
+  }
+  if (terms) {
+    entries.push({ path: "/terms", priority: "0.3" });
+  }
+  if (privacy) {
+    entries.push({ path: "/privacy", priority: "0.3" });
+  }
+
+  return entries;
+}
+
 function uniqueEntries(entries: Entry[]) {
   const unique = new Map<string, Entry>();
   for (const entry of entries) if (!unique.has(entry.path)) unique.set(entry.path, entry);
@@ -125,9 +166,9 @@ export const Route = createFileRoute("/sitemap.xml")({
     handlers: {
       GET: async () => {
         try {
-          const commerceEntries = isLiveBackend()
-            ? await liveCommerceEntries()
-            : prototypeCommerceEntries();
+          const [commerceEntries, editorialEntries] = isLiveBackend()
+            ? await Promise.all([liveCommerceEntries(), liveEditorialEntries()])
+            : [prototypeCommerceEntries(), prototypeEditorialEntries];
           const entries: Entry[] = [
             { path: "/", priority: "1.0", changefreq: "weekly" },
             { path: "/shop", priority: "0.9", changefreq: "weekly" },

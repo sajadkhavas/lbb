@@ -26,7 +26,7 @@ import {
 } from "@/lib/backend-delivery";
 import { contentParagraphs, resolveOptionalStorefrontPage } from "@/lib/content-page";
 import { fmtToman } from "@/lib/products";
-import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import { pageMeta, canonical, breadcrumbLd, ROBOTS } from "@/lib/site";
 
 const TITLE = "ارسال، تعویض و مرجوعی | LBB";
 const DESC =
@@ -76,7 +76,12 @@ export const Route = createFileRoute("/shipping-returns")({
     const description = page?.metaDescription || page?.excerpt || DESC;
 
     return {
-      meta: pageMeta({ title, description, path: "/shipping-returns" }),
+      meta: pageMeta({
+        title,
+        description,
+        path: "/shipping-returns",
+        robots: page ? undefined : ROBOTS.NOINDEX_FOLLOW,
+      }),
       links: canonical("/shipping-returns"),
       scripts: [
         {
