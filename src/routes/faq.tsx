@@ -1,20 +1,29 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Minus, Plus } from "lucide-react";
-
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
+import { Navbar } from "@/components/lbb/Navbar";
+import { Footer } from "@/components/lbb/Footer";
+import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { Chip, Container, Section, Surface } from "@/components/lbb/ui/primitives";
-import { resolveStorefrontFaqs, type StorefrontFaqDto } from "@/lib/backend-storefront";
+import { Band, CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 import { contentParagraphs } from "@/lib/content-page";
-import { cn } from "@/lib/utils";
 import { breadcrumbLd, canonical, pageMeta, ROBOTS } from "@/lib/site";
+import { resolveStorefrontFaqs, type StorefrontFaqDto } from "@/lib/storefront-control";
 
-const TITLE = "سوالات متداول | LBB";
-const DESC = "پاسخ سوالات پرتکرار درباره محصولات، سایزبندی، سفارش، ارسال و مرجوعی در LBB.";
+const TITLE = "سوالات متداول LBB | سایز، ارسال و انتخاب محصول";
+const DESC =
+  "پاسخ سوالات متداول LBB درباره اطلاعات محصول، انتخاب سایز و روش‌های ارسال تأییدشده؛ در حالت live پاسخ‌ها از پنل مدیریت می‌آیند.";
 
-type FaqItem = { question: string; answer: string };
-type FaqGroup = { id: string; label: string; title: string; items: FaqItem[] };
+type FaqGroup = {
+  id: string;
+  label: string;
+  title: string;
+  items: { question: string; answer: string }[];
+};
 
+/**
+ * Prototype-only fallback. Production live mode treats the Backend list as authoritative;
+ * an empty live list stays empty and must never resurrect prototype answers.
+ */
 const FAQ_GROUPS: FaqGroup[] = [
   {
     id: "products",
@@ -22,14 +31,14 @@ const FAQ_GROUPS: FaqGroup[] = [
     title: "محصول و موجودی",
     items: [
       {
-        question: "اطلاعات محصول از کجا می‌آید؟",
+        question: "موجود بودن یک محصول یا سایز را از کجا بفهمم؟",
         answer:
-          "در نسخه فروشگاهی، نام، قیمت، رنگ، سایز، موجودی و جزئیات تاییدشده محصول از داده مدیریت‌شده فروشگاه نمایش داده می‌شود.",
+          "صفحه همان محصول مرجع وضعیت قابل انتخاب رنگ، سایز و موجودی است. اطلاعات محصول نمونه یا غیرفعال نباید مبنای خرید قرار گیرد.",
       },
       {
-        question: "اگر یک سایز یا رنگ موجود نباشد چه می‌شود؟",
+        question: "اطلاعات جنس و نگهداری را از کجا بررسی کنم؟",
         answer:
-          "فقط گزینه‌هایی که برای همان محصول و واریانت قابل فروش باشند برای انتخاب خرید در نظر گرفته می‌شوند.",
+          "اطلاعات همان محصول بر توصیه عمومی مقدم است. اگر جنس، تن‌خور یا روش نگهداری برای یک محصول منتشر نشده باشد، آن مورد نباید از روی حدس تکمیل شود.",
       },
     ],
   },
@@ -39,31 +48,14 @@ const FAQ_GROUPS: FaqGroup[] = [
     title: "فیت و انتخاب سایز",
     items: [
       {
-        question: "راهنمای سایز کجاست؟",
+        question: "سایزبندی محصولات به چه صورت است؟",
         answer:
-          "در صفحه هر محصول، راهنمای سایز مخصوص همان محصول را بررسی کنید؛ اندازه‌ها و فیت می‌توانند بین محصولات متفاوت باشند.",
+          "راهنمای اندازه باید برای همان محصول بررسی شود؛ بین مدل‌ها و برش‌های مختلف نمی‌توان یک جدول عمومی را بدون تأیید به همه محصولات تعمیم داد.",
       },
       {
-        question: "اگر بین دو سایز مردد باشم چه کنم؟",
+        question: "اگر بین دو سایز مردد باشم چه چیزی را مقایسه کنم؟",
         answer:
-          "اندازه‌های بدن یا لباس مناسب خودتان را با جدول همان محصول مقایسه کنید و توضیح فیت همان محصول را هم در نظر بگیرید.",
-      },
-    ],
-  },
-  {
-    id: "ordering",
-    label: "ORDER FLOW",
-    title: "قیمت و ثبت سفارش",
-    items: [
-      {
-        question: "قیمت نهایی چه زمانی مشخص می‌شود؟",
-        answer:
-          "قیمت نمایش‌داده‌شده برای واریانت انتخابی مبنای سبد است و در مسیر ثبت سفارش، موجودی و مبلغ دوباره از منبع فروشگاه بررسی می‌شود.",
-      },
-      {
-        question: "اضافه کردن به سبد یعنی موجودی قطعی رزرو شده است؟",
-        answer:
-          "خیر. اعتبار موجودی در مرحله ثبت سفارش دوباره بررسی می‌شود و رزرو موجودی طبق جریان خرید فروشگاه انجام می‌شود.",
+          "اندازه‌های ثبت‌شده محصول و نوع تن‌خور را با یک لباس مشابه که اندازه آن برای شما مناسب است مقایسه کنید و در صورت نیاز از راه ارتباطی رسمی LBB راهنمایی بگیرید.",
       },
     ],
   },
@@ -73,26 +65,14 @@ const FAQ_GROUPS: FaqGroup[] = [
     title: "ارسال و تحویل",
     items: [
       {
-        question: "روش ارسال چگونه تعیین می‌شود؟",
+        question: "روش‌های ارسال LBB چیست؟",
         answer:
-          "روش‌های قابل استفاده با توجه به استان و شهر مقصد و تنظیمات فعال فروشگاه نمایش داده می‌شوند.",
+          "ارسال فوری با اسنپ یا اسنپ‌باکس برای تهران و کرج و ارسال تیپاکس یا دکاپست برای سراسر ایران فعال است. هزینه حمل این روش‌ها خارج از پرداخت آنلاین فروشگاه و به‌صورت پس‌کرایه دریافت می‌شود.",
       },
       {
-        question: "هزینه ارسال داخل قیمت کالا حساب شده؟",
+        question: "برای جزئیات مرجوعی و تعویض کجا را ببینم؟",
         answer:
-          "خیر. شرایط و هزینه روش ارسال مستقل از قیمت کالا و مطابق گزینه فعال فروشگاه در مسیر سفارش مشخص می‌شود.",
-      },
-    ],
-  },
-  {
-    id: "returns",
-    label: "RETURNS",
-    title: "تعویض و مرجوعی",
-    items: [
-      {
-        question: "برای درخواست تعویض یا مرجوعی چه کنم؟",
-        answer:
-          "شرایط جاری را در صفحه ارسال و مرجوعی بررسی کنید و درخواست را از مسیر پشتیبانی فروشگاه ثبت کنید.",
+          "صفحه ارسال و مرجوعی وضعیت سیاست منتشرشده را نشان می‌دهد. جزئیات نهایی فقط وقتی از پنل تأیید و منتشر شوند به‌عنوان تعهد عمومی نمایش داده می‌شوند.",
       },
     ],
   },
@@ -151,148 +131,102 @@ export const Route = createFileRoute("/faq")({
 function FaqPage() {
   const liveFaqs = Route.useLoaderData();
   const faqGroups = liveFaqs === null ? FAQ_GROUPS : backendFaqGroups(liveFaqs);
-  const [activeGroup, setActiveGroup] = useState(faqGroups[0]?.id ?? "");
-  const refs = useRef(new Map<string, HTMLElement>());
-
-  const allGroups = useMemo(() => faqGroups, [faqGroups]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-        if (visible?.target instanceof HTMLElement) {
-          setActiveGroup(visible.target.dataset.groupId ?? "");
-        }
-      },
-      { rootMargin: "-30% 0px -55%", threshold: [0.05, 0.25, 0.5] },
-    );
-
-    for (const element of refs.current.values()) observer.observe(element);
-    return () => observer.disconnect();
-  }, [allGroups]);
 
   return (
-    <main>
-      <Section className="pb-8 pt-8 sm:pb-10 sm:pt-10">
-        <Container>
+    <>
+      <Navbar theme="light" />
+      <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
+        <Shell className="py-3">
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "سوالات متداول" }]} />
-          <div className="mt-8 max-w-3xl">
-            <Chip>FAQ / SUPPORT</Chip>
-            <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight sm:text-5xl">
-              سوالات متداول
+        </Shell>
+
+        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
+          <Shell>
+            <TechLabel tone="signal">FAQ / LBB</TechLabel>
+            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+              پاسخ‌های روشن پیش از انتخاب و ثبت سفارش
             </h1>
-            <p className="mt-4 text-base leading-8 text-muted-foreground sm:text-lg">
-              پاسخ کوتاه و روشن برای سوالات پرتکرار درباره محصول، سایز، سفارش و پشتیبانی.
+            <p className="text-lede mt-5 max-w-[62ch]">
+              در حالت live، فقط سؤال‌های فعال ثبت‌شده در پنل مدیریت نمایش داده می‌شوند.
             </p>
-          </div>
-        </Container>
-      </Section>
 
-      {allGroups.length === 0 ? (
-        <Section className="pt-0">
-          <Container>
-            <Surface className="p-6 text-sm leading-7 text-muted-foreground sm:p-8">
-              پرسش متداول منتشرشده‌ای وجود ندارد. برای راهنمایی می‌توانید از صفحه تماس با ما استفاده
-              کنید.
-            </Surface>
-          </Container>
-        </Section>
-      ) : (
-        <Section className="pt-0">
-          <Container>
-            <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
-              <aside className="hidden lg:sticky lg:top-28 lg:block">
-                <nav aria-label="دسته‌بندی سوالات" className="space-y-2">
-                  {allGroups.map((group) => (
-                    <button
-                      key={group.id}
-                      type="button"
-                      onClick={() => refs.current.get(group.id)?.scrollIntoView({ behavior: "smooth" })}
-                      className={cn(
-                        "block w-full rounded-xl px-4 py-3 text-right text-sm transition-colors",
-                        activeGroup === group.id
-                          ? "bg-foreground font-bold text-background"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                      )}
-                    >
-                      {group.title}
-                    </button>
-                  ))}
-                </nav>
-              </aside>
-
-              <div className="space-y-10">
-                {allGroups.map((group) => (
-                  <FaqGroupSection
+            {faqGroups.length > 0 ? (
+              <nav className="mt-8 flex flex-wrap gap-2" aria-label="دسته‌های سوالات متداول">
+                {faqGroups.map((group) => (
+                  <a
                     key={group.id}
-                    group={group}
-                    elementRef={(element) => {
-                      if (element) refs.current.set(group.id, element);
-                      else refs.current.delete(group.id);
-                    }}
-                  />
+                    href={`#${group.id}`}
+                    className="inline-flex min-h-11 items-center rounded-full border border-hairline px-4 py-2 text-xs text-metal transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  >
+                    {group.title}
+                  </a>
+                ))}
+              </nav>
+            ) : null}
+          </Shell>
+        </Band>
+
+        <Band>
+          <Shell className="max-w-[980px]">
+            {faqGroups.length === 0 ? (
+              <StatePanel title="سؤال متداول فعالی از پنل منتشر نشده است" tone="info">
+                تا زمان ثبت و فعال‌سازی FAQ در پنل، پاسخ نمونه یا قدیمی به‌جای داده واقعی نمایش داده
+                نمی‌شود. برای پرسش فعلی از راه ارتباطی رسمی LBB استفاده کنید.
+              </StatePanel>
+            ) : (
+              <div className="space-y-12">
+                {faqGroups.map((group, groupIndex) => (
+                  <section id={group.id} key={group.id} className="scroll-mt-28">
+                    <div className="flex flex-wrap items-end justify-between gap-4">
+                      <div>
+                        <TechLabel tone="signal">
+                          {String(groupIndex + 1).padStart(2, "0")} / {group.label}
+                        </TechLabel>
+                        <h2 className="mt-3 text-display-3 text-bone">{group.title}</h2>
+                      </div>
+                      <span className="tech text-mute">
+                        {group.items.length.toLocaleString("fa-IR")} پاسخ
+                      </span>
+                    </div>
+
+                    <div className="mt-5 overflow-hidden rounded-2xl border border-hairline bg-carbon">
+                      {group.items.map((item) => (
+                        <details
+                          key={item.question}
+                          className="group border-b border-hairline last:border-b-0"
+                        >
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 text-sm font-bold leading-7 text-bone transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal md:px-6">
+                            <span>{item.question}</span>
+                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-hairline text-metal transition-transform duration-200 group-open:rotate-45 group-open:border-signal group-open:text-signal">
+                              <Plus aria-hidden="true" size={17} />
+                            </span>
+                          </summary>
+                          <div className="px-5 pb-6 md:px-6">
+                            <p className="max-w-[72ch] text-sm leading-8 text-metal">
+                              {item.answer}
+                            </p>
+                          </div>
+                        </details>
+                      ))}
+                    </div>
+                  </section>
                 ))}
               </div>
+            )}
+
+            <div className="mt-12 flex flex-wrap gap-3">
+              <Link to="/shipping-returns" className={CtaClasses("line")}>
+                ارسال و مرجوعی
+              </Link>
+              <Link to="/contact" className={CtaClasses("signal")}>
+                تماس با LBB
+              </Link>
             </div>
-          </Container>
-        </Section>
-      )}
-    </main>
-  );
-}
-
-function FaqGroupSection({
-  group,
-  elementRef,
-}: {
-  group: FaqGroup;
-  elementRef: (element: HTMLElement | null) => void;
-}) {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-
-  return (
-    <section
-      ref={elementRef}
-      data-group-id={group.id}
-      className="scroll-mt-28"
-      aria-labelledby={`faq-${group.id}`}
-    >
-      <div className="mb-4 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">{group.label}</p>
-          <h2 id={`faq-${group.id}`} className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
-            {group.title}
-          </h2>
-        </div>
-      </div>
-
-      <Surface className="divide-y overflow-hidden p-0">
-        {group.items.map((item, index) => {
-          const isOpen = openIndex === index;
-
-          return (
-            <div key={item.question}>
-              <button
-                type="button"
-                className="flex w-full items-center justify-between gap-4 px-5 py-5 text-right sm:px-6"
-                aria-expanded={isOpen}
-                onClick={() => setOpenIndex(isOpen ? null : index)}
-              >
-                <span className="font-bold leading-7">{item.question}</span>
-                {isOpen ? <Minus className="size-4 shrink-0" /> : <Plus className="size-4 shrink-0" />}
-              </button>
-              {isOpen ? (
-                <div className="px-5 pb-5 text-sm leading-8 text-muted-foreground sm:px-6">
-                  {item.answer}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </Surface>
-    </section>
+          </Shell>
+        </Band>
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
   );
 }
