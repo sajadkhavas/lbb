@@ -45,7 +45,7 @@ type ShippingCard = {
   deliveryTimeLabel: string | null;
 };
 
-async function resolveLiveDeliveryPolicy(): Promise<LiveDeliveryPolicy | null> {
+async function resolveLiveShippingCards(): Promise<ShippingCard[] | null> {
   if (!isLiveBackend()) return null;
 
   const [tehran, karaj, nationwide] = await Promise.all([
@@ -54,21 +54,21 @@ async function resolveLiveDeliveryPolicy(): Promise<LiveDeliveryPolicy | null> {
     getDeliveryOptions({ province: "اصفهان", city: "اصفهان" }),
   ]);
 
-  return {
+  return backendShippingCards({
     tehran: tehran.data,
     karaj: karaj.data,
     nationwide: nationwide.data,
-  };
+  });
 }
 
 export const Route = createFileRoute("/shipping-returns")({
   loader: async () => {
-    const [page, delivery] = await Promise.all([
+    const [page, shippingCards] = await Promise.all([
       resolveOptionalStorefrontPage("shipping-returns"),
-      resolveLiveDeliveryPolicy(),
+      resolveLiveShippingCards(),
     ]);
 
-    return { page, delivery };
+    return { page, shippingCards };
   },
   head: ({ loaderData }) => {
     const page = loaderData?.page;
@@ -184,8 +184,8 @@ function ShippingCards({ cards }: { cards: ShippingCard[] }) {
   );
 }
 
-function ShippingState({ delivery }: { delivery: LiveDeliveryPolicy | null }) {
-  if (delivery) return <ShippingCards cards={backendShippingCards(delivery)} />;
+function ShippingState({ cards }: { cards: ShippingCard[] | null }) {
+  if (cards) return <ShippingCards cards={cards} />;
 
   const { shipping } = STORE_SETTINGS;
   const methods = getPublicShippingMethods();
@@ -315,11 +315,9 @@ function ManagedPolicy({ content }: { content: string | null }) {
 }
 
 function ShippingReturnsPage() {
-  const { page, delivery } = Route.useLoaderData();
+  const { page, shippingCards } = Route.useLoaderData();
   const { shipping, returns } = STORE_SETTINGS;
-  const shippingPublished = delivery
-    ? backendShippingCards(delivery).length > 0
-    : canPublishShipping();
+  const shippingPublished = shippingCards ? shippingCards.length > 0 : canPublishShipping();
   const returnsPublished = canPublishReturns();
 
   return (
@@ -372,7 +370,7 @@ function ShippingReturnsPage() {
                 </p>
               </div>
             </div>
-            <ShippingState delivery={delivery} />
+            <ShippingState cards={shippingCards} />
           </section>
 
           <section aria-labelledby="returns-heading">
