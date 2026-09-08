@@ -5,24 +5,27 @@ async function source(path: string) {
   return readFile(new URL(`../${path}`, import.meta.url), "utf8");
 }
 
-test("E1 live sitemap follows backend publication truth instead of prototype editorial data", async () => {
-  const sitemap = await source("src/routes/sitemap[.]xml.ts");
+test(
+  "E1 live sitemap follows backend publication truth instead of prototype editorial data",
+  async () => {
+    const sitemap = await source("src/routes/sitemap[.]xml.ts");
 
-  expect(sitemap).toContain("const prototypeEditorialEntries");
-  expect(sitemap).toContain("async function liveEditorialEntries");
-  expect(sitemap).toContain("resolveStorefrontFaqs()");
-  expect(sitemap).toContain("resolveStorefrontJournal()");
-  expect(sitemap).toContain('resolveOptionalStorefrontPage("terms")');
-  expect(sitemap).toContain('resolveOptionalStorefrontPage("privacy")');
-  expect(sitemap).toContain('resolveOptionalStorefrontPage("shipping-returns")');
-  expect(sitemap).toContain("...(journal ?? []).map((article)");
-  expect(sitemap).toContain("if ((faqs ?? []).length > 0)");
-  expect(sitemap).toContain("if (shippingReturns)");
-  expect(sitemap).toContain("if (terms)");
-  expect(sitemap).toContain("if (privacy)");
-  expect(sitemap).toContain("? await Promise.all([liveCommerceEntries(), liveEditorialEntries()])");
-  expect(sitemap).toContain(": [prototypeCommerceEntries(), prototypeEditorialEntries]");
-});
+    expect(sitemap).toContain("const prototypeEditorialEntries");
+    expect(sitemap).toContain("async function liveEditorialEntries");
+    expect(sitemap).toContain("resolveStorefrontFaqs()");
+    expect(sitemap).toContain("resolveStorefrontJournal()");
+    expect(sitemap).toContain('resolveOptionalStorefrontPage("terms")');
+    expect(sitemap).toContain('resolveOptionalStorefrontPage("privacy")');
+    expect(sitemap).toContain('resolveOptionalStorefrontPage("shipping-returns")');
+    expect(sitemap).toContain("...(journal ?? []).map((article)");
+    expect(sitemap).toContain("if ((faqs ?? []).length > 0)");
+    expect(sitemap).toContain("if (shippingReturns)");
+    expect(sitemap).toContain("if (terms)");
+    expect(sitemap).toContain("if (privacy)");
+    expect(sitemap).toContain("? await Promise.all([liveCommerceEntries(), liveEditorialEntries()])");
+    expect(sitemap).toContain(": [prototypeCommerceEntries(), prototypeEditorialEntries]");
+  },
+);
 
 test("E1 public fallbacks are crawlable but noindex until backend publication exists", async () => {
   const [faq, terms, privacy, shipping] = await Promise.all([
