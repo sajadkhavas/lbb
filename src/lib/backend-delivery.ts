@@ -11,13 +11,14 @@ export type DeliveryOptionDto = {
   method: DeliveryMethod;
   label: string;
   enabled: boolean;
+  policyEligible: boolean;
   feeToman: number;
-  paymentMode: "freight_collect";
+  paymentMode: "freight_collect" | "unavailable";
   isFree: false;
-  feeNotice: string;
-  carrier: { label: string };
-  coverage: { label: string };
-  eta: { label: string; minDays: number | null; maxDays: number | null };
+  feeNotice: string | null;
+  carrier: { label: string | null };
+  coverage: { label: string | null };
+  eta: { label: string | null; minDays: number | null; maxDays: number | null };
 };
 
 export type DeliveryOptionsDto = {
