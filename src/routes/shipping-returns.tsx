@@ -18,29 +18,79 @@ import {
   getPublicShippingMethods,
   type VerificationState,
 } from "@/lib/store-settings";
+import { isLiveBackend, type DeliveryMethod } from "@/lib/backend-api";
+import {
+  getDeliveryOptions,
+  type DeliveryOptionDto,
+  type DeliveryOptionsDto,
+} from "@/lib/backend-delivery";
+import { contentParagraphs, resolveOptionalStorefrontPage } from "@/lib/content-page";
 import { fmtToman } from "@/lib/products";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 
 const TITLE = "ارسال، تعویض و مرجوعی | LBB";
 const DESC =
-  "وضعیت عمومی و تأییدشده ارسال، تعویض، مرجوعی و بازپرداخت LBB؛ جزئیات تأییدنشده نمایش داده نمی‌شوند.";
+  "روش‌های ارسال تأییدشده LBB و وضعیت سیاست تعویض و مرجوعی؛ داده عملیاتی در حالت live از Backend خوانده می‌شود.";
+
+type LiveDeliveryPolicy = {
+  tehran: DeliveryOptionsDto;
+  karaj: DeliveryOptionsDto;
+  nationwide: DeliveryOptionsDto;
+};
+
+type ShippingCard = {
+  id: DeliveryMethod;
+  title: string;
+  description: string;
+  deliveryTimeLabel: string | null;
+};
+
+async function resolveLiveDeliveryPolicy(): Promise<LiveDeliveryPolicy | null> {
+  if (!isLiveBackend()) return null;
+
+  const [tehran, karaj, nationwide] = await Promise.all([
+    getDeliveryOptions({ province: "تهران", city: "تهران" }),
+    getDeliveryOptions({ province: "البرز", city: "کرج" }),
+    getDeliveryOptions({ province: "اصفهان", city: "اصفهان" }),
+  ]);
+
+  return {
+    tehran: tehran.data,
+    karaj: karaj.data,
+    nationwide: nationwide.data,
+  };
+}
 
 export const Route = createFileRoute("/shipping-returns")({
-  head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESC, path: "/shipping-returns" }),
-    links: canonical("/shipping-returns"),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify(
-          breadcrumbLd([
-            { name: "خانه", path: "/" },
-            { name: "ارسال و مرجوعی", path: "/shipping-returns" },
-          ]),
-        ),
-      },
-    ],
-  }),
+  loader: async () => {
+    const [page, delivery] = await Promise.all([
+      resolveOptionalStorefrontPage("shipping-returns"),
+      resolveLiveDeliveryPolicy(),
+    ]);
+
+    return { page, delivery };
+  },
+  head: ({ loaderData }) => {
+    const page = loaderData?.page;
+    const title = page?.metaTitle || (page ? `${page.title} | LBB` : TITLE);
+    const description = page?.metaDescription || page?.excerpt || DESC;
+
+    return {
+      meta: pageMeta({ title, description, path: "/shipping-returns" }),
+      links: canonical("/shipping-returns"),
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: page?.title || "ارسال و مرجوعی", path: "/shipping-returns" },
+            ]),
+          ),
+        },
+      ],
+    };
+  },
   component: ShippingReturnsPage,
 });
 
@@ -50,7 +100,90 @@ function PublicationBadge({ state, published }: { state: VerificationState; publ
   return <StatusTag tone="neutral">منتشر نشده</StatusTag>;
 }
 
-function ShippingState() {
+function findMethod(options: DeliveryOptionsDto, method: DeliveryMethod): DeliveryOptionDto | undefined {
+  return options.methods.find((item) => item.method === method);
+}
+
+function backendShippingCards(delivery: LiveDeliveryPolicy): ShippingCard[] {
+  const immediateTehran = findMethod(delivery.tehran, "immediate_courier");
+  const immediateKaraj = findMethod(delivery.karaj, "immediate_courier");
+  const tipax = findMethod(delivery.nationwide, "tipax");
+  const decapost = findMethod(delivery.nationwide, "decapost");
+
+  const cards: Array<ShippingCard | null> = [
+    immediateTehran?.enabled && immediateKaraj?.enabled
+      ? {
+          id: "immediate_courier",
+          title: "ارسال فوری — اسنپ / اسنپ‌باکس",
+          description:
+            immediateTehran.feeNotice ||
+            "فقط برای مقصدهای تهران و کرج؛ هزینه حمل خارج از پرداخت آنلاین فروشگاه دریافت می‌شود.",
+          deliveryTimeLabel: immediateTehran.eta.label,
+        }
+      : null,
+    tipax?.enabled && tipax.policyEligible
+      ? {
+          id: "tipax",
+          title: "تیپاکس — پس‌کرایه",
+          description:
+            tipax.feeNotice ||
+            "ارسال سراسری؛ هزینه حمل خارج از پرداخت آنلاین فروشگاه و به‌صورت پس‌کرایه دریافت می‌شود.",
+          deliveryTimeLabel: tipax.eta.label,
+        }
+      : null,
+    decapost?.enabled && decapost.policyEligible
+      ? {
+          id: "decapost",
+          title: "دکاپست — پس‌کرایه",
+          description:
+            decapost.feeNotice ||
+            "ارسال سراسری؛ هزینه حمل خارج از پرداخت آنلاین فروشگاه و به‌صورت پس‌کرایه دریافت می‌شود.",
+          deliveryTimeLabel: decapost.eta.label,
+        }
+      : null,
+  ];
+
+  return cards.filter((card): card is ShippingCard => card !== null);
+}
+
+function ShippingCards({ cards }: { cards: ShippingCard[] }) {
+  if (cards.length === 0) {
+    return (
+      <StatePanel title="روش ارسال عمومی در دسترس نیست" tone="warning">
+        Backend در حال حاضر هیچ روش فعال و مجاز قابل نمایش برنگردانده است.
+      </StatePanel>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {cards.map((method) => (
+        <article key={method.id} className="rounded-2xl border border-hairline bg-carbon p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="tech text-signal">VERIFIED SHIPPING</p>
+              <h3 className="mt-2 text-base font-bold text-bone">{method.title}</h3>
+            </div>
+            <StatusTag tone="success">فعال و تأییدشده</StatusTag>
+          </div>
+          <p className="mt-3 text-sm leading-7 text-metal">{method.description}</p>
+          {method.deliveryTimeLabel ? (
+            <dl className="mt-5 text-sm">
+              <div className="flex items-start justify-between gap-4 border-t border-hairline pt-3">
+                <dt className="text-mute">تحویل</dt>
+                <dd className="text-end font-semibold text-bone">{method.deliveryTimeLabel}</dd>
+              </div>
+            </dl>
+          ) : null}
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ShippingState({ delivery }: { delivery: LiveDeliveryPolicy | null }) {
+  if (delivery) return <ShippingCards cards={backendShippingCards(delivery)} />;
+
   const { shipping } = STORE_SETTINGS;
   const methods = getPublicShippingMethods();
 
@@ -61,9 +194,7 @@ function ShippingState() {
         title={pending ? "تنظیمات ارسال در حال بررسی است" : "روش ارسال عمومی هنوز منتشر نشده است"}
         tone={pending ? "warning" : "info"}
       >
-        {pending
-          ? "تا پایان بررسی، هیچ روش، هزینه، آستانهٔ ارسال رایگان، محدوده یا بازهٔ تحویل به‌عنوان اطلاعات عمومی نمایش داده نمی‌شود."
-          : "در وضعیت فعلی هیچ مبلغ، وعدهٔ ارسال رایگان، شرکت حمل‌ونقل یا زمان تحویلی از طرف LBB در این صفحه اعلام نمی‌شود."}
+        تا زمان تأیید، روش، هزینه، محدوده و بازه تحویل به‌عنوان اطلاعات عمومی حدس زده نمی‌شوند.
       </StatePanel>
     );
   }
@@ -89,18 +220,6 @@ function ShippingState() {
                 <dd className="font-semibold text-bone">{fmtToman(method.feeToman)}</dd>
               </div>
             ) : null}
-            {method.freeFromToman !== null ? (
-              <div className="flex items-start justify-between gap-4 border-t border-hairline pt-3">
-                <dt className="text-mute">ارسال رایگان از</dt>
-                <dd className="font-semibold text-bone">{fmtToman(method.freeFromToman)}</dd>
-              </div>
-            ) : null}
-            {method.processingTimeLabel ? (
-              <div className="flex items-start justify-between gap-4 border-t border-hairline pt-3">
-                <dt className="text-mute">آماده‌سازی</dt>
-                <dd className="text-end font-semibold text-bone">{method.processingTimeLabel}</dd>
-              </div>
-            ) : null}
             {method.deliveryTimeLabel ? (
               <div className="flex items-start justify-between gap-4 border-t border-hairline pt-3">
                 <dt className="text-mute">تحویل</dt>
@@ -115,22 +234,28 @@ function ShippingState() {
 }
 
 function ReturnsState() {
-  const { returns, legal } = STORE_SETTINGS;
+  const { returns } = STORE_SETTINGS;
   const published = canPublishReturns();
 
   if (!published) {
     const pending = returns.verification === "pending";
     return (
-      <StatePanel
-        title={
-          pending ? "سیاست بازگشت در حال بررسی است" : "سیاست مرجوعی و تعویض هنوز منتشر نشده است"
-        }
-        tone={pending ? "warning" : "info"}
-      >
-        مهلت درخواست، امکان تعویض، مسئول هزینهٔ بازگشت، کالاهای مستثنا و زمان بازپرداخت تا زمانی که
-        سیاست هم تأیید و هم منتشر نشود نمایش داده نمی‌شوند. از وضعیت فعلی هیچ «مهلت بازگشت» یا ضمانت
-        عمومی استنباط نکنید.
-      </StatePanel>
+      <div className="space-y-4">
+        <StatePanel
+          title={
+            pending ? "سیاست بازگشت در حال بررسی است" : "سیاست مرجوعی و تعویض هنوز منتشر نشده است"
+          }
+          tone={pending ? "warning" : "info"}
+        >
+          سیاست کامل مرجوعی، شرایط بازپرداخت و موارد مستثنا تا زمان انتشار از پنل به‌عنوان تعهد عمومی
+          نمایش داده نمی‌شوند.
+        </StatePanel>
+        <StatePanel title="اعلام سریع مغایرت یا مشکل سایز" tone="info">
+          LBB درخواست می‌کند مغایرت با عکس یا مشخصات، ایراد کالا یا مشکل مربوط به سایز حداکثر تا ۴۸
+          ساعت پس از تحویل اطلاع داده شود تا رسیدگی سریع‌تر انجام شود. این بازه، حقوق قانونی
+          مصرف‌کننده در معامله از راه دور را حذف یا محدود نمی‌کند.
+        </StatePanel>
+      </div>
     );
   }
 
@@ -165,40 +290,31 @@ function ReturnsState() {
             <dd className="mt-1 font-semibold text-bone">{returns.refundTimeLabel}</dd>
           </div>
         ) : null}
-        {returns.customerPaysReturnShipping !== null ? (
-          <div className="border-t border-hairline pt-3">
-            <dt className="text-mute">هزینهٔ ارسال بازگشت</dt>
-            <dd className="mt-1 font-semibold text-bone">
-              {returns.customerPaysReturnShipping ? "بر عهده مشتری" : "بر عهده فروشگاه"}
-            </dd>
-          </div>
-        ) : null}
-        {legal.lastReviewedAt ? (
-          <div className="border-t border-hairline pt-3">
-            <dt className="text-mute">آخرین بازبینی</dt>
-            <dd className="mt-1 font-semibold text-bone" dir="ltr">
-              {legal.lastReviewedAt}
-            </dd>
-          </div>
-        ) : null}
       </dl>
-      {returns.excludedCategories.length > 0 ? (
-        <div className="mt-5 border-t border-hairline pt-4">
-          <p className="text-sm font-semibold text-bone">موارد مستثنا</p>
-          <ul className="mt-2 list-inside list-disc space-y-1 text-sm leading-7 text-metal">
-            {returns.excludedCategories.map((category) => (
-              <li key={category}>{category}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
     </div>
   );
 }
 
+function ManagedPolicy({ content }: { content: string | null }) {
+  const paragraphs = contentParagraphs(content);
+  if (paragraphs.length === 0) return null;
+
+  return (
+    <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+      <TechLabel tone="signal">ADMIN / PUBLISHED POLICY</TechLabel>
+      <div className="mt-5 space-y-4 text-sm leading-8 text-metal">
+        {paragraphs.map((paragraph, index) => (
+          <p key={`${index}-${paragraph.slice(0, 28)}`}>{paragraph}</p>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ShippingReturnsPage() {
+  const { page, delivery } = Route.useLoaderData();
   const { shipping, returns } = STORE_SETTINGS;
-  const shippingPublished = canPublishShipping();
+  const shippingPublished = delivery ? backendShippingCards(delivery).length > 0 : canPublishShipping();
   const returnsPublished = canPublishReturns();
 
   return (
@@ -207,16 +323,16 @@ function ShippingReturnsPage() {
       <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16">
         <div className="hairline-b">
           <Shell className="py-3">
-            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ارسال و مرجوعی" }]} />
+            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: page?.title || "ارسال و مرجوعی" }]} />
           </Shell>
         </div>
 
         <header className="mx-auto max-w-[880px] px-4 py-10 md:px-8 md:py-14">
           <TechLabel tone="signal">TRUST / SHIPPING / RETURNS</TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">ارسال، تعویض و مرجوعی</h1>
+          <h1 className="mt-3 text-display-2 text-bone">{page?.title || "ارسال، تعویض و مرجوعی"}</h1>
           <p className="mt-4 max-w-[66ch] text-sm leading-8 text-metal">
-            این صفحه فقط اطلاعاتی را عمومی می‌کند که در تنظیمات فروشگاه تأیید شده و برای نمایش فعال
-            باشند. نبودن یک عدد یا روش به معنی مقدار پیش‌فرض یا وعدهٔ ضمنی نیست.
+            {page?.excerpt ||
+              "روش‌های ارسال در حالت live از Backend خوانده می‌شوند و سیاست کامل مرجوعی تنها پس از انتشار از پنل، مرجع عمومی خواهد بود."}
           </p>
           <div className="mt-5 flex flex-wrap gap-2" aria-label="وضعیت سیاست‌ها">
             <span className="inline-flex items-center gap-2">
@@ -231,6 +347,8 @@ function ShippingReturnsPage() {
         </header>
 
         <div className="mx-auto max-w-[880px] space-y-12 px-4 pb-16 md:px-8">
+          {page ? <ManagedPolicy content={page.content} /> : null}
+
           <section aria-labelledby="shipping-heading">
             <div className="mb-5 flex items-start gap-3">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-hairline bg-carbon text-signal">
@@ -241,11 +359,11 @@ function ShippingReturnsPage() {
                   ارسال و تحویل
                 </h2>
                 <p className="mt-1 text-sm leading-7 text-metal">
-                  روش، هزینه و زمان فقط از رکوردهای فعال و تأییدشده نمایش داده می‌شوند.
+                  فقط روش‌های فعال و مجاز به‌عنوان گزینه عمومی نمایش داده می‌شوند.
                 </p>
               </div>
             </div>
-            <ShippingState />
+            <ShippingState delivery={delivery} />
           </section>
 
           <section aria-labelledby="returns-heading">
@@ -258,7 +376,7 @@ function ShippingReturnsPage() {
                   تعویض و مرجوعی
                 </h2>
                 <p className="mt-1 text-sm leading-7 text-metal">
-                  فعال بودن مرجوعی به‌تنهایی دربارهٔ تعویض یا بازپرداخت ادعایی ایجاد نمی‌کند.
+                  سیاست داخلی نباید حقوق قانونی مصرف‌کننده را محدود یا جایگزین کند.
                 </p>
               </div>
             </div>
@@ -275,31 +393,10 @@ function ShippingReturnsPage() {
                   تفاوت اصطلاح‌ها
                 </h2>
                 <p className="mt-1 text-sm leading-7 text-metal">
-                  این تعریف‌ها برای شفافیت رابط هستند و به‌تنهایی سیاست فروشگاه محسوب نمی‌شوند.
+                  تعویض، مرجوعی و بازپرداخت فرایندهای جدا هستند و شرایط نهایی آنها باید در سیاست
+                  منتشرشده مشخص باشد.
                 </p>
               </div>
-            </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              <article className="rounded-2xl border border-hairline bg-carbon p-5">
-                <h3 className="font-bold text-bone">تعویض</h3>
-                <p className="mt-2 text-sm leading-7 text-metal">
-                  جایگزین شدن کالای برگشتی با کالای دیگر، فقط در صورتی که سیاست منتشرشده آن را مجاز
-                  بداند.
-                </p>
-              </article>
-              <article className="rounded-2xl border border-hairline bg-carbon p-5">
-                <h3 className="font-bold text-bone">مرجوعی</h3>
-                <p className="mt-2 text-sm leading-7 text-metal">
-                  درخواست بازگرداندن کالا بر اساس شرایطی که باید جداگانه تأیید و منتشر شده باشند.
-                </p>
-              </article>
-              <article className="rounded-2xl border border-hairline bg-carbon p-5">
-                <h3 className="font-bold text-bone">بازپرداخت</h3>
-                <p className="mt-2 text-sm leading-7 text-metal">
-                  بازگشت وجه پس از یک فرایند معتبر مالی؛ زمان آن فقط در صورت وجود سیاست تأییدشده
-                  نمایش داده می‌شود.
-                </p>
-              </article>
             </div>
           </section>
 
@@ -308,11 +405,10 @@ function ShippingReturnsPage() {
             aria-labelledby="help-heading"
           >
             <h2 id="help-heading" className="text-lg font-bold text-bone">
-              پیش از اقدام، اطلاعات منتشرشده را بررسی کنید
+              راهنمای تکمیلی
             </h2>
             <p className="mt-3 max-w-[66ch] text-sm leading-7 text-metal">
-              برای چارچوب استفاده از سایت، حریم خصوصی و راه ارتباطی تأییدشده از صفحات زیر استفاده
-              کنید. این صفحه جای اطلاعات تأییدنشده را با مقدار فرضی پر نمی‌کند.
+              برای شرایط استفاده، حریم خصوصی یا پیگیری یک مورد مشخص از صفحات زیر استفاده کنید.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Link to="/terms" className={CtaClasses("line")}>
