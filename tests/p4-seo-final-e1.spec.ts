@@ -48,7 +48,7 @@ test("E1 keeps the valid shop modifier contract", async () => {
   ]);
 
   expect(shop).toContain("hasSearchModifiers(filters)");
-  expect(shop).toContain('robots: noindex ? "noindex, follow" : "index, follow"');
+  expect(shop).toContain('robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined');
   expect(filters).toContain('"price-asc"');
   expect(filters).toContain('"price-desc"');
   expect(seoContract).toContain("/shop?sizes=M&sort=price-asc");
