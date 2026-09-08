@@ -150,14 +150,23 @@ if (/<form\b/i.test(contact) || contact.includes("پیام شما ارسال ش�
   failures.push("Contact route must not expose a false-success form without a transport.");
 }
 
-const officialDeliveryMethods = ["immediate_courier", "tipax", "decapost", "express_post"];
-for (const method of officialDeliveryMethods) {
+// The frozen API type retains the four canonical P4 methods for wire compatibility.
+const canonicalDeliveryMethods = ["immediate_courier", "tipax", "decapost", "express_post"];
+for (const method of canonicalDeliveryMethods) {
   if (!backendApi.includes(`\"${method}\"`)) {
-    failures.push(`Frontend DeliveryMethod contract is missing P4 method: ${method}`);
+    failures.push(`Frontend DeliveryMethod contract is missing canonical P4 method: ${method}`);
   }
+}
+
+// The employer-approved storefront policy intentionally publishes only these three methods.
+const employerDeliveryMethods = ["immediate_courier", "tipax", "decapost"];
+for (const method of employerDeliveryMethods) {
   if (!settings.includes(`id: \"${method}\"`)) {
-    failures.push(`Public shipping settings are missing canonical P4 method id: ${method}`);
+    failures.push(`Public shipping settings are missing employer-approved method: ${method}`);
   }
+}
+if (settings.includes('id: "express_post"')) {
+  failures.push("Express Post must not be published by the active employer storefront policy.");
 }
 for (const legacyId of [
   "courier-karaj-tehran",
@@ -171,6 +180,11 @@ for (const legacyId of [
 }
 if (!backendDelivery.includes("/api/v1/delivery/options")) {
   failures.push("P4 live delivery methods must remain backend-authoritative.");
+}
+for (const required of ["policyEligible", '"freight_collect"', "isFree", "feeNotice"]) {
+  if (!backendDelivery.includes(required)) {
+    failures.push(`Freight-collect delivery response contract is missing: ${required}`);
+  }
 }
 
 if (!checkout.includes("getCommerceReadiness") || !checkout.includes("getPublicPaymentSettings")) {
@@ -198,6 +212,10 @@ for (const required of [
   "initiatePayment",
   "ensureBackendCsrf",
   'const needsAddress = deliveryMethod !== "";',
+  "method.enabled && method.policyEligible",
+  'method.paymentMode === "freight_collect"',
+  "پس‌کرایه — خارج از مبلغ آنلاین",
+  "مبلغ قابل پرداخت آنلاین",
 ]) {
   if (!checkout.includes(required)) {
     failures.push(`P4 live checkout boundary is missing: ${required}`);
@@ -250,4 +268,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Store settings, P3 storefront control and P4 commerce contract audit passed.");
+console.log("Store settings, P3 storefront control and employer freight-collect commerce contract audit passed.");
