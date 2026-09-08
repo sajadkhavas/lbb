@@ -6,7 +6,7 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { Band, CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 import { contentParagraphs } from "@/lib/content-page";
-import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";
+import { breadcrumbLd, canonical, pageMeta, ROBOTS } from "@/lib/site";
 import { resolveStorefrontFaqs, type StorefrontFaqDto } from "@/lib/storefront-control";
 
 const TITLE = "سوالات متداول LBB | سایز، ارسال و انتخاب محصول";
@@ -104,8 +104,13 @@ function backendFaqGroups(items: StorefrontFaqDto[]): FaqGroup[] {
 
 export const Route = createFileRoute("/faq")({
   loader: () => resolveStorefrontFaqs(),
-  head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESC, path: "/faq" }),
+  head: ({ loaderData }) => ({
+    meta: pageMeta({
+      title: TITLE,
+      description: DESC,
+      path: "/faq",
+      robots: loaderData !== null && loaderData.length === 0 ? ROBOTS.NOINDEX_FOLLOW : undefined,
+    }),
     links: canonical("/faq"),
     scripts: [
       {
