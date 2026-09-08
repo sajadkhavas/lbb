@@ -648,7 +648,11 @@ function ServerQuote({
         {quote.totals.discount.amount > 0 ? (
           <Row label="تخفیف" value={`− ${fmtToman(quote.totals.discount.amount)}`} />
         ) : null}
-        <Row label="مبلغ قابل پرداخت آنلاین" value={fmtToman(quote.totals.grandTotal.amount)} bold />
+        <Row
+          label="مبلغ قابل پرداخت آنلاین"
+          value={fmtToman(quote.totals.grandTotal.amount)}
+          bold
+        />
       </div>
       {freightCollect ? (
         <p className="mt-3 text-xs font-semibold leading-6 text-signal">
