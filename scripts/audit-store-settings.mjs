@@ -268,4 +268,6 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Store settings, P3 storefront control and employer freight-collect commerce contract audit passed.");
+console.log(
+  "Store settings, P3 storefront control and employer freight-collect commerce contract audit passed.",
+);
