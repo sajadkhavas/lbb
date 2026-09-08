@@ -6,12 +6,13 @@ async function source(path: string) {
 }
 
 test("D2 legal/content routes are wired to backend authority without stale express-post claims", async () => {
-  const [terms, privacy, shipping, faq, helper] = await Promise.all([
+  const [terms, privacy, shipping, faq, helper, brandAudit] = await Promise.all([
     source("src/routes/terms.tsx"),
     source("src/routes/privacy.tsx"),
     source("src/routes/shipping-returns.tsx"),
     source("src/routes/faq.tsx"),
     source("src/lib/content-page.ts"),
+    source("scripts/audit-brand-copy.mjs"),
   ]);
 
   expect(terms).toContain('resolveOptionalStorefrontPage("terms")');
@@ -29,6 +30,15 @@ test("D2 legal/content routes are wired to backend authority without stale expre
 
   expect(helper).toContain("error instanceof BackendApiError && error.status === 404");
   expect(helper).toContain("throw error");
+
+  // Brand identity remains Karaj-only. The audit exemption is scoped specifically to the
+  // shipping route and requires either internal identifiers, the exact delivery query,
+  // or user-facing shipping/destination wording alongside both Tehran and Karaj.
+  expect(brandAudit).toContain('relative === "src/routes/shipping-returns.tsx"');
+  expect(brandAudit).toContain('trimmed.includes("getDeliveryOptions")');
+  expect(brandAudit).toContain('/(ارسال|مقصد|تحویل|پیک|اسنپ)/.test(trimmed)');
+  expect(brandAudit).toContain('/(تهران.*کرج|کرج.*تهران)/.test(trimmed)');
+  expect(brandAudit).not.toContain('relative === "src/routes/shipping-returns.tsx") return true');
 });
 
 test("D2 prototype fallbacks remain truthful and accessible", async ({ page }) => {
