@@ -29,7 +29,7 @@ test("E1 unpublished fallbacks stay crawlable noindex", async () => {
     source("src/routes/shipping-returns.tsx"),
   ]);
 
-  expect(faq).toContain("loaderData !== null && loaderData.length === 0");
+  expect(faq).toContain("Array.isArray(loaderData) && loaderData.length === 0");
   expect(terms).toContain("robots: page ? undefined");
   expect(privacy).toContain("robots: page ? undefined");
   expect(shipping).toContain("robots: page ? undefined");
