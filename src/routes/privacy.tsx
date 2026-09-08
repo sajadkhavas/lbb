@@ -63,7 +63,9 @@ function ManagedPrivacy({ content }: { content: string | null }) {
       <TechLabel tone="signal">ADMIN / PUBLISHED POLICY</TechLabel>
       <div className="mt-5 space-y-4 text-sm leading-8 text-metal">
         {paragraphs.length > 0 ? (
-          paragraphs.map((paragraph, index) => <p key={`${index}-${paragraph.slice(0, 28)}`}>{paragraph}</p>)
+          paragraphs.map((paragraph, index) => (
+            <p key={`${index}-${paragraph.slice(0, 28)}`}>{paragraph}</p>
+          ))
         ) : (
           <p>این صفحه از پنل منتشر شده است، اما هنوز متن تفصیلی برای آن ثبت نشده است.</p>
         )}
@@ -83,7 +85,9 @@ function PrivacyPage() {
       <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16">
         <div className="hairline-b">
           <Shell className="py-3">
-            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: page?.title || "حریم خصوصی" }]} />
+            <Breadcrumb
+              items={[{ label: "خانه", href: "/" }, { label: page?.title || "حریم خصوصی" }]}
+            />
           </Shell>
         </div>
 

@@ -1,8 +1,5 @@
 import { BackendApiError } from "@/lib/backend-api";
-import {
-  resolveStorefrontPage,
-  type StorefrontPageDto,
-} from "@/lib/storefront-control";
+import { resolveStorefrontPage, type StorefrontPageDto } from "@/lib/storefront-control";
 
 /**
  * Published content pages are optional during the controlled activation window.

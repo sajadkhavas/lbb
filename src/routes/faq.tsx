@@ -4,13 +4,7 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import {
-  Band,
-  CtaClasses,
-  Shell,
-  StatePanel,
-  TechLabel,
-} from "@/components/lbb/ui/primitives";
+import { Band, CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 import { contentParagraphs } from "@/lib/content-page";
 import { breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import { resolveStorefrontFaqs, type StorefrontFaqDto } from "@/lib/storefront-control";
@@ -202,7 +196,9 @@ function FaqPage() {
                             </span>
                           </summary>
                           <div className="px-5 pb-6 md:px-6">
-                            <p className="max-w-[72ch] text-sm leading-8 text-metal">{item.answer}</p>
+                            <p className="max-w-[72ch] text-sm leading-8 text-metal">
+                              {item.answer}
+                            </p>
                           </div>
                         </details>
                       ))}

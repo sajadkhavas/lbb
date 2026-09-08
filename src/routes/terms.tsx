@@ -51,15 +51,7 @@ export const Route = createFileRoute("/terms")({
   component: TermsPage,
 });
 
-function Section({
-  title,
-  children,
-  id,
-}: {
-  title: string;
-  children: ReactNode;
-  id?: string;
-}) {
+function Section({ title, children, id }: { title: string; children: ReactNode; id?: string }) {
   return (
     <section id={id} className="scroll-mt-28 border-t border-hairline pt-7">
       <h2 className="text-xl font-bold text-bone">{title}</h2>
@@ -76,7 +68,9 @@ function ManagedTerms({ content }: { content: string | null }) {
       <TechLabel tone="signal">ADMIN / PUBLISHED POLICY</TechLabel>
       <div className="mt-5 space-y-4 text-sm leading-8 text-metal">
         {paragraphs.length > 0 ? (
-          paragraphs.map((paragraph, index) => <p key={`${index}-${paragraph.slice(0, 28)}`}>{paragraph}</p>)
+          paragraphs.map((paragraph, index) => (
+            <p key={`${index}-${paragraph.slice(0, 28)}`}>{paragraph}</p>
+          ))
         ) : (
           <p>این صفحه از پنل منتشر شده است، اما هنوز متن تفصیلی برای آن ثبت نشده است.</p>
         )}
@@ -99,7 +93,9 @@ function TermsPage() {
       <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16">
         <div className="hairline-b">
           <Shell className="py-3">
-            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: page?.title || "شرایط استفاده" }]} />
+            <Breadcrumb
+              items={[{ label: "خانه", href: "/" }, { label: page?.title || "شرایط استفاده" }]}
+            />
           </Shell>
         </div>
 
@@ -126,11 +122,15 @@ function TermsPage() {
                 نبودن نسخه منتشرشده به معنی وجود مهلت، هزینه، روش پرداخت یا تعهد پیش‌فرض نیست.
               </StatePanel>
 
-              <StatePanel className="mt-4" title="مهلت ۴۸ ساعت، حقوق قانونی را محدود نمی‌کند" tone="info">
-                درخواست LBB برای اعلام سریع مغایرت با عکس یا مشخصات، ایراد کالا یا مشکل مربوط به سایز
-                حداکثر تا ۴۸ ساعت پس از تحویل، یک مسیر رسیدگی داخلی است. در معامله از راه دور، حقوق
-                قانونی مصرف‌کننده از جمله حق انصراف مقرر در قانون تجارت الکترونیکی مستقل است و این
-                بازه ۴۸ ساعته آن را حذف یا محدود نمی‌کند.
+              <StatePanel
+                className="mt-4"
+                title="مهلت ۴۸ ساعت، حقوق قانونی را محدود نمی‌کند"
+                tone="info"
+              >
+                درخواست LBB برای اعلام سریع مغایرت با عکس یا مشخصات، ایراد کالا یا مشکل مربوط به
+                سایز حداکثر تا ۴۸ ساعت پس از تحویل، یک مسیر رسیدگی داخلی است. در معامله از راه دور،
+                حقوق قانونی مصرف‌کننده از جمله حق انصراف مقرر در قانون تجارت الکترونیکی مستقل است و
+                این بازه ۴۸ ساعته آن را حذف یا محدود نمی‌کند.
               </StatePanel>
 
               <div className="mt-10 space-y-9">

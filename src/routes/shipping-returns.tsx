@@ -100,7 +100,10 @@ function PublicationBadge({ state, published }: { state: VerificationState; publ
   return <StatusTag tone="neutral">منتشر نشده</StatusTag>;
 }
 
-function findMethod(options: DeliveryOptionsDto, method: DeliveryMethod): DeliveryOptionDto | undefined {
+function findMethod(
+  options: DeliveryOptionsDto,
+  method: DeliveryMethod,
+): DeliveryOptionDto | undefined {
   return options.methods.find((item) => item.method === method);
 }
 
@@ -247,8 +250,8 @@ function ReturnsState() {
           }
           tone={pending ? "warning" : "info"}
         >
-          سیاست کامل مرجوعی، شرایط بازپرداخت و موارد مستثنا تا زمان انتشار از پنل به‌عنوان تعهد عمومی
-          نمایش داده نمی‌شوند.
+          سیاست کامل مرجوعی، شرایط بازپرداخت و موارد مستثنا تا زمان انتشار از پنل به‌عنوان تعهد
+          عمومی نمایش داده نمی‌شوند.
         </StatePanel>
         <StatePanel title="اعلام سریع مغایرت یا مشکل سایز" tone="info">
           LBB درخواست می‌کند مغایرت با عکس یا مشخصات، ایراد کالا یا مشکل مربوط به سایز حداکثر تا ۴۸
@@ -314,7 +317,9 @@ function ManagedPolicy({ content }: { content: string | null }) {
 function ShippingReturnsPage() {
   const { page, delivery } = Route.useLoaderData();
   const { shipping, returns } = STORE_SETTINGS;
-  const shippingPublished = delivery ? backendShippingCards(delivery).length > 0 : canPublishShipping();
+  const shippingPublished = delivery
+    ? backendShippingCards(delivery).length > 0
+    : canPublishShipping();
   const returnsPublished = canPublishReturns();
 
   return (
@@ -323,13 +328,17 @@ function ShippingReturnsPage() {
       <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16">
         <div className="hairline-b">
           <Shell className="py-3">
-            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: page?.title || "ارسال و مرجوعی" }]} />
+            <Breadcrumb
+              items={[{ label: "خانه", href: "/" }, { label: page?.title || "ارسال و مرجوعی" }]}
+            />
           </Shell>
         </div>
 
         <header className="mx-auto max-w-[880px] px-4 py-10 md:px-8 md:py-14">
           <TechLabel tone="signal">TRUST / SHIPPING / RETURNS</TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">{page?.title || "ارسال، تعویض و مرجوعی"}</h1>
+          <h1 className="mt-3 text-display-2 text-bone">
+            {page?.title || "ارسال، تعویض و مرجوعی"}
+          </h1>
           <p className="mt-4 max-w-[66ch] text-sm leading-8 text-metal">
             {page?.excerpt ||
               "روش‌های ارسال در حالت live از Backend خوانده می‌شوند و سیاست کامل مرجوعی تنها پس از انتشار از پنل، مرجع عمومی خواهد بود."}
