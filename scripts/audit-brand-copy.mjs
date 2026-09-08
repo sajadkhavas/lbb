@@ -35,10 +35,10 @@ function isAllowedTehranReference(relative, line) {
     return true;
   }
 
-  // Tehran is a verified delivery geography, not a brand-location claim.
+  // Tehran is an employer-verified delivery geography alongside Karaj, not a brand-location claim.
   if (
     (relative === "src/lib/store-settings.ts" || relative === "src/routes/faq.tsx") &&
-    /ارسال فوری.*کرج و تهران/.test(trimmed)
+    /(ارسال فوری|مقصدهای).*(تهران.*کرج|کرج.*تهران)/.test(trimmed)
   ) {
     return true;
   }

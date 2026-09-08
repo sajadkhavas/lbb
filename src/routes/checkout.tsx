@@ -87,7 +87,7 @@ function LiveCheckout() {
 
   const backendItems = useMemo(() => cartLinesToBackendItems(lines), [lines]);
   const cartCompatible = backendItems.length > 0 && backendItems.length === lines.length;
-  const enabledMethods = methods.filter((method) => method.enabled);
+  const enabledMethods = methods.filter((method) => method.enabled && method.policyEligible);
   const selectedMethod = enabledMethods.find((method) => method.method === deliveryMethod) ?? null;
   const needsAddress = deliveryMethod !== "";
   const shouldRecoverPending = lines.length === 0 && Boolean(continuity);
@@ -210,7 +210,9 @@ function LiveCheckout() {
       .then((response) => {
         if (cancelled) return;
         setMethods(response.data.methods);
-        const available = response.data.methods.filter((method) => method.enabled);
+        const available = response.data.methods.filter(
+          (method) => method.enabled && method.policyEligible,
+        );
         setDeliveryMethod((current) =>
           available.some((method) => method.method === current)
             ? current
@@ -543,9 +545,20 @@ function LiveCheckout() {
                       className="me-2"
                     />
                     <span className="font-semibold text-bone">{method.label}</span>
-                    <span className="mt-1 block text-xs text-metal">
-                      هزینه نهایی فقط در Quote سرور قطعی می‌شود.
+                    <span className="mt-2 block text-xs leading-6 text-metal">
+                      {method.coverage.label}
+                      {method.eta.label ? ` · ${method.eta.label}` : ""}
                     </span>
+                    {method.paymentMode === "freight_collect" ? (
+                      <span className="mt-1 block text-xs font-semibold leading-6 text-signal">
+                        پس‌کرایه — هزینه حمل داخل مبلغ پرداخت آنلاین نیست.
+                      </span>
+                    ) : null}
+                    {method.feeNotice ? (
+                      <span className="mt-1 block text-xs leading-6 text-mute">
+                        {method.feeNotice}
+                      </span>
+                    ) : null}
                   </label>
                 ))}
               </div>
@@ -553,11 +566,11 @@ function LiveCheckout() {
           </section>
 
           {quote ? (
-            <ServerQuote quote={quote} />
+            <ServerQuote quote={quote} method={selectedMethod} />
           ) : (
             <StatePanel title="جمع نهایی هنوز محاسبه نشده است" tone="info">
-              قیمت Variantها، موجودی و هزینه تحویل با دکمه «دریافت جمع نهایی» دوباره در Backend
-              بررسی می‌شوند.
+              قیمت Variantها و موجودی با دکمه «دریافت جمع نهایی» دوباره در Backend بررسی می‌شوند؛
+              کرایه روش‌های فعال فروشگاه پس‌کرایه است و به Total آنلاین اضافه نمی‌شود.
             </StatePanel>
           )}
 
@@ -606,7 +619,15 @@ function LiveCheckout() {
   );
 }
 
-function ServerQuote({ quote }: { quote: CheckoutQuoteDto }) {
+function ServerQuote({
+  quote,
+  method,
+}: {
+  quote: CheckoutQuoteDto;
+  method: DeliveryOptionDto | null;
+}) {
+  const freightCollect = method?.paymentMode === "freight_collect";
+
   return (
     <section className="border border-signal/60 bg-carbon p-5" aria-labelledby="server-quote-title">
       <TechLabel tone="signal">SERVER QUOTE</TechLabel>
@@ -615,13 +636,29 @@ function ServerQuote({ quote }: { quote: CheckoutQuoteDto }) {
       </h2>
       <div className="mt-4 space-y-2 text-sm">
         <Row label="جمع کالاها" value={fmtToman(quote.totals.subtotal.amount)} />
-        <Row label="هزینه تحویل" value={fmtToman(quote.totals.deliveryFee.amount)} />
+        <Row
+          label="هزینه ارسال"
+          value={
+            freightCollect
+              ? "پس‌کرایه — خارج از مبلغ آنلاین"
+              : fmtToman(quote.totals.deliveryFee.amount)
+          }
+        />
         <Row label="هزینه بسته‌بندی" value={fmtToman(quote.totals.packagingFee.amount)} />
         {quote.totals.discount.amount > 0 ? (
           <Row label="تخفیف" value={`− ${fmtToman(quote.totals.discount.amount)}`} />
         ) : null}
-        <Row label="مبلغ نهایی" value={fmtToman(quote.totals.grandTotal.amount)} bold />
+        <Row
+          label="مبلغ قابل پرداخت آنلاین"
+          value={fmtToman(quote.totals.grandTotal.amount)}
+          bold
+        />
       </div>
+      {freightCollect ? (
+        <p className="mt-3 text-xs font-semibold leading-6 text-signal">
+          کرایه حمل در این مبلغ محاسبه نشده و طبق روش ارسال انتخابی به‌صورت پس‌کرایه دریافت می‌شود.
+        </p>
+      ) : null}
       <p className="mt-3 text-xs leading-6 text-metal">
         Quote تا {new Date(quote.expiresAt).toLocaleString("fa-IR")} معتبر است؛ Commit دوباره Truth
         را کنترل می‌کند.
@@ -752,8 +789,8 @@ function CheckoutChrome({ children }: { children: React.ReactNode }) {
           <TechLabel tone="signal">CHECKOUT / SERVER AUTHORITATIVE</TechLabel>
           <h1 className="mt-3 text-display-2 text-bone">تکمیل سفارش</h1>
           <p className="mt-3 max-w-[66ch] text-sm leading-8 text-metal">
-            قیمت، موجودی، هزینه تحویل، Order و Payment state در حالت live فقط از Backend پذیرفته
-            می‌شوند.
+            قیمت، موجودی، روش ارسال، Order و Payment state در حالت live فقط از Backend پذیرفته
+            می‌شوند. کرایه روش‌های فعال فعلی پس‌کرایه است و داخل مبلغ آنلاین قرار نمی‌گیرد.
           </p>
           {children}
         </div>
@@ -826,15 +863,18 @@ function PrototypeCheckout() {
                   </div>
                 </div>
                 <p className="mt-3 text-xs leading-6 text-mute">
-                  این مبلغ فقط جمع اقلام سبد است؛ هزینه ارسال یا Total نهایی تا وجود دادهٔ
-                  قابل‌اعتماد اضافه نمی‌شود.
+                  این مبلغ فقط جمع اقلام سبد است؛ کرایه ارسال پس‌کرایه است و به مبلغ آنلاین اضافه
+                  نمی‌شود.
                 </p>
               </section>
 
               {shippingMethods.length > 0 ? (
-                <StatePanel title="روش ارسال عمومی تأیید شده است" tone="success">
-                  روش‌های فعال: {shippingMethods.map((method) => method.title).join("، ")}. انتخاب
-                  روش و محاسبه قابل‌اعتماد هزینه به فرایند واقعی سفارش وابسته است.
+                <StatePanel title="روش‌های ارسال فروشگاه تأیید شده‌اند" tone="success">
+                  <p>روش‌های فعال: {shippingMethods.map((method) => method.title).join("، ")}.</p>
+                  <p className="mt-2">
+                    همه روش‌های فعال فعلی پس‌کرایه‌اند؛ هزینه حمل هنگام استفاده از سرویس حمل جدا از
+                    مبلغ پرداخت آنلاین فروشگاه دریافت می‌شود.
+                  </p>
                 </StatePanel>
               ) : (
                 <StatePanel

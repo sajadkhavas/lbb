@@ -237,10 +237,9 @@ test("shipping, contact, legal and privacy routes are truth-safe at mobile width
   await expect(shippingSection).toBeVisible();
 
   for (const method of [
-    "ارسال فوری با پیک",
+    "ارسال فوری — اسنپ / اسنپ‌باکس",
     "تیپاکس — پس‌کرایه",
     "دکاپست — پس‌کرایه",
-    "پست پیشتاز",
   ]) {
     await expect(
       shippingSection.getByText(method, {
@@ -248,6 +247,12 @@ test("shipping, contact, legal and privacy routes are truth-safe at mobile width
       }),
     ).toBeVisible();
   }
+
+  await expect(
+    shippingSection.getByText("پست پیشتاز", {
+      exact: true,
+    }),
+  ).toHaveCount(0);
 
   const returnsSection = page.locator('section[aria-labelledby="returns-heading"]');
 
