@@ -22,7 +22,9 @@ test(
     expect(sitemap).toContain("if (shippingReturns)");
     expect(sitemap).toContain("if (terms)");
     expect(sitemap).toContain("if (privacy)");
-    expect(sitemap).toContain("? await Promise.all([liveCommerceEntries(), liveEditorialEntries()])");
+    expect(sitemap).toContain(
+      "? await Promise.all([liveCommerceEntries(), liveEditorialEntries()])",
+    );
     expect(sitemap).toContain(": [prototypeCommerceEntries(), prototypeEditorialEntries]");
   },
 );
