@@ -12,6 +12,12 @@ export type DeliveryOptionDto = {
   label: string;
   enabled: boolean;
   feeToman: number;
+  paymentMode: "freight_collect";
+  isFree: false;
+  feeNotice: string;
+  carrier: { label: string };
+  coverage: { label: string };
+  eta: { label: string; minDays: number | null; maxDays: number | null };
 };
 
 export type DeliveryOptionsDto = {
