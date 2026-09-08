@@ -13,7 +13,7 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { getPublicContactChannels } from "@/lib/store-settings";
 import { contentParagraphs, resolveOptionalStorefrontPage } from "@/lib/content-page";
-import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import { pageMeta, canonical, breadcrumbLd, ROBOTS } from "@/lib/site";
 
 const TITLE = "حریم خصوصی | LBB";
 const DESC =
@@ -28,7 +28,12 @@ export const Route = createFileRoute("/privacy")({
     const breadcrumbName = page?.title || "حریم خصوصی";
 
     return {
-      meta: pageMeta({ title, description, path: "/privacy" }),
+      meta: pageMeta({
+        title,
+        description,
+        path: "/privacy",
+        robots: page ? undefined : ROBOTS.NOINDEX_FOLLOW,
+      }),
       links: canonical("/privacy"),
       scripts: [
         {
