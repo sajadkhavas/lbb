@@ -51,7 +51,7 @@ test("E1 keeps the valid shop modifier contract", async () => {
   expect(shop).toContain('robots: noindex ? "noindex, follow" : "index, follow"');
   expect(filters).toContain('"price-asc"');
   expect(filters).toContain('"price-desc"');
-  expect(seoContract).toContain('/shop?sizes=M&sort=price-asc');
+  expect(seoContract).toContain("/shop?sizes=M&sort=price-asc");
   expect(seoContract).toContain('"noindex, follow"');
 });
 
