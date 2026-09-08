@@ -18,7 +18,7 @@ import {
   getPublicPaymentSettings,
 } from "@/lib/store-settings";
 import { contentParagraphs, resolveOptionalStorefrontPage } from "@/lib/content-page";
-import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import { pageMeta, canonical, breadcrumbLd, ROBOTS } from "@/lib/site";
 
 const TITLE = "شرایط استفاده | LBB";
 const DESC =
@@ -33,7 +33,12 @@ export const Route = createFileRoute("/terms")({
     const breadcrumbName = page?.title || "شرایط استفاده";
 
     return {
-      meta: pageMeta({ title, description, path: "/terms" }),
+      meta: pageMeta({
+        title,
+        description,
+        path: "/terms",
+        robots: page ? undefined : ROBOTS.NOINDEX_FOLLOW,
+      }),
       links: canonical("/terms"),
       scripts: [
         {
