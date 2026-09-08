@@ -61,10 +61,7 @@ function isAllowedTehranReference(relative, line) {
     // User-facing Tehran references are allowed only when the same line explicitly describes
     // shipping/destination geography together with Karaj. This deliberately does not whitelist
     // generic claims such as "فروشگاه LBB در تهران".
-    if (
-      /(ارسال|مقصد|تحویل|پیک|اسنپ)/.test(trimmed) &&
-      /(تهران.*کرج|کرج.*تهران)/.test(trimmed)
-    ) {
+    if (/(ارسال|مقصد|تحویل|پیک|اسنپ)/.test(trimmed) && /(تهران.*کرج|کرج.*تهران)/.test(trimmed)) {
       return true;
     }
   }

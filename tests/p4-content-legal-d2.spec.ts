@@ -36,8 +36,8 @@ test("D2 legal/content routes are wired to backend authority without stale expre
   // or user-facing shipping/destination wording alongside both Tehran and Karaj.
   expect(brandAudit).toContain('relative === "src/routes/shipping-returns.tsx"');
   expect(brandAudit).toContain('trimmed.includes("getDeliveryOptions")');
-  expect(brandAudit).toContain('/(ارسال|مقصد|تحویل|پیک|اسنپ)/.test(trimmed)');
-  expect(brandAudit).toContain('/(تهران.*کرج|کرج.*تهران)/.test(trimmed)');
+  expect(brandAudit).toContain("/(ارسال|مقصد|تحویل|پیک|اسنپ)/.test(trimmed)");
+  expect(brandAudit).toContain("/(تهران.*کرج|کرج.*تهران)/.test(trimmed)");
   expect(brandAudit).not.toContain('relative === "src/routes/shipping-returns.tsx") return true');
 });
 
