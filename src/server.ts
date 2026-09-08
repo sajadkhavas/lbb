@@ -1,5 +1,6 @@
 import "./lib/error-capture";
 
+import { installBackendSsrFetchCredential } from "./lib/backend-ssr-fetch";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
@@ -8,6 +9,8 @@ type ServerEntry = {
 };
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
+
+installBackendSsrFetchCredential();
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
