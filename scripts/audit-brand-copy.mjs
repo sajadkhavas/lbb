@@ -43,6 +43,29 @@ function isAllowedTehranReference(relative, line) {
     return true;
   }
 
+  if (relative === "src/routes/shipping-returns.tsx") {
+    // Internal variable/type identifiers such as `tehran` are not storefront location claims.
+    if (!trimmed.includes("تهران") && /\btehran\b/i.test(trimmed)) {
+      return true;
+    }
+
+    // Exact Backend delivery-geography query used to verify Tehran eligibility.
+    if (
+      trimmed.includes("getDeliveryOptions") &&
+      trimmed.includes('province: "تهران"') &&
+      trimmed.includes('city: "تهران"')
+    ) {
+      return true;
+    }
+
+    // User-facing Tehran references are allowed only when the same line explicitly describes
+    // shipping/destination geography together with Karaj. This deliberately does not whitelist
+    // generic claims such as "فروشگاه LBB در تهران".
+    if (/(ارسال|مقصد|تحویل|پیک|اسنپ)/.test(trimmed) && /(تهران.*کرج|کرج.*تهران)/.test(trimmed)) {
+      return true;
+    }
+  }
+
   return false;
 }
 
