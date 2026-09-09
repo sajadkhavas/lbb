@@ -27,10 +27,14 @@ export type UsableMannequinProfile = MannequinProfileDto & {
 };
 
 const validSlot = (value: unknown): value is MannequinSlot =>
-  typeof value === "string" && (MANNEQUIN_SLOTS as readonly string[]).includes(value);
+  typeof value === "string" &&
+  (MANNEQUIN_SLOTS as readonly string[]).includes(value);
 
 const finiteInRange = (value: unknown, min: number, max: number) =>
-  typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
+  typeof value === "number" &&
+  Number.isFinite(value) &&
+  value >= min &&
+  value <= max;
 
 /**
  * The storefront deliberately fails closed. A partially configured profile must
