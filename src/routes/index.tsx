@@ -8,13 +8,13 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Navbar } from "@/components/lbb/Navbar";
 import { CategoryGateway } from "@/components/lbb/home/CategoryGateway";
 import { DecisionSupport } from "@/components/lbb/home/DecisionSupport";
-import { DropStory } from "@/components/lbb/home/DropStory";
+import { DropStory, type LiveFeaturedStory } from "@/components/lbb/home/DropStory";
 import { HeroNarrative } from "@/components/lbb/home/HeroNarrative";
 import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
-import { BackendApiError, getProduct, listProducts } from "@/lib/backend-api";
+import { BackendApiError, getCollection, getProduct, listProducts } from "@/lib/backend-api";
 import { backendCard, type BackendCatalogCard } from "@/lib/backend-storefront";
 import { listStorefrontCategories, type StorefrontCategoryDto } from "@/lib/final-technical-api";
 import { productImage } from "@/lib/product-images";
@@ -22,6 +22,7 @@ import { absUrl, canonical, pageMeta } from "@/lib/site";
 import {
   resolveStorefrontControl,
   resolveStorefrontLookbook,
+  type StorefrontControl,
   type StorefrontLookDto,
 } from "@/lib/storefront-control";
 
@@ -38,6 +39,7 @@ type HomeLoaderData = {
   categories: StorefrontCategoryDto[] | null;
   products: BackendCatalogCard[] | null;
   lookbook: StorefrontLookDto[] | null;
+  featuredStory: LiveFeaturedStory | null;
 };
 
 async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | null> {
@@ -63,6 +65,31 @@ async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | n
   }
 }
 
+async function resolveLiveFeaturedStory(control: StorefrontControl): Promise<LiveFeaturedStory | null> {
+  if (!control.featuredStory.enabled || !control.featuredStory.collectionSlug.trim()) return null;
+
+  try {
+    const response = await getCollection(control.featuredStory.collectionSlug, {
+      page: 1,
+      per_page: 3,
+      sort: "newest",
+    });
+    return {
+      collection: response.data.collection,
+      products: response.data.products.map(backendCard),
+    };
+  } catch (error) {
+    if (
+      error instanceof BackendApiError &&
+      error.status === 404 &&
+      error.code === "resource_not_found"
+    ) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 export const Route = createFileRoute("/")({
   loader: async (): Promise<HomeLoaderData> => {
     const control = await resolveStorefrontControl();
@@ -73,14 +100,16 @@ export const Route = createFileRoute("/")({
         categories: null,
         products: null,
         lookbook: null,
+        featuredStory: null,
       };
     }
 
-    const [heroProduct, categories, productResponse, lookbook] = await Promise.all([
+    const [heroProduct, categories, productResponse, lookbook, featuredStory] = await Promise.all([
       resolveLiveHeroProduct(control.home.heroProductSlug),
       listStorefrontCategories(),
       listProducts({ sort: "newest", page: 1, per_page: 4 }),
       resolveStorefrontLookbook(),
+      resolveLiveFeaturedStory(control),
     ]);
 
     return {
@@ -89,6 +118,7 @@ export const Route = createFileRoute("/")({
       categories,
       products: productResponse.data.map(backendCard),
       lookbook: lookbook ?? [],
+      featuredStory,
     };
   },
   head: ({ loaderData }) => {
@@ -117,10 +147,13 @@ export const Route = createFileRoute("/")({
       description: control.brand.shortIntroduction,
       address: {
         "@type": "PostalAddress",
+        streetAddress: control.contact.addressLine || undefined,
         addressLocality: control.contact.city,
         addressRegion: control.contact.province,
         addressCountry: "IR",
       },
+      telephone: control.contact.phone,
+      email: control.contact.email || undefined,
       sameAs: [control.contact.instagramUrl],
     };
 
@@ -149,7 +182,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { control, heroProduct, categories, products, lookbook } = Route.useLoaderData();
+  const { control, heroProduct, categories, products, lookbook, featuredStory } = Route.useLoaderData();
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
@@ -159,7 +192,7 @@ function Home() {
     trust: <TrustStrip />,
     categories: <CategoryGateway liveCategories={categories} />,
     products: <ProductMoments liveProducts={products} />,
-    drop_story: <DropStory />,
+    drop_story: <DropStory liveStory={featuredStory} />,
     decision_support: <DecisionSupport />,
     local_store: <LocalStoreVisit />,
     instagram: <InstagramStrip liveItems={lookbook} />,
