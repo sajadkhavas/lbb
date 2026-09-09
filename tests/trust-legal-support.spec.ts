@@ -286,7 +286,7 @@ test("shipping, contact, legal and privacy routes are truth-safe at mobile width
 
   await expect(page.locator("main form")).toHaveCount(0);
 
-  await expect(page.getByText("فرم تماس آنلاین فعال نیست")).toBeVisible();
+  await expect(page.getByText("فرم تماس در حالت نمونه غیرفعال است")).toBeVisible();
 
   await expectNoHorizontalOverflow(page);
 
@@ -352,5 +352,5 @@ test("order confirmation and tracking never trust browser-local success", async 
 
   await page.goto("/track-order", { waitUntil: "networkidle" });
   await expect(page.locator("main form")).toHaveCount(0);
-  await expect(page.getByText("فرم پیگیری عمداً غیرفعال است")).toBeVisible();
+  await expect(page.getByText("پیگیری فقط در حالت live فعال است")).toBeVisible();
 });
