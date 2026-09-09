@@ -162,7 +162,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
           role="region"
           aria-roledescription="carousel"
           aria-label={`گالری تصاویر ${name}`}
-          className="group relative flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-xl border border-hairline bg-carbon shadow-[0_18px_55px_rgba(0,0,0,0.2)] [scrollbar-width:none] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal md:overflow-hidden md:rounded-2xl lg:rounded-3xl lg:shadow-[0_24px_75px_rgba(0,0,0,0.3)] [&::-webkit-scrollbar]:hidden"
+          className="group relative flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-xl border border-hairline bg-carbon shadow-[0_18px_55px_rgba(0,0,0,0.2)] [scrollbar-width:none] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal md:overflow-hidden md:rounded-2xl lg:shadow-[0_24px_75px_rgba(0,0,0,0.3)] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, index) => (
             <div
