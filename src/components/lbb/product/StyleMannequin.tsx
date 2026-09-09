@@ -21,7 +21,7 @@ export function StyleMannequin({
       aria-label={`پیش‌نمایش دوبعدی ${productName} روی مانکن`}
       data-testid="style-mannequin"
       data-mannequin-slot={profile.slot}
-      className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_50%_42%,#ffffff_0%,#f5f2ec_58%,#e9e5dc_100%)]"
+      className="absolute inset-0 isolate overflow-hidden bg-[radial-gradient(circle_at_50%_42%,#ffffff_0%,#f5f2ec_58%,#e9e5dc_100%)]"
     >
       <div aria-hidden="true" className="absolute inset-0 grid place-items-center text-[#c8c2b8]">
         <svg
