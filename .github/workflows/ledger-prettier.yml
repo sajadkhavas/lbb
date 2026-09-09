@@ -1,0 +1,39 @@
+name: Ledger Prettier Apply
+
+on:
+  push:
+    branches:
+      - feature/final-technical-completion
+
+permissions:
+  contents: write
+
+jobs:
+  apply-ledger-format:
+    if: ${{ !contains(github.event.head_commit.message, '[ledger-prettier]') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/final-technical-completion
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format authoritative ledger
+        run: |
+          npx prettier --write docs/LBB_PROJECT_MASTER_LEDGER_FA.md
+          npx prettier --check docs/LBB_PROJECT_MASTER_LEDGER_FA.md
+      - name: Commit exact ledger formatting
+        run: |
+          git add docs/LBB_PROJECT_MASTER_LEDGER_FA.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --cached --quiet; then
+            echo "LEDGER_ALREADY_FORMATTED=YES"
+            exit 0
+          fi
+          git commit -m "style: format project master ledger [ledger-prettier]"
+          git push origin HEAD:feature/final-technical-completion
