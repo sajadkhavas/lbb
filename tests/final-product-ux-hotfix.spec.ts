@@ -161,7 +161,9 @@ test("product card media fills its frame without the old image inset", async ({ 
   expect(values.widthDelta).toBeLessThanOrEqual(1);
 });
 
-test("PDP keeps mobile composition while desktop receives the polished surface", async ({ page }) => {
+test("PDP keeps mobile composition while desktop receives the polished surface", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
 

@@ -55,10 +55,7 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
       </div>
 
       {effectivePrice !== null ? (
-        <div
-          className="mt-5 flex flex-wrap items-baseline gap-3 lg:mt-6"
-          aria-label="قیمت محصول"
-        >
+        <div className="mt-5 flex flex-wrap items-baseline gap-3 lg:mt-6" aria-label="قیمت محصول">
           <span className="num text-2xl font-bold text-bone lg:text-[1.85rem]">
             {priceRange && pricing.toToman
               ? `${fmtToman(pricing.fromToman!)} تا ${fmtToman(pricing.toToman)}`

@@ -34,7 +34,12 @@ import { CtaClasses, StatusTag, TechLabel } from "@/components/lbb/ui/primitives
 const MAX_QTY = 10;
 
 function fallbackMedia(card: BackendCatalogCard): DecisionMedia[] {
-  const urls = card.previewImages.length > 0 ? card.previewImages : card.primaryImage ? [card.primaryImage] : [];
+  const urls =
+    card.previewImages.length > 0
+      ? card.previewImages
+      : card.primaryImage
+        ? [card.primaryImage]
+        : [];
   return urls.map((src, index) => ({
     id: `${card.id}:preview:${index}`,
     src,
@@ -82,7 +87,11 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
   const gallery = useMemo(() => {
     if (!model) return fallbackMedia(card);
     const selected = mediaForColor(model, colorId);
-    return selected.length > 0 ? selected : model.media.length > 0 ? model.media : fallbackMedia(card);
+    return selected.length > 0
+      ? selected
+      : model.media.length > 0
+        ? model.media
+        : fallbackMedia(card);
   }, [card, colorId, model]);
 
   useEffect(() => {
@@ -114,7 +123,11 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
   const addToCart = () => {
     if (!model || !canAdd || !colorId || !sizeId || !selectedVariant || selectedPrice === null) {
       setSelectionError(true);
-      dialogRef.current?.querySelector<HTMLButtonElement>('[data-testid="pdp-size-selector"] button:not([aria-disabled="true"])')?.focus();
+      dialogRef.current
+        ?.querySelector<HTMLButtonElement>(
+          '[data-testid="pdp-size-selector"] button:not([aria-disabled="true"])',
+        )
+        ?.focus();
       return;
     }
 
@@ -140,7 +153,10 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
   };
 
   return (
-    <div dir="rtl" className="fixed inset-0 z-[300] flex items-end justify-center md:items-center md:p-5">
+    <div
+      dir="rtl"
+      className="fixed inset-0 z-[300] flex items-end justify-center md:items-center md:p-5"
+    >
       <button
         type="button"
         aria-label="بستن نمای سریع"
@@ -165,7 +181,10 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
         >
           <X size={18} aria-hidden="true" />
         </button>
-        <span className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-hairline md:hidden" aria-hidden="true" />
+        <span
+          className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-hairline md:hidden"
+          aria-hidden="true"
+        />
 
         <div className="shrink-0 md:w-[48%]">
           <div
@@ -223,7 +242,9 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
 
             <div className="pointer-events-none absolute end-3 top-3 flex flex-col items-end gap-1.5">
               {!card.availability ? <StatusTag tone="out">ناموجود</StatusTag> : null}
-              {card.stockState === "low_stock" ? <StatusTag tone="neutral">موجودی محدود</StatusTag> : null}
+              {card.stockState === "low_stock" ? (
+                <StatusTag tone="neutral">موجودی محدود</StatusTag>
+              ) : null}
             </div>
 
             {gallery.length > 1 ? (
@@ -270,17 +291,29 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
           {productQuery.isPending ? (
             <div className="grid min-h-[420px] place-items-center text-center">
               <div>
-                <LoaderCircle className="mx-auto animate-spin text-signal" size={28} aria-hidden="true" />
-                <p className="mt-4 text-sm font-semibold text-bone">در حال دریافت اطلاعات واقعی محصول…</p>
-                <p className="mt-2 text-xs leading-6 text-metal">قیمت، موجودی و تنوع از Backend خوانده می‌شود.</p>
+                <LoaderCircle
+                  className="mx-auto animate-spin text-signal"
+                  size={28}
+                  aria-hidden="true"
+                />
+                <p className="mt-4 text-sm font-semibold text-bone">
+                  در حال دریافت اطلاعات واقعی محصول…
+                </p>
+                <p className="mt-2 text-xs leading-6 text-metal">
+                  قیمت، موجودی و تنوع از Backend خوانده می‌شود.
+                </p>
               </div>
             </div>
           ) : productQuery.isError || !model ? (
             <div className="grid min-h-[420px] place-items-center text-center">
               <div className="max-w-sm">
                 <RefreshCcw className="mx-auto text-signal" size={28} aria-hidden="true" />
-                <h2 id={titleId} className="mt-4 text-xl font-black text-bone">نمای سریع موقتاً در دسترس نیست</h2>
-                <p className="mt-3 text-sm leading-7 text-metal">{backendErrorMessage(productQuery.error)}</p>
+                <h2 id={titleId} className="mt-4 text-xl font-black text-bone">
+                  نمای سریع موقتاً در دسترس نیست
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-metal">
+                  {backendErrorMessage(productQuery.error)}
+                </p>
                 <button
                   type="button"
                   onClick={() => void productQuery.refetch()}
@@ -305,17 +338,23 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                 {model.identity.name ?? card.name}
               </h2>
               {model.identity.shortDescription ? (
-                <p className="mt-3 text-sm leading-7 text-metal">{model.identity.shortDescription}</p>
+                <p className="mt-3 text-sm leading-7 text-metal">
+                  {model.identity.shortDescription}
+                </p>
               ) : null}
 
               <div className="mt-5 flex flex-wrap items-baseline gap-3">
                 {selectedPrice !== null ? (
-                  <span className="num text-2xl font-black text-bone">{fmtToman(selectedPrice)}</span>
+                  <span className="num text-2xl font-black text-bone">
+                    {fmtToman(selectedPrice)}
+                  </span>
                 ) : (
                   <span className="text-sm font-semibold text-metal">قیمت عمومی منتشر نشده</span>
                 )}
                 {model.pricing.originalPriceToman ? (
-                  <span className="num text-sm text-mute line-through">{fmtToman(model.pricing.originalPriceToman)}</span>
+                  <span className="num text-sm text-mute line-through">
+                    {fmtToman(model.pricing.originalPriceToman)}
+                  </span>
                 ) : null}
               </div>
 
@@ -327,7 +366,9 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                 <SizeSelector
                   sizes={model.sizes}
                   selected={sizeId}
-                  availabilityFor={(candidate) => sizeAvailabilityForColor(model, candidate, colorId)}
+                  availabilityFor={(candidate) =>
+                    sizeAvailabilityForColor(model, candidate, colorId)
+                  }
                   onSelect={(nextSize) => {
                     setSizeId(nextSize);
                     setSelectionError(false);
@@ -337,7 +378,11 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
               </div>
 
               {selectionError ? (
-                <p id="backend-qv-selection-error" role="alert" className="mt-3 text-xs font-semibold leading-6 text-signal">
+                <p
+                  id="backend-qv-selection-error"
+                  role="alert"
+                  className="mt-3 text-xs font-semibold leading-6 text-signal"
+                >
                   لطفاً یک رنگ و سایز موجود را انتخاب کنید.
                 </p>
               ) : null}
@@ -354,7 +399,10 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                   >
                     <Minus size={15} aria-hidden="true" />
                   </button>
-                  <output className="num w-7 text-center text-sm font-bold text-bone" aria-live="polite">
+                  <output
+                    className="num w-7 text-center text-sm font-bold text-bone"
+                    aria-live="polite"
+                  >
                     {qty}
                   </output>
                   <button
@@ -391,7 +439,11 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                   aria-pressed={liked}
                   className="tap-target grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-hairline transition hover:border-metal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                 >
-                  <Heart size={18} aria-hidden="true" className={liked ? "fill-signal text-signal" : "text-metal"} />
+                  <Heart
+                    size={18}
+                    aria-hidden="true"
+                    className={liked ? "fill-signal text-signal" : "text-metal"}
+                  />
                 </button>
               </div>
 
