@@ -4,23 +4,6 @@ import { useStorefrontControl } from "@/lib/storefront-control";
 export function TickerStrip() {
   const { ticker } = useStorefrontControl();
   const trackRef = useRef<HTMLDivElement>(null);
-  if (ticker.length === 0) return null;
-
-  const row = (
-    <div className="flex shrink-0 items-center">
-      {ticker.map((text, index) => (
-        <span
-          key={`${text}-${index}`}
-          className="tech flex items-center gap-6 whitespace-nowrap px-6 text-obsidian"
-        >
-          {text}
-          <span aria-hidden="true" className="text-obsidian/70">
-            ✦
-          </span>
-        </span>
-      ))}
-    </div>
-  );
 
   useEffect(() => {
     const track = trackRef.current;
@@ -53,6 +36,22 @@ export function TickerStrip() {
       document.removeEventListener("visibilitychange", updatePlayback);
     };
   }, []);
+
+  if (ticker.length === 0) return null;
+
+  const row = (
+    <div className="flex shrink-0 items-center">
+      {ticker.map((text, index) => (
+        <span
+          key={`${text}-${index}`}
+          className="tech flex items-center gap-6 whitespace-nowrap px-6 text-obsidian"
+        >
+          {text}
+          <span aria-hidden="true" className="text-obsidian/70">✦</span>
+        </span>
+      ))}
+    </div>
+  );
 
   return (
     <div aria-hidden="true" className="group h-11 w-full overflow-hidden bg-signal">
