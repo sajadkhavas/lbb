@@ -224,12 +224,15 @@ Official reference:
 
 Official behavior used:
 
-- Tailwind exposes bounded radius utilities such as `rounded-xl` and `rounded-2xl`.
+- `rounded-xl` is a bounded radius;
+- `rounded-2xl` is a bounded radius larger than `rounded-xl` but still not a decorative/full shape.
 
 LBB decision:
 
-- use a bounded radius on the main gallery and thumbnails;
-- avoid `rounded-full` or decorative shapes that would change the product-photography composition.
+- use `rounded-xl` as the main mobile gallery baseline;
+- cap the wider PDP gallery at `rounded-2xl`;
+- keep thumbnails at smaller bounded radii;
+- avoid `rounded-3xl`, `rounded-full` and decorative shapes for product photography.
 
 ## 9. Backend sizes on product cards
 
