@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, type PointerEvent, type TouchEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, Eye } from "lucide-react";
 import { toast } from "sonner";
@@ -24,11 +24,20 @@ function isBackendCard(product: ProductCardModel): product is BackendCatalogCard
 export function ProductCard({ p, priority = false }: { p: ProductCardModel; priority?: boolean }) {
   const backend = isBackendCard(p);
   const [showMannequin, setShowMannequin] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const { open: openQuickView } = useQuickView();
 
-  const primaryImage = backend ? p.primaryImage : productImage(p.slug);
+  const previewImages = backend
+    ? p.previewImages.length > 0
+      ? p.previewImages
+      : p.primaryImage
+        ? [p.primaryImage]
+        : []
+    : [productImage(p.slug)].filter((value): value is string => Boolean(value));
+  const primaryImage = previewImages[previewIndex] ?? previewImages[0] ?? null;
   const mannequin = backend && isUsableMannequinProfile(p.mannequin) ? p.mannequin : null;
   const name = p.name;
   const categoryLabel = backend ? p.categoryLabel : CATEGORIES[p.category].nameFa;
@@ -74,6 +83,31 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     openDrawer();
   };
 
+  const selectPreviewFromPointer = (event: PointerEvent<HTMLDivElement>) => {
+    if (!backend || showMannequin || previewImages.length < 2 || event.pointerType === "touch")
+      return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    if (bounds.width <= 0) return;
+    const ratio = Math.max(0, Math.min(0.999, (event.clientX - bounds.left) / bounds.width));
+    setPreviewIndex(Math.min(previewImages.length - 1, Math.floor(ratio * previewImages.length)));
+  };
+
+  const startSwipe = (event: TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+  };
+
+  const finishSwipe = (event: TouchEvent<HTMLDivElement>) => {
+    if (!backend || showMannequin || previewImages.length < 2 || touchStartX.current === null)
+      return;
+    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+    const delta = touchStartX.current - endX;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 36) return;
+    setPreviewIndex((current) =>
+      delta > 0 ? Math.min(previewImages.length - 1, current + 1) : Math.max(0, current - 1),
+    );
+  };
+
   const overlay = (
     <CardOverlay
       p={p}
@@ -102,19 +136,42 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         {overlay}
       </div>
     ) : primaryImage ? (
-      <Frame
-        src={primaryImage}
-        alt={name}
-        ratio="1/1"
-        width={1024}
-        height={1280}
-        priority={priority}
-        zoom={false}
-        className="product-card__media bg-white"
-        imgClassName="object-contain p-4 sm:p-7"
+      <div
+        className="relative"
+        onPointerMove={selectPreviewFromPointer}
+        onPointerLeave={() => setPreviewIndex(0)}
+        onTouchStart={startSwipe}
+        onTouchEnd={finishSwipe}
       >
-        {overlay}
-      </Frame>
+        <Frame
+          src={primaryImage}
+          alt={name}
+          ratio="1/1"
+          width={1024}
+          height={1280}
+          priority={priority && previewIndex === 0}
+          zoom={false}
+          className="product-card__media bg-white"
+          imgClassName="object-contain p-4 sm:p-7"
+        >
+          {overlay}
+        </Frame>
+        {backend && previewImages.length > 1 ? (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 gap-1 rounded-full bg-obsidian/65 px-2 py-1.5 backdrop-blur"
+          >
+            {previewImages.map((image, index) => (
+              <span
+                key={`${image}-${index}`}
+                className={`h-1.5 rounded-full transition-[width,background-color] ${
+                  previewIndex === index ? "w-4 bg-signal" : "w-1.5 bg-bone/55"
+                }`}
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
     ) : (
       <div className="product-card__media relative aspect-square overflow-hidden bg-white">
         <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">

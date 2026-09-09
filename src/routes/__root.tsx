@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import fontCss from "../fonts.css?url";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AccountStorefrontSync } from "@/components/lbb/AccountStorefrontSync";
 import { CartDrawer } from "@/components/lbb/CartDrawer";
 import { ProductQuickView } from "@/components/lbb/ProductQuickView";
 import { PwaExperience } from "@/components/lbb/PwaExperience";
@@ -193,6 +194,7 @@ function RootComponent() {
         <NavigationOverlayProvider>
           <WishlistProvider>
             <CartProvider>
+              <AccountStorefrontSync />
               <QuickViewProvider>
                 <Outlet />
                 <CartDrawer />

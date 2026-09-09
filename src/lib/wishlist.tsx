@@ -13,28 +13,37 @@ type WishlistCtx = {
   has: (slug: string) => boolean;
   toggle: (slug: string) => boolean;
   remove: (slug: string) => void;
+  replace: (slugs: string[]) => void;
   clear: () => void;
   count: number;
+  hydrated: boolean;
 };
 
 const Ctx = createContext<WishlistCtx | null>(null);
 const KEY = "lbb-wishlist-v1";
+
+function normalizeWishlist(values: unknown[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+
+  for (const value of values) {
+    if (typeof value !== "string") continue;
+    const slug = value.trim();
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    out.push(slug);
+    if (out.length >= 100) break;
+  }
+
+  return out;
+}
 
 function readWishlist(): string[] {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const s of parsed) {
-      if (typeof s === "string" && s.length > 0 && !seen.has(s)) {
-        seen.add(s);
-        out.push(s);
-      }
-    }
-    return out;
+    return Array.isArray(parsed) ? normalizeWishlist(parsed) : [];
   } catch {
     return [];
   }
@@ -54,7 +63,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(KEY, JSON.stringify(slugs));
     } catch {
-      /* ignore */
+      /* Storage may be unavailable. */
     }
   }, [slugs, hydrated]);
 
@@ -62,31 +71,32 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const toggle = useCallback((slug: string) => {
     let added = false;
-    setSlugs((prev) => {
-      if (prev.includes(slug)) return prev.filter((s) => s !== slug);
+    setSlugs((previous) => {
+      if (previous.includes(slug)) return previous.filter((item) => item !== slug);
       added = true;
-      return [...prev, slug];
+      return normalizeWishlist([...previous, slug]);
     });
     return added;
   }, []);
 
   const remove = useCallback(
-    (slug: string) => setSlugs((prev) => prev.filter((s) => s !== slug)),
+    (slug: string) => setSlugs((previous) => previous.filter((item) => item !== slug)),
     [],
   );
 
+  const replace = useCallback((next: string[]) => setSlugs(normalizeWishlist(next)), []);
   const clear = useCallback(() => setSlugs([]), []);
 
   const value = useMemo(
-    () => ({ slugs, has, toggle, remove, clear, count: slugs.length }),
-    [slugs, has, toggle, remove, clear],
+    () => ({ slugs, has, toggle, remove, replace, clear, count: slugs.length, hydrated }),
+    [slugs, has, toggle, remove, replace, clear, hydrated],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export function useWishlist() {
-  const c = useContext(Ctx);
-  if (!c) throw new Error("useWishlist must be used inside WishlistProvider");
-  return c;
+  const context = useContext(Ctx);
+  if (!context) throw new Error("useWishlist must be used inside WishlistProvider");
+  return context;
 }

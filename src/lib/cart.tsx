@@ -27,6 +27,7 @@ type CartCtx = {
   add: (line: CartLine) => void;
   remove: (index: number) => void;
   setQty: (index: number, qty: number) => void;
+  replace: (lines: CartLine[]) => void;
   clear: () => void;
   subtotal: number;
   hydrated: boolean;
@@ -87,7 +88,7 @@ function normalizeQuantity(qty: number) {
   return Math.min(MAX_QTY, Math.max(1, Math.floor(qty)));
 }
 
-function normalizeCartLines(values: unknown[], mode = getBackendMode()): CartLine[] {
+export function normalizeCartLines(values: unknown[], mode = getBackendMode()): CartLine[] {
   const normalized: CartLine[] = [];
   for (const value of values) {
     if (!isLineShape(value)) continue;
@@ -216,6 +217,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       ),
     );
 
+  const replace = (next: CartLine[]) => setLines(normalizeCartLines(next, getBackendMode()));
   const clear = () => setLines([]);
   const count = lines.reduce((sum, line) => sum + line.qty, 0);
   const subtotal = lines.reduce((sum, line) => sum + line.price * line.qty, 0);
@@ -242,6 +244,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         add,
         remove,
         setQty,
+        replace,
         clear,
         subtotal,
         hydrated,

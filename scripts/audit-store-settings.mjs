@@ -14,6 +14,7 @@ const shippingReturns = await read("src/routes/shipping-returns.tsx");
 const contact = await read("src/routes/contact.tsx");
 const storefrontControl = await read("src/lib/storefront-control.tsx");
 const backendApi = await read("src/lib/backend-api.ts");
+const finalTechnicalApi = await read("src/lib/final-technical-api.ts");
 const backendDelivery = await read("src/lib/backend-delivery.ts");
 const checkout = await read("src/routes/checkout.tsx");
 const orderConfirmation = await read("src/routes/order-confirmation.tsx");
@@ -26,6 +27,7 @@ if (!trustMarks) failures.push("Controlled trust-mark component is missing.");
 if (!commerce) failures.push("Frontend commerce readiness boundary is missing.");
 if (!storefrontControl) failures.push("P3 storefront control is missing.");
 if (!backendApi) failures.push("Versioned backend API contract is missing.");
+if (!finalTechnicalApi) failures.push("Final technical API client is missing.");
 if (!backendDelivery) failures.push("Versioned backend delivery client is missing.");
 
 for (const forbidden of [
@@ -146,8 +148,25 @@ if (!backendApi.includes('LBB_CONTRACT_VERSION = "2026-09-06-p3-storefront-v1"')
 if (!envExample.includes("# 2026-09-06-p3-storefront-v1")) {
   failures.push("Frontend environment example still documents a stale backend contract.");
 }
-if (/<form\b/i.test(contact) || contact.includes("پیام شما ارسال شد")) {
-  failures.push("Contact route must not expose a false-success form without a transport.");
+
+// A contact form is allowed only when it is genuinely transported to the versioned Backend.
+// This preserves the original fail-closed rule while accepting the final live inquiry wiring.
+const contactHasInteractiveForm = /<form\b/i.test(contact);
+const contactClaimsSuccess = contact.includes("پیام شما ارسال شد");
+const contactTransportReady =
+  contact.includes("submitContactInquiry") &&
+  contact.includes("isLiveBackend()") &&
+  finalTechnicalApi.includes("export async function submitContactInquiry") &&
+  finalTechnicalApi.includes('requestFinal<ContactInquiryResult>("/api/v1/inquiries"') &&
+  finalTechnicalApi.includes('method: "POST"');
+
+if ((contactHasInteractiveForm || contactClaimsSuccess) && !contactTransportReady) {
+  failures.push(
+    "Contact route must not expose a false-success form without a real Backend transport.",
+  );
+}
+if (contactTransportReady && !contactHasInteractiveForm) {
+  failures.push("Live contact transport exists but the Contact route has no interactive form.");
 }
 
 // The frozen API type retains the four canonical P4 methods for wire compatibility.

@@ -14,10 +14,16 @@ import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
-import { BackendApiError, getProduct } from "@/lib/backend-api";
+import { BackendApiError, getProduct, listProducts } from "@/lib/backend-api";
+import { backendCard, type BackendCatalogCard } from "@/lib/backend-storefront";
+import { listStorefrontCategories, type StorefrontCategoryDto } from "@/lib/final-technical-api";
 import { productImage } from "@/lib/product-images";
 import { absUrl, canonical, pageMeta } from "@/lib/site";
-import { resolveStorefrontControl } from "@/lib/storefront-control";
+import {
+  resolveStorefrontControl,
+  resolveStorefrontLookbook,
+  type StorefrontLookDto,
+} from "@/lib/storefront-control";
 
 type LiveHeroProduct = {
   slug: string;
@@ -26,7 +32,16 @@ type LiveHeroProduct = {
   image: string | null;
 };
 
+type HomeLoaderData = {
+  control: Awaited<ReturnType<typeof resolveStorefrontControl>>;
+  heroProduct: LiveHeroProduct | null;
+  categories: StorefrontCategoryDto[] | null;
+  products: BackendCatalogCard[] | null;
+  lookbook: StorefrontLookDto[] | null;
+};
+
 async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | null> {
+  if (!slug.trim()) return null;
   try {
     const response = await getProduct(slug);
     return {
@@ -49,13 +64,31 @@ async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | n
 }
 
 export const Route = createFileRoute("/")({
-  loader: async () => {
+  loader: async (): Promise<HomeLoaderData> => {
     const control = await resolveStorefrontControl();
-    if (control.source !== "live") return { control, heroProduct: null };
+    if (control.source !== "live") {
+      return {
+        control,
+        heroProduct: null,
+        categories: null,
+        products: null,
+        lookbook: null,
+      };
+    }
+
+    const [heroProduct, categories, productResponse, lookbook] = await Promise.all([
+      resolveLiveHeroProduct(control.home.heroProductSlug),
+      listStorefrontCategories(),
+      listProducts({ sort: "newest", page: 1, per_page: 4 }),
+      resolveStorefrontLookbook(),
+    ]);
 
     return {
       control,
-      heroProduct: await resolveLiveHeroProduct(control.home.heroProductSlug),
+      heroProduct,
+      categories,
+      products: productResponse.data.map(backendCard),
+      lookbook: lookbook ?? [],
     };
   },
   head: ({ loaderData }) => {
@@ -116,7 +149,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { control, heroProduct } = Route.useLoaderData();
+  const { control, heroProduct, categories, products, lookbook } = Route.useLoaderData();
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
@@ -124,12 +157,12 @@ function Home() {
   const sections: Record<string, ReactNode> = {
     ticker: <TickerStrip />,
     trust: <TrustStrip />,
-    categories: <CategoryGateway />,
-    products: <ProductMoments />,
+    categories: <CategoryGateway liveCategories={categories} />,
+    products: <ProductMoments liveProducts={products} />,
     drop_story: <DropStory />,
     decision_support: <DecisionSupport />,
     local_store: <LocalStoreVisit />,
-    instagram: <InstagramStrip />,
+    instagram: <InstagramStrip liveItems={lookbook} />,
   };
 
   return (
@@ -145,7 +178,7 @@ function Home() {
         style={{ paddingTop: offsetTop }}
         data-storefront-source={control.source}
       >
-        <HeroNarrative heroProduct={heroProduct} />
+        <HeroNarrative heroProduct={heroProduct} liveCategories={categories} />
         {control.home.sections.map((key) => (
           <div key={key}>{sections[key] ?? null}</div>
         ))}

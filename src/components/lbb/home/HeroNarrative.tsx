@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 import { CATEGORIES } from "@/lib/categories";
+import type { StorefrontCategoryDto } from "@/lib/final-technical-api";
 import { productImage } from "@/lib/product-images";
 import { fmtToman, productBySlug } from "@/lib/products";
 import { useStorefrontControl } from "@/lib/storefront-control";
@@ -15,12 +16,14 @@ type LiveHeroProduct = {
 
 export function HeroNarrative({
   heroProduct: liveHeroProduct,
+  liveCategories,
 }: {
   heroProduct?: LiveHeroProduct | null;
+  liveCategories?: StorefrontCategoryDto[] | null;
 }) {
   const { source, brand, copy, home } = useStorefrontControl();
   const prototypeProduct = productBySlug(home.heroProductSlug);
-  const categoryOrder = home.categoryOrder.filter(
+  const prototypeCategoryOrder = home.categoryOrder.filter(
     (slug): slug is keyof typeof CATEGORIES => slug in CATEGORIES,
   );
 
@@ -37,6 +40,16 @@ export function HeroNarrative({
         : null;
   const heroImage =
     source === "live" ? (heroProduct?.image ?? null) : productImage(home.heroProductSlug);
+
+  const liveOrder = new Map(home.categoryOrder.map((slug, index) => [slug, index]));
+  const liveQuickCategories = [...(liveCategories ?? [])]
+    .filter((category) => category.showInHeader === true || category.showOnHome === true)
+    .sort((left, right) => {
+      const a = liveOrder.get(left.slug) ?? Number.MAX_SAFE_INTEGER;
+      const b = liveOrder.get(right.slug) ?? Number.MAX_SAFE_INTEGER;
+      return a - b || left.name.localeCompare(right.name, "fa");
+    })
+    .slice(0, 8);
 
   return (
     <section
@@ -87,19 +100,45 @@ export function HeroNarrative({
             <p className="mb-4 text-xs font-bold text-metal">دسته موردنظرت را سریع پیدا کن:</p>
             <nav aria-label="دسترسی سریع به دسته‌های محصول" className="min-w-0">
               <ul className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {categoryOrder.map((slug) => (
-                  <li key={slug} className="shrink-0 snap-start">
-                    <Link
-                      to="/$category"
-                      params={{ category: slug }}
-                      className="inline-flex min-h-11 items-center border border-hairline px-4 text-xs font-semibold text-bone transition-colors hover:border-signal hover:text-signal"
-                    >
-                      {CATEGORIES[slug].nameFaPlural}
-                    </Link>
-                  </li>
-                ))}
+                {source === "live"
+                  ? liveQuickCategories.map((category) => (
+                      <li key={category.publicId} className="shrink-0 snap-start">
+                        <Link
+                          to="/$category"
+                          params={{ category: category.slug }}
+                          className="inline-flex min-h-11 items-center gap-2 border border-hairline px-4 text-xs font-semibold text-bone transition-colors hover:border-signal hover:text-signal"
+                        >
+                          {category.icon ? (
+                            <img
+                              src={category.icon}
+                              alt=""
+                              width={20}
+                              height={20}
+                              className="h-5 w-5 object-contain"
+                            />
+                          ) : null}
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))
+                  : prototypeCategoryOrder.map((slug) => (
+                      <li key={slug} className="shrink-0 snap-start">
+                        <Link
+                          to="/$category"
+                          params={{ category: slug }}
+                          className="inline-flex min-h-11 items-center border border-hairline px-4 text-xs font-semibold text-bone transition-colors hover:border-signal hover:text-signal"
+                        >
+                          {CATEGORIES[slug].nameFaPlural}
+                        </Link>
+                      </li>
+                    ))}
               </ul>
             </nav>
+            {source === "live" && liveQuickCategories.length === 0 ? (
+              <p className="text-xs leading-6 text-mute">
+                هنوز دسته‌ای برای دسترسی سریع از پنل مدیریت فعال نشده است.
+              </p>
+            ) : null}
           </div>
         </div>
 

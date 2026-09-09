@@ -30,15 +30,23 @@ export type BackendCatalogCard = {
   colors: ProductSummaryDto["colors"];
   sizes: ProductSummaryDto["sizes"];
   primaryImage: string | null;
+  previewImages: string[];
   mannequin: MannequinProfileDto | null;
 };
 
-type ProductSummaryWithMannequin = ProductSummaryDto & {
+type ProductSummaryWithPresentation = ProductSummaryDto & {
   mannequin?: MannequinProfileDto | null;
+  previewImages?: string[];
 };
 
 export function backendCard(product: ProductSummaryDto): BackendCatalogCard {
-  const mannequin = (product as ProductSummaryWithMannequin).mannequin;
+  const presentation = product as ProductSummaryWithPresentation;
+  const previewImages = [
+    ...(presentation.previewImages ?? []),
+    ...(product.primaryImage ? [product.primaryImage] : []),
+  ]
+    .filter((value, index, all): value is string => Boolean(value) && all.indexOf(value) === index)
+    .slice(0, 3);
 
   return {
     source: "backend",
@@ -54,8 +62,9 @@ export function backendCard(product: ProductSummaryDto): BackendCatalogCard {
     stockState: product.stockState,
     colors: product.colors,
     sizes: product.sizes,
-    primaryImage: product.primaryImage,
-    mannequin: mannequin ?? null,
+    primaryImage: previewImages[0] ?? product.primaryImage,
+    previewImages,
+    mannequin: presentation.mannequin ?? null,
   };
 }
 
