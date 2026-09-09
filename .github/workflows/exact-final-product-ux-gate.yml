@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  TARGET_SHA: 7fd7a4f2fa81c680289341d402cf2e8b24b8c2e9
+  TARGET_SHA: 561b5e4042eafda819e2437d80276ce5410b4229
   VITE_SITE_URL: https://lbb.example.test
   VITE_LBB_BACKEND_MODE: prototype
 
@@ -22,7 +22,7 @@ jobs:
       - name: Checkout exact frozen implementation
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 7fd7a4f2fa81c680289341d402cf2e8b24b8c2e9
+          ref: 561b5e4042eafda819e2437d80276ce5410b4229
           fetch-depth: 1
 
       - name: Lock exact source identity
@@ -62,7 +62,7 @@ jobs:
       - name: Checkout exact frozen implementation
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 7fd7a4f2fa81c680289341d402cf2e8b24b8c2e9
+          ref: 561b5e4042eafda819e2437d80276ce5410b4229
           fetch-depth: 1
 
       - name: Lock exact source identity
