@@ -46,6 +46,9 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const available = backend ? p.availability : p.inStock;
   const priceFrom = backend ? p.priceFromToman : p.price;
   const priceTo = backend ? p.priceToToman : p.price;
+  const sizeLabels = backend
+    ? p.sizes.map((size) => size.code || size.name).filter(Boolean)
+    : p.sizes;
 
   if (!backend && isLiveBackend()) {
     return (
@@ -215,23 +218,39 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             <span className="num text-xs text-mute line-through">{fmtToman(p.originalPrice)}</span>
           ) : null}
         </div>
-        {!backend && p.sizes.length > 0 ? (
-          <div className="mt-3 flex flex-wrap gap-1.5 md:hidden" aria-label="سایزهای محصول">
-            {p.sizes.map((size) => {
-              const sizeAvailable = isSizeAvailable(p, size);
-              return (
-                <span
-                  key={size}
-                  className={`grid min-h-7 min-w-8 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
-                    sizeAvailable
-                      ? "bg-signal text-obsidian"
-                      : "border border-white/10 bg-white/5 text-mute line-through"
-                  }`}
-                >
-                  {size}
-                </span>
-              );
-            })}
+        {sizeLabels.length > 0 ? (
+          <div
+            className={`mt-3 flex flex-wrap gap-1.5 ${backend ? "" : "md:hidden"}`}
+            aria-label="سایزهای محصول"
+          >
+            {backend
+              ? sizeLabels.map((size) => (
+                  <span
+                    key={size}
+                    className={`grid min-h-7 min-w-8 place-items-center rounded-lg border px-1.5 text-[10px] font-black ${
+                      available
+                        ? "border-white/15 bg-white/5 text-bone"
+                        : "border-white/10 bg-white/5 text-mute line-through"
+                    }`}
+                  >
+                    {size}
+                  </span>
+                ))
+              : sizeLabels.map((size) => {
+                  const sizeAvailable = isSizeAvailable(p, size);
+                  return (
+                    <span
+                      key={size}
+                      className={`grid min-h-7 min-w-8 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
+                        sizeAvailable
+                          ? "bg-signal text-obsidian"
+                          : "border border-white/10 bg-white/5 text-mute line-through"
+                      }`}
+                    >
+                      {size}
+                    </span>
+                  );
+                })}
           </div>
         ) : null}
         <div
