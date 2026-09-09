@@ -220,7 +220,24 @@ No GitHub source-code patch is required for this incident unless the Node-preset
 
 ---
 
-## 9) Employer / Business Truth
+## 9) C1-R2 — PRECHECK FAILURE ONLY
+
+- Attempt timestamp: `2026-09-09` after C1-R1 root-cause proof.
+- Failure occurred at the first target SHA read before any rebuild or activation.
+- Git returned `detected dubious ownership` for FE candidate `/var/www/lbb/releases/d5014061c1a933fd4078acc38b8fa21c5c8f628c`.
+- Classification: `GIT_SAFE_DIRECTORY_GUARD / DEPLOY_SCRIPT_PRECHECK_ONLY`.
+- Cause: target `git rev-parse` calls did not use the existing per-command `-c safe.directory=<release>` pattern.
+- Global Git config must **not** be modified just to bypass this guard; retry uses scoped `git -c safe.directory=...` only.
+- Rebuild performed: NO.
+- FE/BE switch performed: NO.
+- Database mutation: NO.
+- Migration work: NO.
+- Production after handler: FE old `7148764...` / BE old `f0583...`; FE origin `200`; BE ready `200`; both services active.
+- Schema remains forward-migrated with all 3 additive migrations already Ran.
+
+---
+
+## 10) Employer / Business Truth
 
 - Current 8 catalog records are legacy/sample records, not employer final products.
 - Keep samples Draft/Inactive through Admin; do not destructively delete by default.
@@ -231,9 +248,9 @@ No GitHub source-code patch is required for this incident unless the Node-preset
 
 ---
 
-## 10) Remaining path to final handoff
+## 11) Remaining path to final handoff
 
-1. **C1-R2 Node-preset FE candidate rebuild + isolated 5187 acceptance + bounded activation**
+1. **C1-R2a scoped-safe-directory Node-preset FE rebuild + isolated 5187 acceptance + bounded activation**
 2. Narrow live delta acceptance for changed surfaces only
 3. Final GitHub reconciliation / authoritative refs / stale cleanup
 4. Enter real employer data from Admin
@@ -244,7 +261,7 @@ No GitHub source-code patch is required for this incident unless the Node-preset
 
 ---
 
-## 11) External blockers — not code incompleteness
+## 12) External blockers — not code incompleteness
 
 - Kavenegar production credentials/template + real OTP activation
 - Zarinpal merchant approval/credentials + controlled payment activation
@@ -252,7 +269,7 @@ No GitHub source-code patch is required for this incident unless the Node-preset
 
 ---
 
-## 12) Mandatory update protocol
+## 13) Mandatory update protocol
 
 After every important action record:
 - date/time
@@ -271,7 +288,7 @@ Never mark a phase Done without SHA/evidence.
 
 ---
 
-## 13) Change Log
+## 14) Change Log
 
 ### 2026-09-09 — Master Ledger established
 - Authoritative continuation ledger created.
@@ -309,4 +326,11 @@ Never mark a phase Done without SHA/evidence.
 - Final classification: `FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH`.
 - Production config mutation during diagnosis: NO.
 - Database mutation during diagnosis: NO.
-- **EXACT NEXT:** clean-rebuild only FE candidate `d5014061...` with explicit `NITRO_PRESET=node-server`; prove isolated listener/HTTP on 5187; if PASS, activate already-built BE `e696375...` with migrations untouched, then activate FE and run narrow post-cutover health/identity/fail-closed checks.
+
+### 2026-09-09 — C1-R2 safe-directory precheck failure
+- Retry stopped before build because target FE Git repository triggered Git dubious-ownership protection.
+- No global `safe.directory` config was written.
+- No candidate rebuild, symlink switch, service activation, migration, DB or business mutation occurred.
+- Rollback handler only reconfirmed old runtime health: FE `200`, BE ready `200`.
+- Classification: `GIT_SAFE_DIRECTORY_GUARD / PRECHECK_ONLY`.
+- **EXACT NEXT:** rerun only C1-R2a with every candidate Git invocation scoped as `git -c safe.directory=<candidate> ...`; then clean Node-preset rebuild, isolated 5187 HTTP=200 proof, BE target activation without migrations, FE activation and narrow smoke.
