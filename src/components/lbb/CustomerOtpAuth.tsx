@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { CheckCircle2, KeyRound, Loader2, Smartphone } from "lucide-react";
 import { backendErrorMessage, requestOtp, verifyOtp, type CustomerDto } from "@/lib/backend-api";
 import { ensureBackendCsrf } from "@/lib/backend-session";
+import { notifyCustomerAuthenticated } from "@/components/lbb/AccountStorefrontSync";
 import { CtaClasses, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 
 type Props = {
@@ -53,6 +54,7 @@ export function CustomerOtpAuth({
         challengeId,
         code: code.trim(),
       });
+      notifyCustomerAuthenticated();
       onAuthenticated(response.data.user);
     } catch (cause) {
       setError(backendErrorMessage(cause));
