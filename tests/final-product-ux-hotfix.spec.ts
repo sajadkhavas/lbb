@@ -2,10 +2,9 @@ import { expect, test } from "@playwright/test";
 import type { ProductDetailDto, ProductSummaryDto } from "../src/lib/backend-api";
 import { backendCard, backendDecisionModel } from "../src/lib/backend-storefront";
 import {
-  canAddSelection,
-  sizeAvailabilityForColor,
-  variantForSelection,
-} from "../src/lib/product-decision";
+  canPurchaseVariant,
+  selectedVariantAvailability,
+} from "../src/lib/product-decision-policy";
 import { isBackendQuickViewTarget } from "../src/lib/quickview";
 
 const summary: ProductSummaryDto = {
@@ -123,11 +122,30 @@ test("backend Quick View decision model keeps exact variant availability", () =>
   const mediumId = summary.sizes[0].publicId;
   const largeId = summary.sizes[1].publicId;
 
-  expect(sizeAvailabilityForColor(model, mediumId, colorId)).toBe("available");
-  expect(sizeAvailabilityForColor(model, largeId, colorId)).toBe("sold-out");
-  expect(variantForSelection(model, colorId, mediumId)?.id).toBe(detail.variants[0].publicId);
-  expect(canAddSelection(model, colorId, mediumId)).toBe(true);
-  expect(canAddSelection(model, colorId, largeId)).toBe(false);
+  const mediumAvailability = selectedVariantAvailability(model.variants, colorId, mediumId);
+  const largeAvailability = selectedVariantAvailability(model.variants, colorId, largeId);
+
+  expect(mediumAvailability).toBe("available");
+  expect(largeAvailability).toBe("sold-out");
+  expect(
+    model.variants.find(
+      (variant) => variant.colorId === colorId && variant.sizeId === mediumId,
+    )?.id,
+  ).toBe(detail.variants[0].publicId);
+  expect(
+    canPurchaseVariant({
+      commerceReady: model.readyForCommerce,
+      productAvailability: model.stock.availability,
+      variantAvailability: mediumAvailability,
+    }),
+  ).toBe(true);
+  expect(
+    canPurchaseVariant({
+      commerceReady: model.readyForCommerce,
+      productAvailability: model.stock.availability,
+      variantAvailability: largeAvailability,
+    }),
+  ).toBe(false);
 });
 
 test("product card media fills its frame without the old image inset", async ({ page }) => {
