@@ -15,7 +15,7 @@ export function CategoryGateway({
 }: {
   liveCategories?: StorefrontCategoryDto[] | null;
 }) {
-  const { source, home } = useStorefrontControl();
+  const { source, home, sectionCopy } = useStorefrontControl();
   const tilt = (event: PointerEvent<HTMLAnchorElement>) => {
     if (event.pointerType === "touch") return;
     const box = event.currentTarget.getBoundingClientRect();
@@ -31,6 +31,7 @@ export function CategoryGateway({
   };
 
   if (source === "live") {
+    const copy = sectionCopy.categories;
     const order = new Map(home.categoryOrder.map((slug, index) => [slug, index]));
     const categories = [...(liveCategories ?? [])]
       .filter((category) => category.showOnHome === true)
@@ -50,12 +51,12 @@ export function CategoryGateway({
         <Shell>
           <SectionHead
             index="01"
-            label="دسته‌بندی محصولات"
-            title={<span id="home-categories-title">دنبال چی می‌گردی؟</span>}
-            lede="دسته‌هایی که مدیر فروشگاه برای صفحه اصلی فعال کرده، مستقیماً از کاتالوگ زنده نمایش داده می‌شوند."
+            label={copy.label}
+            title={<span id="home-categories-title">{copy.title}</span>}
+            lede={copy.lede}
             action={
               <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
-                همه محصولات
+                {copy.actionLabel}
                 <ArrowUpLeft size={15} aria-hidden="true" />
               </Link>
             }
@@ -158,14 +159,8 @@ export function CategoryGateway({
                   imgClassName="object-contain p-5 opacity-100 drop-shadow-[0_18px_18px_rgba(0,0,0,0.16)] transition-transform duration-500 group-hover:scale-[1.045] sm:p-8"
                   zoom={false}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/5 to-transparent"
-                  />
-                  <span
-                    aria-hidden="true"
-                    className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-black/10 bg-white/90 text-obsidian shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal group-hover:text-signal md:right-5 md:top-5 md:size-16"
-                  >
+                  <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/5 to-transparent" />
+                  <span aria-hidden="true" className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-black/10 bg-white/90 text-obsidian shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal group-hover:text-signal md:right-5 md:top-5 md:size-16">
                     <CategoryIcon category={slug} className="size-9 md:size-10" />
                   </span>
                   <div className="category-tilt__content absolute inset-x-0 bottom-0 p-4 md:p-5">
@@ -175,17 +170,11 @@ export function CategoryGateway({
                           <TechLabel tone="signal">0{index + 1}</TechLabel>
                           <TechLabel tone="bone">ال‌بی‌بی / مهستان</TechLabel>
                         </div>
-                        <h3 className="mt-2 text-display-3 font-black text-bone">
-                          {category.nameFaPlural}
-                        </h3>
-                        <p className="mt-2 line-clamp-2 max-w-[42ch] text-xs leading-6 text-metal">
-                          {category.heroTagline}
-                        </p>
+                        <h3 className="mt-2 text-display-3 font-black text-bone">{category.nameFaPlural}</h3>
+                        <p className="mt-2 line-clamp-2 max-w-[42ch] text-xs leading-6 text-metal">{category.heroTagline}</p>
                       </div>
                       <span className="shrink-0 rounded-xl border border-hairline-strong bg-obsidian/90 px-3 py-2 text-left backdrop-blur">
-                        <span className="num block text-sm font-black text-bone">
-                          {fmtNum(count)}
-                        </span>
+                        <span className="num block text-sm font-black text-bone">{fmtNum(count)}</span>
                         <span className="tech mt-1 block text-mute">محصول</span>
                       </span>
                     </div>
@@ -200,32 +189,13 @@ export function CategoryGateway({
   );
 }
 
-function LiveCategoryOverlay({
-  category,
-  index,
-}: {
-  category: StorefrontCategoryDto;
-  index: number;
-}) {
+function LiveCategoryOverlay({ category, index }: { category: StorefrontCategoryDto; index: number }) {
   return (
     <>
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/5 to-transparent"
-      />
+      <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/5 to-transparent" />
       {category.icon ? (
-        <span
-          aria-hidden="true"
-          className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-black/10 bg-white/90 text-obsidian shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal md:right-5 md:top-5 md:size-16"
-        >
-          <img
-            src={category.icon}
-            alt=""
-            width={40}
-            height={40}
-            className="size-9 object-contain md:size-10"
-            loading="lazy"
-          />
+        <span aria-hidden="true" className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-black/10 bg-white/90 text-obsidian shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal md:right-5 md:top-5 md:size-16">
+          <img src={category.icon} alt="" width={40} height={40} className="size-9 object-contain md:size-10" loading="lazy" />
         </span>
       ) : null}
       <div className="category-tilt__content absolute inset-x-0 bottom-0 p-4 md:p-5">
@@ -236,17 +206,11 @@ function LiveCategoryOverlay({
               <TechLabel tone="bone">LIVE CATALOG</TechLabel>
             </div>
             <h3 className="mt-2 text-display-3 font-black text-bone">{category.name}</h3>
-            {category.description ? (
-              <p className="mt-2 line-clamp-2 max-w-[42ch] text-xs leading-6 text-metal">
-                {category.description}
-              </p>
-            ) : null}
+            {category.description ? <p className="mt-2 line-clamp-2 max-w-[42ch] text-xs leading-6 text-metal">{category.description}</p> : null}
           </div>
           {typeof category.productCount === "number" ? (
             <span className="shrink-0 rounded-xl border border-hairline-strong bg-obsidian/90 px-3 py-2 text-left backdrop-blur">
-              <span className="num block text-sm font-black text-bone">
-                {fmtNum(category.productCount)}
-              </span>
+              <span className="num block text-sm font-black text-bone">{fmtNum(category.productCount)}</span>
               <span className="tech mt-1 block text-mute">محصول</span>
             </span>
           ) : null}
