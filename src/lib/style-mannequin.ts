@@ -27,14 +27,10 @@ export type UsableMannequinProfile = MannequinProfileDto & {
 };
 
 const validSlot = (value: unknown): value is MannequinSlot =>
-  typeof value === "string" &&
-  (MANNEQUIN_SLOTS as readonly string[]).includes(value);
+  typeof value === "string" && (MANNEQUIN_SLOTS as readonly string[]).includes(value);
 
 const finiteInRange = (value: unknown, min: number, max: number) =>
-  typeof value === "number" &&
-  Number.isFinite(value) &&
-  value >= min &&
-  value <= max;
+  typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
 
 /**
  * The storefront deliberately fails closed. A partially configured profile must
@@ -45,15 +41,15 @@ export function isUsableMannequinProfile(
 ): profile is UsableMannequinProfile {
   return Boolean(
     profile?.enabled === true &&
-      typeof profile.assetUrl === "string" &&
-      profile.assetUrl.trim().length > 0 &&
-      validSlot(profile.slot) &&
-      finiteInRange(profile.offsetX, -50, 50) &&
-      finiteInRange(profile.offsetY, -50, 50) &&
-      finiteInRange(profile.scale, 0.5, 2) &&
-      Number.isInteger(profile.layer) &&
-      profile.layer >= 1 &&
-      profile.layer <= 100,
+    typeof profile.assetUrl === "string" &&
+    profile.assetUrl.trim().length > 0 &&
+    validSlot(profile.slot) &&
+    finiteInRange(profile.offsetX, -50, 50) &&
+    finiteInRange(profile.offsetY, -50, 50) &&
+    finiteInRange(profile.scale, 0.5, 2) &&
+    Number.isInteger(profile.layer) &&
+    profile.layer >= 1 &&
+    profile.layer <= 100,
   );
 }
 
