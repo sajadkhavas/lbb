@@ -2,10 +2,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Heart, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { toast } from "sonner";
-import { useQuickView } from "@/lib/quickview";
+import { BackendProductQuickView } from "@/components/lbb/BackendProductQuickView";
+import { isBackendQuickViewTarget, useQuickView } from "@/lib/quickview";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
-import { discountPercent, fmtToman, isSizeAvailable } from "@/lib/products";
+import { discountPercent, fmtToman, isSizeAvailable, type Product } from "@/lib/products";
 import { CATEGORIES } from "@/lib/categories";
 import { productGallery } from "@/lib/product-images";
 import { colorName } from "@/lib/color-names";
@@ -16,12 +17,22 @@ import { Identifier } from "@/components/lbb/ui/Identifier";
 const MAX_QTY = 10;
 
 export function ProductQuickView() {
-  const { product, close, dismissForNavigation } = useQuickView();
+  const { product } = useQuickView();
+  if (!product) return null;
+  return isBackendQuickViewTarget(product) ? (
+    <BackendProductQuickView card={product} />
+  ) : (
+    <PrototypeProductQuickView product={product} />
+  );
+}
+
+function PrototypeProductQuickView({ product: p }: { product: Product }) {
+  const { close, dismissForNavigation } = useQuickView();
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
-  useFocusTrap(Boolean(product), dialogRef, close);
+  useFocusTrap(true, dialogRef, close);
 
   const [color, setColor] = useState("");
   const [size, setSize] = useState("");
@@ -31,16 +42,13 @@ export function ProductQuickView() {
   const touchStart = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!product) return;
-    setColor(product.colors[0] ?? "");
+    setColor(p.colors[0] ?? "");
     setSize("");
     setQty(1);
     setImg(0);
     setSizeError(false);
-  }, [product]);
+  }, [p]);
 
-  if (!product) return null;
-  const p = product;
   const gallery = productGallery(p.slug).slice(0, 4);
   const liked = has(p.slug);
   const discount = discountPercent(p);
@@ -92,6 +100,7 @@ export function ProductQuickView() {
             className="relative aspect-[4/3] w-full overflow-hidden bg-carbon touch-pan-y md:aspect-[3/4] md:h-full"
             tabIndex={gallery.length > 1 ? 0 : -1}
             role="region"
+            aria-roledescription="carousel"
             aria-label={`گالری نمای سریع ${p.name}`}
             onKeyDown={(event) => {
               if (gallery.length <= 1) return;
@@ -109,10 +118,13 @@ export function ProductQuickView() {
                 setImg(gallery.length - 1);
               }
             }}
-            onTouchStart={(event: React.TouchEvent<HTMLDivElement>) => {
+            onTouchStart={(event) => {
               touchStart.current = event.touches[0]?.clientX ?? null;
             }}
-            onTouchEnd={(event: React.TouchEvent<HTMLDivElement>) => {
+            onTouchCancel={() => {
+              touchStart.current = null;
+            }}
+            onTouchEnd={(event) => {
               if (touchStart.current === null) return;
               const end = event.changedTouches[0]?.clientX ?? touchStart.current;
               const delta = end - touchStart.current;
