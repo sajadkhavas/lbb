@@ -10,6 +10,7 @@ Created: `2026-09-09`
 ## 1) Current accepted identities
 
 ### Frontend
+
 - Repo: `sajadkhavas/lbb`
 - Operational branch: `fix/lbb-local-boutique-homepage`
 - Production URL: `https://lbbclo.com`
@@ -19,12 +20,14 @@ Created: `2026-09-09`
 - PR #88 accepted implementation head before base reconciliation: `2876eb83ed7a58ba937f8514d26e090bbd28ae05`
 
 ### Backend
+
 - Repo: `sajadkhavas/lbb-backend`
 - API/Admin: `https://api.lbbclo.com`
 - Current Production SHA: `e69637548de98681830308291a60777068350bfa`
 - Current public API contract: `2026-09-06-p3-storefront-v1`
 
 ### Commerce lock
+
 - `checkout.enabled=false`
 - `payment.enabled=false`
 - `provider=disabled`
@@ -57,6 +60,7 @@ Never intentionally re-run or roll back already accepted additive migrations onl
 ## 3) Final Technical Completion already merged/deployed
 
 ### Frontend PR #87
+
 - accepted source: `7435049fcc2336fc744ff6d8d494a048705be5fd`
 - merge/runtime SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
 - Quality #459 PASS
@@ -67,6 +71,7 @@ Never intentionally re-run or roll back already accepted additive migrations onl
 Implemented: Admin-backed taxonomy/navigation, Home category/Hero hydration, latest products, verified preview images, Contact, Track Order, account Cart/Wishlist sync, Lookbook/social hydration, no prototype leakage, FC1 mannequin card integration.
 
 ### Backend PR #28
+
 - accepted source: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
 - merge/runtime SHA: `e69637548de98681830308291a60777068350bfa`
 
@@ -77,6 +82,7 @@ Implemented: three-level category hierarchy, Admin parent/header/home/icon contr
 ## 4) Production schema/cutover truth
 
 Already Ran in Production:
+
 - `2026_09_09_020000_add_style_mannequin_profile_to_products_table.php`
 - `2026_09_09_120000_extend_categories_for_storefront_taxonomy.php`
 - `2026_09_09_123000_create_customer_storefront_state_tables.php`
@@ -108,6 +114,7 @@ C1-R2A used scoped `git -c safe.directory=...`, explicit `NITRO_PRESET=node-serv
 ## 6) PR #88 — Final Product UX Hotfix
 
 Owner-required bounded recovery:
+
 1. restore live Backend Quick View / Eye preview;
 2. show real Backend product detail inside Quick View;
 3. restore Backend size labels on cards;
@@ -119,6 +126,7 @@ Owner-required bounded recovery:
 9. improve desktop PDP composition without regressing mobile.
 
 Important implementation commits include:
+
 - `c521db486741b87f500f90a64619aa56c91f0b2c` sizes
 - `d804c64cb15375e89c5d0ccadd3ecd241e66842a` safe Quick View target model
 - `d67b66805abd7afe469bf1bc018fa1b07c6aeaf7` Backend Quick View/detail
@@ -131,6 +139,7 @@ Important implementation commits include:
 - `f156829c7bedb343cf2bc2e848ab99a5d66805e4` official-reference decision record
 
 ### Exact acceptance evidence
+
 - Visual baseline updater run `34374342196`: PASS.
 - Guard proved exactly 14 expected Playwright PNG baselines changed; no Source/Config delta.
 - Exact Final Product UX Gate run `34374653797`: PASS.
@@ -141,6 +150,7 @@ Important implementation commits include:
 - No Production/DB/schema/business/commerce mutation occurred during PR #88 CI remediation.
 
 ### Base reconciliation
+
 Operational branch contains four post-PR87 documentation-only commits; compared with the PR baseline, their only changed file is this Ledger. Source code has no base conflict. Reconciliation therefore preserves the Product UX tree and the newer operational history in one two-parent merge commit before PR #88 merge.
 
 ---
@@ -173,6 +183,7 @@ The completion criterion is: after this pass, normal store/business maintenance 
 ## 9) Mandatory update protocol
 
 At every important checkpoint record:
+
 - date/time
 - START/END/accepted SHA
 - PR/Issue
