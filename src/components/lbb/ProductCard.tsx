@@ -29,7 +29,8 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const { open: openQuickView } = useQuickView();
 
   const primaryImage = backend ? p.primaryImage : productImage(p.slug);
-  const mannequin = backend && isUsableMannequinProfile(p.mannequin) ? p.mannequin : null;
+  const mannequin =
+    backend && isUsableMannequinProfile(p.mannequin) ? p.mannequin : null;
   const name = p.name;
   const categoryLabel = backend ? p.categoryLabel : CATEGORIES[p.category].nameFa;
   const liked = has(p.slug);
@@ -313,7 +314,11 @@ function CardOverlay({
             event.stopPropagation();
             onToggleMannequin();
           }}
-          aria-label={showMannequin ? `بازگشت به تصویر ${p.name}` : `نمایش ${p.name} روی مانکن دوبعدی`}
+          aria-label={
+            showMannequin
+              ? `بازگشت به تصویر ${p.name}`
+              : `نمایش ${p.name} روی مانکن دوبعدی`
+          }
           aria-pressed={showMannequin}
           className="absolute bottom-2 start-2 z-30 min-h-9 rounded-xl border border-black/10 bg-white/90 px-3 text-[10px] font-black text-obsidian shadow-raised backdrop-blur transition-colors hover:bg-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal motion-reduce:transition-none"
         >
