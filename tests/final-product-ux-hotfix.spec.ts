@@ -128,9 +128,8 @@ test("backend Quick View decision model keeps exact variant availability", () =>
   expect(mediumAvailability).toBe("available");
   expect(largeAvailability).toBe("sold-out");
   expect(
-    model.variants.find(
-      (variant) => variant.colorId === colorId && variant.sizeId === mediumId,
-    )?.id,
+    model.variants.find((variant) => variant.colorId === colorId && variant.sizeId === mediumId)
+      ?.id,
   ).toBe(detail.variants[0].publicId);
   expect(
     canPurchaseVariant({
