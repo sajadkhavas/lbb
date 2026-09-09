@@ -176,7 +176,7 @@ export function Navbar({
               aria-haspopup="dialog"
               aria-expanded={active === "menu"}
               onClick={() => open("menu")}
-              className={`${iconClass} ms-0.5`}
+              className={`${iconClass} ms-0.5 lg:hidden`}
             >
               <Menu size={20} strokeWidth={1.6} aria-hidden="true" />
             </button>
