@@ -57,7 +57,11 @@ export function InstagramStrip({ liveItems }: { liveItems?: StorefrontLookDto[] 
                   <span className="absolute inset-0 flex items-end bg-gradient-to-t from-black/75 via-transparent to-transparent p-4 text-start opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
                     <span>
                       <span className="block text-sm font-bold text-white">{item.title}</span>
-                      {item.caption ? <span className="mt-1 line-clamp-2 block text-[11px] leading-5 text-white/70">{item.caption}</span> : null}
+                      {item.caption ? (
+                        <span className="mt-1 line-clamp-2 block text-[11px] leading-5 text-white/70">
+                          {item.caption}
+                        </span>
+                      ) : null}
                     </span>
                   </span>
                 </a>
@@ -112,7 +116,9 @@ export function InstagramStrip({ liveItems }: { liveItems?: StorefrontLookDto[] 
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-4xl text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">✦</span>
+              <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-4xl text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                ✦
+              </span>
             </a>
           ))}
         </div>

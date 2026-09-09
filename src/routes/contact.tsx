@@ -175,9 +175,12 @@ function ContactPage() {
                 ))}
               </div>
 
-              {isLiveBackend() ? <LiveContactForm /> : (
+              {isLiveBackend() ? (
+                <LiveContactForm />
+              ) : (
                 <StatePanel className="mt-6" title="فرم تماس در حالت نمونه غیرفعال است" tone="info">
-                  ثبت پیام فقط در حالت live و از طریق Backend انجام می‌شود؛ موفقیت ساختگی در مرورگر نمایش داده نمی‌شود.
+                  ثبت پیام فقط در حالت live و از طریق Backend انجام می‌شود؛ موفقیت ساختگی در مرورگر
+                  نمایش داده نمی‌شود.
                 </StatePanel>
               )}
             </section>
@@ -279,7 +282,10 @@ function LiveContactForm() {
   };
 
   return (
-    <form onSubmit={submit} className="mt-8 rounded-2xl border border-hairline bg-carbon p-5 md:p-6">
+    <form
+      onSubmit={submit}
+      className="mt-8 rounded-2xl border border-hairline bg-carbon p-5 md:p-6"
+    >
       <div className="flex items-center justify-between gap-4">
         <div>
           <TechLabel tone="signal">CONTACT FORM / BACKEND</TechLabel>
@@ -350,19 +356,34 @@ function LiveContactForm() {
 
       <label className="sr-only" aria-hidden="true">
         وب‌سایت
-        <input tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} />
+        <input
+          tabIndex={-1}
+          autoComplete="off"
+          value={website}
+          onChange={(event) => setWebsite(event.target.value)}
+        />
       </label>
 
       <p className="mt-3 text-[11px] leading-6 text-mute">
-        حداقل یکی از شماره موبایل یا ایمیل را وارد کنید. پیام مستقیماً در Backend فروشگاه ثبت می‌شود.
+        حداقل یکی از شماره موبایل یا ایمیل را وارد کنید. پیام مستقیماً در Backend فروشگاه ثبت
+        می‌شود.
       </p>
 
       <button
         type="submit"
-        disabled={busy || !fullName.trim() || message.trim().length < 10 || (!mobile.trim() && !email.trim())}
+        disabled={
+          busy ||
+          !fullName.trim() ||
+          message.trim().length < 10 ||
+          (!mobile.trim() && !email.trim())
+        }
         className={`${CtaClasses("signal")} mt-5 disabled:cursor-not-allowed disabled:opacity-50`}
       >
-        {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Send size={16} aria-hidden="true" />}
+        {busy ? (
+          <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+        ) : (
+          <Send size={16} aria-hidden="true" />
+        )}
         {busy ? "در حال ثبت…" : "ثبت پیام"}
       </button>
 
@@ -373,7 +394,10 @@ function LiveContactForm() {
       ) : null}
       {reference ? (
         <StatePanel className="mt-4" title="پیام با موفقیت ثبت شد" tone="success">
-          کد پیگیری داخلی درخواست: <span className="num" dir="ltr">{reference}</span>
+          کد پیگیری داخلی درخواست:{" "}
+          <span className="num" dir="ltr">
+            {reference}
+          </span>
         </StatePanel>
       ) : null}
     </form>

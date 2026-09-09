@@ -16,10 +16,7 @@ import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
 import { BackendApiError, getProduct, listProducts } from "@/lib/backend-api";
 import { backendCard, type BackendCatalogCard } from "@/lib/backend-storefront";
-import {
-  listStorefrontCategories,
-  type StorefrontCategoryDto,
-} from "@/lib/final-technical-api";
+import { listStorefrontCategories, type StorefrontCategoryDto } from "@/lib/final-technical-api";
 import { productImage } from "@/lib/product-images";
 import { absUrl, canonical, pageMeta } from "@/lib/site";
 import {

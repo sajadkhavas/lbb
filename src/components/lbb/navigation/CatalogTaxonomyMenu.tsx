@@ -8,10 +8,7 @@ import {
   type CatalogTaxonomyNode,
 } from "@/lib/catalog-taxonomy";
 import { isLiveBackend } from "@/lib/backend-api";
-import {
-  listStorefrontCategories,
-  type StorefrontCategoryDto,
-} from "@/lib/final-technical-api";
+import { listStorefrontCategories, type StorefrontCategoryDto } from "@/lib/final-technical-api";
 
 function nodeLabels(nodes: readonly CatalogTaxonomyNode[] | undefined) {
   if (!nodes?.length) return [];
@@ -39,7 +36,9 @@ function buildLiveTree(categories: StorefrontCategoryDto[]): LiveCategoryNode[] 
   }
 
   const prune = (node: LiveCategoryNode): LiveCategoryNode | null => {
-    const children = node.children.map(prune).filter((value): value is LiveCategoryNode => value !== null);
+    const children = node.children
+      .map(prune)
+      .filter((value): value is LiveCategoryNode => value !== null);
     if (node.showInHeader !== true && children.length === 0) return null;
     return { ...node, children };
   };
@@ -119,7 +118,10 @@ function LiveTaxonomy({
 }) {
   if (loading) {
     return (
-      <div className="mt-3 rounded-2xl border border-hairline bg-carbon p-5 text-sm text-metal" role="status">
+      <div
+        className="mt-3 rounded-2xl border border-hairline bg-carbon p-5 text-sm text-metal"
+        role="status"
+      >
         در حال دریافت دسته‌بندی‌های فروشگاه…
       </div>
     );
@@ -128,7 +130,8 @@ function LiveTaxonomy({
   if (failed) {
     return (
       <div className="mt-3 rounded-2xl border border-hairline bg-carbon p-5 text-sm leading-7 text-metal">
-        دسته‌بندی‌های زنده فعلاً قابل دریافت نیستند. برای جلوگیری از نمایش ساختار قدیمی، منوی نمونه جایگزین نمی‌شود.
+        دسته‌بندی‌های زنده فعلاً قابل دریافت نیستند. برای جلوگیری از نمایش ساختار قدیمی، منوی نمونه
+        جایگزین نمی‌شود.
       </div>
     );
   }
@@ -175,7 +178,9 @@ function LiveTaxonomy({
                   </span>
                 )}
                 <span className="min-w-0">
-                  <span className={`block text-base font-black transition-colors group-hover:text-signal ${active ? "text-signal" : "text-bone"}`}>
+                  <span
+                    className={`block text-base font-black transition-colors group-hover:text-signal ${active ? "text-signal" : "text-bone"}`}
+                  >
                     {root.name}
                   </span>
                   {root.description ? (
@@ -202,7 +207,9 @@ function LiveTaxonomy({
                     >
                       <span className="min-w-0 truncate">{child.name}</span>
                       {typeof child.productCount === "number" ? (
-                        <span className="num shrink-0 text-[10px] text-mute">{child.productCount.toLocaleString("fa-IR")}</span>
+                        <span className="num shrink-0 text-[10px] text-mute">
+                          {child.productCount.toLocaleString("fa-IR")}
+                        </span>
                       ) : null}
                     </Link>
                     {child.children.length > 0 ? (
@@ -246,23 +253,30 @@ function PrototypeTaxonomy({
 }) {
   return (
     <div>
-      <div className={compact ? "mt-3 grid gap-2" : "mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3"}>
+      <div
+        className={compact ? "mt-3 grid gap-2" : "mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3"}
+      >
         {CATALOG_NAVIGATION.map((entry, index) => {
           const group = catalogNavigationGroup(entry);
           if (!group) return null;
 
           const active = entry.currentRoute !== undefined && pathname === `/${entry.currentRoute}`;
-          const labels = group.strategy === "filter-first" ? (group.filters ?? []) : nodeLabels(group.children);
+          const labels =
+            group.strategy === "filter-first" ? (group.filters ?? []) : nodeLabels(group.children);
 
           const content = (
             <>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <span className="num text-[10px] text-mute">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="num text-[10px] text-mute">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                   <h4 className={`mt-1 text-lg font-black ${active ? "text-signal" : "text-bone"}`}>
                     {group.label}
                   </h4>
-                  {group.latin ? <span className="tech mt-1 block text-mute">{group.latin}</span> : null}
+                  {group.latin ? (
+                    <span className="tech mt-1 block text-mute">{group.latin}</span>
+                  ) : null}
                 </div>
                 {entry.availability === "planned" ? (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-hairline px-2 py-1 text-[10px] text-mute">
@@ -270,14 +284,21 @@ function PrototypeTaxonomy({
                     به‌زودی
                   </span>
                 ) : entry.availability === "partial" ? (
-                  <span className="shrink-0 rounded-full border border-signal/40 px-2 py-1 text-[10px] text-signal">بخشی فعال</span>
+                  <span className="shrink-0 rounded-full border border-signal/40 px-2 py-1 text-[10px] text-signal">
+                    بخشی فعال
+                  </span>
                 ) : (
-                  <span className="shrink-0 rounded-full border border-hairline px-2 py-1 text-[10px] text-metal">فعال</span>
+                  <span className="shrink-0 rounded-full border border-hairline px-2 py-1 text-[10px] text-metal">
+                    فعال
+                  </span>
                 )}
               </div>
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {labels.map((label) => (
-                  <span key={label} className="rounded-full border border-hairline-soft bg-carbon-2 px-2.5 py-1 text-[10px] leading-5 text-metal">
+                  <span
+                    key={label}
+                    className="rounded-full border border-hairline-soft bg-carbon-2 px-2.5 py-1 text-[10px] leading-5 text-metal"
+                  >
                     {label}
                   </span>
                 ))}
@@ -308,7 +329,11 @@ function PrototypeTaxonomy({
           }
 
           return (
-            <article key={entry.groupSlug} aria-disabled="true" className="min-w-0 rounded-2xl border border-hairline-soft bg-carbon/70 p-4">
+            <article
+              key={entry.groupSlug}
+              aria-disabled="true"
+              className="min-w-0 rounded-2xl border border-hairline-soft bg-carbon/70 p-4"
+            >
               {content}
             </article>
           );
@@ -328,7 +353,9 @@ function PrototypeTaxonomy({
               className="flex min-h-12 items-center justify-between gap-4 rounded-xl border border-hairline-soft px-4 transition-colors hover:border-signal"
             >
               <span>
-                <span className={`text-sm font-black ${active ? "text-signal" : "text-bone"}`}>{item.label}</span>
+                <span className={`text-sm font-black ${active ? "text-signal" : "text-bone"}`}>
+                  {item.label}
+                </span>
                 <span className="tech mr-2 text-mute">{item.latin}</span>
               </span>
               <span className="text-[10px] text-mute">{item.note}</span>

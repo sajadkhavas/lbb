@@ -31,11 +31,11 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const { open: openQuickView } = useQuickView();
 
   const previewImages = backend
-    ? (p.previewImages.length > 0
-        ? p.previewImages
-        : p.primaryImage
-          ? [p.primaryImage]
-          : [])
+    ? p.previewImages.length > 0
+      ? p.previewImages
+      : p.primaryImage
+        ? [p.primaryImage]
+        : []
     : [productImage(p.slug)].filter((value): value is string => Boolean(value));
   const primaryImage = previewImages[previewIndex] ?? previewImages[0] ?? null;
   const mannequin = backend && isUsableMannequinProfile(p.mannequin) ? p.mannequin : null;
@@ -84,7 +84,8 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   };
 
   const selectPreviewFromPointer = (event: PointerEvent<HTMLDivElement>) => {
-    if (!backend || showMannequin || previewImages.length < 2 || event.pointerType === "touch") return;
+    if (!backend || showMannequin || previewImages.length < 2 || event.pointerType === "touch")
+      return;
     const bounds = event.currentTarget.getBoundingClientRect();
     if (bounds.width <= 0) return;
     const ratio = Math.max(0, Math.min(0.999, (event.clientX - bounds.left) / bounds.width));
@@ -96,15 +97,14 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   };
 
   const finishSwipe = (event: TouchEvent<HTMLDivElement>) => {
-    if (!backend || showMannequin || previewImages.length < 2 || touchStartX.current === null) return;
+    if (!backend || showMannequin || previewImages.length < 2 || touchStartX.current === null)
+      return;
     const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
     const delta = touchStartX.current - endX;
     touchStartX.current = null;
     if (Math.abs(delta) < 36) return;
     setPreviewIndex((current) =>
-      delta > 0
-        ? Math.min(previewImages.length - 1, current + 1)
-        : Math.max(0, current - 1),
+      delta > 0 ? Math.min(previewImages.length - 1, current + 1) : Math.max(0, current - 1),
     );
   };
 

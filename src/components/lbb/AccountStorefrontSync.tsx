@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  getCurrentCustomer,
-  isAuthenticationError,
-  isLiveBackend,
-} from "@/lib/backend-api";
+import { getCurrentCustomer, isAuthenticationError, isLiveBackend } from "@/lib/backend-api";
 import { useCart, type CartLine } from "@/lib/cart";
 import {
   getAccountStorefrontState,
@@ -53,16 +49,8 @@ function mergeCart(local: CartLine[], remote: AccountCartStateItem[]) {
 }
 
 export function AccountStorefrontSync() {
-  const {
-    lines,
-    hydrated: cartHydrated,
-    replace: replaceLocalCart,
-  } = useCart();
-  const {
-    slugs,
-    hydrated: wishlistHydrated,
-    replace: replaceLocalWishlist,
-  } = useWishlist();
+  const { lines, hydrated: cartHydrated, replace: replaceLocalCart } = useCart();
+  const { slugs, hydrated: wishlistHydrated, replace: replaceLocalWishlist } = useWishlist();
   const [authenticated, setAuthenticated] = useState(false);
   const [initialSyncDone, setInitialSyncDone] = useState(false);
   const applyingRemote = useRef(false);
@@ -115,11 +103,13 @@ export function AccountStorefrontSync() {
         const mergedCart = mergeCart(lines, remote.cartItems);
 
         await replaceAccountWishlist(mergedWishlist);
-        const canonical = (await replaceAccountCart(
-          mergedCart
-            .filter((line) => line.variantId)
-            .map((line) => ({ variantId: line.variantId!, quantity: line.qty })),
-        )).data;
+        const canonical = (
+          await replaceAccountCart(
+            mergedCart
+              .filter((line) => line.variantId)
+              .map((line) => ({ variantId: line.variantId!, quantity: line.qty })),
+          )
+        ).data;
         if (cancelled) return;
 
         applyingRemote.current = true;

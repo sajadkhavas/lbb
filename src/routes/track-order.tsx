@@ -98,12 +98,15 @@ function TrackOrderPage() {
           </TechLabel>
           <h1 className="mt-3 text-display-2 text-bone">پیگیری وضعیت سفارش</h1>
           <p className="mt-4 max-w-[62ch] text-sm leading-8 text-metal">
-            شماره سفارش و همان شماره موبایلی که هنگام ثبت سفارش وارد شده را بنویس. برای حفظ حریم خصوصی،
-            این صفحه اطلاعات گیرنده، آدرس یا اقلام سفارش را نمایش نمی‌دهد.
+            شماره سفارش و همان شماره موبایلی که هنگام ثبت سفارش وارد شده را بنویس. برای حفظ حریم
+            خصوصی، این صفحه اطلاعات گیرنده، آدرس یا اقلام سفارش را نمایش نمی‌دهد.
           </p>
 
           {isLiveBackend() ? (
-            <form onSubmit={submit} className="mt-8 rounded-2xl border border-hairline bg-carbon p-5 md:p-6">
+            <form
+              onSubmit={submit}
+              className="mt-8 rounded-2xl border border-hairline bg-carbon p-5 md:p-6"
+            >
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="grid gap-2 text-xs font-semibold text-metal">
                   شماره سفارش
@@ -137,7 +140,11 @@ function TrackOrderPage() {
                 disabled={busy || !orderNumber.trim() || !mobile.trim()}
                 className={`${CtaClasses("signal")} mt-5 disabled:cursor-not-allowed disabled:opacity-50`}
               >
-                {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Search size={16} aria-hidden="true" />}
+                {busy ? (
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Search size={16} aria-hidden="true" />
+                )}
                 {busy ? "در حال بررسی…" : "پیگیری سفارش"}
               </button>
             </form>
@@ -182,12 +189,18 @@ function TrackingResult({ result }: { result: PublicOrderTracking }) {
   ] as const;
 
   return (
-    <section className="mt-6 rounded-2xl border border-signal/35 bg-carbon p-5 md:p-6" aria-live="polite">
+    <section
+      className="mt-6 rounded-2xl border border-signal/35 bg-carbon p-5 md:p-6"
+      aria-live="polite"
+    >
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-5">
         <div>
           <TechLabel tone="signal">VERIFIED ORDER STATUS</TechLabel>
           <h2 className="mt-2 text-xl font-bold text-bone">
-            سفارش <span className="num" dir="ltr">{result.orderNumber}</span>
+            سفارش{" "}
+            <span className="num" dir="ltr">
+              {result.orderNumber}
+            </span>
           </h2>
         </div>
         <span className="rounded-full border border-signal/40 px-3 py-1.5 text-xs font-bold text-signal">
@@ -198,19 +211,31 @@ function TrackingResult({ result }: { result: PublicOrderTracking }) {
       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
         <div className="rounded-xl border border-hairline bg-obsidian p-4">
           <dt className="text-mute">وضعیت پرداخت</dt>
-          <dd className="mt-1 font-semibold text-bone">{labelOf(result.paymentStatus, PAYMENT_LABELS)}</dd>
+          <dd className="mt-1 font-semibold text-bone">
+            {labelOf(result.paymentStatus, PAYMENT_LABELS)}
+          </dd>
         </div>
         <div className="rounded-xl border border-hairline bg-obsidian p-4">
           <dt className="text-mute">روش ارسال</dt>
-          <dd className="mt-1 font-semibold text-bone">{result.deliveryMethod ?? "هنوز تعیین نشده"}</dd>
+          <dd className="mt-1 font-semibold text-bone">
+            {result.deliveryMethod ?? "هنوز تعیین نشده"}
+          </dd>
         </div>
-        {(result.shipment?.carrier || result.trackingCode || result.shipment?.trackingReference) ? (
+        {result.shipment?.carrier || result.trackingCode || result.shipment?.trackingReference ? (
           <div className="rounded-xl border border-hairline bg-obsidian p-4 sm:col-span-2">
             <dt className="text-mute">اطلاعات رهگیری مرسوله</dt>
             <dd className="mt-1 flex flex-wrap gap-x-5 gap-y-1 font-semibold text-bone">
               {result.shipment?.carrier ? <span>{result.shipment.carrier}</span> : null}
-              {result.trackingCode ? <span className="num" dir="ltr">{result.trackingCode}</span> : null}
-              {result.shipment?.trackingReference ? <span className="num" dir="ltr">{result.shipment.trackingReference}</span> : null}
+              {result.trackingCode ? (
+                <span className="num" dir="ltr">
+                  {result.trackingCode}
+                </span>
+              ) : null}
+              {result.shipment?.trackingReference ? (
+                <span className="num" dir="ltr">
+                  {result.shipment.trackingReference}
+                </span>
+              ) : null}
             </dd>
           </div>
         ) : null}
@@ -218,13 +243,22 @@ function TrackingResult({ result }: { result: PublicOrderTracking }) {
 
       <ol className="mt-6 grid gap-3" aria-label="مراحل سفارش">
         {milestones.map(([label, date, Icon]) => (
-          <li key={label} className={`flex items-center gap-3 rounded-xl border p-3 ${date ? "border-signal/30 bg-signal/5" : "border-hairline bg-obsidian"}`}>
-            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${date ? "bg-signal text-obsidian" : "bg-carbon-2 text-mute"}`}>
+          <li
+            key={label}
+            className={`flex items-center gap-3 rounded-xl border p-3 ${date ? "border-signal/30 bg-signal/5" : "border-hairline bg-obsidian"}`}
+          >
+            <span
+              className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${date ? "bg-signal text-obsidian" : "bg-carbon-2 text-mute"}`}
+            >
               <Icon size={16} aria-hidden="true" />
             </span>
             <span className="min-w-0">
-              <span className={`block text-sm font-bold ${date ? "text-bone" : "text-metal"}`}>{label}</span>
-              <span className="mt-0.5 block text-[11px] text-mute">{faDate(date) ?? "هنوز ثبت نشده"}</span>
+              <span className={`block text-sm font-bold ${date ? "text-bone" : "text-metal"}`}>
+                {label}
+              </span>
+              <span className="mt-0.5 block text-[11px] text-mute">
+                {faDate(date) ?? "هنوز ثبت نشده"}
+              </span>
             </span>
           </li>
         ))}

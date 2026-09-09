@@ -55,7 +55,9 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
     "urban-runner-sneaker",
     "lbb-crew-socks",
   ];
-  const curated = currentSlugs.flatMap((slug) => products.filter((product) => product.slug === slug));
+  const curated = currentSlugs.flatMap((slug) =>
+    products.filter((product) => product.slug === slug),
+  );
 
   return (
     <section
