@@ -45,13 +45,16 @@
 - Payment: `false`
 - Provider: `disabled`
 
-### C1 failed activation state
-- C1 target FE: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
-- C1 target BE: `e69637548de98681830308291a60777068350bfa`
-- Application symlinks were automatically rolled back to the previous releases after FE activation failure.
-- Backend post-rollback ready check: `200`.
-- Frontend origin immediately after rollback returned `502` even though `lbb.service` printed `active`; this is the active incident requiring narrow diagnosis before any retry.
-- Do **not** assume frontend rollback is fully healthy until listener/journal/origin are re-verified.
+### Current recovered runtime after C1 rollback
+- Frontend `current`: `7148764a98654ed53f08a287a13969a8396d3c28`
+- Frontend service: active/running
+- Frontend listener: `127.0.0.1:5173`
+- Direct frontend HTTP: `200`
+- Nginx frontend origin: `200`
+- Backend application symlink: rolled back to old release after C1 failure
+- Production database: **forward-migrated** with the 3 additive C1 migrations already Ran
+- Backend post-rollback ready check: `200`
+- Commerce remains fail-closed: checkout=false / payment=false / provider=disabled
 
 ---
 
@@ -74,7 +77,11 @@ Without real drift evidence, do not repeat:
 - Final Technical Completion Backend PR #28
 - Final Technical Completion Frontend PR #87
 - P0 exact deployment contract discovery from `2026-09-09`
-- C1 successful build preparation and successful database migration execution
+- C1 successful FE/BE candidate source preparation
+- C1 successful Backend composer/package/optimize preparation
+- C1 successful database backup + checksum
+- C1 successful execution of all 3 additive database migrations
+- C1-R1 root-cause diagnosis described below
 
 ---
 
@@ -125,7 +132,8 @@ All 3 migrations were executed successfully on Production DB:
 These migrations are additive/backward-compatible with the old application release. Therefore:
 - **DO NOT run `migrate:rollback` manually.**
 - Application rollback does not require schema rollback.
-- On the next deployment retry, migration status should show these migrations as already `Ran`; they must not be treated as pending again.
+- On the deployment retry, migration status must show these migrations as already `Ran`.
+- The retry must not intentionally re-run migration work.
 
 ---
 
@@ -144,21 +152,17 @@ This is a cutover safety backup, not the final handoff backup/restore acceptance
 
 ## 7) C1 — Final Production Cutover incident
 
-### Timestamp / evidence
-- Run evidence dir:
-  `/var/www/lbb/backend/shared/deploy-evidence/final-cutover-20260909T135054Z`
+### Evidence directory
+`/var/www/lbb/backend/shared/deploy-evidence/final-cutover-20260909T135054Z`
 
-### Successful gates
+### Successful C1 gates
 - PRE_FRONTEND: `200`
 - PRE_API_READY: `200`
 - free disk: ~9 GB
-- FE candidate checkout/build: PASS
+- FE candidate checkout/build: PASS as a build artifact, but built for the wrong Nitro runtime preset
 - BE candidate checkout/composer/package discovery/optimize: PASS
-- final new API route contract: PASS
+- final API route contract: PASS
 - commerce fail-closed: PASS
-  - Checkout `false`
-  - Payment `false`
-  - Provider `disabled`
 - DB backup + SHA256: PASS
 - exact migration delta lock: PASS
 - migrations: `3/3 RAN`
@@ -168,24 +172,55 @@ This is a cutover safety backup, not the final handoff backup/restore acceptance
 - category API contract: PASS
 
 ### Failure
-- FE atomic activation switched `current` to target and restarted `lbb.service`.
-- Gate failed at `systemctl is-active --quiet lbb.service` after switch.
-- Classification at this point: `FRONTEND_RUNTIME_START_FAILURE_AFTER_SWITCH / ROOT_CAUSE_NOT_YET_PROVEN`.
-
-### Automatic rollback
-- FE `current` -> old release attempted: YES
-- BE `current` -> old release attempted: YES
-- Backend after rollback ready: `200`
-- Frontend origin immediately after rollback: `502`
-- Schema auto rollback: intentionally NOT attempted
-- Old releases preserved: YES
-
-### Safety rule
-Do not retry C1, rebuild candidates, edit Nginx, modify TLS/Cloudflare, or rollback DB schema until the current FE 502/start failure is diagnosed from systemd journal + listener + exact current symlink.
+- FE target switched into `current` and `lbb.service` restarted.
+- `lbb.service` failed the active gate.
+- Automatic application rollback restored old FE/BE symlinks.
+- A transient FE `502` was observed immediately after rollback; subsequent C1-R1 diagnosis proved full old-FE recovery.
 
 ---
 
-## 8) Employer / Business Truth
+## 8) C1-R1 — ROOT CAUSE PROVEN
+
+### Old production FE output
+- release: `7148764a98654ed53f08a287a13969a8396d3c28`
+- `.output/nitro.json` preset: `node-server`
+- entrypoint contains Nitro Node runtime and `serve(...)`
+- service listens successfully on `127.0.0.1:5173`
+
+### Failed new FE candidate output
+- release/source: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- `.output/nitro.json` preset: `cloudflare-module`
+- `.output/server/wrangler.json`: present
+- `.wrangler/deploy/config.json`: present
+- entrypoint contains Cloudflare module handler/runtime
+- isolated direct start on port `5187`: **NO LISTENER**
+- process exits cleanly because Cloudflare module output exports a handler instead of starting a Node HTTP listener
+
+### Classification
+`FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH / CLOUDFLARE_MODULE_ARTIFACT_DEPLOYED_TO_NODE_SYSTEMD_RUNTIME`
+
+This is **not**:
+- Nginx failure
+- systemd unit design failure
+- database migration failure
+- Backend/API failure
+- application feature-code regression proven by runtime
+
+### Required repair
+Rebuild only the existing FE candidate source `d5014061...` with explicit `NITRO_PRESET=node-server`, preserving production VITE live variables. Then:
+1. assert `.output/nitro.json` preset=`node-server`
+2. assert Cloudflare/Wrangler runtime artifacts are absent or irrelevant after clean rebuild
+3. isolated start as user `lbb` on port `5187`
+4. require listener + HTTP 200
+5. only then reactivate Backend target `e696375...` without migrations
+6. activate FE target `d5014061...`
+7. health/identity/fail-closed acceptance
+
+No GitHub source-code patch is required for this incident unless the Node-preset rebuild itself fails.
+
+---
+
+## 9) Employer / Business Truth
 
 - Current 8 catalog records are legacy/sample records, not employer final products.
 - Keep samples Draft/Inactive through Admin; do not destructively delete by default.
@@ -196,21 +231,20 @@ Do not retry C1, rebuild candidates, edit Nginx, modify TLS/Cloudflare, or rollb
 
 ---
 
-## 9) Remaining path to final handoff
+## 10) Remaining path to final handoff
 
-1. **C1-R1 narrow frontend runtime incident diagnosis/recovery**
-2. Resume/retry only the failed frontend activation portion if diagnosis proves candidate/runtime contract repair; backend schema is already migrated
-3. Narrow live delta acceptance for changed surfaces only
-4. Final GitHub reconciliation / authoritative refs / stale cleanup
-5. Enter real employer data from Admin
-6. Real-data acceptance
-7. Fresh final MySQL backup + checksum + disposable restore
-8. Exactly one final real server reboot + post-reboot acceptance
-9. Freeze/tag/handoff + close FE #78 / BE #21
+1. **C1-R2 Node-preset FE candidate rebuild + isolated 5187 acceptance + bounded activation**
+2. Narrow live delta acceptance for changed surfaces only
+3. Final GitHub reconciliation / authoritative refs / stale cleanup
+4. Enter real employer data from Admin
+5. Real-data acceptance
+6. Fresh final MySQL backup + checksum + disposable restore
+7. Exactly one final real server reboot + post-reboot acceptance
+8. Freeze/tag/handoff + close FE #78 / BE #21
 
 ---
 
-## 10) External blockers — not code incompleteness
+## 11) External blockers — not code incompleteness
 
 - Kavenegar production credentials/template + real OTP activation
 - Zarinpal merchant approval/credentials + controlled payment activation
@@ -218,7 +252,7 @@ Do not retry C1, rebuild candidates, edit Nginx, modify TLS/Cloudflare, or rollb
 
 ---
 
-## 11) Mandatory update protocol
+## 12) Mandatory update protocol
 
 After every important action record:
 - date/time
@@ -237,7 +271,7 @@ Never mark a phase Done without SHA/evidence.
 
 ---
 
-## 12) Change Log
+## 13) Change Log
 
 ### 2026-09-09 — Master Ledger established
 - Authoritative continuation ledger created.
@@ -255,16 +289,24 @@ Never mark a phase Done without SHA/evidence.
 - Exact pending target schema identified as 3 migrations.
 
 ### 2026-09-09 — C1 final cutover attempt / rollback incident
-- FE/BE immutable candidates built successfully.
+- FE/BE candidates prepared successfully.
 - Pre-migration DB backup created and checksummed.
 - All 3 additive migrations successfully ran.
 - Backend target activated and passed Health/Ready/API contract.
 - Frontend target failed to become active after switch.
 - Automatic application rollback executed.
-- Backend rollback state ready=200.
-- Frontend origin after rollback returned 502 despite service being reported active.
 - Schema left forward-compatible; no migration rollback attempted.
 - Business data mutation: NO.
 - Schema mutation: YES — exactly the 3 additive migrations above.
 - Commerce: checkout=false / payment=false / provider=disabled.
-- **EXACT NEXT:** run a narrow read-only C1-R1 frontend diagnosis: current symlink/SHA, `lbb.service` detailed state, PID/process, port 5173 listener, recent journal from cutover time, candidate vs old entrypoint permission/readability. Recover old frontend first if needed; do not retry cutover or change Nginx/schema before root cause is proven.
+
+### 2026-09-09 — C1-R1 frontend runtime root cause proven
+- Old FE fully recovered: service active, listener `5173`, direct HTTP `200`, Nginx origin `200`.
+- Old Nitro preset: `node-server`.
+- Failed candidate Nitro preset: `cloudflare-module`.
+- Failed candidate contained Wrangler/Cloudflare output and no Node listener.
+- Isolated candidate start on `5187`: no listener; process exited without startup error because artifact is a Cloudflare handler module.
+- Final classification: `FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH`.
+- Production config mutation during diagnosis: NO.
+- Database mutation during diagnosis: NO.
+- **EXACT NEXT:** clean-rebuild only FE candidate `d5014061...` with explicit `NITRO_PRESET=node-server`; prove isolated listener/HTTP on 5187; if PASS, activate already-built BE `e696375...` with migrations untouched, then activate FE and run narrow post-cutover health/identity/fail-closed checks.
