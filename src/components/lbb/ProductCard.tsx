@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, Eye } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +11,8 @@ import { useQuickView } from "@/lib/quickview";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
 import { isLiveBackend } from "@/lib/backend-api";
 import { colorName } from "@/lib/color-names";
+import { isUsableMannequinProfile } from "@/lib/style-mannequin";
+import { StyleMannequin } from "@/components/lbb/product/StyleMannequin";
 import { Frame, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
 
 export type ProductCardModel = Product | BackendCatalogCard;
@@ -20,11 +23,13 @@ function isBackendCard(product: ProductCardModel): product is BackendCatalogCard
 
 export function ProductCard({ p, priority = false }: { p: ProductCardModel; priority?: boolean }) {
   const backend = isBackendCard(p);
+  const [showMannequin, setShowMannequin] = useState(false);
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const { open: openQuickView } = useQuickView();
 
   const primaryImage = backend ? p.primaryImage : productImage(p.slug);
+  const mannequin = backend && isUsableMannequinProfile(p.mannequin) ? p.mannequin : null;
   const name = p.name;
   const categoryLabel = backend ? p.categoryLabel : CATEGORIES[p.category].nameFa;
   const liked = has(p.slug);
@@ -69,50 +74,55 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     openDrawer();
   };
 
-  const cardImage = primaryImage ? (
-    <Frame
-      src={primaryImage}
-      alt={name}
-      ratio="1/1"
-      width={1024}
-      height={1280}
-      priority={priority}
-      zoom={false}
-      className="product-card__media bg-white"
-      imgClassName="object-contain p-4 sm:p-7"
-    >
-      <CardOverlay
-        p={p}
-        liked={liked}
-        discount={discount}
-        available={available}
-        onToggleWishlist={() => toggle(p.slug)}
-        onQuickView={
-          backend
-            ? null
-            : (button) => {
-                openQuickView(p, button);
-              }
-        }
-        onAddWithSize={addWithSize}
-      />
-    </Frame>
-  ) : (
-    <div className="product-card__media relative aspect-square overflow-hidden bg-white">
-      <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">
-        تصویر تأییدشده برای این محصول منتشر نشده است.
-      </div>
-      <CardOverlay
-        p={p}
-        liked={liked}
-        discount={discount}
-        available={available}
-        onToggleWishlist={() => toggle(p.slug)}
-        onQuickView={null}
-        onAddWithSize={addWithSize}
-      />
-    </div>
+  const overlay = (
+    <CardOverlay
+      p={p}
+      liked={liked}
+      discount={discount}
+      available={available}
+      mannequinAvailable={mannequin !== null}
+      showMannequin={showMannequin}
+      onToggleMannequin={() => setShowMannequin((current) => !current)}
+      onToggleWishlist={() => toggle(p.slug)}
+      onQuickView={
+        backend
+          ? null
+          : (button) => {
+              openQuickView(p, button);
+            }
+      }
+      onAddWithSize={addWithSize}
+    />
   );
+
+  const cardImage =
+    showMannequin && mannequin ? (
+      <div className="product-card__media relative aspect-square overflow-hidden bg-white">
+        <StyleMannequin profile={mannequin} productName={name} priority={priority} />
+        {overlay}
+      </div>
+    ) : primaryImage ? (
+      <Frame
+        src={primaryImage}
+        alt={name}
+        ratio="1/1"
+        width={1024}
+        height={1280}
+        priority={priority}
+        zoom={false}
+        className="product-card__media bg-white"
+        imgClassName="object-contain p-4 sm:p-7"
+      >
+        {overlay}
+      </Frame>
+    ) : (
+      <div className="product-card__media relative aspect-square overflow-hidden bg-white">
+        <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">
+          تصویر تأییدشده برای این محصول منتشر نشده است.
+        </div>
+        {overlay}
+      </div>
+    );
 
   return (
     <article
@@ -223,6 +233,9 @@ function CardOverlay({
   liked,
   discount,
   available,
+  mannequinAvailable,
+  showMannequin,
+  onToggleMannequin,
   onToggleWishlist,
   onQuickView,
   onAddWithSize,
@@ -231,6 +244,9 @@ function CardOverlay({
   liked: boolean;
   discount: number;
   available: boolean;
+  mannequinAvailable: boolean;
+  showMannequin: boolean;
+  onToggleMannequin: () => void;
   onToggleWishlist: () => void;
   onQuickView: ((button: HTMLButtonElement) => void) | null;
   onAddWithSize: (size: string) => void;
@@ -287,6 +303,24 @@ function CardOverlay({
           className="tap-target absolute end-2 top-14 z-20 grid place-items-center rounded-xl border border-white/10 bg-obsidian/75 text-bone shadow-raised backdrop-blur transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
         >
           <Eye size={16} strokeWidth={1.6} aria-hidden="true" />
+        </button>
+      ) : null}
+
+      {mannequinAvailable ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onToggleMannequin();
+          }}
+          aria-label={
+            showMannequin ? `بازگشت به تصویر ${p.name}` : `نمایش ${p.name} روی مانکن دوبعدی`
+          }
+          aria-pressed={showMannequin}
+          className="absolute bottom-2 start-2 z-30 min-h-9 rounded-xl border border-black/10 bg-white/90 px-3 text-[10px] font-black text-obsidian shadow-raised backdrop-blur transition-colors hover:bg-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal motion-reduce:transition-none"
+        >
+          {showMannequin ? "تصویر محصول" : "تن‌خور 2D"}
         </button>
       ) : null}
 
