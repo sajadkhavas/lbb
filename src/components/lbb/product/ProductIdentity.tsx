@@ -28,19 +28,24 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
           ? [identity.categoryLabel, identity.latinName].filter(Boolean).join(" / ")
           : "PRODUCT DATA PENDING"}
       </TechLabel>
-      <h1 id="pdp-product-title" className="mt-2 text-display-2 text-bone">
+      <h1
+        id="pdp-product-title"
+        className="mt-2 text-display-2 text-bone lg:mt-3 lg:max-w-[12ch] lg:text-[clamp(2rem,3vw,3.35rem)] lg:leading-[1.08]"
+      >
         {identity.name ?? "اطلاعات محصول در انتظار تأیید"}
       </h1>
       {identity.shortDescription ? (
-        <p className="mt-3 text-sm leading-7 text-metal">{identity.shortDescription}</p>
+        <p className="mt-3 text-sm leading-7 text-metal lg:mt-4 lg:max-w-[48ch] lg:text-[15px] lg:leading-8">
+          {identity.shortDescription}
+        </p>
       ) : (
-        <p className="mt-3 max-w-[52ch] text-sm leading-7 text-metal">
+        <p className="mt-3 max-w-[52ch] text-sm leading-7 text-metal lg:mt-4 lg:leading-8">
           این رکورد برای توسعه رابط حفظ شده است، اما هویت و مشخصات آن هنوز برای نمایش عمومی تأیید
           نشده‌اند.
         </p>
       )}
 
-      <div className="mt-4 flex flex-wrap items-center gap-2" aria-label="وضعیت محصول">
+      <div className="mt-4 flex flex-wrap items-center gap-2 lg:mt-5" aria-label="وضعیت محصول">
         {stock.availability === "available" ? <StatusTag tone="success">موجود</StatusTag> : null}
         {stock.availability === "sold-out" ? <StatusTag tone="out">ناموجود</StatusTag> : null}
         {stock.availability === "unknown" ? (
@@ -50,8 +55,11 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
       </div>
 
       {effectivePrice !== null ? (
-        <div className="mt-5 flex flex-wrap items-baseline gap-3" aria-label="قیمت محصول">
-          <span className="num text-2xl font-bold text-bone">
+        <div
+          className="mt-5 flex flex-wrap items-baseline gap-3 lg:mt-6"
+          aria-label="قیمت محصول"
+        >
+          <span className="num text-2xl font-bold text-bone lg:text-[1.85rem]">
             {priceRange && pricing.toToman
               ? `${fmtToman(pricing.fromToman!)} تا ${fmtToman(pricing.toToman)}`
               : fmtToman(effectivePrice)}
@@ -63,7 +71,7 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
           ) : null}
         </div>
       ) : (
-        <p className="mt-5 text-sm font-semibold text-metal">
+        <p className="mt-5 text-sm font-semibold text-metal lg:mt-6">
           قیمت عمومی این محصول هنوز تأیید نشده است.
         </p>
       )}
