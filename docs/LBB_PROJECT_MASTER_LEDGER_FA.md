@@ -17,22 +17,26 @@
 - Repo: `sajadkhavas/lbb`
 - Production URL: `https://lbbclo.com`
 - Operational branch line: `fix/lbb-local-boutique-homepage`
-- Current accepted branch SHA after FC1: `7515d76026abaf4158f2d06b2c42ccc50662193b`
+- FC1 accepted merge baseline: `7515d76026abaf4158f2d06b2c42ccc50662193b`
 - Final Technical Completion branch: `feature/final-technical-completion`
-- Latest implementation head before this ledger update: `0ce7e46be1ad6e5a729fb2246b17ff8e6f669c47`
-- Open Final Technical Completion PR: `#87`
-- PR #87 base is intentionally `fix/lbb-local-boutique-homepage`; canonical `main` reconciliation is deferred to final GitHub reconciliation.
+- Final Technical Completion accepted source SHA: `7435049fcc2336fc744ff6d8d494a048705be5fd`
+- Final Technical Completion PR: `#87` — **MERGED**
+- Final Technical Completion merge SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- PR #87 base intentionally remained `fix/lbb-local-boutique-homepage`; canonical `main` reconciliation is deferred to the dedicated final GitHub reconciliation gate.
 
 ### Backend
 
 - Repo: `sajadkhavas/lbb-backend`
 - API/Admin: `https://api.lbbclo.com`
-- Backend main after FC1 mannequin merge: `21218cf34603512ee350da738df92c4bb56aa53d`
+- FC1 mannequin merge baseline: `21218cf34603512ee350da738df92c4bb56aa53d`
 - Final Technical Completion branch: `feature/final-technical-completion`
-- Current Final Technical Completion head: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
-- Open Final Technical Completion PR: `#28`
+- Final Technical Completion accepted source SHA: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
+- Final Technical Completion PR: `#28` — **MERGED**
+- Final Technical Completion merge SHA: `e69637548de98681830308291a60777068350bfa`
 
 ### Production runtime currently accepted
+
+> این بخش تا زمانی که cutover نهایی انجام نشده عمداً Runtime قبلی را نشان می‌دهد.
 
 - Frontend: `7148764a98654ed53f08a287a13969a8396d3c28`
 - Backend: `f0583b5892a4e68a6a05549325399145136f5a3b`
@@ -67,6 +71,8 @@
 - SEO FINAL E1 coordinated cutover + trusted SSR rate-limit bucket
 - E1 permission contract diagnostic/repair
 - FC1 2D mannequin Backend PR #27 and Frontend PR #86
+- Final Technical Completion Backend PR #28
+- Final Technical Completion Frontend PR #87
 
 ---
 
@@ -84,11 +90,11 @@
 
 ---
 
-## 4) Final Technical Completion — current scope
+## 4) Final Technical Completion — CLOSED IN GITHUB
 
-### Backend PR #28
+### Backend PR #28 — MERGED
 
-Implemented scope includes:
+Implemented scope:
 
 - three-level category hierarchy with cycle/depth guard
 - parent/header/home/icon Admin controls
@@ -101,49 +107,89 @@ Implemented scope includes:
 - Production disabling/removal of unsafe direct file/robots/sitemap editing surfaces
 - Launch Readiness Admin surface
 
-Last known exact-head acceptance:
+Accepted evidence:
 
-- BE head: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
-- P3 Storefront Integration: PASS
+- BE accepted source: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
+- BE merge SHA: `e69637548de98681830308291a60777068350bfa`
+- PR: `#28` — MERGED
+- P3 Storefront Integration: PASS before merge
+- Review blockers: none at acceptance
 
-### Frontend PR #87
+New schema for final deploy only:
 
-Implemented scope includes:
+- `database/migrations/2026_09_09_120000_extend_categories_for_storefront_taxonomy.php`
+- `database/migrations/2026_09_09_123000_create_customer_storefront_state_tables.php`
+
+These are additive/reversible and must be applied once during final Backend release activation; old migration/infra procedures must not be repeated without drift evidence.
+
+### Frontend PR #87 — MERGED
+
+Implemented scope:
 
 - live Admin-backed taxonomy hierarchy in desktop/mobile navigation
 - Home categories from live taxonomy
 - Hero product/control hydration
 - live latest-product section
 - Product Card desktop hover + mobile swipe using verified preview images
-- Contact form wiring
-- Track Order wiring
-- account Cart/Wishlist synchronization while keeping anonymous local continuity
+- Contact form wiring to real Backend transport
+- privacy-safe Track Order wiring
+- account Cart/Wishlist synchronization while preserving anonymous local continuity
 - Home social/Lookbook hydration from Admin content
 - fail-closed live behavior without prototype leakage
+- FC1 2D mannequin remains integrated in Product Card flow
 
-Current remediation state:
+Final accepted evidence:
 
-- Initial FE head `0e33226ff8faafd84c9063d0d7228e527518d711` failed Quality only at `prettier --check` before build/typecheck/e2e.
-- Exact 10-file Prettier output was generated with the repository's own locked dependencies.
-- Temporary formatting workflow was self-removed after applying output.
-- Formatted implementation head: `0ce7e46be1ad6e5a729fb2246b17ff8e6f669c47`.
-- A normal ledger commit is used to trigger fresh PR CI because `GITHUB_TOKEN`-authored pushes do not trigger the required downstream workflows normally.
-- PR #87 remains **NOT MERGED** until exact-head Quality/PWA/P3 acceptance is green.
+- FE accepted source: `7435049fcc2336fc744ff6d8d494a048705be5fd`
+- FE PR: `#87` — MERGED
+- FE merge SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- Quality Gates `#459`: PASS
+- P3 Live Integration `#103`: PASS
+  - `frontend-contract`: PASS
+  - `full-quality`: PASS
+- F8-B PWA and Push validation `#55`: PASS
+- Review threads: `0`
+- Final E2E regression stale-copy remediation was limited to `tests/trust-legal-support.spec.ts`; runtime Contact/Track Order fail-closed behavior was not weakened.
+- Temporary Prettier workflow used for exact repo formatting was removed before final accepted head.
 
 ---
 
 ## 5) Remaining path to final handoff
 
-1. Rerun exact-head FE #87 Quality/PWA/P3 integration after Prettier remediation.
-2. Zero review threads and merge FE #87 / BE #28 only on accepted exact heads.
-3. Controlled immutable Production deploy with rollback and commerce fail-closed lock.
-4. Narrow live delta acceptance for changed surfaces only.
-5. Final GitHub reconciliation: stale PRs/branches/docs; preserve freeze/rollback refs; canonicalize active state.
-6. Enter real employer data from Admin: products, media, categories, Hero, FAQ, Terms, Privacy, merchant content, social/reels.
-7. Real-data acceptance: no sample leakage; Admin/API/Frontend agreement; sitemap/schema/indexability truth.
-8. Fresh final MySQL backup using `mysqldump --no-tablespaces` + checksum + disposable restore.
-9. Exactly one real final server reboot and post-reboot service/runtime/media/admin verification.
-10. Final freeze/tag/handoff, ledger finalization, close FE #78 and BE #21.
+1. **Controlled immutable Production deploy — narrow only**
+   - no re-run of old server phases without drift evidence
+   - lock accepted FE/BE source/merge identities
+   - inspect only narrow current drift/preflight
+   - apply only new required Backend migrations
+   - release/switch atomically with rollback
+   - keep checkout/payment/provider fail-closed
+2. **Narrow live delta acceptance** for changed surfaces only:
+   - Home/Hero
+   - taxonomy/Header/Home category controls
+   - product preview hover/swipe
+   - 2D mannequin path
+   - Contact
+   - Track Order
+   - Account Cart/Wishlist continuity
+   - Lookbook/Social
+   - Admin Site Settings + Launch Readiness
+3. **Final GitHub reconciliation**
+   - stale PRs/branches/docs
+   - preserve freeze/rollback refs
+   - canonicalize active state without dragging historical branch divergence
+4. **Enter real employer data from Admin**
+   - products/media/categories/Hero/FAQ/Terms/Privacy/merchant/social/reels
+   - legacy samples Draft/Inactive
+5. **Real-data acceptance**
+   - no sample leakage
+   - Admin/API/Frontend agreement
+   - sitemap/schema/indexability truth
+6. **Fresh final backup/restore acceptance**
+   - MySQL dump with `--no-tablespaces`
+   - checksum
+   - disposable restore
+7. **Exactly one final real server reboot** + post-reboot runtime verification
+8. **Freeze/tag/handoff** + ledger finalization + close FE #78 / BE #21
 
 ---
 
@@ -189,13 +235,30 @@ Current remediation state:
 
 ### 2026-09-09 — FE #87 exact Prettier remediation
 
-- START implementation head: `0e33226ff8faafd84c9063d0d7228e527518d711`.
-- Initial Quality failure classification: `FORMAT_ONLY / 10_FILES / BUILD_TYPECHECK_E2E_NOT_REACHED`.
-- Temporary artifact run: `34351827376` — SUCCESS.
-- Exact Prettier apply source commit: `0ce7e46be1ad6e5a729fb2246b17ff8e6f669c47`.
-- Temporary workflow removed from branch after use.
+- Initial Quality failure classification: formatting-only on Final Technical Completion files.
+- Exact Prettier output applied with repository locked dependencies.
+- Temporary formatting workflows removed after use.
 - Server mutation: NO.
 - Production mutation: NO.
 - Schema/business mutation: NO.
 - Commerce: checkout=false / payment=false / provider=disabled.
-- **EXACT NEXT:** accept the new normal GitHub-authored ledger head through Quality/PWA/P3; if green, check review threads and merge FE #87 and BE #28 with exact-head locks.
+
+### 2026-09-09 — Final Technical Completion GitHub closure
+
+- Backend PR `#28`: MERGED.
+- BE accepted source: `ff05d186de0d92795ac1c16bc53832947a4c91ff`.
+- BE merge SHA: `e69637548de98681830308291a60777068350bfa`.
+- Frontend final source before last regression-copy repair reached all build/type/audit gates and 308/310 E2E; the only two failures were stale copy assertions for Prototype Contact and Track Order.
+- Those two test assertions were aligned with the current truthful runtime copy without changing runtime behavior.
+- Final FE accepted source: `7435049fcc2336fc744ff6d8d494a048705be5fd`.
+- Quality Gates `#459`: PASS.
+- P3 Live Integration `#103`: PASS.
+- F8-B PWA `#55`: PASS.
+- Review threads: `0`.
+- Frontend PR `#87`: MERGED.
+- FE merge SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`.
+- Server mutation: NO.
+- Production mutation: NO.
+- Business data mutation: NO.
+- Commerce: checkout=false / payment=false / provider=disabled.
+- **EXACT NEXT:** execute only the narrow final Production drift/preflight and immutable cutover for the accepted FE/BE releases, applying only the two new Backend migrations and preserving rollback/fail-closed commerce; do not repeat previously accepted server work without drift evidence.
