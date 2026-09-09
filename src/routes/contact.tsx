@@ -1,10 +1,13 @@
+import { useState, type FormEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Instagram, MapPin, MessageCircleMore, Phone } from "lucide-react";
+import { Instagram, Loader2, MapPin, MessageCircleMore, Phone, Send } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import { backendErrorMessage, isLiveBackend } from "@/lib/backend-api";
+import { submitContactInquiry } from "@/lib/final-technical-api";
 import { pageMeta, canonical, absUrl, breadcrumbLd } from "@/lib/site";
 import { resolveStorefrontControl, resolveStorefrontPage } from "@/lib/storefront-control";
 
@@ -172,10 +175,11 @@ function ContactPage() {
                 ))}
               </div>
 
-              <StatePanel className="mt-4" title="فرم تماس آنلاین فعال نیست" tone="info">
-                تا زمانی که Transport واقعی پیام در قرارداد live فعال نشده، این صفحه موفقیت ساختگی
-                برای ارسال فرم نشان نمی‌دهد.
-              </StatePanel>
+              {isLiveBackend() ? <LiveContactForm /> : (
+                <StatePanel className="mt-6" title="فرم تماس در حالت نمونه غیرفعال است" tone="info">
+                  ثبت پیام فقط در حالت live و از طریق Backend انجام می‌شود؛ موفقیت ساختگی در مرورگر نمایش داده نمی‌شود.
+                </StatePanel>
+              )}
             </section>
 
             <aside
@@ -234,5 +238,144 @@ function ContactPage() {
       <Footer />
       <MobileBottomBar />
     </>
+  );
+}
+
+function LiveContactForm() {
+  const [fullName, setFullName] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [reference, setReference] = useState<string | null>(null);
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!fullName.trim() || message.trim().length < 10 || (!mobile.trim() && !email.trim())) return;
+
+    setBusy(true);
+    setError(null);
+    setReference(null);
+    try {
+      const response = await submitContactInquiry({
+        fullName,
+        mobile,
+        email,
+        subject,
+        message,
+        website,
+      });
+      setReference(response.data.inquiry.id);
+      setSubject("");
+      setMessage("");
+    } catch (cause) {
+      setError(backendErrorMessage(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="mt-8 rounded-2xl border border-hairline bg-carbon p-5 md:p-6">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <TechLabel tone="signal">CONTACT FORM / BACKEND</TechLabel>
+          <h2 className="mt-2 text-xl font-bold text-bone">ارسال پیام به LBB</h2>
+        </div>
+        <Send size={20} className="text-signal" aria-hidden="true" />
+      </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <label className="grid gap-2 text-xs font-semibold text-metal">
+          نام و نام خانوادگی
+          <input
+            required
+            minLength={2}
+            maxLength={120}
+            autoComplete="name"
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
+            className="min-h-12 rounded-xl border border-hairline bg-obsidian px-4 text-sm text-bone outline-none focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
+          />
+        </label>
+        <label className="grid gap-2 text-xs font-semibold text-metal">
+          شماره موبایل
+          <input
+            inputMode="tel"
+            autoComplete="tel"
+            dir="ltr"
+            value={mobile}
+            onChange={(event) => setMobile(event.target.value)}
+            placeholder="0912…"
+            className="min-h-12 rounded-xl border border-hairline bg-obsidian px-4 text-left text-sm text-bone outline-none focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
+          />
+        </label>
+        <label className="grid gap-2 text-xs font-semibold text-metal">
+          ایمیل
+          <input
+            type="email"
+            autoComplete="email"
+            dir="ltr"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="min-h-12 rounded-xl border border-hairline bg-obsidian px-4 text-left text-sm text-bone outline-none focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
+          />
+        </label>
+        <label className="grid gap-2 text-xs font-semibold text-metal">
+          موضوع
+          <input
+            maxLength={220}
+            value={subject}
+            onChange={(event) => setSubject(event.target.value)}
+            className="min-h-12 rounded-xl border border-hairline bg-obsidian px-4 text-sm text-bone outline-none focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
+          />
+        </label>
+      </div>
+
+      <label className="mt-4 grid gap-2 text-xs font-semibold text-metal">
+        پیام
+        <textarea
+          required
+          minLength={10}
+          maxLength={5000}
+          rows={6}
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+          className="rounded-xl border border-hairline bg-obsidian px-4 py-3 text-sm leading-7 text-bone outline-none focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
+        />
+      </label>
+
+      <label className="sr-only" aria-hidden="true">
+        وب‌سایت
+        <input tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} />
+      </label>
+
+      <p className="mt-3 text-[11px] leading-6 text-mute">
+        حداقل یکی از شماره موبایل یا ایمیل را وارد کنید. پیام مستقیماً در Backend فروشگاه ثبت می‌شود.
+      </p>
+
+      <button
+        type="submit"
+        disabled={busy || !fullName.trim() || message.trim().length < 10 || (!mobile.trim() && !email.trim())}
+        className={`${CtaClasses("signal")} mt-5 disabled:cursor-not-allowed disabled:opacity-50`}
+      >
+        {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Send size={16} aria-hidden="true" />}
+        {busy ? "در حال ثبت…" : "ثبت پیام"}
+      </button>
+
+      {error ? (
+        <StatePanel className="mt-4" title="پیام ثبت نشد" tone="warning">
+          {error}
+        </StatePanel>
+      ) : null}
+      {reference ? (
+        <StatePanel className="mt-4" title="پیام با موفقیت ثبت شد" tone="success">
+          کد پیگیری داخلی درخواست: <span className="num" dir="ltr">{reference}</span>
+        </StatePanel>
+      ) : null}
+    </form>
   );
 }
