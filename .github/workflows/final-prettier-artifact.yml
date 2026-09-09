@@ -1,0 +1,64 @@
+name: Final Prettier Artifact
+
+on:
+  push:
+    branches:
+      - feature/final-technical-completion
+
+permissions:
+  contents: read
+
+jobs:
+  format-artifact:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Format exact Final Completion files
+        run: |
+          npx prettier --write \
+            src/components/lbb/AccountStorefrontSync.tsx \
+            src/components/lbb/home/CategoryGateway.tsx \
+            src/components/lbb/home/HeroNarrative.tsx \
+            src/components/lbb/home/ProductMoments.tsx \
+            src/components/lbb/InstagramStrip.tsx \
+            src/components/lbb/navigation/CatalogTaxonomyMenu.tsx \
+            src/components/lbb/ProductCard.tsx \
+            src/routes/contact.tsx \
+            src/routes/index.tsx \
+            src/routes/track-order.tsx
+      - name: Verify formatting
+        run: |
+          npx prettier --check \
+            src/components/lbb/AccountStorefrontSync.tsx \
+            src/components/lbb/home/CategoryGateway.tsx \
+            src/components/lbb/home/HeroNarrative.tsx \
+            src/components/lbb/home/ProductMoments.tsx \
+            src/components/lbb/InstagramStrip.tsx \
+            src/components/lbb/navigation/CatalogTaxonomyMenu.tsx \
+            src/components/lbb/ProductCard.tsx \
+            src/routes/contact.tsx \
+            src/routes/index.tsx \
+            src/routes/track-order.tsx
+      - name: Upload exact formatted sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-prettier-sources
+          path: |
+            src/components/lbb/AccountStorefrontSync.tsx
+            src/components/lbb/home/CategoryGateway.tsx
+            src/components/lbb/home/HeroNarrative.tsx
+            src/components/lbb/home/ProductMoments.tsx
+            src/components/lbb/InstagramStrip.tsx
+            src/components/lbb/navigation/CatalogTaxonomyMenu.tsx
+            src/components/lbb/ProductCard.tsx
+            src/routes/contact.tsx
+            src/routes/index.tsx
+            src/routes/track-order.tsx
+          if-no-files-found: error
+          retention-days: 1
