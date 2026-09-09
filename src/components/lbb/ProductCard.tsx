@@ -29,8 +29,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const { open: openQuickView } = useQuickView();
 
   const primaryImage = backend ? p.primaryImage : productImage(p.slug);
-  const mannequin =
-    backend && isUsableMannequinProfile(p.mannequin) ? p.mannequin : null;
+  const mannequin = backend && isUsableMannequinProfile(p.mannequin) ? p.mannequin : null;
   const name = p.name;
   const categoryLabel = backend ? p.categoryLabel : CATEGORIES[p.category].nameFa;
   const liked = has(p.slug);
@@ -96,33 +95,34 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     />
   );
 
-  const cardImage = showMannequin && mannequin ? (
-    <div className="product-card__media relative aspect-square overflow-hidden bg-white">
-      <StyleMannequin profile={mannequin} productName={name} priority={priority} />
-      {overlay}
-    </div>
-  ) : primaryImage ? (
-    <Frame
-      src={primaryImage}
-      alt={name}
-      ratio="1/1"
-      width={1024}
-      height={1280}
-      priority={priority}
-      zoom={false}
-      className="product-card__media bg-white"
-      imgClassName="object-contain p-4 sm:p-7"
-    >
-      {overlay}
-    </Frame>
-  ) : (
-    <div className="product-card__media relative aspect-square overflow-hidden bg-white">
-      <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">
-        تصویر تأییدشده برای این محصول منتشر نشده است.
+  const cardImage =
+    showMannequin && mannequin ? (
+      <div className="product-card__media relative aspect-square overflow-hidden bg-white">
+        <StyleMannequin profile={mannequin} productName={name} priority={priority} />
+        {overlay}
       </div>
-      {overlay}
-    </div>
-  );
+    ) : primaryImage ? (
+      <Frame
+        src={primaryImage}
+        alt={name}
+        ratio="1/1"
+        width={1024}
+        height={1280}
+        priority={priority}
+        zoom={false}
+        className="product-card__media bg-white"
+        imgClassName="object-contain p-4 sm:p-7"
+      >
+        {overlay}
+      </Frame>
+    ) : (
+      <div className="product-card__media relative aspect-square overflow-hidden bg-white">
+        <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">
+          تصویر تأییدشده برای این محصول منتشر نشده است.
+        </div>
+        {overlay}
+      </div>
+    );
 
   return (
     <article
@@ -315,9 +315,7 @@ function CardOverlay({
             onToggleMannequin();
           }}
           aria-label={
-            showMannequin
-              ? `بازگشت به تصویر ${p.name}`
-              : `نمایش ${p.name} روی مانکن دوبعدی`
+            showMannequin ? `بازگشت به تصویر ${p.name}` : `نمایش ${p.name} روی مانکن دوبعدی`
           }
           aria-pressed={showMannequin}
           className="absolute bottom-2 start-2 z-30 min-h-9 rounded-xl border border-black/10 bg-white/90 px-3 text-[10px] font-black text-obsidian shadow-raised backdrop-blur transition-colors hover:bg-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal motion-reduce:transition-none"
