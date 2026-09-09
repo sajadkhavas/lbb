@@ -1,21 +1,14 @@
 import { useEffect, useRef } from "react";
-
-const ITEMS = [
-  "ال‌بی‌بی",
-  "پوشاک خیابانی",
-  "تیشرت",
-  "شلوار",
-  "کتونی",
-  "جوراب",
-  "کرج",
-  "پاساژ مهستان",
-];
+import { useStorefrontControl } from "@/lib/storefront-control";
 
 export function TickerStrip() {
+  const { ticker } = useStorefrontControl();
   const trackRef = useRef<HTMLDivElement>(null);
+  if (ticker.length === 0) return null;
+
   const row = (
     <div className="flex shrink-0 items-center">
-      {ITEMS.map((text, index) => (
+      {ticker.map((text, index) => (
         <span
           key={`${text}-${index}`}
           className="tech flex items-center gap-6 whitespace-nowrap px-6 text-obsidian"
@@ -34,8 +27,6 @@ export function TickerStrip() {
     if (!track || typeof window === "undefined") return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    // It is directly below the hero and must already be alive on the first paint.
-    // The observer only pauses it later when it is genuinely far off-screen.
     let inViewport = true;
 
     const updatePlayback = () => {
