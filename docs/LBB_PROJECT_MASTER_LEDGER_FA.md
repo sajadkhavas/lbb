@@ -1,378 +1,202 @@
 # LBB — Project Master Ledger (FA)
 
-**Authoritative project ledger / مرجع واحد ادامه پروژه**
-
+**Authoritative continuation ledger / مرجع واحد ادامه پروژه**  
 Created: `2026-09-09`
 
-این فایل بعد از هر checkpoint مهم، PR/CI/Merge/Deploy/Incident/Acceptance و تغییر
-`EXACT NEXT` به‌روزرسانی می‌شود.
-
-در صورت تعارض، Runtime evidence و GitHub exact SHA/PR/CI جدیدتر بر متن قدیمی مقدم‌اند.
+در صورت تعارض، Runtime evidence و GitHub exact SHA/PR/CI جدیدتر بر متن قدیمی مقدم‌اند. بعد از هر checkpoint مهم، SHA/PR/CI/Runtime/Data mutation/Commerce state/EXACT NEXT در همین فایل ثبت می‌شود.
 
 ---
 
-## 1) Repositories / Runtime
+## 1) Current accepted identities
 
 ### Frontend
-
 - Repo: `sajadkhavas/lbb`
-- Production URL: `https://lbbclo.com`
 - Operational branch: `fix/lbb-local-boutique-homepage`
-- Current Production SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
-- Current Product UX hotfix branch: `hotfix/final-product-ux`
-- Current Product UX PR: `#88`
-- PR #88 state at this checkpoint: `DRAFT / OPEN / NOT MERGED / NOT DEPLOYED`
+- Production URL: `https://lbbclo.com`
+- Current Production SHA before PR #88 deployment: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- Current Product UX branch: `hotfix/final-product-ux`
+- Product UX PR: `#88`
+- PR #88 accepted implementation head before base reconciliation: `2876eb83ed7a58ba937f8514d26e090bbd28ae05`
 
 ### Backend
-
 - Repo: `sajadkhavas/lbb-backend`
 - API/Admin: `https://api.lbbclo.com`
 - Current Production SHA: `e69637548de98681830308291a60777068350bfa`
-- Backend code change in PR #88: `NO`
-- API contract: `2026-09-06-p3-storefront-v1`
+- Current public API contract: `2026-09-06-p3-storefront-v1`
 
 ### Commerce lock
+- `checkout.enabled=false`
+- `payment.enabled=false`
+- `provider=disabled`
 
-- Checkout: `false`
-- Payment: `false`
-- Provider: `disabled`
-
-PR #88 must not change these values.
+These values must stay fail-closed until the separate external activation gates.
 
 ---
 
-## 2) Closed / DO NOT REDO
+## 2) Closed / DO NOT REDO without real drift
 
-Do not repeat these without a real drift signal:
-
-- F0–F20 Frontend foundation/design/catalog/commerce/editorial/performance/a11y/RTL/SEO
+- F0–F20 frontend foundation/design/catalog/commerce/editorial/performance/a11y/RTL/SEO
 - P1.2 / P1.3 / P1.4 SEO/content/freeze
 - P2 Backend final audit/freeze
 - P3 Live Integration
-- P4/P4-ACT release architecture and immutable `releases/current/shared`
-- Nginx / TLS / Cloudflare acceptance
-- Node SSR / PHP-FPM / MySQL / health / readiness
-- persistent media/shared storage + permissions
-- Admin login/role/navigation
-- Admin dashboard repair + owner browser UAT
-- Shipping production contract + Admin configuration
-- Admin Catalog/Media/Inventory UAT
-- Admin Owner Product UAT
-- Catalog provenance audit
-- Content/legal and SEO final gates
-- FC1 Backend PR #27 and Frontend PR #86 code implementation
-- Final Technical Completion Backend PR #28 and Frontend PR #87 code implementation
-- previously applied additive Backend migrations from the final cutover
+- P4/P4-ACT immutable `releases/current/shared` architecture
+- Nginx/TLS/Cloudflare baseline
+- Node SSR/PHP-FPM/MySQL health/readiness baseline
+- persistent media/shared storage/permissions
+- Admin login/role/navigation/UAT
+- Shipping production contract/Admin controls
+- catalog provenance/content/legal/SEO historical gates
+- FC1 Backend PR #27 / Frontend PR #86
+- Final Technical Completion Backend PR #28 / Frontend PR #87
+- already-applied additive Backend migrations listed below
 
-Existing migrations must not be rolled back or intentionally re-run for PR #88.
+Never intentionally re-run or roll back already accepted additive migrations only to repeat evidence.
 
 ---
 
-## 3) Current Production business truth
-
-- Current eight catalog records are legacy/sample Frontend-origin records.
-- They are not accepted as final employer merchandise.
-- Real employer products must be entered and reviewed through Admin.
-- Samples should be Draft/Inactive rather than destructively deleted by default.
-- Only categories with real published products should be public/indexable.
-- Header/category hierarchy is Admin-driven.
-- Home category/Hero/social surfaces are Backend/Admin controlled.
-- Checkout and Payment remain OFF until separate external activation gates.
-
----
-
-## 4) Final Technical Completion already merged
+## 3) Final Technical Completion already merged/deployed
 
 ### Frontend PR #87
+- accepted source: `7435049fcc2336fc744ff6d8d494a048705be5fd`
+- merge/runtime SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- Quality #459 PASS
+- P3 Live Integration #103 PASS
+- PWA #55 PASS
+- review threads 0
 
-- Accepted source head: `7435049fcc2336fc744ff6d8d494a048705be5fd`
-- Merge SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
-- Current Production uses this exact Frontend merge SHA.
-
-Implemented scope included:
-
-- Admin-backed taxonomy/navigation
-- Home categories and Hero controls
-- live latest products
-- verified preview images
-- Contact and Track Order wiring
-- account Cart/Wishlist synchronization
-- Admin Lookbook/social hydration
-- fail-closed live behavior without prototype leakage
+Implemented: Admin-backed taxonomy/navigation, Home category/Hero hydration, latest products, verified preview images, Contact, Track Order, account Cart/Wishlist sync, Lookbook/social hydration, no prototype leakage, FC1 mannequin card integration.
 
 ### Backend PR #28
+- accepted source: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
+- merge/runtime SHA: `e69637548de98681830308291a60777068350bfa`
 
-- Accepted source head: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
-- Merge SHA: `e69637548de98681830308291a60777068350bfa`
-- Current Production uses this exact Backend merge SHA.
-
-Implemented scope included:
-
-- three-level category hierarchy
-- Admin parent/header/home/icon controls
-- verified `previewImages`
-- inquiry/contact API
-- privacy-safe public order tracking
-- account Cart/Wishlist persistence contracts
-- Launch Readiness/Admin control surfaces
+Implemented: three-level category hierarchy, Admin parent/header/home/icon controls, verified `previewImages`, Inquiry/Contact API, privacy-safe Track Order, account storefront state, Launch Readiness/Admin surfaces.
 
 ---
 
-## 5) Production cutover history — DO NOT REPEAT
+## 4) Production schema/cutover truth
 
-The first final cutover applied three additive migrations and later rolled application releases back.
-The schema intentionally remained forward-migrated because the migrations are additive and
-backward compatible.
-
-Already-applied migrations:
-
+Already Ran in Production:
 - `2026_09_09_020000_add_style_mannequin_profile_to_products_table.php`
 - `2026_09_09_120000_extend_categories_for_storefront_taxonomy.php`
 - `2026_09_09_123000_create_customer_storefront_state_tables.php`
 
 Cutover backup:
+`/var/www/lbb/backend/shared/deploy-backups/final-cutover-20260909T135054Z/lbb-pre-final-cutover-20260909T135054Z.sql.gz`
 
-- file:
-  `/var/www/lbb/backend/shared/deploy-backups/final-cutover-20260909T135054Z/lbb-pre-final-cutover-20260909T135054Z.sql.gz`
-- SHA-256:
-  `e38eaa11bf2d5c9d1227dd6cf54db0fa8fc00eb41830e0fbec12d9029b69e442`
+SHA256:
+`e38eaa11bf2d5c9d1227dd6cf54db0fa8fc00eb41830e0fbec12d9029b69e442`
 
-The final successful Frontend deployment required an explicit Nitro `node-server` build.
-The earlier failure was classified as `FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH`.
+C1 first activation failed because the FE artifact was built with Nitro `cloudflare-module` for a Node/systemd runtime. Classification: `FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH`.
 
-Current active Production after recovery:
+C1-R2 then stopped pre-build on Git dubious ownership. Classification: `GIT_SAFE_DIRECTORY_GUARD / PRECHECK_ONLY`; no global safe.directory change was accepted.
 
-- Frontend: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
-- Backend: `e69637548de98681830308291a60777068350bfa`
+C1-R2A used scoped `git -c safe.directory=...`, explicit `NITRO_PRESET=node-server`, isolated port 5187 acceptance, and bounded activation. Final active runtime became FE `d5014061...` / BE `e6963754...`; migrations were not repeated and Commerce stayed fail-closed.
 
 ---
 
-## 6) Owner-required Product UX recovery
+## 5) Current business truth
 
-After live review, Final Technical Completion was accepted as technically deployed but not as final
-Product UX acceptance.
-
-Required bounded recovery:
-
-1. restore Quick View for live Backend product cards;
-2. preserve mobile card swipe before PDP navigation;
-3. prevent a real swipe from accidentally opening the PDP;
-4. preserve desktop multi-image card preview;
-5. show Backend size labels on product cards again;
-6. make card product media edge-to-edge/full-width;
-7. preserve the FC1 2D mannequin implementation;
-8. prove mannequin visibility later with valid Admin-backed product data;
-9. mildly round PDP product gallery corners;
-10. polish Desktop PDP composition;
-11. preserve the currently-good Mobile PDP behavior.
-
-Hard rule:
-
-`MOBILE_CURRENT_GOOD_UX = PRESERVE`
+- Existing eight catalog rows are legacy/sample records and are not accepted as final employer merchandise.
+- Real employer products must be entered/reviewed through Admin.
+- Samples should stay Draft/Inactive by default rather than be destructively deleted.
+- Only categories with real published products should become public/indexable.
+- Store-facing configurable content should be Backend/Admin-driven.
 
 ---
 
-## 7) PR #88 — Final Product UX Hotfix
+## 6) PR #88 — Final Product UX Hotfix
 
-Branch:
+Owner-required bounded recovery:
+1. restore live Backend Quick View / Eye preview;
+2. show real Backend product detail inside Quick View;
+3. restore Backend size labels on cards;
+4. preserve mobile swipe before PDP navigation and suppress accidental navigation after a swipe;
+5. preserve desktop multi-image preview;
+6. make card media full-width;
+7. preserve FC1 2D mannequin support;
+8. mildly round PDP gallery corners;
+9. improve desktop PDP composition without regressing mobile.
 
-`hotfix/final-product-ux`
+Important implementation commits include:
+- `c521db486741b87f500f90a64619aa56c91f0b2c` sizes
+- `d804c64cb15375e89c5d0ccadd3ecd241e66842a` safe Quick View target model
+- `d67b66805abd7afe469bf1bc018fa1b07c6aeaf7` Backend Quick View/detail
+- `584a0ccb8960a46849a71e51a21553d85530489e` Eye/full-width media/mobile swipe guard
+- `4009e4d1bab2c46fff106aeb22c65a3538faa2f8` Backend Quick View dispatch
+- `ee07c56b806b836980c51756f18d8e18e621b38a` PDP gallery framing
+- `9ebc7500af264e93836af4dc46b09e44ca398df1` desktop purchase panel
+- `ab5fc72ba66b8aae8078572dd06411ba16e45fd0` desktop identity hierarchy
+- `85eb046ee818f6790f6d2c9ac235dbd7be743820` focused acceptance tests
+- `f156829c7bedb343cf2bc2e848ab99a5d66805e4` official-reference decision record
 
-PR:
+### Exact acceptance evidence
+- Visual baseline updater run `34374342196`: PASS.
+- Guard proved exactly 14 expected Playwright PNG baselines changed; no Source/Config delta.
+- Exact Final Product UX Gate run `34374653797`: PASS.
+- `exact-quality`: PASS, including complete repository quality suite and focused Product UX acceptance.
+- `exact-p3-contract`: PASS, including format/lint/typecheck/P3 invariants.
+- PR review/comments at acceptance: 0.
+- PR moved from Draft to Ready.
+- No Production/DB/schema/business/commerce mutation occurred during PR #88 CI remediation.
 
-`#88 — Hotfix: restore final product UX on live backend`
-
-Production baseline:
-
-`d5014061c1a933fd4078acc38b8fa21c5c8f628c`
-
-### Registered implementation commits before formatting remediation
-
-- `c521db486741b87f500f90a64619aa56c91f0b2c`
-  - restore Backend size labels on product cards;
-  - card size chips remain informational at summary level.
-- `d804c64cb15375e89c5d0ccadd3ecd241e66842a`
-  - Quick View context accepts Prototype or Backend targets safely.
-- `d67b66805abd7afe469bf1bc018fa1b07c6aeaf7`
-  - dedicated Backend Quick View with real Product Detail fetching and exact variant state.
-- `584a0ccb8960a46849a71e51a21553d85530489e`
-  - restore Backend Preview/Eye action;
-  - full-width 4:5 card media;
-  - mobile swipe click-suppression guard.
-- `4009e4d1bab2c46fff106aeb22c65a3538faa2f8`
-  - dispatch Backend targets to the new live Quick View;
-  - preserve legacy Prototype Quick View.
-- `ee07c56b806b836980c51756f18d8e18e621b38a`
-  - soften PDP gallery/thumb corners and desktop gallery framing.
-- `9ebc7500af264e93836af4dc46b09e44ca398df1`
-  - Desktop-only purchase panel surface/sticky composition.
-- `ab5fc72ba66b8aae8078572dd06411ba16e45fd0`
-  - Desktop-only product identity hierarchy polish.
-- `85eb046ee818f6790f6d2c9ac235dbd7be743820`
-  - focused Product UX contract/layout tests.
-- `f156829c7bedb343cf2bc2e848ab99a5d66805e4`
-  - official-reference implementation decision document.
-
-### Official reference evidence
-
-Tracked document:
-
-`docs/FINAL_PRODUCT_UX_HOTFIX_RESEARCH.md`
-
-It records the official Tailwind CSS, TanStack Query, TanStack Router, W3C WAI-ARIA and Playwright
-documentation used for the hotfix decisions.
-
-### CI incident before formatting remediation
-
-At head `ee07c56b806b836980c51756f18d8e18e621b38a`:
-
-- Quality Gates `#465`: `FAIL`
-- P3 Live Integration `#109`: `FAIL`
-- failure reached `prettier --check` before build/typecheck/e2e;
-- Quality log identified formatting drift in:
-  - `docs/LBB_PROJECT_MASTER_LEDGER_FA.md`
-  - `src/components/lbb/BackendProductQuickView.tsx`
-
-Classification:
-
-`FORMAT_GATE_ONLY / LOGIC_GATES_NOT_REACHED`
-
-This is not accepted as green implementation evidence.
-
-### Mutation state
-
-- Production mutation: `NO`
-- Backend code mutation: `NO`
-- Database/schema mutation: `NO`
-- Business/product data mutation: `NO`
-- Checkout/payment mutation: `NO`
+### Base reconciliation
+Operational branch contains four post-PR87 documentation-only commits; compared with the PR baseline, their only changed file is this Ledger. Source code has no base conflict. Reconciliation therefore preserves the Product UX tree and the newer operational history in one two-parent merge commit before PR #88 merge.
 
 ---
 
-## 8) PR #88 acceptance requirements
+## 7) Final owner request — last engineering pass
 
-Do not merge PR #88 until all are true:
+After PR #88 closes, perform one consolidated Backend/Frontend control audit before final server handoff:
 
-- exact head Prettier PASS;
-- lint PASS;
-- build PASS;
-- typecheck PASS;
-- Quality Gates PASS;
-- P3 Live Integration PASS;
-- focused Product UX tests PASS;
-- existing accessibility/interaction suites PASS;
-- intentional visual snapshot changes are reviewed and bounded;
-- review threads = 0;
-- PR is no longer Draft;
-- exact accepted head is recorded before merge.
+- inventory every user-visible business/content surface in Frontend;
+- classify each as live Backend/Admin controlled, intentionally static application UI, or remaining hardcoded business content;
+- create/fix Backend models/settings/Admin resources/API fields for every remaining editable business surface;
+- wire Frontend to the Backend contract with fail-closed behavior and no prototype/sample leakage;
+- ensure contact/store identity, menus, banners/Hero, categories, social/Lookbook, legal/business copy, configurable section visibility/order, merchandising selections and other owner-managed values can be edited without source changes where appropriate;
+- keep structural UI labels and security-critical behavior in code when they are application semantics rather than business content;
+- add contract/feature/UI tests and official-reference documentation;
+- do not activate Checkout/Payment/Kavenegar/WebPush without their separate real credentials/acceptance.
 
-Do not deploy until the accepted merge SHA exists.
+The completion criterion is: after this pass, normal store/business maintenance can be performed from Admin rather than by editing Frontend source.
 
 ---
 
-## 9) Live acceptance after PR #88 merge
+## 8) External blockers, not ordinary code incompleteness
 
-The immutable Frontend release must be built with explicit Node runtime preset.
-Backend remains unchanged unless a new, evidenced Backend defect is discovered.
-
-Required live checks:
-
-- Backend Quick View Eye/Preview visible and functional;
-- real Product Detail data visible in Quick View;
-- Backend size labels visible on product cards;
-- mobile multi-image swipe works before opening PDP;
-- swipe does not accidentally navigate;
-- normal tap still navigates;
-- card media is full-width;
-- PDP corners are mildly rounded;
-- Desktop PDP hierarchy/layout is polished;
-- Mobile PDP remains correct;
-- one controlled Admin-configured product proves 2D mannequin visibility when valid data exists;
-- Checkout/Payment remain OFF.
-
-If Production has no product with multiple verified images or no valid mannequin profile, those are
-business-data acceptance prerequisites and must not be falsely reported as code PASS.
+- Kavenegar production account/template/credentials + real OTP activation test
+- Zarinpal merchant approval/credentials + controlled payment activation
+- Web Push may remain disabled when VAPID is absent
 
 ---
 
-## 10) Remaining path to final handoff
+## 9) Mandatory update protocol
 
-1. close PR #88 formatting/build/typecheck/test gates;
-2. review exact diff and zero review threads;
-3. merge PR #88 with exact-head lock;
-4. immutable Frontend Production release and narrow live Product UX acceptance;
-5. final GitHub reconciliation and stale-state cleanup;
-6. enter real employer data through Admin;
-7. real-data acceptance across Admin/API/Frontend;
-8. fresh final MySQL backup + checksum + disposable restore;
-9. exactly one final real server reboot + post-reboot acceptance;
-10. final freeze/tag/handoff and close Frontend #78 / Backend #21.
+At every important checkpoint record:
+- date/time
+- START/END/accepted SHA
+- PR/Issue
+- CI/run/evidence
+- Production runtime identity if changed
+- schema/business mutation YES/NO
+- Commerce state
+- failure classification if any
+- DO NOT REDO additions
+- `EXACT NEXT`
 
----
-
-## 11) External blockers
-
-These are not normal code incompleteness:
-
-- Kavenegar production credentials/template/account and real OTP activation test;
-- Zarinpal merchant approval/credentials and controlled payment activation;
-- Web Push may remain disabled if VAPID credentials are not supplied.
+Never mark a phase Done without exact evidence.
 
 ---
 
-## 12) Mandatory update protocol
+## 10) EXACT NEXT
 
-After every important action, register at least:
-
-- date/time;
-- gate/phase/incident;
-- START SHA(s);
-- END/accepted SHA(s);
-- PR/Issue numbers;
-- CI workflow/run result;
-- Production runtime identity when changed;
-- data/schema/business mutation YES/NO;
-- Commerce state;
-- evidence/hash when applicable;
-- failure classification;
-- DO NOT REDO additions;
-- `EXACT NEXT`.
-
-Never register a phase only with «انجام شد».
-SHA/PR/CI/evidence are required.
-
----
-
-## 13) Change Log
-
-### 2026-09-09 — Master Ledger established
-
-- authoritative ledger created;
-- historical Production and closure truth registered.
-
-### 2026-09-09 — Final Technical Completion merged and deployed
-
-- Frontend Production: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`;
-- Backend Production: `e69637548de98681830308291a60777068350bfa`;
-- explicit Node server rebuild solved the Frontend runtime preset mismatch;
-- Checkout/Payment remained fail-closed.
-
-### 2026-09-09 — Product UX live-review gap identified
-
-- Backend Quick View not wired to live cards;
-- card sizes hidden for Backend cards despite summary data;
-- swipe/mannequin required real live-data acceptance;
-- card/PDP visual polish requested by owner;
-- Final Technical Completion retained as technical baseline, not final UX acceptance.
-
-### 2026-09-09 — PR #88 implementation checkpoint
-
-- branch: `hotfix/final-product-ux`;
-- Production baseline: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`;
-- Backend Production remains `e69637548de98681830308291a60777068350bfa`;
-- official-reference document added;
-- focused Hotfix tests added;
-- no Production/DB/business/commerce mutation;
-- current CI blocker classification: `FORMAT_GATE_ONLY / LOGIC_GATES_NOT_REACHED`;
-- **EXACT NEXT:** apply repository-exact Prettier output, remove temporary formatting mechanism,
-  then obtain fresh exact-head Quality/P3 results before reviewing visual snapshots and merge readiness.
+1. finish two-parent reconciliation of PR #88 with operational branch;
+2. re-run exact-head Product UX gate if the accepted tree/head changes;
+3. merge PR #88 with `expected_head_sha` lock;
+4. start the consolidated final Backend-driven/Admin-control audit on fresh FE/BE branches from the accepted operational heads;
+5. complete all real gaps in Backend + Frontend + tests/docs;
+6. run exact-head CI on both repos;
+7. deploy the final combined release once, then perform live real-data/admin acceptance;
+8. fresh final DB backup + checksum + disposable restore;
+9. exactly one final real reboot + post-reboot acceptance;
+10. freeze/tag/handoff and close FE #78 / BE #21 when all evidence is green.
