@@ -15,7 +15,7 @@ export function CategoryGateway({
 }: {
   liveCategories?: StorefrontCategoryDto[] | null;
 }) {
-  const { source, home } = useStorefrontControl();
+  const { source, home, sectionCopy } = useStorefrontControl();
   const tilt = (event: PointerEvent<HTMLAnchorElement>) => {
     if (event.pointerType === "touch") return;
     const box = event.currentTarget.getBoundingClientRect();
@@ -31,6 +31,7 @@ export function CategoryGateway({
   };
 
   if (source === "live") {
+    const copy = sectionCopy.categories;
     const order = new Map(home.categoryOrder.map((slug, index) => [slug, index]));
     const categories = [...(liveCategories ?? [])]
       .filter((category) => category.showOnHome === true)
@@ -50,12 +51,12 @@ export function CategoryGateway({
         <Shell>
           <SectionHead
             index="01"
-            label="دسته‌بندی محصولات"
-            title={<span id="home-categories-title">دنبال چی می‌گردی؟</span>}
-            lede="دسته‌هایی که مدیر فروشگاه برای صفحه اصلی فعال کرده، مستقیماً از کاتالوگ زنده نمایش داده می‌شوند."
+            label={copy.label}
+            title={<span id="home-categories-title">{copy.title}</span>}
+            lede={copy.lede}
             action={
               <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
-                همه محصولات
+                {copy.actionLabel}
                 <ArrowUpLeft size={15} aria-hidden="true" />
               </Link>
             }

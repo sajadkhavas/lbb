@@ -16,11 +16,12 @@ function isExternalHref(value: string) {
 }
 
 export function InstagramStrip({ liveItems }: { liveItems?: StorefrontLookDto[] | null }) {
-  const { source, brand } = useStorefrontControl();
+  const { source, brand, sectionCopy } = useStorefrontControl();
 
   if (source === "live") {
     const items = liveItems ?? [];
     if (items.length === 0) return null;
+    const copy = sectionCopy.instagram;
 
     return (
       <section
@@ -75,13 +76,13 @@ export function InstagramStrip({ liveItems }: { liveItems?: StorefrontLookDto[] 
               rel="noopener noreferrer"
               className="tap-target inline-flex items-center justify-center rounded-xl border border-white/30 px-8 py-3 text-xs font-bold uppercase tracking-[0.25em] text-white transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
             >
-              دنبال ما در اینستاگرام
+              {copy.followCta}
             </a>
             <a
               href="/lookbook"
               className="tap-target inline-flex items-center justify-center rounded-xl border border-white/15 px-8 py-3 text-xs font-bold text-white/80 transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
             >
-              مشاهده لوک‌بوک
+              {copy.lookbookCta}
             </a>
           </div>
         </div>

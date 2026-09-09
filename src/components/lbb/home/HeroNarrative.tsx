@@ -21,7 +21,7 @@ export function HeroNarrative({
   heroProduct?: LiveHeroProduct | null;
   liveCategories?: StorefrontCategoryDto[] | null;
 }) {
-  const { source, brand, copy, home } = useStorefrontControl();
+  const { source, brand, copy, home, sectionCopy } = useStorefrontControl();
   const prototypeProduct = productBySlug(home.heroProductSlug);
   const prototypeCategoryOrder = home.categoryOrder.filter(
     (slug): slug is keyof typeof CATEGORIES => slug in CATEGORIES,
@@ -50,6 +50,7 @@ export function HeroNarrative({
       return a - b || left.name.localeCompare(right.name, "fa");
     })
     .slice(0, 8);
+  const liveHeroCopy = sectionCopy.hero;
 
   return (
     <section
@@ -92,12 +93,16 @@ export function HeroNarrative({
             </div>
 
             <p className="mt-4 max-w-[55ch] text-xs leading-6 text-mute">
-              قیمت، رنگ، سایزهای موجود و تن‌خور هر محصول را قبل از انتخاب بررسی کن.
+              {source === "live"
+                ? liveHeroCopy.helperText
+                : "قیمت، رنگ، سایزهای موجود و تن‌خور هر محصول را قبل از انتخاب بررسی کن."}
             </p>
           </div>
 
           <div className="mt-10 border-t border-hairline pt-6">
-            <p className="mb-4 text-xs font-bold text-metal">دسته موردنظرت را سریع پیدا کن:</p>
+            <p className="mb-4 text-xs font-bold text-metal">
+              {source === "live" ? liveHeroCopy.categoryPrompt : "دسته موردنظرت را سریع پیدا کن:"}
+            </p>
             <nav aria-label="دسترسی سریع به دسته‌های محصول" className="min-w-0">
               <ul className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {source === "live"
@@ -212,7 +217,7 @@ export function HeroNarrative({
             href="#home-categories"
             className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline-strong bg-obsidian/85 px-3 text-xs font-bold text-bone backdrop-blur transition-colors hover:border-signal hover:text-signal md:left-8 md:top-8"
           >
-            دیدن دسته‌بندی‌ها
+            {source === "live" ? liveHeroCopy.categoryAnchorLabel : "دیدن دسته‌بندی‌ها"}
             <ArrowDownLeft size={15} aria-hidden="true" />
           </a>
         </div>

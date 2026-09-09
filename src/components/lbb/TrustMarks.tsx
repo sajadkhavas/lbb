@@ -1,13 +1,28 @@
 import { ExternalLink } from "lucide-react";
-import { STORE_SETTINGS, getPublicEnamad, type EnamadPublicSettings } from "@/lib/store-settings";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
-export function TrustMarks({
-  placement = "footer",
-}: {
-  placement?: EnamadPublicSettings["displayLocation"];
-}) {
-  const enamad = getPublicEnamad(STORE_SETTINGS, placement);
-  if (!enamad || !enamad.verificationUrl || !enamad.badgeImageUrl || !enamad.identifier)
+function isHttpsUrl(value: string | null): value is string {
+  if (!value) return false;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function TrustMarks({ placement = "footer" }: { placement?: "footer" | "trust-page" }) {
+  const { policies } = useStorefrontControl();
+  const enamad = policies.enamad;
+  const visible = Boolean(
+    enamad.enabled &&
+    enamad.verification === "verified" &&
+    enamad.identifier?.trim() &&
+    isHttpsUrl(enamad.verificationUrl) &&
+    isHttpsUrl(enamad.badgeImageUrl) &&
+    enamad.displayLocation === placement,
+  );
+
+  if (!visible || !enamad.verificationUrl || !enamad.badgeImageUrl || !enamad.identifier)
     return null;
 
   return (

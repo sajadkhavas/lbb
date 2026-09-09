@@ -232,38 +232,32 @@ test("shipping, contact, legal and privacy routes are truth-safe at mobile width
     }),
   ).toBeVisible();
 
-  const shippingSection = page.locator('section[aria-labelledby="shipping-heading"]');
-
+  const shippingSection = page.locator('section[aria-labelledby="shipping-title"]');
   await expect(shippingSection).toBeVisible();
+  await expect(
+    shippingSection.getByText("روش‌های ارسال در حالت نمونه نمایش عملیاتی ندارند"),
+  ).toBeVisible();
 
   for (const method of [
     "ارسال فوری — اسنپ / اسنپ‌باکس",
     "تیپاکس — پس‌کرایه",
     "دکاپست — پس‌کرایه",
+    "پست پیشتاز",
   ]) {
     await expect(
       shippingSection.getByText(method, {
         exact: true,
       }),
-    ).toBeVisible();
+    ).toHaveCount(0);
   }
 
-  await expect(
-    shippingSection.getByText("پست پیشتاز", {
-      exact: true,
-    }),
-  ).toHaveCount(0);
-
-  const returnsSection = page.locator('section[aria-labelledby="returns-heading"]');
-
+  const returnsSection = page.locator('section[aria-labelledby="returns-title"]');
   await expect(returnsSection).toBeVisible();
-
   await expect(
-    returnsSection.getByText("سیاست بازگشت در حال بررسی است", {
+    returnsSection.getByText("سیاست مرجوعی در حالت نمونه مرجع تجاری نیست", {
       exact: true,
     }),
   ).toBeVisible();
-
   await expect(page.getByText(/۷ روز ضمانت بازگشت/)).toHaveCount(0);
 
   await expectNoHorizontalOverflow(page);

@@ -50,7 +50,8 @@ test("D2 prototype fallbacks remain truthful and accessible", async ({ page }) =
 
   await page.goto("/terms", { waitUntil: "networkidle" });
   await expect(page.getByRole("heading", { level: 1, name: "شرایط استفاده" })).toBeVisible();
-  await expect(page.getByText(/۴۸ ساعت، حقوق قانونی را محدود نمی‌کند/)).toBeVisible();
+  await expect(page.getByText("شرایط تجاری فروش هنوز از پنل منتشر نشده است")).toBeVisible();
+  await expect(page.getByText(/۴۸ ساعت، حقوق قانونی را محدود نمی‌کند/)).toHaveCount(0);
 
   await page.goto("/privacy", { waitUntil: "networkidle" });
   await expect(page.getByRole("heading", { level: 1, name: "حریم خصوصی" })).toBeVisible();
@@ -59,11 +60,12 @@ test("D2 prototype fallbacks remain truthful and accessible", async ({ page }) =
   await expect(
     page.getByRole("heading", { level: 1, name: "ارسال، تعویض و مرجوعی" }),
   ).toBeVisible();
-  await expect(page.getByText("ارسال فوری — اسنپ / اسنپ‌باکس", { exact: true })).toBeVisible();
-  await expect(page.getByText("تیپاکس — پس‌کرایه", { exact: true })).toBeVisible();
-  await expect(page.getByText("دکاپست — پس‌کرایه", { exact: true })).toBeVisible();
+  await expect(page.getByText("روش‌های ارسال در حالت نمونه نمایش عملیاتی ندارند")).toBeVisible();
+  await expect(page.getByText("سیاست مرجوعی در حالت نمونه مرجع تجاری نیست")).toBeVisible();
+  await expect(page.getByText("ارسال فوری — اسنپ / اسنپ‌باکس", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("تیپاکس — پس‌کرایه", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("دکاپست — پس‌کرایه", { exact: true })).toHaveCount(0);
   await expect(page.getByText("پست پیشتاز", { exact: true })).toHaveCount(0);
-  await expect(page.getByText(/حداکثر تا ۴۸ ساعت پس از تحویل/)).toBeVisible();
 
   await page.goto("/faq", { waitUntil: "networkidle" });
   await expect(

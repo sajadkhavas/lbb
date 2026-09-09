@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
@@ -11,14 +10,9 @@ import {
   StatusTag,
   TechLabel,
 } from "@/components/lbb/ui/primitives";
-import {
-  STORE_SETTINGS,
-  canPublishReturns,
-  canPublishShipping,
-  getPublicPaymentSettings,
-} from "@/lib/store-settings";
 import { contentParagraphs, resolveOptionalStorefrontPage } from "@/lib/content-page";
 import { pageMeta, canonical, breadcrumbLd, ROBOTS } from "@/lib/site";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
 const TITLE = "شرایط استفاده | LBB";
 const DESC =
@@ -31,7 +25,6 @@ export const Route = createFileRoute("/terms")({
     const title = page?.metaTitle || (page ? `${page.title} | LBB` : TITLE);
     const description = page?.metaDescription || page?.excerpt || DESC;
     const breadcrumbName = page?.title || "شرایط استفاده";
-
     return {
       meta: pageMeta({
         title,
@@ -56,18 +49,8 @@ export const Route = createFileRoute("/terms")({
   component: TermsPage,
 });
 
-function Section({ title, children, id }: { title: string; children: ReactNode; id?: string }) {
-  return (
-    <section id={id} className="scroll-mt-28 border-t border-hairline pt-7">
-      <h2 className="text-xl font-bold text-bone">{title}</h2>
-      <div className="mt-3 space-y-3 text-sm leading-8 text-metal">{children}</div>
-    </section>
-  );
-}
-
 function ManagedTerms({ content }: { content: string | null }) {
   const paragraphs = contentParagraphs(content);
-
   return (
     <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
       <TechLabel tone="signal">ADMIN / PUBLISHED POLICY</TechLabel>
@@ -86,16 +69,18 @@ function ManagedTerms({ content }: { content: string | null }) {
 
 function TermsPage() {
   const page = Route.useLoaderData();
-  const { payment } = STORE_SETTINGS;
-  const shippingPublished = canPublishShipping();
-  const returnsPublished = canPublishReturns();
-  const publicPayment = getPublicPaymentSettings();
+  const { source, runtime, policies } = useStorefrontControl();
   const publishedFromAdmin = Boolean(page);
+  const returnsPublished = policies.returns.enabled && policies.returns.verification === "verified";
 
   return (
     <>
       <Navbar />
-      <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16">
+      <main
+        dir="rtl"
+        className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16"
+        data-storefront-source={source}
+      >
         <div className="hairline-b">
           <Shell className="py-3">
             <Breadcrumb
@@ -109,12 +94,12 @@ function TermsPage() {
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <h1 className="text-display-2 text-bone">{page?.title || "شرایط استفاده"}</h1>
             <StatusTag tone={publishedFromAdmin ? "success" : "warning"}>
-              {publishedFromAdmin ? "منتشرشده از پنل" : "شرایط تجاری نهایی منتشر نشده"}
+              {publishedFromAdmin ? "منتشرشده از پنل" : "شرایط نهایی منتشر نشده"}
             </StatusTag>
           </div>
           <p className="mt-4 max-w-[68ch] text-sm leading-8 text-metal">
             {page?.excerpt ||
-              "تا زمانی که نسخه نهایی از پنل مدیریت منتشر نشود، این صفحه فقط مرزهای امن و فعلی استفاده از سایت را توضیح می‌دهد و شرط تجاری جدیدی اختراع نمی‌کند."}
+              "تا انتشار نسخه نهایی از پنل، Frontend شرط تجاری، مهلت، هزینه یا تعهد جدیدی ایجاد نمی‌کند."}
           </p>
         </header>
 
@@ -122,72 +107,47 @@ function TermsPage() {
           {page ? (
             <ManagedTerms content={page.content} />
           ) : (
-            <>
-              <StatePanel title="شرایط تجاری فروش هنوز از پنل منتشر نشده است" tone="warning">
-                نبودن نسخه منتشرشده به معنی وجود مهلت، هزینه، روش پرداخت یا تعهد پیش‌فرض نیست.
-              </StatePanel>
-
-              <StatePanel
-                className="mt-4"
-                title="مهلت ۴۸ ساعت، حقوق قانونی را محدود نمی‌کند"
-                tone="info"
-              >
-                درخواست LBB برای اعلام سریع مغایرت با عکس یا مشخصات، ایراد کالا یا مشکل مربوط به
-                سایز حداکثر تا ۴۸ ساعت پس از تحویل، یک مسیر رسیدگی داخلی است. در معامله از راه دور،
-                حقوق قانونی مصرف‌کننده از جمله حق انصراف مقرر در قانون تجارت الکترونیکی مستقل است و
-                این بازه ۴۸ ساعته آن را حذف یا محدود نمی‌کند.
-              </StatePanel>
-
-              <div className="mt-10 space-y-9">
-                <Section id="website-use" title="استفاده از وب‌سایت">
-                  <p>
-                    صفحات عمومی LBB برای مرور محتوای فروشگاه، اطلاعات محصول و مسیرهای پشتیبانی در
-                    دسترس هستند. تنها داده فعال و تأییدشده باید مبنای ادعای عمومی قرار گیرد.
-                  </p>
-                </Section>
-
-                <Section id="commerce" title="ثبت سفارش و پرداخت">
-                  {publicPayment ? (
-                    <p>
-                      روش پرداخت عمومی با عنوان «{publicPayment.displayName}» تأیید شده است؛ با این
-                      حال موفقیت پرداخت فقط پس از Verify معتبر سمت سرور قابل پذیرش است.
-                    </p>
-                  ) : (
-                    <p>
-                      در حال حاضر هیچ روش پرداخت عمومی فعال و تأییدشده‌ای برای نمایش وجود ندارد و
-                      Frontend نباید از روی حدس نام درگاه یا وضعیت موفقیت بسازد.
-                    </p>
-                  )}
-                  {payment.verification === "pending" ? (
-                    <p>تنظیمات عمومی پرداخت در حال بررسی است و تا تأیید نهایی منتشر نمی‌شود.</p>
-                  ) : null}
-                </Section>
-
-                <Section id="policies" title="ارسال، تعویض، مرجوعی و بازپرداخت">
-                  <p>
-                    وضعیت ارسال {shippingPublished ? "منتشرشده" : "منتشرنشده"} است و سیاست کامل
-                    مرجوعی/تعویض {returnsPublished ? "منتشرشده" : "هنوز منتشرنشده"} است.
-                  </p>
-                  <Link to="/shipping-returns" className={CtaClasses("line")}>
-                    مشاهده ارسال و مرجوعی
-                  </Link>
-                </Section>
-
-                <Section title="حریم خصوصی">
-                  <p>
-                    جزئیات پردازش داده و وضعیت سرویس‌های فعال در صفحه حریم خصوصی توضیح داده می‌شود.
-                  </p>
-                  <Link to="/privacy" className={CtaClasses("line")}>
-                    مطالعه حریم خصوصی
-                  </Link>
-                </Section>
-              </div>
-            </>
+            <StatePanel title="شرایط تجاری فروش هنوز از پنل منتشر نشده است" tone="warning">
+              نبودن نسخه منتشرشده به معنی وجود شرط یا تعهد پیش‌فرض نیست.
+            </StatePanel>
           )}
 
+          <section className="mt-8 grid gap-4 md:grid-cols-2" aria-label="وضعیت عملیاتی Backend">
+            <div className="rounded-2xl border border-hairline bg-carbon p-5">
+              <p className="tech text-signal">CHECKOUT / RUNTIME</p>
+              <h2 className="mt-2 text-lg font-bold text-bone">ثبت سفارش</h2>
+              <p className="mt-3 text-sm leading-7 text-metal">
+                {runtime.checkoutEnabled
+                  ? "Backend ثبت سفارش را فعال اعلام کرده است."
+                  : "Backend ثبت سفارش را غیرفعال اعلام کرده است."}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-hairline bg-carbon p-5">
+              <p className="tech text-signal">PAYMENT / RUNTIME</p>
+              <h2 className="mt-2 text-lg font-bold text-bone">پرداخت</h2>
+              <p className="mt-3 text-sm leading-7 text-metal">
+                {runtime.payment.enabled
+                  ? `Backend درگاه «${runtime.payment.provider}» را فعال اعلام کرده است؛ موفقیت پرداخت فقط پس از Verify سمت سرور معتبر است.`
+                  : "هیچ درگاه پرداخت فعال از Backend اعلام نشده است."}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-hairline bg-carbon p-5 md:col-span-2">
+              <p className="tech text-signal">RETURNS / ADMIN</p>
+              <h2 className="mt-2 text-lg font-bold text-bone">مرجوعی و تعویض</h2>
+              <p className="mt-3 text-sm leading-7 text-metal">
+                {returnsPublished
+                  ? "سیاست مرجوعی در پنل فعال و تأیید شده است. جزئیات کامل در صفحه ارسال و مرجوعی نمایش داده می‌شود."
+                  : "سیاست مرجوعی هنوز در پنل به وضعیت فعال و تأییدشده نرسیده است."}
+              </p>
+              <Link to="/shipping-returns" className={`${CtaClasses("line")} mt-4`}>
+                مشاهده ارسال و مرجوعی
+              </Link>
+            </div>
+          </section>
+
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/shipping-returns" className={CtaClasses("line")}>
-              ارسال و مرجوعی
+            <Link to="/privacy" className={CtaClasses("line")}>
+              حریم خصوصی
             </Link>
             <Link to="/contact" className={CtaClasses("signal")}>
               تماس و پشتیبانی

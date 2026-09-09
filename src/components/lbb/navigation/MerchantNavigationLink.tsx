@@ -1,9 +1,12 @@
 import type { PropsWithChildren } from "react";
+import { safePublicHref } from "@/lib/public-href";
 import type { MerchantNavigationItem } from "@/lib/storefront-control";
 
 export function isMerchantNavigationItemActive(pathname: string, item: MerchantNavigationItem) {
-  if (item.href === "/") return pathname === "/";
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const href = safePublicHref(item.href);
+  if (!href || href.startsWith("https://")) return false;
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function MerchantNavigationLink({
@@ -16,8 +19,18 @@ export function MerchantNavigationLink({
   className?: string;
   onNavigate?: () => void;
 }>) {
+  const href = safePublicHref(item.href);
+  if (!href) return null;
+  const external = href.startsWith("https://");
+
   return (
-    <a href={item.href} onClick={onNavigate} className={className}>
+    <a
+      href={href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      onClick={onNavigate}
+      className={className}
+    >
       {children ?? item.label}
     </a>
   );

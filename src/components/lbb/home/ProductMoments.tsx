@@ -7,10 +7,11 @@ import { products } from "@/lib/products";
 import { useStorefrontControl } from "@/lib/storefront-control";
 
 export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalogCard[] | null }) {
-  const { source } = useStorefrontControl();
+  const { source, sectionCopy } = useStorefrontControl();
 
   if (source === "live") {
     const items = liveProducts ?? [];
+    const copy = sectionCopy.products;
     return (
       <section
         dir="rtl"
@@ -20,12 +21,12 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
         <Shell>
           <SectionHead
             index="02"
-            label="انتخاب‌های ال‌بی‌بی"
-            title={<span id="home-products-title">تازه‌های فروشگاه</span>}
-            lede="محصولات منتشرشده از کاتالوگ واقعی؛ قیمت و موجودی نمایش‌داده‌شده از Backend می‌آیند."
+            label={copy.label}
+            title={<span id="home-products-title">{copy.title}</span>}
+            lede={copy.lede}
             action={
               <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
-                کاتالوگ کامل
+                {copy.actionLabel}
                 <ArrowUpLeft size={15} aria-hidden="true" />
               </Link>
             }

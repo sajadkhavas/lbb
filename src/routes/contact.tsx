@@ -1,12 +1,22 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Instagram, Loader2, MapPin, MessageCircleMore, Phone, Send } from "lucide-react";
+import {
+  Clock3,
+  Instagram,
+  Loader2,
+  Mail,
+  MapPin,
+  MessageCircleMore,
+  Phone,
+  Send,
+} from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 import { backendErrorMessage, isLiveBackend } from "@/lib/backend-api";
+import { contentParagraphs } from "@/lib/content-page";
 import { submitContactInquiry } from "@/lib/final-technical-api";
 import { pageMeta, canonical, absUrl, breadcrumbLd } from "@/lib/site";
 import { resolveStorefrontControl, resolveStorefrontPage } from "@/lib/storefront-control";
@@ -14,11 +24,12 @@ import { resolveStorefrontControl, resolveStorefrontPage } from "@/lib/storefron
 const FALLBACK_TITLE = "تماس با LBB";
 const FALLBACK_DESC = "راه‌های ارتباط عمومی و تأییدشده با LBB و اطلاعات فروشگاه حضوری در کرج.";
 
-type ContactKind = "instagram" | "phone" | "whatsapp";
+type ContactKind = "instagram" | "phone" | "whatsapp" | "email";
 
 function ContactIcon({ kind }: { kind: ContactKind }) {
   if (kind === "instagram") return <Instagram size={18} aria-hidden="true" />;
   if (kind === "phone") return <Phone size={18} aria-hidden="true" />;
+  if (kind === "email") return <Mail size={18} aria-hidden="true" />;
   return <MessageCircleMore size={18} aria-hidden="true" />;
 }
 
@@ -57,8 +68,10 @@ export const Route = createFileRoute("/contact")({
         alternateName: control.brand.nameFa,
         url: absUrl("/"),
         telephone: control.contact.phone,
+        email: control.contact.email || undefined,
         address: {
           "@type": "PostalAddress",
+          streetAddress: control.contact.addressLine || undefined,
           addressLocality: control.contact.city,
           addressRegion: control.contact.province,
           addressCountry: "IR",
@@ -91,12 +104,8 @@ function ContactPage() {
   const { control, page } = Route.useLoaderData();
   const whatsappDigits = control.contact.whatsapp.replace(/\D/g, "").replace(/^0/, "");
   const phoneDigits = control.contact.phone.replace(/\D/g, "").replace(/^0/, "");
-  const contacts: Array<{
-    kind: ContactKind;
-    label: string;
-    value: string;
-    href: string;
-  }> = [
+  const pageParagraphs = contentParagraphs(page?.content ?? null);
+  const contacts: Array<{ kind: ContactKind; label: string; value: string; href: string }> = [
     {
       kind: "instagram",
       label: "اینستاگرام",
@@ -115,6 +124,16 @@ function ContactPage() {
       value: control.contact.whatsapp,
       href: `https://wa.me/98${whatsappDigits}`,
     },
+    ...(control.contact.email
+      ? [
+          {
+            kind: "email" as const,
+            label: "ایمیل",
+            value: control.contact.email,
+            href: `mailto:${control.contact.email}`,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -142,6 +161,13 @@ function ContactPage() {
                 {page?.excerpt ||
                   "برای پرسش درباره محصول، سایز، موجودی یا سفارش می‌توانید از راه‌های ارتباطی رسمی LBB استفاده کنید."}
               </p>
+              {pageParagraphs.length > 0 ? (
+                <div className="mt-5 max-w-[62ch] space-y-3 text-sm leading-8 text-metal">
+                  {pageParagraphs.map((paragraph, index) => (
+                    <p key={`${index}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2" aria-label="راه‌های ارتباطی تأییدشده">
                 {contacts.map((channel) => (
@@ -163,7 +189,9 @@ function ContactPage() {
                       <span
                         className="mt-0.5 block truncate text-[11px] text-mute"
                         dir={
-                          channel.kind === "phone" || channel.kind === "whatsapp"
+                          channel.kind === "phone" ||
+                          channel.kind === "whatsapp" ||
+                          channel.kind === "email"
                             ? "ltr"
                             : undefined
                         }
@@ -216,24 +244,52 @@ function ContactPage() {
                   <dd className="text-end font-semibold text-bone">
                     {control.source === "prototype"
                       ? control.brand.physicalLocation
-                      : control.contact.locationLabel}
+                      : control.contact.addressLine || control.contact.locationLabel}
                   </dd>
                 </div>
               </dl>
 
-              <div className="mt-7 rounded-xl border border-hairline bg-obsidian p-4">
-                <div className="flex items-start gap-3">
-                  <MessageCircleMore
-                    size={18}
-                    className="mt-1 shrink-0 text-signal"
-                    aria-hidden="true"
-                  />
-                  <p className="text-sm leading-7 text-metal">
-                    شماره واحد و ساعت کاری تا زمانی که به‌صورت عمومی تأیید نشوند در سایت حدس زده
-                    نمی‌شوند.
+              {control.contact.openingHours.length > 0 ? (
+                <div className="mt-6 rounded-xl border border-hairline bg-obsidian p-4">
+                  <p className="flex items-center gap-2 text-sm font-bold text-bone">
+                    <Clock3 size={17} className="text-signal" aria-hidden="true" />
+                    ساعت کاری
                   </p>
+                  <ul className="mt-3 space-y-1 text-xs leading-6 text-metal">
+                    {control.contact.openingHours.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
+              ) : null}
+
+              {control.contact.mapUrl ? (
+                <a
+                  href={control.contact.mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${CtaClasses("line")} mt-5 w-full`}
+                >
+                  مشاهده موقعیت روی نقشه
+                  <MapPin size={16} aria-hidden="true" />
+                </a>
+              ) : null}
+
+              {!control.contact.addressLine && control.contact.openingHours.length === 0 ? (
+                <div className="mt-7 rounded-xl border border-hairline bg-obsidian p-4">
+                  <div className="flex items-start gap-3">
+                    <MessageCircleMore
+                      size={18}
+                      className="mt-1 shrink-0 text-signal"
+                      aria-hidden="true"
+                    />
+                    <p className="text-sm leading-7 text-metal">
+                      جزئیات تکمیلی آدرس و ساعت کاری فقط پس از ثبت و انتشار از پنل نمایش داده
+                      می‌شوند.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
             </aside>
           </div>
         </Shell>
@@ -258,7 +314,6 @@ function LiveContactForm() {
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!fullName.trim() || message.trim().length < 10 || (!mobile.trim() && !email.trim())) return;
-
     setBusy(true);
     setError(null);
     setReference(null);
@@ -293,7 +348,6 @@ function LiveContactForm() {
         </div>
         <Send size={20} className="text-signal" aria-hidden="true" />
       </div>
-
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2 text-xs font-semibold text-metal">
           نام و نام خانوادگی
@@ -340,7 +394,6 @@ function LiveContactForm() {
           />
         </label>
       </div>
-
       <label className="mt-4 grid gap-2 text-xs font-semibold text-metal">
         پیام
         <textarea
@@ -353,7 +406,6 @@ function LiveContactForm() {
           className="rounded-xl border border-hairline bg-obsidian px-4 py-3 text-sm leading-7 text-bone outline-none focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/30"
         />
       </label>
-
       <label className="sr-only" aria-hidden="true">
         وب‌سایت
         <input
@@ -363,12 +415,10 @@ function LiveContactForm() {
           onChange={(event) => setWebsite(event.target.value)}
         />
       </label>
-
       <p className="mt-3 text-[11px] leading-6 text-mute">
         حداقل یکی از شماره موبایل یا ایمیل را وارد کنید. پیام مستقیماً در Backend فروشگاه ثبت
         می‌شود.
       </p>
-
       <button
         type="submit"
         disabled={
@@ -386,7 +436,6 @@ function LiveContactForm() {
         )}
         {busy ? "در حال ثبت…" : "ثبت پیام"}
       </button>
-
       {error ? (
         <StatePanel className="mt-4" title="پیام ثبت نشد" tone="warning">
           {error}

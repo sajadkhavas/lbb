@@ -64,7 +64,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*
+          npx playwright install --with-deps chromium
       - name: Run complete frozen-baseline quality suite
         run: npm run quality
       - name: Upload browser report on failure

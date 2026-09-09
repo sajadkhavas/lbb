@@ -1,25 +1,28 @@
-import { MapPin, Ruler, ScanText } from "lucide-react";
-import { BRAND_COPY } from "@/lib/brand";
+import {
+  CircleHelp,
+  Headphones,
+  MapPin,
+  PackageCheck,
+  Ruler,
+  ScanText,
+  type LucideIcon,
+} from "lucide-react";
+import { safePublicHref } from "@/lib/public-href";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
-const ITEMS = [
-  {
-    Icon: ScanText,
-    title: "جزئیات روشن محصول",
-    sub: "جنس، تن‌خور، رنگ و ویژگی‌های هر قطعه پیش از انتخاب در دسترس است",
-  },
-  {
-    Icon: Ruler,
-    title: "انتخاب آگاهانه اندازه",
-    sub: "راهنمای اندازه و توضیح تن‌خور برای مقایسه و انتخاب دقیق‌تر",
-  },
-  {
-    Icon: MapPin,
-    title: "حضور در کرج",
-    sub: BRAND_COPY.storeLocationLabel,
-  },
-];
+const ICONS: Record<string, LucideIcon> = {
+  details: ScanText,
+  size: Ruler,
+  location: MapPin,
+  shipping: PackageCheck,
+  support: Headphones,
+};
 
 export function TrustStrip() {
+  const { trust } = useStorefrontControl();
+  const items = trust.filter((item) => item.enabled);
+  if (items.length === 0) return null;
+
   return (
     <section
       dir="rtl"
@@ -27,15 +30,38 @@ export function TrustStrip() {
       aria-label="ویژگی‌های تجربه خرید از LBB"
     >
       <div className="mx-auto grid max-w-[var(--lbb-shell-max)] grid-cols-1 gap-4 md:grid-cols-3 md:divide-x md:divide-x-reverse md:divide-hairline-soft">
-        {ITEMS.map(({ Icon, title, sub }) => (
-          <div key={title} className="flex items-start gap-3 px-2 py-2 md:px-5">
-            <Icon size={21} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
-            <div>
-              <p className="text-sm font-semibold text-bone">{title}</p>
-              <p className="mt-1 text-xs leading-6 text-metal">{sub}</p>
+        {items.map((item, index) => {
+          const Icon = ICONS[item.icon] ?? CircleHelp;
+          const href = safePublicHref(item.href);
+          const content = (
+            <>
+              <Icon size={21} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
+              <div>
+                <p className="text-sm font-semibold text-bone">{item.title}</p>
+                <p className="mt-1 text-xs leading-6 text-metal">{item.description}</p>
+              </div>
+            </>
+          );
+
+          return href ? (
+            <a
+              key={`${item.title}-${index}`}
+              href={href}
+              target={href.startsWith("https://") ? "_blank" : undefined}
+              rel={href.startsWith("https://") ? "noopener noreferrer" : undefined}
+              className="flex items-start gap-3 px-2 py-2 transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:px-5"
+            >
+              {content}
+            </a>
+          ) : (
+            <div
+              key={`${item.title}-${index}`}
+              className="flex items-start gap-3 px-2 py-2 md:px-5"
+            >
+              {content}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
