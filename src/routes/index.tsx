@@ -126,10 +126,10 @@ export const Route = createFileRoute("/")({
   head: ({ loaderData }) => {
     const control = loaderData?.control;
     if (!control) return {};
-    const heroImage =
-      control.source === "live"
-        ? (loaderData.heroProduct?.image ?? null)
-        : productImage(control.home.heroProductSlug);
+    const liveStore = control.source === "live";
+    const heroImage = liveStore
+      ? (loaderData.heroProduct?.image ?? null)
+      : productImage(control.home.heroProductSlug);
 
     const websiteJsonLd = {
       "@context": "https://schema.org",
@@ -149,13 +149,13 @@ export const Route = createFileRoute("/")({
       description: control.brand.shortIntroduction,
       address: {
         "@type": "PostalAddress",
-        streetAddress: control.contact.addressLine || undefined,
+        streetAddress: liveStore ? control.contact.addressLine || undefined : undefined,
         addressLocality: control.contact.city,
         addressRegion: control.contact.province,
         addressCountry: "IR",
       },
-      telephone: control.contact.phone,
-      email: control.contact.email || undefined,
+      telephone: liveStore ? control.contact.phone || undefined : undefined,
+      email: liveStore ? control.contact.email || undefined : undefined,
       sameAs: [control.contact.instagramUrl],
     };
 
