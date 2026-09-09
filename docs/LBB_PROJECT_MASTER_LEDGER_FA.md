@@ -13,6 +13,7 @@
 ## 1) Repositories / Runtime
 
 ### Frontend
+
 - Repo: `sajadkhavas/lbb`
 - Production URL: `https://lbbclo.com`
 - Operational branch line: `fix/lbb-local-boutique-homepage`
@@ -23,6 +24,7 @@
 - PR #87 base is intentionally `fix/lbb-local-boutique-homepage`; canonical `main` reconciliation is deferred to final GitHub reconciliation.
 
 ### Backend
+
 - Repo: `sajadkhavas/lbb-backend`
 - API/Admin: `https://api.lbbclo.com`
 - Backend main after FC1 mannequin merge: `21218cf34603512ee350da738df92c4bb56aa53d`
@@ -31,6 +33,7 @@
 - Open Final Technical Completion PR: `#28`
 
 ### Production runtime currently accepted
+
 - Frontend: `7148764a98654ed53f08a287a13969a8396d3c28`
 - Backend: `f0583b5892a4e68a6a05549325399145136f5a3b`
 - API contract: `2026-09-06-p3-storefront-v1`
@@ -84,7 +87,9 @@
 ## 4) Final Technical Completion — current scope
 
 ### Backend PR #28
+
 Implemented scope includes:
+
 - three-level category hierarchy with cycle/depth guard
 - parent/header/home/icon Admin controls
 - additive public taxonomy metadata
@@ -97,11 +102,14 @@ Implemented scope includes:
 - Launch Readiness Admin surface
 
 Last known exact-head acceptance:
+
 - BE head: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
 - P3 Storefront Integration: PASS
 
 ### Frontend PR #87
+
 Implemented scope includes:
+
 - live Admin-backed taxonomy hierarchy in desktop/mobile navigation
 - Home categories from live taxonomy
 - Hero product/control hydration
@@ -114,6 +122,7 @@ Implemented scope includes:
 - fail-closed live behavior without prototype leakage
 
 Current remediation state:
+
 - Initial FE head `0e33226ff8faafd84c9063d0d7228e527518d711` failed Quality only at `prettier --check` before build/typecheck/e2e.
 - Exact 10-file Prettier output was generated with the repository's own locked dependencies.
 - Temporary formatting workflow was self-removed after applying output.
@@ -171,6 +180,7 @@ Current remediation state:
 ## 8) Change Log
 
 ### 2026-09-09 — Master Ledger established
+
 - File created because previous docs (`LBB_CURRENT_EXECUTION_STATUS_FA.md`, `LBB_MASTER_HANDOFF_FA.md`) existed but the planned `LBB_PROJECT_MASTER_LEDGER_FA.md` had not actually been created.
 - Captured current Production identity, FC1 closure, Final Technical Completion PRs, current CI blocker, remaining handoff path and update protocol.
 - Business mutation: NO
@@ -178,6 +188,7 @@ Current remediation state:
 - Commerce: checkout=false / payment=false / provider=disabled
 
 ### 2026-09-09 — FE #87 exact Prettier remediation
+
 - START implementation head: `0e33226ff8faafd84c9063d0d7228e527518d711`.
 - Initial Quality failure classification: `FORMAT_ONLY / 10_FILES / BUILD_TYPECHECK_E2E_NOT_REACHED`.
 - Temporary artifact run: `34351827376` — SUCCESS.
