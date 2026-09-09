@@ -1,0 +1,77 @@
+name: Temporary PR88 Exact Prettier
+
+on:
+  push:
+    branches:
+      - hotfix/final-product-ux
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout hotfix branch
+        uses: actions/checkout@v4
+        with:
+          ref: hotfix/final-product-ux
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Apply repository-exact Prettier
+        run: |
+          npx prettier --write \
+            src/lib/quickview.tsx \
+            src/components/lbb/BackendProductQuickView.tsx \
+            src/components/lbb/ProductQuickView.tsx \
+            src/components/lbb/ProductCard.tsx \
+            src/components/lbb/product/Gallery.tsx \
+            src/components/lbb/product/ProductPurchasePanel.tsx \
+            src/components/lbb/product/ProductIdentity.tsx \
+            tests/final-product-ux-hotfix.spec.ts \
+            docs/FINAL_PRODUCT_UX_HOTFIX_RESEARCH.md \
+            docs/LBB_PROJECT_MASTER_LEDGER_FA.md
+          npx prettier --check \
+            src/lib/quickview.tsx \
+            src/components/lbb/BackendProductQuickView.tsx \
+            src/components/lbb/ProductQuickView.tsx \
+            src/components/lbb/ProductCard.tsx \
+            src/components/lbb/product/Gallery.tsx \
+            src/components/lbb/product/ProductPurchasePanel.tsx \
+            src/components/lbb/product/ProductIdentity.tsx \
+            tests/final-product-ux-hotfix.spec.ts \
+            docs/FINAL_PRODUCT_UX_HOTFIX_RESEARCH.md \
+            docs/LBB_PROJECT_MASTER_LEDGER_FA.md
+          git diff --check
+
+      - name: Commit exact formatter output
+        run: |
+          if git diff --quiet; then
+            echo 'FORMAT_CHANGES=NO'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            src/lib/quickview.tsx \
+            src/components/lbb/BackendProductQuickView.tsx \
+            src/components/lbb/ProductQuickView.tsx \
+            src/components/lbb/ProductCard.tsx \
+            src/components/lbb/product/Gallery.tsx \
+            src/components/lbb/product/ProductPurchasePanel.tsx \
+            src/components/lbb/product/ProductIdentity.tsx \
+            tests/final-product-ux-hotfix.spec.ts \
+            docs/FINAL_PRODUCT_UX_HOTFIX_RESEARCH.md \
+            docs/LBB_PROJECT_MASTER_LEDGER_FA.md
+          git commit -m 'style: apply exact Prettier output for PR88'
+          git push origin HEAD:hotfix/final-product-ux
