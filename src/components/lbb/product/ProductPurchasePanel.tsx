@@ -123,16 +123,19 @@ export function ProductPurchasePanel({
 
   return (
     <>
-      <div className="flex min-w-0 flex-col gap-5 md:sticky md:top-20 md:self-start">
+      <div
+        data-testid="pdp-purchase-panel"
+        className="flex min-w-0 flex-col gap-5 md:sticky md:top-20 md:self-start lg:top-24 lg:gap-6 lg:rounded-3xl lg:border lg:border-white/10 lg:bg-carbon/70 lg:p-7 lg:shadow-[0_24px_70px_rgba(0,0,0,0.28)] lg:backdrop-blur-sm xl:p-8"
+      >
         <ProductIdentity model={model} />
 
-        <div className="flex items-center justify-end border-t border-hairline pt-4">
+        <div className="flex items-center justify-end border-t border-hairline pt-4 lg:pt-5">
           <button
             type="button"
             onClick={() => toggle(model.slug)}
             aria-pressed={liked}
             aria-label={liked ? "حذف محصول از علاقه‌مندی‌ها" : "افزودن محصول به علاقه‌مندی‌ها"}
-            className="tap-target grid place-items-center border border-hairline text-bone hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="tap-target grid place-items-center rounded-xl border border-hairline text-bone transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
           >
             <Heart
               size={18}
@@ -198,13 +201,13 @@ export function ProductPurchasePanel({
           </p>
         ) : null}
 
-        <div ref={addButtonRef}>
+        <div ref={addButtonRef} className="lg:pt-1">
           <button
             type="button"
             onClick={onAdd}
             disabled={!canAdd}
             aria-describedby={!canAdd ? "pdp-purchase-status" : undefined}
-            className={`${CtaClasses("signal")} min-h-14 w-full disabled:cursor-not-allowed disabled:opacity-50`}
+            className={`${CtaClasses("signal")} min-h-14 w-full rounded-xl disabled:cursor-not-allowed disabled:opacity-50`}
           >
             <ShoppingBag size={18} aria-hidden="true" />
             <span>{canAdd ? "افزودن به سبد خرید" : "خرید در دسترس نیست"}</span>

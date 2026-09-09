@@ -26,6 +26,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const [showMannequin, setShowMannequin] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
+  const suppressNextMediaClick = useRef(false);
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const { open: openQuickView } = useQuickView();
@@ -46,6 +47,9 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const available = backend ? p.availability : p.inStock;
   const priceFrom = backend ? p.priceFromToman : p.price;
   const priceTo = backend ? p.priceToToman : p.price;
+  const sizeLabels = backend
+    ? p.sizes.map((size) => size.code || size.name).filter(Boolean)
+    : p.sizes;
 
   if (!backend && isLiveBackend()) {
     return (
@@ -94,6 +98,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
 
   const startSwipe = (event: TouchEvent<HTMLDivElement>) => {
     touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+    suppressNextMediaClick.current = false;
   };
 
   const finishSwipe = (event: TouchEvent<HTMLDivElement>) => {
@@ -103,6 +108,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     const delta = touchStartX.current - endX;
     touchStartX.current = null;
     if (Math.abs(delta) < 36) return;
+    suppressNextMediaClick.current = true;
     setPreviewIndex((current) =>
       delta > 0 ? Math.min(previewImages.length - 1, current + 1) : Math.max(0, current - 1),
     );
@@ -118,41 +124,45 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       showMannequin={showMannequin}
       onToggleMannequin={() => setShowMannequin((current) => !current)}
       onToggleWishlist={() => toggle(p.slug)}
-      onQuickView={
-        backend
-          ? null
-          : (button) => {
-              openQuickView(p, button);
-            }
-      }
+      onQuickView={(button) => openQuickView(p, button)}
       onAddWithSize={addWithSize}
     />
   );
 
   const cardImage =
     showMannequin && mannequin ? (
-      <div className="product-card__media relative aspect-square overflow-hidden bg-white">
+      <div className="product-card__media relative aspect-[4/5] overflow-hidden bg-white">
         <StyleMannequin profile={mannequin} productName={name} priority={priority} />
         {overlay}
       </div>
     ) : primaryImage ? (
       <div
-        className="relative"
+        className="relative touch-pan-y"
         onPointerMove={selectPreviewFromPointer}
         onPointerLeave={() => setPreviewIndex(0)}
         onTouchStart={startSwipe}
+        onTouchCancel={() => {
+          touchStartX.current = null;
+          suppressNextMediaClick.current = false;
+        }}
         onTouchEnd={finishSwipe}
+        onClickCapture={(event) => {
+          if (!suppressNextMediaClick.current) return;
+          suppressNextMediaClick.current = false;
+          event.preventDefault();
+          event.stopPropagation();
+        }}
       >
         <Frame
           src={primaryImage}
           alt={name}
-          ratio="1/1"
+          ratio="4/5"
           width={1024}
           height={1280}
           priority={priority && previewIndex === 0}
           zoom={false}
           className="product-card__media bg-white"
-          imgClassName="object-contain p-4 sm:p-7"
+          imgClassName="object-cover"
         >
           {overlay}
         </Frame>
@@ -173,7 +183,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         ) : null}
       </div>
     ) : (
-      <div className="product-card__media relative aspect-square overflow-hidden bg-white">
+      <div className="product-card__media relative aspect-[4/5] overflow-hidden bg-white">
         <div className="absolute inset-0 grid place-items-center px-6 text-center text-xs leading-6 text-mute">
           تصویر تأییدشده برای این محصول منتشر نشده است.
         </div>
@@ -215,23 +225,39 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             <span className="num text-xs text-mute line-through">{fmtToman(p.originalPrice)}</span>
           ) : null}
         </div>
-        {!backend && p.sizes.length > 0 ? (
-          <div className="mt-3 flex flex-wrap gap-1.5 md:hidden" aria-label="سایزهای محصول">
-            {p.sizes.map((size) => {
-              const sizeAvailable = isSizeAvailable(p, size);
-              return (
-                <span
-                  key={size}
-                  className={`grid min-h-7 min-w-8 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
-                    sizeAvailable
-                      ? "bg-signal text-obsidian"
-                      : "border border-white/10 bg-white/5 text-mute line-through"
-                  }`}
-                >
-                  {size}
-                </span>
-              );
-            })}
+        {sizeLabels.length > 0 ? (
+          <div
+            className={`mt-3 flex flex-wrap gap-1.5 ${backend ? "" : "md:hidden"}`}
+            aria-label="سایزهای محصول"
+          >
+            {backend
+              ? sizeLabels.map((size) => (
+                  <span
+                    key={size}
+                    className={`grid min-h-7 min-w-8 place-items-center rounded-lg border px-1.5 text-[10px] font-black ${
+                      available
+                        ? "border-white/15 bg-white/5 text-bone"
+                        : "border-white/10 bg-white/5 text-mute line-through"
+                    }`}
+                  >
+                    {size}
+                  </span>
+                ))
+              : sizeLabels.map((size) => {
+                  const sizeAvailable = isSizeAvailable(p, size);
+                  return (
+                    <span
+                      key={size}
+                      className={`grid min-h-7 min-w-8 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
+                        sizeAvailable
+                          ? "bg-signal text-obsidian"
+                          : "border border-white/10 bg-white/5 text-mute line-through"
+                      }`}
+                    >
+                      {size}
+                    </span>
+                  );
+                })}
           </div>
         ) : null}
         <div
@@ -262,24 +288,14 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
                 />
               ))}
         </div>
-        {backend ? (
-          <Link
-            to="/product/$slug"
-            params={{ slug: p.slug }}
-            className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-hairline px-3 text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
-          >
-            انتخاب رنگ و سایز
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={(event) => openQuickView(p, event.currentTarget)}
-            className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-signal/40 bg-signal/10 px-2 text-[11px] font-bold text-signal transition hover:bg-signal hover:text-obsidian focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:hidden"
-          >
-            <Eye size={15} aria-hidden="true" />
-            {p.inStock ? "انتخاب سایز و خرید" : "مشاهده محصول"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={(event) => openQuickView(p, event.currentTarget)}
+          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-signal/35 bg-signal/10 px-3 text-xs font-semibold text-signal transition hover:bg-signal hover:text-obsidian focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+        >
+          <Eye size={15} aria-hidden="true" />
+          {backend ? "نمای سریع و انتخاب سایز" : p.inStock ? "انتخاب سایز و خرید" : "مشاهده محصول"}
+        </button>
       </div>
     </article>
   );

@@ -1,336 +1,213 @@
 # LBB — Project Master Ledger (FA)
 
-> **Authoritative project ledger / مرجع واحد ادامه پروژه**
->
-> ایجاد: `2026-09-09`
->
-> بعد از هر checkpoint مهم، PR/CI/Merge/Deploy/Incident/Acceptance و تغییر `EXACT NEXT` باید همین فایل به‌روزرسانی شود.
->
-> در صورت تعارض، **Runtime evidence + GitHub exact SHA/PR/CI جدیدتر** بر متن قدیمی مقدم است.
+**Authoritative continuation ledger / مرجع واحد ادامه پروژه**  
+Created: `2026-09-09`
+
+در صورت تعارض، Runtime evidence و GitHub exact SHA/PR/CI جدیدتر بر متن قدیمی مقدم‌اند. بعد از هر checkpoint مهم، SHA/PR/CI/Runtime/Data mutation/Commerce state/EXACT NEXT در همین فایل ثبت می‌شود.
 
 ---
 
-## 1) Repositories / accepted code
+## 1) Current accepted identities
 
 ### Frontend
+
 - Repo: `sajadkhavas/lbb`
-- Operational branch line: `fix/lbb-local-boutique-homepage`
-- FC1 merge baseline: `7515d76026abaf4158f2d06b2c42ccc50662193b`
-- Final Technical Completion accepted source: `7435049fcc2336fc744ff6d8d494a048705be5fd`
-- PR `#87`: **MERGED**
-- Final Technical Completion merge SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
-- Quality Gates `#459`: PASS
-- P3 Live Integration `#103`: PASS
-- PWA `#55`: PASS
-- Review threads: `0`
+- Operational branch: `fix/lbb-local-boutique-homepage`
+- Production URL: `https://lbbclo.com`
+- Current Production SHA before PR #88 deployment: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- Current Product UX branch: `hotfix/final-product-ux`
+- Product UX PR: `#88`
+- PR #88 accepted implementation head before base reconciliation: `2876eb83ed7a58ba937f8514d26e090bbd28ae05`
 
 ### Backend
+
 - Repo: `sajadkhavas/lbb-backend`
-- FC1 mannequin merge baseline: `21218cf34603512ee350da738df92c4bb56aa53d`
-- Final Technical Completion accepted source: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
-- PR `#28`: **MERGED**
-- Final Technical Completion merge SHA: `e69637548de98681830308291a60777068350bfa`
-- P3 Storefront Integration: PASS before merge
-- Review blockers: none
+- API/Admin: `https://api.lbbclo.com`
+- Current Production SHA: `e69637548de98681830308291a60777068350bfa`
+- Current public API contract: `2026-09-06-p3-storefront-v1`
+
+### Commerce lock
+
+- `checkout.enabled=false`
+- `payment.enabled=false`
+- `provider=disabled`
+
+These values must stay fail-closed until the separate external activation gates.
 
 ---
 
-## 2) Current Production identity
+## 2) Closed / DO NOT REDO without real drift
 
-### Before C1 attempt
-- Frontend: `7148764a98654ed53f08a287a13969a8396d3c28`
-- Backend: `f0583b5892a4e68a6a05549325399145136f5a3b`
-- API contract: `2026-09-06-p3-storefront-v1`
-- Checkout: `false`
-- Payment: `false`
-- Provider: `disabled`
-
-### Current recovered runtime after C1 rollback
-- Frontend `current`: `7148764a98654ed53f08a287a13969a8396d3c28`
-- Frontend service: active/running
-- Frontend listener: `127.0.0.1:5173`
-- Direct frontend HTTP: `200`
-- Nginx frontend origin: `200`
-- Backend application symlink: rolled back to old release after C1 failure
-- Production database: **forward-migrated** with the 3 additive C1 migrations already Ran
-- Backend post-rollback ready check: `200`
-- Commerce remains fail-closed: checkout=false / payment=false / provider=disabled
-
----
-
-## 3) Closed / DO NOT REDO
-
-Without real drift evidence, do not repeat:
-
-- F0–F20 Frontend foundation/design/catalog/commerce/editorial/performance/a11y/RTL/SEO
+- F0–F20 frontend foundation/design/catalog/commerce/editorial/performance/a11y/RTL/SEO
 - P1.2 / P1.3 / P1.4 SEO/content/freeze
 - P2 Backend final audit/freeze
 - P3 Live Integration
-- P4 / P4-ACT release architecture
-- Nginx / TLS / Cloudflare acceptance
-- Node SSR / PHP-FPM / MySQL baseline acceptance
-- persistent media/shared storage + permissions
-- Admin login/role/navigation and owner UAT
-- Shipping production contract/Admin configuration
-- catalog provenance/content/legal/SEO E1 historical gates
-- FC1 2D mannequin PR #27 / PR #86
-- Final Technical Completion Backend PR #28
-- Final Technical Completion Frontend PR #87
-- P0 exact deployment contract discovery from `2026-09-09`
-- C1 successful FE/BE candidate source preparation
-- C1 successful Backend composer/package/optimize preparation
-- C1 successful database backup + checksum
-- C1 successful execution of all 3 additive database migrations
-- C1-R1 root-cause diagnosis described below
+- P4/P4-ACT immutable `releases/current/shared` architecture
+- Nginx/TLS/Cloudflare baseline
+- Node SSR/PHP-FPM/MySQL health/readiness baseline
+- persistent media/shared storage/permissions
+- Admin login/role/navigation/UAT
+- Shipping production contract/Admin controls
+- catalog provenance/content/legal/SEO historical gates
+- FC1 Backend PR #27 / Frontend PR #86
+- Final Technical Completion Backend PR #28 / Frontend PR #87
+- already-applied additive Backend migrations listed below
+
+Never intentionally re-run or roll back already accepted additive migrations only to repeat evidence.
 
 ---
 
-## 4) Final Technical Completion scope — CLOSED IN GITHUB
+## 3) Final Technical Completion already merged/deployed
 
-### Backend
-- three-level category hierarchy with cycle/depth guard
-- parent/header/home/icon Admin controls
-- additive public taxonomy metadata
-- verified ordered `previewImages` max 3
-- v1 Inquiry/Contact
-- privacy-safe public Track Order
-- account-backed Cart/Wishlist persistence
-- Site Settings repair on `StoreSetting`
-- unsafe File/Robots/Sitemap editor production access disabled
-- Launch Readiness Admin page
-- FC1 mannequin contract and Admin data
+### Frontend PR #87
 
-### Frontend
-- live Admin-backed taxonomy hierarchy desktop/mobile
-- Home categories from live taxonomy
-- Admin Hero/product hydration
-- live latest products
-- product desktop hover + mobile swipe preview images
-- Contact wired to Backend
-- Track Order wired to Backend
-- account Cart/Wishlist sync with anonymous local continuity
-- Home Lookbook/Social hydration
-- fail-closed live behavior without prototype leakage
-- FC1 mannequin ProductCard integration
+- accepted source: `7435049fcc2336fc744ff6d8d494a048705be5fd`
+- merge/runtime SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- Quality #459 PASS
+- P3 Live Integration #103 PASS
+- PWA #55 PASS
+- review threads 0
+
+Implemented: Admin-backed taxonomy/navigation, Home category/Hero hydration, latest products, verified preview images, Contact, Track Order, account Cart/Wishlist sync, Lookbook/social hydration, no prototype leakage, FC1 mannequin card integration.
+
+### Backend PR #28
+
+- accepted source: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
+- merge/runtime SHA: `e69637548de98681830308291a60777068350bfa`
+
+Implemented: three-level category hierarchy, Admin parent/header/home/icon controls, verified `previewImages`, Inquiry/Contact API, privacy-safe Track Order, account storefront state, Launch Readiness/Admin surfaces.
 
 ---
 
-## 5) Schema truth after C1
+## 4) Production schema/cutover truth
 
-Exactly **3 new migrations** existed between old Production backend `f0583...` and target `e696375...`:
+Already Ran in Production:
 
-1. `2026_09_09_020000_add_style_mannequin_profile_to_products_table.php`
-2. `2026_09_09_120000_extend_categories_for_storefront_taxonomy.php`
-3. `2026_09_09_123000_create_customer_storefront_state_tables.php`
+- `2026_09_09_020000_add_style_mannequin_profile_to_products_table.php`
+- `2026_09_09_120000_extend_categories_for_storefront_taxonomy.php`
+- `2026_09_09_123000_create_customer_storefront_state_tables.php`
 
-### C1 result
-All 3 migrations were executed successfully on Production DB:
-- mannequin product columns: RAN
-- category hierarchy/header/home controls: RAN
-- customer cart/wishlist tables: RAN
+Cutover backup:
+`/var/www/lbb/backend/shared/deploy-backups/final-cutover-20260909T135054Z/lbb-pre-final-cutover-20260909T135054Z.sql.gz`
 
-These migrations are additive/backward-compatible with the old application release. Therefore:
-- **DO NOT run `migrate:rollback` manually.**
-- Application rollback does not require schema rollback.
-- On the deployment retry, migration status must show these migrations as already `Ran`.
-- The retry must not intentionally re-run migration work.
+SHA256:
+`e38eaa11bf2d5c9d1227dd6cf54db0fa8fc00eb41830e0fbec12d9029b69e442`
 
----
+C1 first activation failed because the FE artifact was built with Nitro `cloudflare-module` for a Node/systemd runtime. Classification: `FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH`.
 
-## 6) C1 pre-migration backup evidence
+C1-R2 then stopped pre-build on Git dubious ownership. Classification: `GIT_SAFE_DIRECTORY_GUARD / PRECHECK_ONLY`; no global safe.directory change was accepted.
 
-- Backup file:
-  `/var/www/lbb/backend/shared/deploy-backups/final-cutover-20260909T135054Z/lbb-pre-final-cutover-20260909T135054Z.sql.gz`
-- SHA256:
-  `e38eaa11bf2d5c9d1227dd6cf54db0fa8fc00eb41830e0fbec12d9029b69e442`
-- gzip validation: PASS
-- `mysqldump --no-tablespaces`: used
-
-This is a cutover safety backup, not the final handoff backup/restore acceptance.
+C1-R2A used scoped `git -c safe.directory=...`, explicit `NITRO_PRESET=node-server`, isolated port 5187 acceptance, and bounded activation. Final active runtime became FE `d5014061...` / BE `e6963754...`; migrations were not repeated and Commerce stayed fail-closed.
 
 ---
 
-## 7) C1 — Final Production Cutover incident
+## 5) Current business truth
 
-### Evidence directory
-`/var/www/lbb/backend/shared/deploy-evidence/final-cutover-20260909T135054Z`
-
-### Successful C1 gates
-- PRE_FRONTEND: `200`
-- PRE_API_READY: `200`
-- free disk: ~9 GB
-- FE candidate checkout/build: PASS as a build artifact, but built for the wrong Nitro runtime preset
-- BE candidate checkout/composer/package discovery/optimize: PASS
-- final API route contract: PASS
-- commerce fail-closed: PASS
-- DB backup + SHA256: PASS
-- exact migration delta lock: PASS
-- migrations: `3/3 RAN`
-- BE atomic activation: PASS
-- BE origin health: `200`
-- BE origin ready: `200`
-- category API contract: PASS
-
-### Failure
-- FE target switched into `current` and `lbb.service` restarted.
-- `lbb.service` failed the active gate.
-- Automatic application rollback restored old FE/BE symlinks.
-- A transient FE `502` was observed immediately after rollback; subsequent C1-R1 diagnosis proved full old-FE recovery.
-
----
-
-## 8) C1-R1 — ROOT CAUSE PROVEN
-
-### Old production FE output
-- release: `7148764a98654ed53f08a287a13969a8396d3c28`
-- `.output/nitro.json` preset: `node-server`
-- entrypoint contains Nitro Node runtime and `serve(...)`
-- service listens successfully on `127.0.0.1:5173`
-
-### Failed new FE candidate output
-- release/source: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
-- `.output/nitro.json` preset: `cloudflare-module`
-- `.output/server/wrangler.json`: present
-- `.wrangler/deploy/config.json`: present
-- entrypoint contains Cloudflare module handler/runtime
-- isolated direct start on port `5187`: **NO LISTENER**
-- process exits cleanly because Cloudflare module output exports a handler instead of starting a Node HTTP listener
-
-### Classification
-`FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH / CLOUDFLARE_MODULE_ARTIFACT_DEPLOYED_TO_NODE_SYSTEMD_RUNTIME`
-
-This is **not**:
-- Nginx failure
-- systemd unit design failure
-- database migration failure
-- Backend/API failure
-- application feature-code regression proven by runtime
-
-### Required repair
-Rebuild only the existing FE candidate source `d5014061...` with explicit `NITRO_PRESET=node-server`, preserving production VITE live variables. Then:
-1. assert `.output/nitro.json` preset=`node-server`
-2. assert Cloudflare/Wrangler runtime artifacts are absent or irrelevant after clean rebuild
-3. isolated start as user `lbb` on port `5187`
-4. require listener + HTTP 200
-5. only then reactivate Backend target `e696375...` without migrations
-6. activate FE target `d5014061...`
-7. health/identity/fail-closed acceptance
-
-No GitHub source-code patch is required for this incident unless the Node-preset rebuild itself fails.
-
----
-
-## 9) C1-R2 — PRECHECK FAILURE ONLY
-
-- Attempt timestamp: `2026-09-09` after C1-R1 root-cause proof.
-- Failure occurred at the first target SHA read before any rebuild or activation.
-- Git returned `detected dubious ownership` for FE candidate `/var/www/lbb/releases/d5014061c1a933fd4078acc38b8fa21c5c8f628c`.
-- Classification: `GIT_SAFE_DIRECTORY_GUARD / DEPLOY_SCRIPT_PRECHECK_ONLY`.
-- Cause: target `git rev-parse` calls did not use the existing per-command `-c safe.directory=<release>` pattern.
-- Global Git config must **not** be modified just to bypass this guard; retry uses scoped `git -c safe.directory=...` only.
-- Rebuild performed: NO.
-- FE/BE switch performed: NO.
-- Database mutation: NO.
-- Migration work: NO.
-- Production after handler: FE old `7148764...` / BE old `f0583...`; FE origin `200`; BE ready `200`; both services active.
-- Schema remains forward-migrated with all 3 additive migrations already Ran.
-
----
-
-## 10) Employer / Business Truth
-
-- Current 8 catalog records are legacy/sample records, not employer final products.
-- Keep samples Draft/Inactive through Admin; do not destructively delete by default.
-- Real products must be entered from Admin.
+- Existing eight catalog rows are legacy/sample records and are not accepted as final employer merchandise.
+- Real employer products must be entered/reviewed through Admin.
+- Samples should stay Draft/Inactive by default rather than be destructively deleted.
 - Only categories with real published products should become public/indexable.
-- Header/categories/Hero/social content must remain Admin-driven.
-- Checkout and Payment stay OFF until separate external activation gates.
+- Store-facing configurable content should be Backend/Admin-driven.
 
 ---
 
-## 11) Remaining path to final handoff
+## 6) PR #88 — Final Product UX Hotfix
 
-1. **C1-R2a scoped-safe-directory Node-preset FE rebuild + isolated 5187 acceptance + bounded activation**
-2. Narrow live delta acceptance for changed surfaces only
-3. Final GitHub reconciliation / authoritative refs / stale cleanup
-4. Enter real employer data from Admin
-5. Real-data acceptance
-6. Fresh final MySQL backup + checksum + disposable restore
-7. Exactly one final real server reboot + post-reboot acceptance
-8. Freeze/tag/handoff + close FE #78 / BE #21
+Owner-required bounded recovery:
+
+1. restore live Backend Quick View / Eye preview;
+2. show real Backend product detail inside Quick View;
+3. restore Backend size labels on cards;
+4. preserve mobile swipe before PDP navigation and suppress accidental navigation after a swipe;
+5. preserve desktop multi-image preview;
+6. make card media full-width;
+7. preserve FC1 2D mannequin support;
+8. mildly round PDP gallery corners;
+9. improve desktop PDP composition without regressing mobile.
+
+Important implementation commits include:
+
+- `c521db486741b87f500f90a64619aa56c91f0b2c` sizes
+- `d804c64cb15375e89c5d0ccadd3ecd241e66842a` safe Quick View target model
+- `d67b66805abd7afe469bf1bc018fa1b07c6aeaf7` Backend Quick View/detail
+- `584a0ccb8960a46849a71e51a21553d85530489e` Eye/full-width media/mobile swipe guard
+- `4009e4d1bab2c46fff106aeb22c65a3538faa2f8` Backend Quick View dispatch
+- `ee07c56b806b836980c51756f18d8e18e621b38a` PDP gallery framing
+- `9ebc7500af264e93836af4dc46b09e44ca398df1` desktop purchase panel
+- `ab5fc72ba66b8aae8078572dd06411ba16e45fd0` desktop identity hierarchy
+- `85eb046ee818f6790f6d2c9ac235dbd7be743820` focused acceptance tests
+- `f156829c7bedb343cf2bc2e848ab99a5d66805e4` official-reference decision record
+
+### Exact acceptance evidence
+
+- Visual baseline updater run `34374342196`: PASS.
+- Guard proved exactly 14 expected Playwright PNG baselines changed; no Source/Config delta.
+- Exact Final Product UX Gate run `34374653797`: PASS.
+- `exact-quality`: PASS, including complete repository quality suite and focused Product UX acceptance.
+- `exact-p3-contract`: PASS, including format/lint/typecheck/P3 invariants.
+- PR review/comments at acceptance: 0.
+- PR moved from Draft to Ready.
+- No Production/DB/schema/business/commerce mutation occurred during PR #88 CI remediation.
+
+### Base reconciliation
+
+Operational branch contains four post-PR87 documentation-only commits; compared with the PR baseline, their only changed file is this Ledger. Source code has no base conflict. Reconciliation therefore preserves the Product UX tree and the newer operational history in one two-parent merge commit before PR #88 merge.
 
 ---
 
-## 12) External blockers — not code incompleteness
+## 7) Final owner request — last engineering pass
 
-- Kavenegar production credentials/template + real OTP activation
+After PR #88 closes, perform one consolidated Backend/Frontend control audit before final server handoff:
+
+- inventory every user-visible business/content surface in Frontend;
+- classify each as live Backend/Admin controlled, intentionally static application UI, or remaining hardcoded business content;
+- create/fix Backend models/settings/Admin resources/API fields for every remaining editable business surface;
+- wire Frontend to the Backend contract with fail-closed behavior and no prototype/sample leakage;
+- ensure contact/store identity, menus, banners/Hero, categories, social/Lookbook, legal/business copy, configurable section visibility/order, merchandising selections and other owner-managed values can be edited without source changes where appropriate;
+- keep structural UI labels and security-critical behavior in code when they are application semantics rather than business content;
+- add contract/feature/UI tests and official-reference documentation;
+- do not activate Checkout/Payment/Kavenegar/WebPush without their separate real credentials/acceptance.
+
+The completion criterion is: after this pass, normal store/business maintenance can be performed from Admin rather than by editing Frontend source.
+
+---
+
+## 8) External blockers, not ordinary code incompleteness
+
+- Kavenegar production account/template/credentials + real OTP activation test
 - Zarinpal merchant approval/credentials + controlled payment activation
-- Web Push may remain disabled if VAPID is not supplied
+- Web Push may remain disabled when VAPID is absent
 
 ---
 
-## 13) Mandatory update protocol
+## 9) Mandatory update protocol
 
-After every important action record:
+At every important checkpoint record:
+
 - date/time
-- gate/incident
 - START/END/accepted SHA
 - PR/Issue
 - CI/run/evidence
 - Production runtime identity if changed
 - schema/business mutation YES/NO
-- commerce state
-- failure classification
+- Commerce state
+- failure classification if any
 - DO NOT REDO additions
 - `EXACT NEXT`
 
-Never mark a phase Done without SHA/evidence.
+Never mark a phase Done without exact evidence.
 
 ---
 
-## 14) Change Log
+## 10) EXACT NEXT
 
-### 2026-09-09 — Master Ledger established
-- Authoritative continuation ledger created.
-- Production mutation: NO.
-
-### 2026-09-09 — Final Technical Completion GitHub closure
-- BE PR #28 merged at `e69637548de98681830308291a60777068350bfa`.
-- FE PR #87 merged at `d5014061c1a933fd4078acc38b8fa21c5c8f628c`.
-- FE Quality #459 / P3 #103 / PWA #55: PASS.
-- Production mutation: NO.
-
-### 2026-09-09 — P0 exact deployment contract
-- Runtime confirmed old FE `7148764...` / BE `f0583...`.
-- Services/permissions/Nginx/shared env/health matched accepted topology.
-- Exact pending target schema identified as 3 migrations.
-
-### 2026-09-09 — C1 final cutover attempt / rollback incident
-- FE/BE candidates prepared successfully.
-- Pre-migration DB backup created and checksummed.
-- All 3 additive migrations successfully ran.
-- Backend target activated and passed Health/Ready/API contract.
-- Frontend target failed to become active after switch.
-- Automatic application rollback executed.
-- Schema left forward-compatible; no migration rollback attempted.
-- Business data mutation: NO.
-- Schema mutation: YES — exactly the 3 additive migrations above.
-- Commerce: checkout=false / payment=false / provider=disabled.
-
-### 2026-09-09 — C1-R1 frontend runtime root cause proven
-- Old FE fully recovered: service active, listener `5173`, direct HTTP `200`, Nginx origin `200`.
-- Old Nitro preset: `node-server`.
-- Failed candidate Nitro preset: `cloudflare-module`.
-- Failed candidate contained Wrangler/Cloudflare output and no Node listener.
-- Isolated candidate start on `5187`: no listener; process exited without startup error because artifact is a Cloudflare handler module.
-- Final classification: `FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH`.
-- Production config mutation during diagnosis: NO.
-- Database mutation during diagnosis: NO.
-
-### 2026-09-09 — C1-R2 safe-directory precheck failure
-- Retry stopped before build because target FE Git repository triggered Git dubious-ownership protection.
-- No global `safe.directory` config was written.
-- No candidate rebuild, symlink switch, service activation, migration, DB or business mutation occurred.
-- Rollback handler only reconfirmed old runtime health: FE `200`, BE ready `200`.
-- Classification: `GIT_SAFE_DIRECTORY_GUARD / PRECHECK_ONLY`.
-- **EXACT NEXT:** rerun only C1-R2a with every candidate Git invocation scoped as `git -c safe.directory=<candidate> ...`; then clean Node-preset rebuild, isolated 5187 HTTP=200 proof, BE target activation without migrations, FE activation and narrow smoke.
+1. finish two-parent reconciliation of PR #88 with operational branch;
+2. re-run exact-head Product UX gate if the accepted tree/head changes;
+3. merge PR #88 with `expected_head_sha` lock;
+4. start the consolidated final Backend-driven/Admin-control audit on fresh FE/BE branches from the accepted operational heads;
+5. complete all real gaps in Backend + Frontend + tests/docs;
+6. run exact-head CI on both repos;
+7. deploy the final combined release once, then perform live real-data/admin acceptance;
+8. fresh final DB backup + checksum + disposable restore;
+9. exactly one final real reboot + post-reboot acceptance;
+10. freeze/tag/handoff and close FE #78 / BE #21 when all evidence is green.
