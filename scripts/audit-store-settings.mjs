@@ -161,7 +161,9 @@ const contactTransportReady =
   finalTechnicalApi.includes('method: "POST"');
 
 if ((contactHasInteractiveForm || contactClaimsSuccess) && !contactTransportReady) {
-  failures.push("Contact route must not expose a false-success form without a real Backend transport.");
+  failures.push(
+    "Contact route must not expose a false-success form without a real Backend transport.",
+  );
 }
 if (contactTransportReady && !contactHasInteractiveForm) {
   failures.push("Live contact transport exists but the Contact route has no interactive form.");
