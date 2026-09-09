@@ -47,7 +47,9 @@ export function TickerStrip() {
           className="tech flex items-center gap-6 whitespace-nowrap px-6 text-obsidian"
         >
           {text}
-          <span aria-hidden="true" className="text-obsidian/70">✦</span>
+          <span aria-hidden="true" className="text-obsidian/70">
+            ✦
+          </span>
         </span>
       ))}
     </div>

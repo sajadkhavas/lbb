@@ -65,7 +65,9 @@ async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | n
   }
 }
 
-async function resolveLiveFeaturedStory(control: StorefrontControl): Promise<LiveFeaturedStory | null> {
+async function resolveLiveFeaturedStory(
+  control: StorefrontControl,
+): Promise<LiveFeaturedStory | null> {
   if (!control.featuredStory.enabled || !control.featuredStory.collectionSlug.trim()) return null;
 
   try {
@@ -182,7 +184,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { control, heroProduct, categories, products, lookbook, featuredStory } = Route.useLoaderData();
+  const { control, heroProduct, categories, products, lookbook, featuredStory } =
+    Route.useLoaderData();
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;

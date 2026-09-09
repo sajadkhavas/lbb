@@ -4,9 +4,19 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { CtaClasses, Shell, StatePanel, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
+import {
+  CtaClasses,
+  Shell,
+  StatePanel,
+  StatusTag,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
 import { isLiveBackend, type DeliveryMethod } from "@/lib/backend-api";
-import { getDeliveryOptions, type DeliveryOptionDto, type DeliveryOptionsDto } from "@/lib/backend-delivery";
+import {
+  getDeliveryOptions,
+  type DeliveryOptionDto,
+  type DeliveryOptionsDto,
+} from "@/lib/backend-delivery";
 import { contentParagraphs, resolveOptionalStorefrontPage } from "@/lib/content-page";
 import { pageMeta, canonical, breadcrumbLd, ROBOTS } from "@/lib/site";
 import { useStorefrontControl, type ReturnsPolicyControl } from "@/lib/storefront-control";
@@ -80,7 +90,10 @@ export const Route = createFileRoute("/shipping-returns")({
   component: ShippingReturnsPage,
 });
 
-function findMethod(options: DeliveryOptionsDto, method: DeliveryMethod): DeliveryOptionDto | undefined {
+function findMethod(
+  options: DeliveryOptionsDto,
+  method: DeliveryMethod,
+): DeliveryOptionDto | undefined {
   return options.methods.find((item) => item.method === method);
 }
 
@@ -105,7 +118,8 @@ function backendShippingCards(delivery: LiveDeliveryPolicy): ShippingCard[] {
       ? {
           id: "tipax",
           title: "تیپاکس",
-          description: tipax.feeNotice || "این روش ارسال بر اساس تنظیمات فعال Backend نمایش داده می‌شود.",
+          description:
+            tipax.feeNotice || "این روش ارسال بر اساس تنظیمات فعال Backend نمایش داده می‌شود.",
           deliveryTimeLabel: tipax.eta.label,
         }
       : null,
@@ -135,7 +149,8 @@ function ShippingState({ cards, live }: { cards: ShippingCard[] | null; live: bo
   if (!cards || cards.length === 0) {
     return (
       <StatePanel title="روش ارسال عمومی در دسترس نیست" tone="warning">
-        Backend در حال حاضر هیچ روش فعال و مجاز قابل نمایش برنگردانده است؛ Frontend روش یا هزینه‌ای حدس نمی‌زند.
+        Backend در حال حاضر هیچ روش فعال و مجاز قابل نمایش برنگردانده است؛ Frontend روش یا هزینه‌ای
+        حدس نمی‌زند.
       </StatePanel>
     );
   }
@@ -186,7 +201,8 @@ function ReturnsState({ policy, live }: { policy: ReturnsPolicyControl; live: bo
         }
         tone={policy.verification === "pending" ? "warning" : "info"}
       >
-        تا زمانی که سیاست در پنل به وضعیت فعال و تأییدشده نرسد، Frontend مهلت، هزینه یا تعهدی برای مرجوعی ایجاد نمی‌کند.
+        تا زمانی که سیاست در پنل به وضعیت فعال و تأییدشده نرسد، Frontend مهلت، هزینه یا تعهدی برای
+        مرجوعی ایجاد نمی‌کند.
       </StatePanel>
     );
   }
@@ -204,7 +220,9 @@ function ReturnsState({ policy, live }: { policy: ReturnsPolicyControl; live: bo
         </div>
         <div className="border-t border-hairline pt-3">
           <dt className="text-mute">تعویض</dt>
-          <dd className="mt-1 font-semibold text-bone">{policy.exchangeEnabled ? "فعال" : "غیرفعال"}</dd>
+          <dd className="mt-1 font-semibold text-bone">
+            {policy.exchangeEnabled ? "فعال" : "غیرفعال"}
+          </dd>
         </div>
         {policy.returnWindowDays !== null ? (
           <div className="border-t border-hairline pt-3">
@@ -283,7 +301,9 @@ function ShippingReturnsPage() {
 
         <header className="mx-auto max-w-[980px] px-4 py-10 md:px-8 md:py-14">
           <TechLabel tone="signal">DELIVERY / RETURNS / BACKEND</TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">{page?.title || "ارسال، تعویض و مرجوعی"}</h1>
+          <h1 className="mt-3 text-display-2 text-bone">
+            {page?.title || "ارسال، تعویض و مرجوعی"}
+          </h1>
           <p className="mt-4 max-w-[70ch] text-sm leading-8 text-metal">
             {page?.excerpt ||
               "روش ارسال از Delivery API و سیاست مرجوعی از پنل مدیریت خوانده می‌شود؛ اطلاعات منتشرنشده در Frontend حدس زده نمی‌شوند."}
@@ -308,7 +328,9 @@ function ShippingReturnsPage() {
               </span>
               <div>
                 <TechLabel tone="signal">DELIVERY API</TechLabel>
-                <h2 id="shipping-title" className="mt-1 text-xl font-bold text-bone">روش‌های ارسال</h2>
+                <h2 id="shipping-title" className="mt-1 text-xl font-bold text-bone">
+                  روش‌های ارسال
+                </h2>
               </div>
             </div>
             <ShippingState cards={shippingCards} live={live} />
@@ -321,7 +343,9 @@ function ShippingReturnsPage() {
               </span>
               <div>
                 <TechLabel tone="signal">ADMIN POLICY</TechLabel>
-                <h2 id="returns-title" className="mt-1 text-xl font-bold text-bone">تعویض و مرجوعی</h2>
+                <h2 id="returns-title" className="mt-1 text-xl font-bold text-bone">
+                  تعویض و مرجوعی
+                </h2>
               </div>
             </div>
             <ReturnsState policy={policies.returns} live={live} />
@@ -329,14 +353,23 @@ function ShippingReturnsPage() {
 
           {!page && live ? (
             <StatePanel title="متن کامل سیاست هنوز از پنل منتشر نشده است" tone="info">
-              وضعیت عملیاتی بالا از Backend می‌آید؛ متن حقوقی تفصیلی فقط بعد از انتشار ContentPage این مسیر نمایش داده خواهد شد.
+              وضعیت عملیاتی بالا از Backend می‌آید؛ متن حقوقی تفصیلی فقط بعد از انتشار ContentPage
+              این مسیر نمایش داده خواهد شد.
             </StatePanel>
           ) : null}
 
           <div className="flex flex-wrap gap-3 border-t border-hairline pt-8">
-            <Link to="/terms" className={CtaClasses("line")}>شرایط استفاده</Link>
-            <Link to="/contact" className={CtaClasses("signal")}>پشتیبانی<ArrowUpLeft size={16} aria-hidden="true" /></Link>
-            <Link to="/shop" className={CtaClasses("line")}>بازگشت به فروشگاه<RefreshCcw size={15} aria-hidden="true" /></Link>
+            <Link to="/terms" className={CtaClasses("line")}>
+              شرایط استفاده
+            </Link>
+            <Link to="/contact" className={CtaClasses("signal")}>
+              پشتیبانی
+              <ArrowUpLeft size={16} aria-hidden="true" />
+            </Link>
+            <Link to="/shop" className={CtaClasses("line")}>
+              بازگشت به فروشگاه
+              <RefreshCcw size={15} aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </main>

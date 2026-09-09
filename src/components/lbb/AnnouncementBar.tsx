@@ -78,21 +78,33 @@ export function AnnouncementBar({
       className="fixed inset-x-0 top-0 z-[calc(var(--z-nav)+1)] grid grid-cols-[auto_minmax(0,1fr)_auto] items-center bg-signal text-obsidian"
       style={{ height: ANNOUNCEMENT_HEIGHT }}
     >
-      <span aria-hidden="true" className="tech ps-3 text-obsidian">{brand.nameFa} / خبر</span>
+      <span aria-hidden="true" className="tech ps-3 text-obsidian">
+        {brand.nameFa} / خبر
+      </span>
       <a
         href={current.href}
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
         className="tech flex min-w-0 items-center justify-center gap-3 truncate px-3 text-center text-obsidian focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-obsidian"
       >
-        <span aria-live="polite" className="truncate">{current.text}</span>
+        <span aria-live="polite" className="truncate">
+          {current.text}
+        </span>
         <span aria-hidden="true" className="hidden gap-1 sm:flex">
           {safeAnnouncements.map((message, messageIndex) => (
-            <span key={`${message.href}-${message.text}`} className={`h-1 w-3 ${messageIndex === index ? "bg-obsidian" : "bg-obsidian/30"}`} />
+            <span
+              key={`${message.href}-${message.text}`}
+              className={`h-1 w-3 ${messageIndex === index ? "bg-obsidian" : "bg-obsidian/30"}`}
+            />
           ))}
         </span>
       </a>
-      <button type="button" aria-label="بستن نوار اطلاعیه" onClick={dismiss} className="grid h-8 w-10 place-items-center text-obsidian/75 transition-colors hover:text-obsidian">
+      <button
+        type="button"
+        aria-label="بستن نوار اطلاعیه"
+        onClick={dismiss}
+        className="grid h-8 w-10 place-items-center text-obsidian/75 transition-colors hover:text-obsidian"
+      >
         <X size={14} aria-hidden="true" />
       </button>
     </aside>

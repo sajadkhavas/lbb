@@ -1,4 +1,12 @@
-import { CircleHelp, Headphones, MapPin, PackageCheck, Ruler, ScanText, type LucideIcon } from "lucide-react";
+import {
+  CircleHelp,
+  Headphones,
+  MapPin,
+  PackageCheck,
+  Ruler,
+  ScanText,
+  type LucideIcon,
+} from "lucide-react";
 import { safePublicHref } from "@/lib/public-href";
 import { useStorefrontControl } from "@/lib/storefront-control";
 
@@ -46,7 +54,10 @@ export function TrustStrip() {
               {content}
             </a>
           ) : (
-            <div key={`${item.title}-${index}`} className="flex items-start gap-3 px-2 py-2 md:px-5">
+            <div
+              key={`${item.title}-${index}`}
+              className="flex items-start gap-3 px-2 py-2 md:px-5"
+            >
               {content}
             </div>
           );

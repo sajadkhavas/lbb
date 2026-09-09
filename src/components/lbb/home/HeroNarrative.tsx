@@ -59,7 +59,10 @@ export function HeroNarrative({
       className="relative isolate overflow-hidden bg-obsidian pt-[var(--lbb-nav-h)] text-bone"
     >
       <div aria-hidden="true" className="absolute inset-0 grid-marks opacity-55" />
-      <div aria-hidden="true" className="absolute -left-24 top-24 h-72 w-72 rounded-full bg-signal/10 blur-3xl" />
+      <div
+        aria-hidden="true"
+        className="absolute -left-24 top-24 h-72 w-72 rounded-full bg-signal/10 blur-3xl"
+      />
 
       <div className="relative grid min-h-[calc(100svh-var(--lbb-nav-h))] lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)]">
         <div className="order-2 flex min-w-0 flex-col justify-between border-t border-hairline px-[var(--lbb-gutter)] py-10 lg:order-1 lg:border-l lg:border-t-0 lg:py-12 xl:py-16">
@@ -70,7 +73,10 @@ export function HeroNarrative({
               <TechLabel>{brand.slogan}</TechLabel>
             </div>
 
-            <h1 id="home-hero-title" className="mt-7 max-w-[12ch] text-hero leading-[0.95] text-bone">
+            <h1
+              id="home-hero-title"
+              className="mt-7 max-w-[12ch] text-hero leading-[0.95] text-bone"
+            >
               {copy.heroTitle}
             </h1>
 
@@ -108,7 +114,13 @@ export function HeroNarrative({
                           className="inline-flex min-h-11 items-center gap-2 border border-hairline px-4 text-xs font-semibold text-bone transition-colors hover:border-signal hover:text-signal"
                         >
                           {category.icon ? (
-                            <img src={category.icon} alt="" width={20} height={20} className="h-5 w-5 object-contain" />
+                            <img
+                              src={category.icon}
+                              alt=""
+                              width={20}
+                              height={20}
+                              className="h-5 w-5 object-contain"
+                            />
                           ) : null}
                           {category.name}
                         </Link>
@@ -128,7 +140,9 @@ export function HeroNarrative({
               </ul>
             </nav>
             {source === "live" && liveQuickCategories.length === 0 ? (
-              <p className="text-xs leading-6 text-mute">هنوز دسته‌ای برای دسترسی سریع از پنل مدیریت فعال نشده است.</p>
+              <p className="text-xs leading-6 text-mute">
+                هنوز دسته‌ای برای دسترسی سریع از پنل مدیریت فعال نشده است.
+              </p>
             ) : null}
           </div>
         </div>
@@ -157,7 +171,10 @@ export function HeroNarrative({
               تصویر محصول منتخب در حال تکمیل است.
             </div>
           )}
-          <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/10 to-transparent lg:bg-gradient-to-r lg:from-obsidian/65 lg:via-transparent" />
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/10 to-transparent lg:bg-gradient-to-r lg:from-obsidian/65 lg:via-transparent"
+          />
           <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-bone/30" />
 
           {heroProduct ? (
@@ -167,7 +184,15 @@ export function HeroNarrative({
               className="group absolute bottom-5 right-5 grid w-[min(360px,calc(100%-2.5rem))] grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-hairline-strong bg-obsidian/95 p-2 text-bone shadow-overlay backdrop-blur md:bottom-8 md:right-8"
             >
               {heroProduct.image ? (
-                <img src={heroProduct.image} alt="" width={64} height={80} loading="eager" decoding="async" className="h-20 w-16 rounded-xl object-cover" />
+                <img
+                  src={heroProduct.image}
+                  alt=""
+                  width={64}
+                  height={80}
+                  loading="eager"
+                  decoding="async"
+                  className="h-20 w-16 rounded-xl object-cover"
+                />
               ) : (
                 <span aria-hidden="true" className="h-20 w-16 rounded-xl bg-carbon-2" />
               )}
@@ -175,10 +200,16 @@ export function HeroNarrative({
                 <TechLabel tone="signal">HERO PIECE</TechLabel>
                 <span className="mt-1 block truncate text-sm font-black">{heroProduct.name}</span>
                 <span className="num mt-1 block text-xs text-metal">
-                  {heroProduct.priceToman === null ? "قیمت در صفحه محصول" : fmtToman(heroProduct.priceToman)}
+                  {heroProduct.priceToman === null
+                    ? "قیمت در صفحه محصول"
+                    : fmtToman(heroProduct.priceToman)}
                 </span>
               </span>
-              <ArrowUpLeft size={18} aria-hidden="true" className="text-mute transition-colors group-hover:text-signal" />
+              <ArrowUpLeft
+                size={18}
+                aria-hidden="true"
+                className="text-mute transition-colors group-hover:text-signal"
+              />
             </Link>
           ) : null}
 
