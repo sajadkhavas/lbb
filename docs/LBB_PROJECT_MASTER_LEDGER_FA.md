@@ -1,9 +1,10 @@
 # LBB — Project Master Ledger (FA)
 
 **Authoritative continuation ledger / مرجع واحد ادامه پروژه**  
-Created: `2026-09-09`
+Created: `2026-09-09`  
+Last synchronized checkpoint: `2026-09-09 — FINAL_ADMIN_DRIVEN_PRE_DEPLOY_ACCEPTED`
 
-در صورت تعارض، Runtime evidence و GitHub exact SHA/PR/CI جدیدتر بر متن قدیمی مقدم‌اند. بعد از هر checkpoint مهم، SHA/PR/CI/Runtime/Data mutation/Commerce state/EXACT NEXT در همین فایل ثبت می‌شود.
+در صورت تعارض، Runtime evidence و GitHub exact SHA/PR/CI جدیدتر بر متن قدیمی مقدم‌اند. هیچ مرحله‌ای بدون evidence واقعی `DONE` محسوب نمی‌شود.
 
 ---
 
@@ -14,17 +15,25 @@ Created: `2026-09-09`
 - Repo: `sajadkhavas/lbb`
 - Operational branch: `fix/lbb-local-boutique-homepage`
 - Production URL: `https://lbbclo.com`
-- Current Production SHA before PR #88 deployment: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
-- Current Product UX branch: `hotfix/final-product-ux`
-- Product UX PR: `#88`
-- PR #88 accepted implementation head before base reconciliation: `2876eb83ed7a58ba937f8514d26e090bbd28ae05`
+- **Current Production SHA before final deployment:** `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- Final Product UX PR: `#88` — MERGED / DO NOT REDO
+  - accepted head: `561b5e4042eafda819e2437d80276ce5410b4229`
+  - merge SHA: `3d11cae296e83f30d43cfb4f0d0fd1f89dd36313`
+- Final Admin-driven Storefront PR: `#90` — MERGED
+  - accepted exact head: `7c6ff6b1292db094859549aa4b8010cf10dfd21e`
+  - merge SHA: `f37bd5c2919181c4ea09e9666974d4473aa140cc`
+  - accepted source tree = merge tree: `84cf2263c7424ebe179c98e49c533231d5d792a0`
 
 ### Backend
 
 - Repo: `sajadkhavas/lbb-backend`
 - API/Admin: `https://api.lbbclo.com`
-- Current Production SHA: `e69637548de98681830308291a60777068350bfa`
-- Current public API contract: `2026-09-06-p3-storefront-v1`
+- **Current Production SHA before final deployment:** `e69637548de98681830308291a60777068350bfa`
+- Final Admin-driven Storefront Controls PR: `#29` — MERGED
+  - accepted exact head: `67b6d1166e1e8e563d4d52b208eaec270eca8234`
+  - merge SHA: `8482b6eda370ebe2ca32a674283f67b82eed8629`
+  - accepted source tree = merge tree: `3602bad03dd1c591ec5cb4a1f09cb5be32d52f1e`
+- Public API contract remains additive/backward-compatible: `2026-09-06-p3-storefront-v1`
 
 ### Commerce lock
 
@@ -32,7 +41,7 @@ Created: `2026-09-09`
 - `payment.enabled=false`
 - `provider=disabled`
 
-These values must stay fail-closed until the separate external activation gates.
+These values must stay fail-closed until separate external activation gates are explicitly satisfied.
 
 ---
 
@@ -51,163 +60,225 @@ These values must stay fail-closed until the separate external activation gates.
 - catalog provenance/content/legal/SEO historical gates
 - FC1 Backend PR #27 / Frontend PR #86
 - Final Technical Completion Backend PR #28 / Frontend PR #87
+- Final Product UX PR #88
+- Final Admin-driven Storefront Frontend PR #90
+- Final Admin-driven Storefront Backend PR #29
 - already-applied additive Backend migrations listed below
 
-Never intentionally re-run or roll back already accepted additive migrations only to repeat evidence.
+Never intentionally re-run accepted migrations, shipping work, Product UX work, or Admin-driven wiring solely to reproduce evidence.
 
 ---
 
-## 3) Final Technical Completion already merged/deployed
+## 3) Previously deployed Final Technical Completion
 
 ### Frontend PR #87
 
 - accepted source: `7435049fcc2336fc744ff6d8d494a048705be5fd`
-- merge/runtime SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
+- deployed runtime SHA: `d5014061c1a933fd4078acc38b8fa21c5c8f628c`
 - Quality #459 PASS
 - P3 Live Integration #103 PASS
 - PWA #55 PASS
 - review threads 0
 
-Implemented: Admin-backed taxonomy/navigation, Home category/Hero hydration, latest products, verified preview images, Contact, Track Order, account Cart/Wishlist sync, Lookbook/social hydration, no prototype leakage, FC1 mannequin card integration.
-
 ### Backend PR #28
 
 - accepted source: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
-- merge/runtime SHA: `e69637548de98681830308291a60777068350bfa`
+- deployed runtime SHA: `e69637548de98681830308291a60777068350bfa`
 
-Implemented: three-level category hierarchy, Admin parent/header/home/icon controls, verified `previewImages`, Inquiry/Contact API, privacy-safe Track Order, account storefront state, Launch Readiness/Admin surfaces.
+This pair remains Production until the final combined deployment described in `EXACT NEXT`.
 
 ---
 
-## 4) Production schema/cutover truth
+## 4) Production schema / cutover truth
 
-Already Ran in Production:
+Already ran in Production:
 
 - `2026_09_09_020000_add_style_mannequin_profile_to_products_table.php`
 - `2026_09_09_120000_extend_categories_for_storefront_taxonomy.php`
 - `2026_09_09_123000_create_customer_storefront_state_tables.php`
 
-Cutover backup:
+These migrations are already accepted and **must not be repeated for the final Admin-driven pass**.
+
+Previous cutover backup:
+
 `/var/www/lbb/backend/shared/deploy-backups/final-cutover-20260909T135054Z/lbb-pre-final-cutover-20260909T135054Z.sql.gz`
 
 SHA256:
+
 `e38eaa11bf2d5c9d1227dd6cf54db0fa8fc00eb41830e0fbec12d9029b69e442`
 
-C1 first activation failed because the FE artifact was built with Nitro `cloudflare-module` for a Node/systemd runtime. Classification: `FRONTEND_BUILD_RUNTIME_PRESET_MISMATCH`.
-
-C1-R2 then stopped pre-build on Git dubious ownership. Classification: `GIT_SAFE_DIRECTORY_GUARD / PRECHECK_ONLY`; no global safe.directory change was accepted.
-
-C1-R2A used scoped `git -c safe.directory=...`, explicit `NITRO_PRESET=node-server`, isolated port 5187 acceptance, and bounded activation. Final active runtime became FE `d5014061...` / BE `e6963754...`; migrations were not repeated and Commerce stayed fail-closed.
+C1 first activation failed because FE built with Nitro `cloudflare-module` for a Node/systemd runtime. Accepted repair C1-R2A used scoped `git -c safe.directory=...`, explicit `NITRO_PRESET=node-server`, isolated port `5187` acceptance and atomic switch. Do not regress to auto-detected Cloudflare preset.
 
 ---
 
 ## 5) Current business truth
 
-- Existing eight catalog rows are legacy/sample records and are not accepted as final employer merchandise.
+- Existing eight catalog rows are technically clean legacy/sample records classified `LEGACY_FRONTEND_CATALOG_MIGRATED / OWNER-UNVERIFIED`.
+- They are not automatically accepted as final employer merchandise/inventory.
 - Real employer products must be entered/reviewed through Admin.
-- Samples should stay Draft/Inactive by default rather than be destructively deleted.
-- Only categories with real published products should become public/indexable.
-- Store-facing configurable content should be Backend/Admin-driven.
+- Prefer Draft/Inactive for unverified samples rather than destructive deletion.
+- Only categories with genuine published products should be public/indexable.
+- Unknown legal/commercial facts must remain pending/disabled until owner verification.
+- No final-pass PR mutates Production business data.
 
 ---
 
-## 6) PR #88 — Final Product UX Hotfix
+## 6) PR #88 — Final Product UX Hotfix — CLOSED
 
-Owner-required bounded recovery:
+Accepted user-required recovery includes:
 
-1. restore live Backend Quick View / Eye preview;
-2. show real Backend product detail inside Quick View;
-3. restore Backend size labels on cards;
-4. preserve mobile swipe before PDP navigation and suppress accidental navigation after a swipe;
-5. preserve desktop multi-image preview;
-6. make card media full-width;
-7. preserve FC1 2D mannequin support;
-8. mildly round PDP gallery corners;
-9. improve desktop PDP composition without regressing mobile.
+- Backend Quick View / Eye preview restored;
+- real Backend detail inside Quick View;
+- Backend size labels on cards;
+- mobile swipe before PDP navigation with accidental-navigation suppression;
+- desktop multi-image preview;
+- full-width `4:5` card media;
+- FC1 2D mannequin contract retained;
+- mildly rounded PDP gallery;
+- desktop PDP composition polish while preserving good mobile UX.
 
-Important implementation commits include:
+Acceptance evidence:
 
-- `c521db486741b87f500f90a64619aa56c91f0b2c` sizes
-- `d804c64cb15375e89c5d0ccadd3ecd241e66842a` safe Quick View target model
-- `d67b66805abd7afe469bf1bc018fa1b07c6aeaf7` Backend Quick View/detail
-- `584a0ccb8960a46849a71e51a21553d85530489e` Eye/full-width media/mobile swipe guard
-- `4009e4d1bab2c46fff106aeb22c65a3538faa2f8` Backend Quick View dispatch
-- `ee07c56b806b836980c51756f18d8e18e621b38a` PDP gallery framing
-- `9ebc7500af264e93836af4dc46b09e44ca398df1` desktop purchase panel
-- `ab5fc72ba66b8aae8078572dd06411ba16e45fd0` desktop identity hierarchy
-- `85eb046ee818f6790f6d2c9ac235dbd7be743820` focused acceptance tests
-- `f156829c7bedb343cf2bc2e848ab99a5d66805e4` official-reference decision record
+- accepted head `561b5e4042eafda819e2437d80276ce5410b4229`
+- merge `3d11cae296e83f30d43cfb4f0d0fd1f89dd36313`
+- exact Product UX full-quality/P3 acceptance PASS
+- bounded Playwright baseline update PASS
+- review threads 0
 
-### Exact acceptance evidence
-
-- Visual baseline updater run `34374342196`: PASS.
-- Guard proved exactly 14 expected Playwright PNG baselines changed; no Source/Config delta.
-- Exact Final Product UX Gate run `34374653797`: PASS.
-- `exact-quality`: PASS, including complete repository quality suite and focused Product UX acceptance.
-- `exact-p3-contract`: PASS, including format/lint/typecheck/P3 invariants.
-- PR review/comments at acceptance: 0.
-- PR moved from Draft to Ready.
-- No Production/DB/schema/business/commerce mutation occurred during PR #88 CI remediation.
-
-### Base reconciliation
-
-Operational branch contains four post-PR87 documentation-only commits; compared with the PR baseline, their only changed file is this Ledger. Source code has no base conflict. Reconciliation therefore preserves the Product UX tree and the newer operational history in one two-parent merge commit before PR #88 merge.
+`PR_88_FINAL_PRODUCT_UX = DONE / MERGED / DO_NOT_REDO`
 
 ---
 
-## 7) Final owner request — last engineering pass
+## 7) Final Admin-driven Storefront pass — MERGED / PRE-DEPLOY ACCEPTED
 
-After PR #88 closes, perform one consolidated Backend/Frontend control audit before final server handoff:
+### Frontend PR #90
 
-- inventory every user-visible business/content surface in Frontend;
-- classify each as live Backend/Admin controlled, intentionally static application UI, or remaining hardcoded business content;
-- create/fix Backend models/settings/Admin resources/API fields for every remaining editable business surface;
-- wire Frontend to the Backend contract with fail-closed behavior and no prototype/sample leakage;
-- ensure contact/store identity, menus, banners/Hero, categories, social/Lookbook, legal/business copy, configurable section visibility/order, merchandising selections and other owner-managed values can be edited without source changes where appropriate;
-- keep structural UI labels and security-critical behavior in code when they are application semantics rather than business content;
-- add contract/feature/UI tests and official-reference documentation;
-- do not activate Checkout/Payment/Kavenegar/WebPush without their separate real credentials/acceptance.
+- title: `Final: make production storefront fully Admin-driven`
+- accepted exact head: `7c6ff6b1292db094859549aa4b8010cf10dfd21e`
+- Quality Gates #482 / run `34384484660`: PASS
+- P3 Live Integration #126 / run `34384484666`: PASS
+- review threads: 0
+- merge SHA: `f37bd5c2919181c4ea09e9666974d4473aa140cc`
+- accepted source tree = merge tree: `84cf2263c7424ebe179c98e49c533231d5d792a0`
 
-The completion criterion is: after this pass, normal store/business maintenance can be performed from Admin rather than by editing Frontend source.
+### Backend PR #29
+
+- title: `Final: add Admin-driven storefront presentation controls`
+- accepted exact head: `67b6d1166e1e8e563d4d52b208eaec270eca8234`
+- P3 Storefront Integration #65 / run `34386908332`: PASS
+  - SQLite full suite: PASS
+  - Pint delta: PASS
+  - foundation/secret safety: PASS
+  - MySQL regression: PASS
+  - real two-process oversell race: PASS
+- review threads: 0
+- merge SHA: `8482b6eda370ebe2ca32a674283f67b82eed8629`
+- accepted source tree = merge tree: `3602bad03dd1c591ec5cb4a1f09cb5be32d52f1e`
+
+### Admin / Backend authority now implemented
+
+Normal store/business maintenance is designed to come from Backend/Admin rather than Frontend source:
+
+- brand identity and primary copy;
+- Home Hero product and section copy;
+- ticker / trust cards;
+- category ordering and Home category presentation;
+- latest-product presentation copy;
+- Decision Support;
+- Local Store section;
+- Featured Collection Story using a real Backend collection slug;
+- Instagram/Lookbook CTAs and public social links;
+- public phone / WhatsApp / email / address / map / opening hours;
+- global Size Guide via Backend content authority;
+- Terms and Privacy via Backend content authority;
+- Shipping methods via Delivery API;
+- Returns policy via Admin setting;
+- Enamad display via verified Admin setting;
+- SEO defaults;
+- Admin-managed public links constrained to internal `/...` or HTTPS.
+
+Prototype/sample truth remains available only for explicit non-production prototype behavior and is not the authority in `live` mode.
+
+### Backend architecture
+
+- existing `StoreSetting`, `ContentPage`, catalog, FAQ, Gallery/Lookbook and Post infrastructure reused;
+- no parallel CMS introduced;
+- no new schema migration required;
+- Admin values override safe presentation defaults;
+- legal/commercial defaults stay disabled/pending rather than being invented;
+- Checkout/Payment state is derived from Backend runtime config, not editable presentation settings;
+- stale unrelated ToolMaster `SiteDataSeeder.php` source removed; Production DB unaffected.
+
+Tracked authority matrix:
+
+`docs/FINAL_ADMIN_DRIVEN_STOREFRONT_AUDIT_FA.md`
+
+Issue evidence:
+
+- Frontend #78 comment `5606553510`
+- Backend #21 comment `5606556784`
+
+`FINAL_ADMIN_DRIVEN_CODE = DONE / MERGED / EXACT_HEAD_GREEN / PRE_DEPLOY_ACCEPTED`
 
 ---
 
-## 8) External blockers, not ordinary code incompleteness
+## 8) Official implementation references used
 
-- Kavenegar production account/template/credentials + real OTP activation test
+Architecture was kept aligned with the official documentation for the actual stack:
+
+- Laravel 12 — Eloquent casts / JSON structured values;
+- Filament 3 — Repeater and structured form controls for repeatable Admin JSON data;
+- TanStack Router — route/root data loading and shared route context for SSR/SEO-friendly authority;
+- Playwright — stable-environment visual snapshot and assertion workflow;
+- Nitro — explicit production preset selection; LBB runtime requires `node-server`.
+
+Project evidence and versioned tests remain the final authority for LBB-specific behavior.
+
+---
+
+## 9) External blockers — not ordinary code incompleteness
+
+- Kavenegar production account/template/API credentials + real OTP activation test
 - Zarinpal merchant approval/credentials + controlled payment activation
 - Web Push may remain disabled when VAPID is absent
 
----
-
-## 9) Mandatory update protocol
-
-At every important checkpoint record:
-
-- date/time
-- START/END/accepted SHA
-- PR/Issue
-- CI/run/evidence
-- Production runtime identity if changed
-- schema/business mutation YES/NO
-- Commerce state
-- failure classification if any
-- DO NOT REDO additions
-- `EXACT NEXT`
-
-Never mark a phase Done without exact evidence.
+These are separate activation gates and do not justify re-opening completed storefront engineering.
 
 ---
 
-## 10) EXACT NEXT
+## 10) Mandatory update protocol
 
-1. finish two-parent reconciliation of PR #88 with operational branch;
-2. re-run exact-head Product UX gate if the accepted tree/head changes;
-3. merge PR #88 with `expected_head_sha` lock;
-4. start the consolidated final Backend-driven/Admin-control audit on fresh FE/BE branches from the accepted operational heads;
-5. complete all real gaps in Backend + Frontend + tests/docs;
-6. run exact-head CI on both repos;
-7. deploy the final combined release once, then perform live real-data/admin acceptance;
-8. fresh final DB backup + checksum + disposable restore;
-9. exactly one final real reboot + post-reboot acceptance;
-10. freeze/tag/handoff and close FE #78 / BE #21 when all evidence is green.
+At every remaining checkpoint record:
+
+- date/time;
+- START/END/accepted SHA;
+- PR/Issue;
+- CI/run/evidence;
+- Production runtime identity if changed;
+- schema/business mutation YES/NO;
+- Commerce state;
+- failure classification if any;
+- DO NOT REDO additions;
+- `EXACT NEXT`.
+
+Never mark deployment/handoff Done without live evidence.
+
+---
+
+## 11) EXACT NEXT
+
+`FINAL_IMMUTABLE_ADMIN_DRIVEN_DEPLOYMENT`
+
+1. deploy Backend merge `8482b6eda370ebe2ca32a674283f67b82eed8629` and Frontend merge `f37bd5c2919181c4ea09e9666974d4473aa140cc` as new immutable releases;
+2. **run no migrations** in this deployment;
+3. preserve Backend shared `.env` / storage/media and Frontend immutable `releases/current` topology;
+4. build Frontend explicitly with `NITRO_PRESET=node-server` and prove isolated port `5187` HTTP acceptance before switch;
+5. atomically switch Backend and Frontend with bounded rollback to current Production SHAs if application activation fails;
+6. verify health/ready/bootstrap, public routes, Admin-driven authority and `checkout=false / payment=false / provider=disabled`;
+7. perform live Product UX acceptance for Quick View, sizes, swipe/preview, card media, PDP and one controlled mannequin configuration without silently publishing false product truth;
+8. enter/review real employer data through Admin; keep unknown legal/Enamad/returns facts pending/disabled until verified;
+9. after real-data/live acceptance, create a **fresh final MySQL backup + SHA256 + disposable restore acceptance**;
+10. perform exactly one final real server reboot and post-reboot acceptance;
+11. freeze/tag/handoff and then close FE #78 / BE #21 only when all evidence is green.
+
+Current Production remains FE `d5014061c1a933fd4078acc38b8fa21c5c8f628c` / BE `e69637548de98681830308291a60777068350bfa` until step 1 succeeds.
