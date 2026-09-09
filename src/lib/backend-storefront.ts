@@ -13,6 +13,7 @@ import type {
   ProductDecisionViewModel,
 } from "@/lib/product-decision";
 import type { Filters, SortKey } from "@/lib/product-filter";
+import type { MannequinProfileDto } from "@/lib/style-mannequin";
 
 export type BackendCatalogCard = {
   source: "backend";
@@ -29,9 +30,16 @@ export type BackendCatalogCard = {
   colors: ProductSummaryDto["colors"];
   sizes: ProductSummaryDto["sizes"];
   primaryImage: string | null;
+  mannequin: MannequinProfileDto | null;
+};
+
+type ProductSummaryWithMannequin = ProductSummaryDto & {
+  mannequin?: MannequinProfileDto | null;
 };
 
 export function backendCard(product: ProductSummaryDto): BackendCatalogCard {
+  const mannequin = (product as ProductSummaryWithMannequin).mannequin;
+
   return {
     source: "backend",
     id: product.publicId,
@@ -47,6 +55,7 @@ export function backendCard(product: ProductSummaryDto): BackendCatalogCard {
     colors: product.colors,
     sizes: product.sizes,
     primaryImage: product.primaryImage,
+    mannequin: mannequin ?? null,
   };
 }
 
