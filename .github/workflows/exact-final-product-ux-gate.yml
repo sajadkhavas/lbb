@@ -1,0 +1,110 @@
+name: Exact Final Product UX Gate
+
+on:
+  push:
+    branches:
+      - hotfix/final-product-ux-gate
+
+permissions:
+  contents: read
+
+env:
+  TARGET_SHA: 6d32d3f8d0bf81e63c1f34063f2fab55a0c83bb0
+  VITE_SITE_URL: https://lbb.example.test
+  VITE_LBB_BACKEND_MODE: prototype
+
+jobs:
+  exact-quality:
+    name: exact-quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    steps:
+      - name: Checkout exact frozen implementation
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 6d32d3f8d0bf81e63c1f34063f2fab55a0c83bb0
+          fetch-depth: 1
+
+      - name: Lock exact source identity
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$TARGET_SHA"
+          printf 'TARGET_SHA=%s\nACTUAL_SHA=%s\nTREE_SHA=%s\n' \
+            "$TARGET_SHA" "$ACTUAL_SHA" "$(git rev-parse HEAD^{tree})"
+          sha256sum package-lock.json
+          git status --short
+
+      - name: Setup Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run complete repository quality suite
+        run: npm run quality
+
+      - name: Run focused final Product UX acceptance
+        run: npx playwright test tests/final-product-ux-hotfix.spec.ts --project=chromium
+
+  exact-p3-contract:
+    name: exact-p3-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact frozen implementation
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 6d32d3f8d0bf81e63c1f34063f2fab55a0c83bb0
+          fetch-depth: 1
+
+      - name: Lock exact source identity
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          printf 'TARGET_SHA=%s\nTREE_SHA=%s\n' "$TARGET_SHA" "$(git rev-parse HEAD^{tree})"
+
+      - name: Setup Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Format lint and type contract
+        run: |
+          npm run format:check
+          npm run lint
+          npm run typecheck
+
+      - name: Assert P3 live-control invariants
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs')
+          const api = fs.readFileSync('src/lib/backend-api.ts', 'utf8')
+          const control = fs.readFileSync('src/lib/storefront-control.tsx', 'utf8')
+          const root = fs.readFileSync('src/routes/__root.tsx', 'utf8')
+          const home = fs.readFileSync('src/routes/index.tsx', 'utf8')
+          if (!api.includes('2026-09-06-p3-storefront-v1')) throw new Error('P3 contract version missing')
+          if (!control.includes('source: "prototype"')) throw new Error('Explicit prototype mode missing')
+          if (!control.includes('/api/v1/storefront/bootstrap')) throw new Error('Storefront bootstrap consumer missing')
+          if (!root.includes('loader: () => resolveStorefrontControl()')) throw new Error('SSR root control loader missing')
+          if (!home.includes('getProduct(slug)')) throw new Error('Live hero product consumer missing')
+          if (!home.includes('resolveLiveHeroProduct(control.home.heroProductSlug)')) throw new Error('Fail-safe live hero resolver missing')
+          if (!home.includes('error instanceof BackendApiError')) throw new Error('BackendApiError guard missing')
+          if (!home.includes('error.status === 404')) throw new Error('Hero 404 guard missing')
+          if (!home.includes('error.code === "resource_not_found"')) throw new Error('Hero resource_not_found guard missing')
+          if (!home.includes('return null;')) throw new Error('Hero empty-state fallback missing')
+          console.log('P3_LIVE_CONTROL_INVARIANTS=PASS')
+          NODE
