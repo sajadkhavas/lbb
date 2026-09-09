@@ -28,7 +28,9 @@ jobs:
         run: npm ci
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.list.save
+          npx playwright install --with-deps chromium
 
       - name: Run complete quality suite
         run: npm run quality
