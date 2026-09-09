@@ -1,4 +1,5 @@
 import { CircleHelp, Headphones, MapPin, PackageCheck, Ruler, ScanText, type LucideIcon } from "lucide-react";
+import { safePublicHref } from "@/lib/public-href";
 import { useStorefrontControl } from "@/lib/storefront-control";
 
 const ICONS: Record<string, LucideIcon> = {
@@ -23,6 +24,7 @@ export function TrustStrip() {
       <div className="mx-auto grid max-w-[var(--lbb-shell-max)] grid-cols-1 gap-4 md:grid-cols-3 md:divide-x md:divide-x-reverse md:divide-hairline-soft">
         {items.map((item, index) => {
           const Icon = ICONS[item.icon] ?? CircleHelp;
+          const href = safePublicHref(item.href);
           const content = (
             <>
               <Icon size={21} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
@@ -33,10 +35,12 @@ export function TrustStrip() {
             </>
           );
 
-          return item.href ? (
+          return href ? (
             <a
               key={`${item.title}-${index}`}
-              href={item.href}
+              href={href}
+              target={href.startsWith("https://") ? "_blank" : undefined}
+              rel={href.startsWith("https://") ? "noopener noreferrer" : undefined}
               className="flex items-start gap-3 px-2 py-2 transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:px-5"
             >
               {content}
