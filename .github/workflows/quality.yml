@@ -29,7 +29,7 @@ jobs:
 
       - name: Install Chromium
         run: |
-          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.list.save
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*
           npx playwright install --with-deps chromium
 
       - name: Run complete quality suite
