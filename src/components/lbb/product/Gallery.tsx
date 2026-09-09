@@ -98,13 +98,13 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
   return (
     <div
       dir="rtl"
-      className="flex min-w-0 flex-col-reverse gap-3 md:sticky md:top-20 md:flex-row md:self-start"
+      className="flex min-w-0 flex-col-reverse gap-3 md:sticky md:top-20 md:flex-row md:self-start lg:top-24 lg:gap-4"
     >
       <div
         role="tablist"
         aria-label={media.length > 0 ? "تصاویر محصول" : "تصاویر محصول — رسانه تأیید نشده"}
         aria-orientation="vertical"
-        className="hidden md:flex md:w-20 md:flex-col md:gap-3"
+        className="hidden md:flex md:w-20 md:flex-col md:gap-3 lg:w-24"
       >
         {items.map((item, index) => (
           <button
@@ -125,13 +125,15 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
             tabIndex={index === active ? 0 : -1}
             onClick={() => scrollToIndex(index)}
             onKeyDown={(event) => onThumbKeyDown(event, index)}
-            className={`tap-target aspect-[4/5] overflow-hidden border bg-carbon transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
-              index === active ? "border-signal" : "border-hairline hover:border-metal"
+            className={`tap-target aspect-[4/5] overflow-hidden rounded-lg border bg-carbon transition-[border-color,opacity,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal lg:rounded-xl ${
+              index === active
+                ? "border-signal opacity-100"
+                : "border-hairline opacity-75 hover:border-metal hover:opacity-100"
             }`}
           >
             {item.placeholder ? (
               <span aria-hidden="true" className="grid h-full w-full place-items-center bg-carbon">
-                <span className="h-5 w-5 border border-hairline" />
+                <span className="h-5 w-5 rounded border border-hairline" />
               </span>
             ) : (
               <img
@@ -160,7 +162,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
           role="region"
           aria-roledescription="carousel"
           aria-label={`گالری تصاویر ${name}`}
-          className="group relative flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overflow-y-hidden border border-hairline bg-carbon [scrollbar-width:none] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal md:overflow-hidden [&::-webkit-scrollbar]:hidden"
+          className="group relative flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-xl border border-hairline bg-carbon shadow-[0_18px_55px_rgba(0,0,0,0.2)] [scrollbar-width:none] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal md:overflow-hidden md:rounded-2xl lg:rounded-3xl lg:shadow-[0_24px_75px_rgba(0,0,0,0.3)] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, index) => (
             <div
@@ -180,7 +182,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
                   <div className="max-w-[28rem]">
                     <span
                       aria-hidden="true"
-                      className="mx-auto block h-12 w-12 border border-hairline"
+                      className="mx-auto block h-12 w-12 rounded-lg border border-hairline"
                     />
                     <p className="mt-5 text-sm font-semibold text-bone">
                       رسانه محصول منتشر نشده است
@@ -200,7 +202,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
                   loading={index === 0 ? "eager" : "lazy"}
                   fetchPriority={index === 0 ? "high" : "auto"}
                   decoding="async"
-                  className="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 md:group-hover:scale-[1.02]"
+                  className="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 md:group-hover:scale-[1.015]"
                 />
               )}
             </div>
