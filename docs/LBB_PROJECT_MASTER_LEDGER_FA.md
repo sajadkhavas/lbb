@@ -18,7 +18,7 @@
 - Operational branch line: `fix/lbb-local-boutique-homepage`
 - Current accepted branch SHA after FC1: `7515d76026abaf4158f2d06b2c42ccc50662193b`
 - Final Technical Completion branch: `feature/final-technical-completion`
-- Current Final Technical Completion head at ledger creation: `0e33226ff8faafd84c9063d0d7228e527518d711`
+- Latest implementation head before this ledger update: `0ce7e46be1ad6e5a729fb2246b17ff8e6f669c47`
 - Open Final Technical Completion PR: `#87`
 - PR #87 base is intentionally `fix/lbb-local-boutique-homepage`; canonical `main` reconciliation is deferred to final GitHub reconciliation.
 
@@ -27,7 +27,7 @@
 - API/Admin: `https://api.lbbclo.com`
 - Backend main after FC1 mannequin merge: `21218cf34603512ee350da738df92c4bb56aa53d`
 - Final Technical Completion branch: `feature/final-technical-completion`
-- Current Final Technical Completion head at ledger creation: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
+- Current Final Technical Completion head: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
 - Open Final Technical Completion PR: `#28`
 
 ### Production runtime currently accepted
@@ -96,7 +96,7 @@ Implemented scope includes:
 - Production disabling/removal of unsafe direct file/robots/sitemap editing surfaces
 - Launch Readiness Admin surface
 
-Last known exact-head acceptance before ledger creation:
+Last known exact-head acceptance:
 - BE head: `ff05d186de0d92795ac1c16bc53832947a4c91ff`
 - P3 Storefront Integration: PASS
 
@@ -113,17 +113,19 @@ Implemented scope includes:
 - Home social/Lookbook hydration from Admin content
 - fail-closed live behavior without prototype leakage
 
-Current CI state at ledger creation:
-- FE head: `0e33226ff8faafd84c9063d0d7228e527518d711`
-- PR #87 Quality Gates failed only at `prettier --check` before build/typecheck/e2e ran.
-- Reported formatting files: 10.
-- Therefore PR #87 is **NOT MERGEABLE/NOT ACCEPTED YET**.
+Current remediation state:
+- Initial FE head `0e33226ff8faafd84c9063d0d7228e527518d711` failed Quality only at `prettier --check` before build/typecheck/e2e.
+- Exact 10-file Prettier output was generated with the repository's own locked dependencies.
+- Temporary formatting workflow was self-removed after applying output.
+- Formatted implementation head: `0ce7e46be1ad6e5a729fb2246b17ff8e6f669c47`.
+- A normal ledger commit is used to trigger fresh PR CI because `GITHUB_TOKEN`-authored pushes do not trigger the required downstream workflows normally.
+- PR #87 remains **NOT MERGED** until exact-head Quality/PWA/P3 acceptance is green.
 
 ---
 
 ## 5) Remaining path to final handoff
 
-1. Fix FE #87 formatting only; rerun exact-head Quality/PWA/P3 integration.
+1. Rerun exact-head FE #87 Quality/PWA/P3 integration after Prettier remediation.
 2. Zero review threads and merge FE #87 / BE #28 only on accepted exact heads.
 3. Controlled immutable Production deploy with rollback and commerce fail-closed lock.
 4. Narrow live delta acceptance for changed surfaces only.
@@ -174,4 +176,15 @@ Current CI state at ledger creation:
 - Business mutation: NO
 - Production mutation: NO
 - Commerce: checkout=false / payment=false / provider=disabled
-- **EXACT NEXT:** remediate only the 10 Prettier-reported FE #87 files, rerun exact-head CI, then proceed only if green.
+
+### 2026-09-09 — FE #87 exact Prettier remediation
+- START implementation head: `0e33226ff8faafd84c9063d0d7228e527518d711`.
+- Initial Quality failure classification: `FORMAT_ONLY / 10_FILES / BUILD_TYPECHECK_E2E_NOT_REACHED`.
+- Temporary artifact run: `34351827376` — SUCCESS.
+- Exact Prettier apply source commit: `0ce7e46be1ad6e5a729fb2246b17ff8e6f669c47`.
+- Temporary workflow removed from branch after use.
+- Server mutation: NO.
+- Production mutation: NO.
+- Schema/business mutation: NO.
+- Commerce: checkout=false / payment=false / provider=disabled.
+- **EXACT NEXT:** accept the new normal GitHub-authored ledger head through Quality/PWA/P3; if green, check review threads and merge FE #87 and BE #28 with exact-head locks.
