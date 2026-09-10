@@ -110,7 +110,9 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
     >
       <div
         role="tablist"
-        aria-label={media.length > 0 ? "تصاویر و نمای مانکن محصول" : "تصاویر محصول — رسانه تأیید نشده"}
+        aria-label={
+          media.length > 0 ? "تصاویر و نمای مانکن محصول" : "تصاویر محصول — رسانه تأیید نشده"
+        }
         aria-orientation="vertical"
         className="hidden md:flex md:w-20 md:flex-col md:gap-3 lg:w-24"
       >
@@ -231,7 +233,10 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
               ? `تصویر ${active + 1} از ${items.length}`
               : `جایگاه رسانه ${active + 1} از ${items.length}؛ رسانه تأیید نشده`}
         </p>
-        <div className="mt-3 flex justify-center gap-1.5 md:hidden" aria-label="انتخاب تصویر یا مانکن">
+        <div
+          className="mt-3 flex justify-center gap-1.5 md:hidden"
+          aria-label="انتخاب تصویر یا مانکن"
+        >
           {items.map((item, index) => (
             <button
               key={item.id}
