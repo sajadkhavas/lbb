@@ -61,38 +61,38 @@ No Admin presentation control can activate real commerce.
 
 ## 4) P0 closure — all mandatory merchant-control gaps accepted
 
-| # | Original gap | Final status | Accepted implementation |
-| --- | --- | --- | --- |
-| 1 | Independent Hero image | `ACCEPTED` | Direct Admin media/file control with safe fallback to selected Hero product image. |
-| 2 | Hero product free-text slug | `ACCEPTED` | Searchable Product selector; merchant does not need to know slugs. |
-| 3 | Free-form Home section manager | `ACCEPTED` | Constrained structured enable/order manager using known section keys. |
-| 4 | Home category free-text slugs | `ACCEPTED` | Searchable/sortable Category selection. |
-| 5 | Home always-newest products | `ACCEPTED` | Real Backend curation modes: `newest / featured / manual`, with safe count/manual selection. |
-| 6 | Announcement raw JSON only | `ACCEPTED` | Structured Announcement editor with message/link/enabled/order controls. |
-| 7 | Merchant navigation raw JSON only | `ACCEPTED` | Structured navigation controls for shop/editorial/service/brand groups. |
-| 8 | Local Store image URL-only | `ACCEPTED` | Direct merchant media upload/picker with safe URL fallback where appropriate. |
-| 9 | Gallery/Lookbook image URL-only | `ACCEPTED` | Direct persistent upload through shared media storage. |
-| 10 | Journal cover URL-only | `ACCEPTED` | Direct persistent cover upload/picker. |
-| 11 | Featured Story free-text collection slug | `ACCEPTED` | Searchable published Collection selector. |
-| 12 | Brand Intro enable/version missing in normal Admin | `ACCEPTED` | Merchant toggle plus version/show-again control. |
-| 13 | Raw StoreSetting editor available to normal merchant | `ACCEPTED` | Restricted to `super_admin`; normal merchant uses structured control surfaces. |
-| 14 | Production File Manager source/build/Git capability | `ACCEPTED` | Removed from normal Production navigation/access; cannot be used as a CMS substitute. |
-| 15 | Hardcoded Footer year | `ACCEPTED` | Automatic year; intentionally not a merchant setting. |
+| #   | Original gap                                         | Final status | Accepted implementation                                                                      |
+| --- | ---------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| 1   | Independent Hero image                               | `ACCEPTED`   | Direct Admin media/file control with safe fallback to selected Hero product image.           |
+| 2   | Hero product free-text slug                          | `ACCEPTED`   | Searchable Product selector; merchant does not need to know slugs.                           |
+| 3   | Free-form Home section manager                       | `ACCEPTED`   | Constrained structured enable/order manager using known section keys.                        |
+| 4   | Home category free-text slugs                        | `ACCEPTED`   | Searchable/sortable Category selection.                                                      |
+| 5   | Home always-newest products                          | `ACCEPTED`   | Real Backend curation modes: `newest / featured / manual`, with safe count/manual selection. |
+| 6   | Announcement raw JSON only                           | `ACCEPTED`   | Structured Announcement editor with message/link/enabled/order controls.                     |
+| 7   | Merchant navigation raw JSON only                    | `ACCEPTED`   | Structured navigation controls for shop/editorial/service/brand groups.                      |
+| 8   | Local Store image URL-only                           | `ACCEPTED`   | Direct merchant media upload/picker with safe URL fallback where appropriate.                |
+| 9   | Gallery/Lookbook image URL-only                      | `ACCEPTED`   | Direct persistent upload through shared media storage.                                       |
+| 10  | Journal cover URL-only                               | `ACCEPTED`   | Direct persistent cover upload/picker.                                                       |
+| 11  | Featured Story free-text collection slug             | `ACCEPTED`   | Searchable published Collection selector.                                                    |
+| 12  | Brand Intro enable/version missing in normal Admin   | `ACCEPTED`   | Merchant toggle plus version/show-again control.                                             |
+| 13  | Raw StoreSetting editor available to normal merchant | `ACCEPTED`   | Restricted to `super_admin`; normal merchant uses structured control surfaces.               |
+| 14  | Production File Manager source/build/Git capability  | `ACCEPTED`   | Removed from normal Production navigation/access; cannot be used as a CMS substitute.        |
+| 15  | Hardcoded Footer year                                | `ACCEPTED`   | Automatic year; intentionally not a merchant setting.                                        |
 
 `P0_FINAL_STATUS = 15_OF_15_ACCEPTED`
 
 ## 5) P1 closure — business-facing copy/media control accepted
 
-| # | Original gap | Final status | Accepted implementation |
-| --- | --- | --- | --- |
-| 1 | Fixed business-facing CTA destinations | `ACCEPTED` | Safe internal-path-or-HTTPS destination controls added where appropriate. |
-| 2 | Collection cover/hero media missing | `ACCEPTED` | Collection media added and consumed by Collection/index/Featured Story/SEO image paths. |
-| 3 | `/shop`, `/collections`, `/lookbook`, `/journal`, `/faq` copy/meta hardcoded | `ACCEPTED` | `page.presentation` authority added and consumed in live SSR/metadata. |
-| 4 | FAQ display category labels hardcoded | `ACCEPTED` | FAQ category presentation mapping is Admin-controlled. |
-| 5 | Journal per-article SEO absent | `ACCEPTED` | `meta_title` and `meta_description` added to Admin/domain/API. |
-| 6 | Footer/shell merchant copy fixed | `ACCEPTED` | Shell/Footer group headings and utility presentation controls added. |
-| 7 | Hero alt/focal/fit fixed | `ACCEPTED` | Safe alt, fit and object-position/focal controls added with defaults. |
-| 8 | Gallery link URL-only validation | `ACCEPTED` | Validation aligned with safe internal `/...` or HTTPS public-link policy. |
+| #   | Original gap                                                                 | Final status | Accepted implementation                                                                 |
+| --- | ---------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------- |
+| 1   | Fixed business-facing CTA destinations                                       | `ACCEPTED`   | Safe internal-path-or-HTTPS destination controls added where appropriate.               |
+| 2   | Collection cover/hero media missing                                          | `ACCEPTED`   | Collection media added and consumed by Collection/index/Featured Story/SEO image paths. |
+| 3   | `/shop`, `/collections`, `/lookbook`, `/journal`, `/faq` copy/meta hardcoded | `ACCEPTED`   | `page.presentation` authority added and consumed in live SSR/metadata.                  |
+| 4   | FAQ display category labels hardcoded                                        | `ACCEPTED`   | FAQ category presentation mapping is Admin-controlled.                                  |
+| 5   | Journal per-article SEO absent                                               | `ACCEPTED`   | `meta_title` and `meta_description` added to Admin/domain/API.                          |
+| 6   | Footer/shell merchant copy fixed                                             | `ACCEPTED`   | Shell/Footer group headings and utility presentation controls added.                    |
+| 7   | Hero alt/focal/fit fixed                                                     | `ACCEPTED`   | Safe alt, fit and object-position/focal controls added with defaults.                   |
+| 8   | Gallery link URL-only validation                                             | `ACCEPTED`   | Validation aligned with safe internal `/...` or HTTPS public-link policy.               |
 
 Additional P1-adjacent acceptance:
 
