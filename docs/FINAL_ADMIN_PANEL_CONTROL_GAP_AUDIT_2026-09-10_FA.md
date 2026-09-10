@@ -6,9 +6,11 @@ Scope: `Frontend storefront ↔ Backend authority ↔ Filament/Admin usability`
 
 ## Locked baselines
 
-- Frontend audit source: `d85ae85f8b407b11cf574dfa02416f473f87b736`
-- Backend audit source: `8482b6eda370ebe2ca32a674283f67b82eed8629`
+- Frontend accepted Production/runtime source: `d85ae85f8b407b11cf574dfa02416f473f87b736`
+- Frontend operational branch current head: `2d606878510d45063fdf05466c1e50791fd1bc3d` (`#92`, documentation-only final handoff closure; runtime code remains the accepted `d85ae85...` source)
+- Backend accepted Production/runtime source and current `main`: `8482b6eda370ebe2ca32a674283f67b82eed8629`
 - Existing historical authority report: `docs/FINAL_ADMIN_DRIVEN_STOREFRONT_AUDIT_FA.md`
+- Current final handoff ledger: `docs/LBB_PROJECT_MASTER_LEDGER_FA.md`
 - Governing production rule: merchant/business/content changes must not require editing Frontend source, raw JSON, active releases or deployment files.
 - Checkout/payment remain fail-closed and are explicitly outside merchant presentation controls.
 
@@ -36,6 +38,8 @@ Status vocabulary:
 
 The public Home currently renders the Hero copy but shows `تصویر محصول منتخب در حال تکمیل است.` when the selected Hero product has no usable image. This confirms the current Hero visual is coupled to the selected product rather than being an independent merchant Hero asset.
 
+The final handoff itself is already closed: Frontend `d85ae85...`, Backend `8482b6...`, required ContentPages `5/5`, reversible Admin→Backend→API→SSR UAT PASS, recovery restore PASS and real reboot acceptance PASS. This audit therefore opens a new post-handoff Admin-usability improvement batch; it does not represent an unfinished item from the previous final deployment.
+
 ## Final control-surface matrix
 
 | Surface | Current authority/control | Status | Gap / required action | Priority |
@@ -53,7 +57,7 @@ The public Home currently renders the Hero copy but shows `تصویر محصول
 | Home category ordering | `categoryOrder` | PARTIAL | Free-text slugs. Replace with selectable/sortable published categories. | P0 |
 | Category content/image/icon/SEO | Category Resource with FileUpload | FULL | Image, icon, visibility, parent, order, publication and SEO are already merchant-manageable. | — |
 | Home product cards data | Product API | FULL | Product card truth comes from Backend. | — |
-| Home product curation | loader requests newest products only | MISSING | Product Admin has `is_featured`, but Home ignores it and always loads newest. Add mode `newest / featured / manual`, safe count, and optional manual selection. | P0 |
+| Home product curation | Home loader requests newest products only | MISSING | Product Admin has `is_featured`, but Home ignores it and always loads newest. Add mode `newest / featured / manual`, safe count, and optional manual selection. | P0 |
 | Product/variant/price/stock | Product Resource | FULL | Strong domain controls already exist. | — |
 | Product media/gallery | Spatie media upload | FULL | Existing product uploads are sufficient. | — |
 | 2D mannequin | Product Resource + verified media | FULL | Enable/slot/preset/asset/offset/scale/layer already controlled. | — |
@@ -73,34 +77,35 @@ The public Home currently renders the Hero copy but shows `تصویر محصول
 | Brand Intro CTA destinations | fixed `/about`; store button only dismisses | PARTIAL | Keep dismiss behavior technical; optionally expose Story destination if required. | P2 |
 | Lookbook/Gallery title/caption/order | GalleryItem Resource | FULL | Text/order/active are manageable. | — |
 | Lookbook/Gallery image | required external `image_url` | PARTIAL | Add direct FileUpload/media picker with persistent shared storage and generated public URL. | P0 |
-| Lookbook related link | Admin uses `->url()` | PARTIAL | Frontend can render a destination, but Admin restricts it to URL form. Align with safe internal `/...` or HTTPS policy. | P1 |
+| Lookbook related link | Admin uses URL-only validation | PARTIAL | Align with the existing safe internal `/...` or HTTPS public-link policy. | P1 |
 | Instagram strip CTA labels | Site Settings | FULL | Labels are editable. | — |
-| Instagram/Lookbook CTA destinations | brand Instagram plus fixed `/lookbook` | PARTIAL | Instagram authority is editable; Lookbook destination is fixed. Usually low-risk; expose only if business requires alternate destination. | P2 |
+| Instagram/Lookbook CTA destinations | brand Instagram plus fixed `/lookbook` | PARTIAL | Instagram authority is editable; Lookbook destination is fixed. Expose only if alternate merchant destination is required. | P2 |
 | Journal article content | Post Resource | FULL | Title/slug/category/tags/excerpt/body/author/status/date are manageable. | — |
 | Journal cover image | external `cover_url` only | PARTIAL | Add direct FileUpload/media picker. | P0 |
-| Journal per-article SEO | title + excerpt are reused | PARTIAL | Add explicit `meta_title` and `meta_description` fields/API if editorial SEO needs independent control. | P1 |
+| Journal per-article SEO | title + excerpt are reused | PARTIAL | Add explicit `meta_title` and `meta_description` fields/API for independent editorial SEO control. | P1 |
 | FAQ questions/answers | FAQ Resource | FULL | Question/answer/category/order/active are manageable. | — |
-| FAQ group display labels/titles | Frontend `FAQ_LABELS` constant | PARTIAL | Category key is editable but visible group title/Latin label are hardcoded. Add FAQ category presentation control or explicit mapping in Admin. | P1 |
+| FAQ group display labels/titles | Frontend `FAQ_LABELS` constant | PARTIAL | Category key is editable but visible group title/Latin label are hardcoded. Add FAQ category presentation control or explicit Admin mapping. | P1 |
 | About page content/SEO | ContentPage + brand settings | FULL for text | Main live text/meta is Backend-owned. | — |
 | About page merchant image | no ContentPage media field; live About is text-only | PARTIAL | Add optional page hero/cover media if merchant should control About imagery. | P2 |
-| Contact page copy/SEO | ContentPage | FULL | ContentPage authority is available. | — |
+| Contact page copy/SEO | ContentPage | FULL | ContentPage authority is available and final Production content authority is present. | — |
 | Contact channels/location/hours | Site Settings | FULL | Phone/WhatsApp/email/address/map/hours available; unverified fields may stay empty. | — |
 | Contact form/inquiries | Inquiry backend/Admin | FULL | Operational domain remains Backend controlled. | — |
-| Size Guide global page | ContentPage | FULL control surface | Production record existence is a separate data-reconciliation task, not a missing Admin capability. | — |
+| Size Guide global page | ContentPage | FULL | Admin control and final Production ContentPage authority are present. | — |
 | Product size guides | Product/SizeGuide domain | FULL | Existing domain control. | — |
-| Terms/Privacy | ContentPage | FULL control surface | Final legal truth remains owner-verified; Production record completion is separate. | — |
+| Terms/Privacy | ContentPage | FULL control surface | Production pages are present; final legal truth remains owner-verified and must not be invented. | — |
 | Shipping methods/zones | DeliveryZone Admin + Delivery API | FULL | Immediate courier/Tipax/Decapost controls exist; unsafe legacy modes stay disabled. | — |
+| Shipping/Returns public page | ContentPage + Delivery API + `policy.returns` | FULL control surface | Production ContentPage is present; operational truth remains split correctly by authority. | — |
 | Returns policy | Site Settings truth-gated | FULL | Enabled/verification/window/refund/shipping fields exist; do not invent values. | — |
 | Enamad | Site Settings truth-gated | FULL for current contract | Verification/id/url/badge URL/location exist. Optional media upload is not required because verified external badge URL may be preferable. | P2 optional |
 | Collections records | Collection Resource | PARTIAL | Name/description/products/status/SEO exist; cover/hero media is absent. | P1 |
 | Collections index page copy/SEO | Frontend constants | MISSING | Make index heading/lede/meta merchant-manageable via ContentPage/page-presentation authority. | P1 |
-| Lookbook index page copy/SEO | Frontend constants/static `heroMain` for social image | MISSING | Add page-presentation/ContentPage authority and merchant social image. | P1 |
-| Journal index page copy/SEO | Frontend constants/static `heroMain` | MISSING | Add page-presentation/ContentPage authority and merchant social image. | P1 |
+| Lookbook index page copy/SEO | Frontend constants/static social image | MISSING | Add page-presentation/ContentPage authority and merchant social image. | P1 |
+| Journal index page copy/SEO | Frontend constants/static social image | MISSING | Add page-presentation/ContentPage authority and merchant social image. | P1 |
 | FAQ index page copy/SEO | Frontend constants | MISSING | Add page-presentation/ContentPage authority. | P1 |
 | Shop index page title/description/chrome | Frontend constants | MISSING | Product data is live, but route SEO/intro business copy should be manageable as page presentation. | P1 |
 | Track Order page help copy/meta | Frontend constants | PARTIAL | Operational status mechanics remain technical; merchant-facing heading/help/support copy may use page-presentation authority. | P2 |
 | Merchant navigation arrays | Bootstrap `navigation.*`, editable only through raw StoreSetting | PARTIAL | Add structured navigation editor for shop/editorial/service/brand: label, latin, description, href, enabled/order. | P0 |
-| Desktop “فروشگاه” menu trigger label | hardcoded Frontend text | PARTIAL | Include in navigation/shell copy settings if merchant-editable shell copy is desired. | P1 |
+| Desktop “فروشگاه” menu trigger label | hardcoded Frontend text | PARTIAL | Include in navigation/shell copy settings if full merchant-facing shell copy control is required. | P1 |
 | Footer merchant navigation | live navigation arrays | PARTIAL | Data authority exists but structured Admin editor is missing. Covered by navigation editor. | P0 |
 | Footer section headings | hardcoded `خرید / کالکشن و محتوا / پشتیبانی / شخصی / برند` | PARTIAL | Add shell/footer copy settings for merchant-facing group labels if full copy control is required. | P1 |
 | Footer bottom legal/contact labels/order | hardcoded Frontend | PARTIAL | Add structured utility links or keep routes fixed and expose labels/order. | P1 |
@@ -110,8 +115,8 @@ The public Home currently renders the Hero copy but shows `تصویر محصول
 | Search/filter/cart/account/wishlist UX labels | application behavior | INTENTIONALLY_TECHNICAL | Not normal merchant content. | — |
 | Checkout/payment provider/secrets | server runtime/env | INTENTIONALLY_TECHNICAL | Must remain fail-closed and must not be activatable from presentation settings. | — |
 | OTP/Kavenegar/VAPID/secrets | server runtime/secret management | INTENTIONALLY_TECHNICAL | Never expose secrets in public StoreSetting/Admin presentation form. | — |
-| Raw StoreSetting editor | generic JSON/value/public editor | REMOVE_OR_RESTRICT | Merchant can break contract or expose wrong data. Restrict to developer/super-admin; normal merchant must use structured pages. | P0 security |
-| File Manager page | source editor + build + Git commit from Admin | REMOVE_OR_RESTRICT | Violates immutable release rule and is not a Production CMS feature. Disable/remove from Production Admin or restrict to non-production developer-only access. | P0 security |
+| Raw StoreSetting editor | generic JSON/value/public editor | REMOVE_OR_RESTRICT | Merchant can break the storefront contract or accidentally make inappropriate settings public. Restrict to developer/super-admin; normal merchant must use structured pages. | P0 security |
+| File Manager page | source editor + build + Git commit from Admin | REMOVE_OR_RESTRICT | Violates immutable release policy and is not a Production CMS feature. Disable/remove from Production Admin or restrict to non-production developer-only access. | P0 security |
 
 ## Existing surfaces that are already sufficiently complete
 
@@ -122,23 +127,25 @@ Do not redo these merely because this audit exists:
 - Category hierarchy, visibility, image, icon and SEO.
 - Delivery zones and currently accepted shipping methods.
 - Contact channels and ContentPage-based content.
+- Required public ContentPage authority `5/5` already accepted in Production.
 - Returns truth gate.
 - Enamad truth gate.
 - FAQ item CRUD.
 - Inquiry/order/customer operational domains.
 - Home ticker, Trust cards and Decision Support structured controls.
+- Final deployment, live Admin UAT, recovery restore and reboot acceptance from the closed handoff.
 
 ## Consolidated implementation batch
 
 The recommended one-time Admin completion pass is:
 
-### P0 — must complete before calling the merchant panel “final”
+### P0 — must complete before calling the merchant panel “final-control complete”
 
 1. Independent Hero image upload/media picker with fallback to Hero product image.
 2. Searchable Hero product selector; remove free-text slug UX.
-3. Structured Home section manager with allowed keys, enable/order controls.
+3. Structured Home section manager with allowed keys and enable/order controls.
 4. Searchable/sortable Home category selector instead of free-text slugs.
-5. Home product curation mode: `newest`, `featured`, `manual`; wire `is_featured` to a real consumer.
+5. Home product curation mode: `newest`, `featured`, `manual`; wire `is_featured` to a real Home consumer.
 6. Structured Announcement Bar editor instead of raw JSON.
 7. Structured merchant navigation editor instead of raw JSON.
 8. Local Store direct image upload/media picker.
@@ -181,17 +188,22 @@ The recommended one-time Admin completion pass is:
 8. Checkout/payment/OTP/push secrets remain operational/server controls and must not be merged into this batch.
 9. Legal, returns, Enamad, address and hours values remain truth-gated; the implementation must not populate unknown employer facts.
 10. No already-applied Production migration should be rerun merely for this Admin completion work.
+11. This post-handoff batch must use a new immutable release and its own exact-head acceptance; closed final-handoff evidence must not be overwritten.
 
 ## Important reconciliation with the 2026-09-09 report
 
 `docs/FINAL_ADMIN_DRIVEN_STOREFRONT_AUDIT_FA.md` and the P3 matrix used `PASS` primarily to mean that a Backend authority/API/live consumer existed. This 2026-09-10 audit does not invalidate that work. It adds the stricter merchant-usability layer: raw JSON, free-text slugs and URL-only media fields are now explicitly `PARTIAL`, even where the underlying API authority was already correct.
 
-## Deployment relationship
+## Relationship to the final handoff
 
-This audit is documentation-only. It does not change the locked Production runtime, does not mutate business data, does not run migrations and does not activate checkout/payment. The current pending ContentPage reconciliation/final deployment sequence remains separate from this report until the Admin completion batch is implemented and accepted.
+The previous production/handoff sequence is **closed and must not be redone** merely because this audit found merchant-usability improvements. Final accepted Production identity remains Frontend `d85ae85...` / Backend `8482b6...`; PR #92 only advanced the operational Frontend branch with final documentation.
+
+This audit is documentation-only: `SCHEMA_MUTATION=NO`, `BUSINESS_DATA_MUTATION=NO`, `PRODUCTION_RELEASE_SWITCH=NO`, `CHECKOUT_PAYMENT_ACTIVATION=NO`.
+
+The implementation of this report is a **new post-handoff maintenance batch**. Its deployment must be additive, exact-head, immutable and independently accepted.
 
 ## EXACT NEXT
 
 `IMPLEMENT_FINAL_ADMIN_CONTROL_COMPLETION_BATCH`
 
-Start from the locked Frontend/Backend baselines, implement P0 as one coordinated cross-repo batch, then P1 if the goal remains absolute business-facing control. Run exact-head Backend + Frontend gates, review threads = 0, merge with expected-head locks, then perform immutable Production deployment and live Admin mutation/restore acceptance. Do not use the Production File Manager for this implementation.
+Start from current operational Frontend head `2d606878510d45063fdf05466c1e50791fd1bc3d` while preserving the accepted runtime code, and Backend `8482b6eda370ebe2ca32a674283f67b82eed8629`. Implement P0 as one coordinated cross-repo batch, then P1 in the same bounded program if the goal remains absolute business-facing control. Run exact-head Backend + Frontend gates, require review threads = 0, merge with expected-head locks, deploy as new immutable releases, and run reversible live Admin mutation/restore acceptance. Do not use the Production File Manager for implementation.
