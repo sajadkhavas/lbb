@@ -5,6 +5,8 @@ import process from "node:process";
 const root = process.cwd();
 const publicDir = path.join(root, ".output/public");
 const assetsDir = path.join(publicDir, "assets");
+// Keep the existing core bundle limits unchanged; the opt-in 3D renderer is measured
+// separately only while it remains a verified React.lazy dynamic chunk.
 const limits = {
   maxJavaScriptFile: 460 * 1024,
   maxCssFile: 160 * 1024,
