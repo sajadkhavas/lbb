@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { UserRound } from "lucide-react";
+import { StyleMannequin } from "@/components/lbb/product/StyleMannequin";
 import type { DecisionMedia } from "@/lib/product-decision";
 
 type GalleryItem = DecisionMedia & { placeholder?: boolean };
@@ -95,6 +97,17 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
     }
   };
 
+  const itemLabel = (item: GalleryItem, index: number) => {
+    if (item.mannequin) return `نمایش ${name} روی مانکن`;
+    if (item.placeholder) return `جایگاه رسانه ${index + 1} از ${items.length} — تأیید نشده`;
+    return `نمایش تصویر ${index + 1} از ${items.length} برای ${name}`;
+  };
+
+  const mobileItemLabel = (item: GalleryItem, index: number) => {
+    if (item.mannequin) return `رفتن به نمای مانکن ${name}`;
+    return `رفتن به ${item.placeholder ? "جایگاه رسانه" : "تصویر"} ${index + 1}`;
+  };
+
   return (
     <div
       dir="rtl"
@@ -102,7 +115,9 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
     >
       <div
         role="tablist"
-        aria-label={media.length > 0 ? "تصاویر محصول" : "تصاویر محصول — رسانه تأیید نشده"}
+        aria-label={
+          media.length > 0 ? "تصاویر و نمای مانکن محصول" : "تصاویر محصول — رسانه تأیید نشده"
+        }
         aria-orientation="vertical"
         className="hidden md:flex md:w-20 md:flex-col md:gap-3 lg:w-24"
       >
@@ -117,11 +132,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
             role="tab"
             aria-selected={index === active}
             aria-controls={`${id}-panel-${index}`}
-            aria-label={
-              item.placeholder
-                ? `جایگاه رسانه ${index + 1} از ${items.length} — تأیید نشده`
-                : `نمایش تصویر ${index + 1} از ${items.length} برای ${name}`
-            }
+            aria-label={itemLabel(item, index)}
             tabIndex={index === active ? 0 : -1}
             onClick={() => scrollToIndex(index)}
             onKeyDown={(event) => onThumbKeyDown(event, index)}
@@ -131,7 +142,12 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
                 : "border-hairline opacity-75 hover:border-metal hover:opacity-100"
             }`}
           >
-            {item.placeholder ? (
+            {item.mannequin ? (
+              <span className="flex h-full w-full flex-col items-center justify-center gap-1.5 bg-[#f3f1ec] px-1 text-[10px] font-black text-obsidian">
+                <UserRound size={24} aria-hidden="true" />
+                <span>مانکن</span>
+              </span>
+            ) : item.placeholder ? (
               <span aria-hidden="true" className="grid h-full w-full place-items-center bg-carbon">
                 <span className="h-5 w-5 rounded border border-hairline" />
               </span>
@@ -161,7 +177,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
           tabIndex={0}
           role="region"
           aria-roledescription="carousel"
-          aria-label={`گالری تصاویر ${name}`}
+          aria-label={`گالری تصاویر و نمای مانکن ${name}`}
           className="group relative flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-xl border border-hairline bg-carbon shadow-[0_18px_55px_rgba(0,0,0,0.2)] [scrollbar-width:none] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal md:overflow-hidden md:rounded-2xl lg:shadow-[0_24px_75px_rgba(0,0,0,0.3)] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, index) => (
@@ -173,7 +189,13 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
               aria-hidden={index !== active}
               className="relative aspect-[4/5] w-full flex-none snap-center overflow-hidden"
             >
-              {item.placeholder ? (
+              {item.mannequin ? (
+                <StyleMannequin
+                  profile={item.mannequin}
+                  productName={name}
+                  priority={index === 0}
+                />
+              ) : item.placeholder ? (
                 <div
                   dir="rtl"
                   className="grid h-full place-items-center px-8 text-center"
@@ -210,9 +232,11 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
         </div>
 
         <p className="sr-only" aria-live="polite">
-          {media.length > 0
-            ? `تصویر ${active + 1} از ${items.length}`
-            : `جایگاه رسانه ${active + 1} از ${items.length}؛ رسانه تأیید نشده`}
+          {items[active]?.mannequin
+            ? `نمای مانکن ${name}`
+            : media.length > 0
+              ? `تصویر ${active + 1} از ${items.length}`
+              : `جایگاه رسانه ${active + 1} از ${items.length}؛ رسانه تأیید نشده`}
         </p>
         <div className="mt-3 flex justify-center gap-1.5 md:hidden" aria-label="انتخاب تصویر">
           {items.map((item, index) => (
@@ -220,16 +244,28 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
               key={item.id}
               type="button"
               onClick={() => scrollToIndex(index)}
-              aria-label={`رفتن به ${item.placeholder ? "جایگاه رسانه" : "تصویر"} ${index + 1}`}
+              aria-label={mobileItemLabel(item, index)}
               aria-current={index === active ? "true" : undefined}
               className={`min-h-11 min-w-11 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
                 index === active ? "text-signal" : "text-mute"
               }`}
             >
-              <span
-                aria-hidden="true"
-                className={`mx-auto block h-1.5 rounded-full ${index === active ? "w-6 bg-signal" : "w-3 bg-hairline"}`}
-              />
+              {item.mannequin ? (
+                <span
+                  aria-hidden="true"
+                  className={`mx-auto inline-flex min-h-7 items-center gap-1 rounded-full border px-2 text-[10px] font-black ${
+                    index === active ? "border-signal text-signal" : "border-hairline text-mute"
+                  }`}
+                >
+                  <UserRound size={13} />
+                  مانکن
+                </span>
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className={`mx-auto block h-1.5 rounded-full ${index === active ? "w-6 bg-signal" : "w-3 bg-hairline"}`}
+                />
+              )}
             </button>
           ))}
         </div>

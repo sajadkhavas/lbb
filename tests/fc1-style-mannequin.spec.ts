@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
-import { backendCard } from "../src/lib/backend-storefront";
-import type { ProductSummaryDto } from "../src/lib/backend-api";
+import { backendCard, backendDecisionModel } from "../src/lib/backend-storefront";
+import type { ProductDetailDto, ProductSummaryDto } from "../src/lib/backend-api";
+import { chooseColorMediaWithPersistentItems } from "../src/lib/product-decision-policy";
 import {
   isUsableMannequinProfile,
   mannequinAssetTransform,
@@ -17,6 +18,35 @@ const validProfile: MannequinProfileDto = {
   layer: 44,
   preset: "top-default",
 };
+
+const summaryPayload = {
+  publicId: "01FC1TEST",
+  slug: "fc1-test-product",
+  name: "محصول تست مانکن",
+  shortDescription: null,
+  category: {
+    publicId: "01FC1CATEGORY",
+    name: "بالاپوش",
+    slug: "tops",
+    seo: {
+      slug: "tops",
+      canonicalPath: "/tops",
+      publication: "published",
+    },
+  },
+  price: { from: { amount: 1_000_000, currency: "TOMAN" }, to: null },
+  availability: true,
+  stockState: "in_stock",
+  colors: [],
+  sizes: [],
+  primaryImage: null,
+  seo: {
+    slug: "fc1-test-product",
+    canonicalPath: "/product/fc1-test-product",
+    publication: "published",
+  },
+  mannequin: validProfile,
+} satisfies ProductSummaryDto & { mannequin: MannequinProfileDto };
 
 test.describe("FC1 2D style mannequin contract", () => {
   test("fails closed for incomplete or unsafe profiles", () => {
@@ -41,38 +71,82 @@ test.describe("FC1 2D style mannequin contract", () => {
   });
 
   test("maps the additive API field onto backend product cards without affecting legacy payloads", () => {
-    const payload = {
-      publicId: "01FC1TEST",
-      slug: "fc1-test-product",
-      name: "محصول تست مانکن",
-      shortDescription: null,
-      category: {
-        publicId: "01FC1CATEGORY",
-        name: "بالاپوش",
-        slug: "tops",
-        seo: {
-          slug: "tops",
-          canonicalPath: "/tops",
-          publication: "published",
-        },
-      },
-      price: { from: { amount: 1_000_000, currency: "TOMAN" }, to: null },
-      availability: true,
-      stockState: "in_stock",
-      colors: [],
-      sizes: [],
-      primaryImage: null,
-      seo: {
-        slug: "fc1-test-product",
-        canonicalPath: "/product/fc1-test-product",
-        publication: "published",
-      },
-      mannequin: validProfile,
-    } satisfies ProductSummaryDto & { mannequin: MannequinProfileDto };
+    expect(backendCard(summaryPayload).mannequin).toEqual(validProfile);
 
-    expect(backendCard(payload).mannequin).toEqual(validProfile);
-
-    const { mannequin: _mannequin, ...legacyPayload } = payload;
+    const { mannequin: _mannequin, ...legacyPayload } = summaryPayload;
     expect(backendCard(legacyPayload).mannequin).toBeNull();
+  });
+
+  test("adds a usable live mannequin to PDP media and keeps it when color media changes", () => {
+    const color = {
+      publicId: "01FC1COLOR",
+      name: "ذغالی",
+      slug: "charcoal",
+      code: "CHARCOAL",
+      hex: "#333333",
+    };
+    const size = {
+      publicId: "01FC1SIZE",
+      name: "Large",
+      code: "L",
+    };
+    const photo = {
+      publicId: "01FC1MEDIA",
+      role: "primary",
+      sortOrder: 0,
+      alt: "تصویر محصول تست مانکن",
+      width: 1200,
+      height: 1500,
+      colorPublicId: color.publicId,
+      variantPublicId: null,
+      url: "https://api.lbb.example.test/storage/product-front.jpg",
+    };
+    const detailPayload = {
+      ...summaryPayload,
+      colors: [color],
+      sizes: [size],
+      description: null,
+      publication: "published",
+      collections: [],
+      drops: [],
+      variants: [
+        {
+          publicId: "01FC1VARIANT00000000000000",
+          sku: "FC1-CHARCOAL-L",
+          color,
+          size,
+          price: { amount: 1_000_000, currency: "TOMAN" },
+          compareAtPrice: null,
+          availability: true,
+          stockState: "in_stock",
+          isActive: true,
+          mediaPublicIds: [photo.publicId],
+        },
+      ],
+      media: [photo],
+      material: null,
+      fabricComposition: null,
+      fit: null,
+      care: null,
+      sizeGuide: null,
+      breadcrumbs: [],
+      mannequin: validProfile,
+    } satisfies ProductDetailDto & { mannequin: MannequinProfileDto };
+
+    const model = backendDecisionModel(detailPayload);
+    const mannequinMedia = model.media.find((item) => item.mannequin);
+    const selectedMedia = chooseColorMediaWithPersistentItems(
+      model.media,
+      model.mediaByColor,
+      color.publicId,
+      (item) => Boolean(item.mannequin),
+    );
+
+    expect(mannequinMedia?.mannequin).toEqual(validProfile);
+    expect(mannequinMedia?.src).toBe(validProfile.assetUrl);
+    expect(selectedMedia.map((item) => item.id)).toEqual([
+      photo.publicId,
+      `${detailPayload.publicId}:mannequin`,
+    ]);
   });
 });

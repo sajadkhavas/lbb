@@ -13,7 +13,7 @@ import type {
   ProductDecisionViewModel,
 } from "@/lib/product-decision";
 import type { Filters, SortKey } from "@/lib/product-filter";
-import type { MannequinProfileDto } from "@/lib/style-mannequin";
+import { isUsableMannequinProfile, type MannequinProfileDto } from "@/lib/style-mannequin";
 
 export type BackendCatalogCard = {
   source: "backend";
@@ -37,6 +37,10 @@ export type BackendCatalogCard = {
 type ProductSummaryWithPresentation = ProductSummaryDto & {
   mannequin?: MannequinProfileDto | null;
   previewImages?: string[];
+};
+
+type ProductDetailWithPresentation = ProductDetailDto & {
+  mannequin?: MannequinProfileDto | null;
 };
 
 export function backendCard(product: ProductSummaryDto): BackendCatalogCard {
@@ -148,7 +152,24 @@ export function backendDecisionModel(product: ProductDetailDto): ProductDecision
     label: size.code || size.name,
   }));
 
-  const media = validMedia(product.media);
+  const productMedia = validMedia(product.media);
+  const presentation = product as ProductDetailWithPresentation;
+  const mannequin = isUsableMannequinProfile(presentation.mannequin)
+    ? presentation.mannequin
+    : null;
+  const media: DecisionMedia[] = mannequin
+    ? [
+        ...productMedia,
+        {
+          id: `${product.publicId}:mannequin`,
+          src: mannequin.assetUrl,
+          alt: `پیش‌نمایش دوبعدی ${product.name} روی مانکن`,
+          width: 1200,
+          height: 1500,
+          mannequin,
+        },
+      ]
+    : productMedia;
   const mediaByColor = Object.fromEntries(
     product.colors.map((color) => {
       const ids = new Set(
@@ -156,7 +177,7 @@ export function backendDecisionModel(product: ProductDetailDto): ProductDecision
           .filter((item) => item.colorPublicId === color.publicId)
           .map((item) => item.publicId),
       );
-      return [color.publicId, media.filter((item) => ids.has(item.id))];
+      return [color.publicId, productMedia.filter((item) => ids.has(item.id))];
     }),
   );
 
