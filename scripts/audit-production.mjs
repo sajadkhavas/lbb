@@ -42,7 +42,9 @@ if (
   !gallerySource.includes("lazy(() =>") ||
   !gallerySource.includes('import("@/components/lbb/product/ProductModel3dViewer")')
 ) {
-  failures.push("Product 3D viewer must remain a React.lazy dynamic import before using the lazy budget.");
+  failures.push(
+    "Product 3D viewer must remain a React.lazy dynamic import before using the lazy budget.",
+  );
 }
 
 let totalJavaScript = 0;
