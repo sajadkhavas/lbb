@@ -1,5 +1,4 @@
 import { useId, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { ChevronDown, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
 import { PERSONAL_NAVIGATION, type NavigationItem } from "@/lib/navigation";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
@@ -7,6 +6,7 @@ import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavi
 import { Logo } from "@/components/lbb/Logo";
 import { TrustMarks } from "@/components/lbb/TrustMarks";
 import { useStorefrontControl, type MerchantNavigationItem } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 function FooterSection({ title, children }: { title: string; children: React.ReactNode }) {
   const reactId = useId();
@@ -75,9 +75,13 @@ function PersonalFooterList({ title, items }: { title: string; items: Navigation
 /** Global dark footer. The theme prop remains for compatibility with existing routes. */
 export function Footer(_props: { theme?: "dark" | "light" } = {}) {
   const { source, brand, copy, contact, navigation } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
   const whatsappHref = `https://wa.me/98${contact.whatsapp.replace(/\D/g, "").replace(/^0/, "")}`;
   const phoneHref = `tel:+98${contact.phone.replace(/\D/g, "").replace(/^0/, "")}`;
   const isPrototype = source === "prototype";
+  const currentYear = new Intl.NumberFormat("fa-IR", { useGrouping: false }).format(
+    new Date().getFullYear(),
+  );
 
   return (
     <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
@@ -102,7 +106,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
                 <a
                   href={whatsappHref}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
                 >
                   <MessageCircle size={15} aria-hidden="true" />
@@ -113,7 +117,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
             <a
               href={brand.instagramUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className={`${isPrototype ? "mt-6" : "mt-4"} inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal`}
             >
               <Instagram size={16} aria-hidden="true" />
@@ -122,12 +126,27 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
             <TrustMarks />
           </div>
 
-          <MerchantFooterList title="خرید" items={navigation.shop} />
-          <MerchantFooterList title="کالکشن و محتوا" items={navigation.editorial} />
-          <MerchantFooterList title="پشتیبانی" items={navigation.service} />
+          <MerchantFooterList
+            title={presentation.shell.footerGroups.shop}
+            items={navigation.shop}
+          />
+          <MerchantFooterList
+            title={presentation.shell.footerGroups.editorial}
+            items={navigation.editorial}
+          />
+          <MerchantFooterList
+            title={presentation.shell.footerGroups.service}
+            items={navigation.service}
+          />
           <div className="grid sm:col-span-2 lg:col-span-1 lg:grid-cols-1 lg:gap-6">
-            <PersonalFooterList title="شخصی" items={PERSONAL_NAVIGATION} />
-            <MerchantFooterList title="برند" items={navigation.brand} />
+            <PersonalFooterList
+              title={presentation.shell.footerGroups.personal}
+              items={PERSONAL_NAVIGATION}
+            />
+            <MerchantFooterList
+              title={presentation.shell.footerGroups.brand}
+              items={navigation.brand}
+            />
           </div>
         </div>
 
@@ -135,21 +154,19 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
           <div>
             <p className="tech">
               {isPrototype
-                ? "© ۲۰۲۶ ال‌بی‌بی — کرج / مهستان"
-                : `© ۲۰۲۶ ${brand.nameFa} — ${contact.locationLabel}`}
+                ? `© ${currentYear} ال‌بی‌بی — کرج / مهستان`
+                : `© ${currentYear} ${brand.nameFa} — ${contact.locationLabel}`}
             </p>
             <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
-            <Link to="/terms" className="text-xs transition-colors hover:text-bone">
-              قوانین
-            </Link>
-            <Link to="/privacy" className="text-xs transition-colors hover:text-bone">
-              حریم خصوصی
-            </Link>
-            <Link to="/contact" className="text-xs transition-colors hover:text-bone">
-              تماس
-            </Link>
+            {presentation.shell.utilityLinks.map((item) => (
+              <MerchantNavigationLink
+                key={`${item.href}-${item.label}`}
+                item={{ label: item.label, latin: item.label, href: item.href }}
+                className="text-xs transition-colors hover:text-bone"
+              />
+            ))}
           </div>
         </div>
       </div>

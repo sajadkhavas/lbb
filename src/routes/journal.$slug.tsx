@@ -22,6 +22,10 @@ import { BackendApiError } from "@/lib/backend-api";
 import { resolveStorefrontJournalPost, type StorefrontJournalDto } from "@/lib/storefront-control";
 
 const COVERS = { hero: heroMain, l1: lifestyle1, l2: lifestyle2 };
+type ManagedJournalDto = StorefrontJournalDto & {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+};
 
 export const Route = createFileRoute("/journal/$slug")({
   loader: async ({ params }) => {
@@ -53,14 +57,15 @@ export const Route = createFileRoute("/journal/$slug")({
     }
 
     if (loaderData.source === "live") {
-      const article = loaderData.article;
-      const title = `${article.title} | ژورنال LBB`;
+      const article = loaderData.article as ManagedJournalDto;
+      const title = article.metaTitle?.trim() || `${article.title} | ژورنال LBB`;
+      const description = article.metaDescription?.trim() || article.excerpt || article.title;
       const path = `/journal/${article.slug}`;
       const articleLd = {
         "@context": "https://schema.org",
         "@type": "Article",
         headline: article.title,
-        description: article.excerpt ?? article.title,
+        description,
         image: article.coverUrl ?? undefined,
         datePublished: article.publishedAt ?? undefined,
         articleSection: article.category ?? undefined,
@@ -70,7 +75,7 @@ export const Route = createFileRoute("/journal/$slug")({
       return {
         meta: pageMeta({
           title,
-          description: article.excerpt ?? article.title,
+          description,
           path,
           image: article.coverUrl ?? undefined,
           type: "article",

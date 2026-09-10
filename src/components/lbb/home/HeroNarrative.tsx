@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 import { CATEGORIES } from "@/lib/categories";
 import type { StorefrontCategoryDto } from "@/lib/final-technical-api";
 import { productImage } from "@/lib/product-images";
 import { fmtToman, productBySlug } from "@/lib/products";
 import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 type LiveHeroProduct = {
   slug: string;
@@ -22,6 +24,7 @@ export function HeroNarrative({
   liveCategories?: StorefrontCategoryDto[] | null;
 }) {
   const { source, brand, copy, home, sectionCopy } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
   const prototypeProduct = productBySlug(home.heroProductSlug);
   const prototypeCategoryOrder = home.categoryOrder.filter(
     (slug): slug is keyof typeof CATEGORIES => slug in CATEGORIES,
@@ -39,7 +42,21 @@ export function HeroNarrative({
           }
         : null;
   const heroImage =
-    source === "live" ? (heroProduct?.image ?? null) : productImage(home.heroProductSlug);
+    source === "live"
+      ? (presentation.hero.imageUrl ?? heroProduct?.image ?? null)
+      : productImage(home.heroProductSlug);
+  const heroAlt =
+    source === "live" && presentation.hero.imageAlt
+      ? presentation.hero.imageAlt
+      : source === "prototype"
+        ? "تیشرت مشکی ال‌بی‌بی روی زمینه روشن"
+        : heroProduct
+          ? `${heroProduct.name} در ویترین ${brand.nameFa}`
+          : `ویترین ${brand.nameFa}`;
+  const heroImageClass =
+    source === "live" && presentation.hero.imageFit === "cover"
+      ? "absolute inset-0 h-full w-full object-cover"
+      : "absolute inset-0 h-full w-full object-contain p-8 sm:p-12 lg:p-16";
 
   const liveOrder = new Map(home.categoryOrder.map((slug, index) => [slug, index]));
   const liveQuickCategories = [...(liveCategories ?? [])]
@@ -83,13 +100,27 @@ export function HeroNarrative({
             <p className="mt-7 max-w-[58ch] text-lede">{copy.heroBody}</p>
 
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link to="/shop" className={CtaClasses("signal", "lg")}>
+              <MerchantNavigationLink
+                item={{
+                  label: copy.primaryCta,
+                  latin: "PRIMARY CTA",
+                  href: presentation.hero.primaryCtaHref,
+                }}
+                className={CtaClasses("signal", "lg")}
+              >
                 {copy.primaryCta}
                 <ArrowUpLeft size={17} aria-hidden="true" />
-              </Link>
-              <Link to="/contact" className={CtaClasses("line", "lg")}>
+              </MerchantNavigationLink>
+              <MerchantNavigationLink
+                item={{
+                  label: copy.secondaryCta,
+                  latin: "SECONDARY CTA",
+                  href: presentation.hero.secondaryCtaHref,
+                }}
+                className={CtaClasses("line", "lg")}
+              >
                 {copy.secondaryCta}
-              </Link>
+              </MerchantNavigationLink>
             </div>
 
             <p className="mt-4 max-w-[55ch] text-xs leading-6 text-mute">
@@ -151,24 +182,19 @@ export function HeroNarrative({
           {heroImage ? (
             <img
               src={heroImage}
-              alt={
-                source === "prototype"
-                  ? "تیشرت مشکی ال‌بی‌بی روی زمینه روشن"
-                  : heroProduct
-                    ? `${heroProduct.name} در ویترین ${brand.nameFa}`
-                    : `ویترین ${brand.nameFa}`
-              }
+              alt={heroAlt}
               width={1200}
               height={1500}
               sizes="(max-width: 1023px) 100vw, 48vw"
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="absolute inset-0 h-full w-full object-contain p-8 sm:p-12 lg:p-16"
+              className={heroImageClass}
+              style={{ objectPosition: presentation.hero.imagePosition }}
             />
           ) : (
             <div className="absolute inset-0 grid place-items-center p-8 text-center text-sm text-obsidian/60">
-              تصویر محصول منتخب در حال تکمیل است.
+              تصویر Hero هنوز از پنل مدیریت منتشر نشده است.
             </div>
           )}
           <span

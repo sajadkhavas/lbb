@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowUpLeft, PackageSearch, RefreshCcw, Search } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
+import { ManagedPageHead } from "@/components/lbb/ManagedPageIntro";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
@@ -58,6 +59,7 @@ import {
   backendFacetVisuals,
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 const TITLE = "فروشگاه LBB | خرید پوشاک خیابانی و استریت‌ویر";
 const DESC =
@@ -163,13 +165,15 @@ export const Route = createFileRoute("/shop")({
       scripts.push({ type: "application/ld+json", children: JSON.stringify(createItemListLd()) });
     }
     return {
-      meta: pageMeta({
-        title: TITLE,
-        description: DESC,
-        path: "/shop",
-        type: "website",
-        robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined,
-      }),
+      meta: isLiveBackend()
+        ? []
+        : pageMeta({
+            title: TITLE,
+            description: DESC,
+            path: "/shop",
+            type: "website",
+            robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined,
+          }),
       links: canonical("/shop"),
       scripts,
     };
@@ -519,6 +523,8 @@ function ShopChrome({
   children: React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const presentation = useStorefrontPresentation();
+  const page = presentation.pages.shop;
   const [query, setQuery] = useState("");
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
@@ -529,6 +535,7 @@ function ShopChrome({
 
   return (
     <>
+      {presentation.source === "live" ? <ManagedPageHead presentation={page} path="/shop" /> : null}
       <Navbar theme="dark" />
       <main
         dir="rtl"
@@ -541,8 +548,12 @@ function ShopChrome({
           <Shell className="py-3 md:py-5">
             <div className="relative isolate min-h-[520px] overflow-hidden rounded-[24px] bg-carbon md:min-h-[590px] md:rounded-[32px]">
               <img
-                src={homeCategoryImage("tshirts")}
-                alt="تیشرت ال‌بی‌بی برای شروع مرور فروشگاه"
+                src={page.socialImageUrl ?? homeCategoryImage("tshirts")}
+                alt={
+                  presentation.source === "live"
+                    ? page.title
+                    : "تیشرت ال‌بی‌بی برای شروع مرور فروشگاه"
+                }
                 width={1600}
                 height={2000}
                 fetchPriority="high"
@@ -550,14 +561,12 @@ function ShopChrome({
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,9,11,.12)_0%,rgba(9,9,11,.38)_42%,rgba(9,9,11,.94)_100%)] md:bg-[linear-gradient(90deg,rgba(9,9,11,.94)_0%,rgba(9,9,11,.68)_42%,rgba(9,9,11,.08)_78%)]" />
               <div className="relative flex min-h-[520px] flex-col justify-end p-5 md:min-h-[590px] md:max-w-[680px] md:justify-center md:p-12 lg:p-16">
-                <TechLabel tone="signal">فروشگاه / ال‌بی‌بی / مهستان</TechLabel>
+                <TechLabel tone="signal">{page.eyebrow}</TechLabel>
                 <h1 className="mt-4 max-w-xl text-[clamp(2.75rem,7vw,6.5rem)] font-black leading-[.92] tracking-[-.06em] text-bone">
-                  استایل تو،
-                  <span className="block text-signal">قانون تو.</span>
+                  {page.title}
                 </h1>
                 <p className="mt-5 max-w-lg text-sm leading-7 text-bone/78 md:text-base md:leading-8">
-                  قطعه‌های ال‌بی‌بی را بر اساس دسته، رنگ، سایز و موجودی کشف کن؛ یا مستقیم چیزی را که
-                  می‌خواهی جست‌وجو کن.
+                  {page.lede}
                 </p>
 
                 <form
@@ -595,8 +604,10 @@ function ShopChrome({
           <Shell className="py-8 md:py-12">
             <div className="mb-5 flex items-end justify-between gap-4">
               <div>
-                <TechLabel tone="signal">SHOP BY CATEGORY</TechLabel>
-                <h2 className="mt-2 text-2xl font-black text-bone md:text-4xl">از دسته شروع کن</h2>
+                <TechLabel tone="signal">{page.sectionLabel}</TechLabel>
+                <h2 className="mt-2 text-2xl font-black text-bone md:text-4xl">
+                  {page.sectionTitle}
+                </h2>
               </div>
               <span className="tech hidden text-mute md:block">SWIPE / EXPLORE</span>
             </div>

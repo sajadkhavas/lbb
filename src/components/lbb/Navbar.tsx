@@ -13,6 +13,7 @@ import { MegaMenuOverlay } from "@/components/lbb/navigation/MegaMenuOverlay";
 import { MobileMenuOverlay } from "@/components/lbb/navigation/MobileMenuOverlay";
 import { SearchOverlay } from "@/components/lbb/navigation/SearchOverlay";
 import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -31,6 +32,7 @@ export function Navbar({
   offsetTop?: number;
 }) {
   const { navigation, brand } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
   const [scrolled, setScrolled] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { active, open, dismissForNavigation } = useNavigationOverlay();
@@ -103,7 +105,7 @@ export function Navbar({
                       : `${ink} opacity-75 hover:opacity-100`
                   }`}
                 >
-                  فروشگاه
+                  {presentation.shell.shopMenuLabel}
                   <ChevronDown
                     size={13}
                     aria-hidden="true"

@@ -23,6 +23,7 @@ const localStore = await read("src/components/lbb/home/LocalStoreVisit.tsx");
 const dropStory = await read("src/components/lbb/home/DropStory.tsx");
 const instagram = await read("src/components/lbb/InstagramStrip.tsx");
 const storefrontControl = await read("src/lib/storefront-control.tsx");
+const storefrontPresentation = await read("src/lib/storefront-presentation.tsx");
 const publicHref = await read("src/lib/public-href.ts");
 const backendApi = await read("src/lib/backend-api.ts");
 const finalTechnicalApi = await read("src/lib/final-technical-api.ts");
@@ -40,6 +41,7 @@ const requiredFiles = {
   shippingReturns,
   contact,
   storefrontControl,
+  storefrontPresentation,
   backendApi,
   finalTechnicalApi,
   backendDelivery,
@@ -187,10 +189,15 @@ for (const required of [
   "resolveLiveFeaturedStory",
   "featuredStory",
   "listStorefrontCategories",
-  "listProducts",
+  "resolveStorefrontHomeProducts",
 ]) {
   if (!home.includes(required))
     failures.push(`Home live loader missing backend authority: ${required}`);
+}
+for (const required of ["resolveStorefrontHomeProducts", "/api/v1/storefront/home-products"]) {
+  if (!storefrontPresentation.includes(required)) {
+    failures.push(`Backend-curated Home product authority missing: ${required}`);
+  }
 }
 
 for (const required of [

@@ -27,6 +27,10 @@ import {
   prototypeStorefrontControl,
   resolveStorefrontControl,
 } from "@/lib/storefront-control";
+import {
+  StorefrontPresentationProvider,
+  resolveStorefrontPresentation,
+} from "@/lib/storefront-presentation";
 import { WishlistProvider } from "@/lib/wishlist";
 
 function NotFoundComponent() {
@@ -117,9 +121,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: () => resolveStorefrontControl(),
+  loader: async () => {
+    const [storefront, presentation] = await Promise.all([
+      resolveStorefrontControl(),
+      resolveStorefrontPresentation(),
+    ]);
+    return { storefront, presentation };
+  },
   head: ({ loaderData }) => {
-    const control = loaderData ?? prototypeStorefrontControl();
+    const control = loaderData?.storefront ?? prototypeStorefrontControl();
     const orgJsonLd = {
       "@context": "https://schema.org",
       "@type": "Organization",
@@ -182,7 +192,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const storefront = Route.useLoaderData();
+  const { storefront, presentation } = Route.useLoaderData();
 
   useEffect(() => {
     void registerPwa();
@@ -190,22 +200,24 @@ function RootComponent() {
 
   return (
     <StorefrontControlProvider value={storefront}>
-      <QueryClientProvider client={queryClient}>
-        <NavigationOverlayProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <AccountStorefrontSync />
-              <QuickViewProvider>
-                <Outlet />
-                <CartDrawer />
-                <ProductQuickView />
-                <PwaExperience />
-                <Toaster position="bottom-left" dir="rtl" richColors closeButton />
-              </QuickViewProvider>
-            </CartProvider>
-          </WishlistProvider>
-        </NavigationOverlayProvider>
-      </QueryClientProvider>
+      <StorefrontPresentationProvider value={presentation}>
+        <QueryClientProvider client={queryClient}>
+          <NavigationOverlayProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <AccountStorefrontSync />
+                <QuickViewProvider>
+                  <Outlet />
+                  <CartDrawer />
+                  <ProductQuickView />
+                  <PwaExperience />
+                  <Toaster position="bottom-left" dir="rtl" richColors closeButton />
+                </QuickViewProvider>
+              </CartProvider>
+            </WishlistProvider>
+          </NavigationOverlayProvider>
+        </QueryClientProvider>
+      </StorefrontPresentationProvider>
     </StorefrontControlProvider>
   );
 }

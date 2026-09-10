@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpLeft, Clock3 } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
+import { ManagedPageHead, ManagedPageIntro } from "@/components/lbb/ManagedPageIntro";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { JOURNAL_ARTICLES } from "@/lib/journal";
@@ -17,6 +18,8 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import { resolveStorefrontJournal, type StorefrontJournalDto } from "@/lib/storefront-control";
+import { isLiveBackend } from "@/lib/backend-api";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 const TITLE = "ژورنال LBB | راهنمای استایل، پارچه و نگهداری";
 const DESC =
@@ -42,7 +45,9 @@ export const Route = createFileRoute("/journal/")({
     };
 
     return {
-      meta: pageMeta({ title: TITLE, description: DESC, path: "/journal", image: heroMain }),
+      meta: isLiveBackend()
+        ? []
+        : pageMeta({ title: TITLE, description: DESC, path: "/journal", image: heroMain }),
       links: canonical("/journal"),
       scripts: [
         {
@@ -71,8 +76,10 @@ function JournalIndexPage() {
 }
 
 function LiveJournalIndexPage({ articles }: { articles: StorefrontJournalDto[] }) {
+  const page = useStorefrontPresentation().pages.journal;
   return (
     <>
+      <ManagedPageHead presentation={page} path="/journal" />
       <Navbar theme="light" />
       <main
         className="min-h-screen bg-obsidian pb-bottombar pt-16"
@@ -83,15 +90,7 @@ function LiveJournalIndexPage({ articles }: { articles: StorefrontJournalDto[] }
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />
         </Shell>
         <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
-          <Shell>
-            <TechLabel tone="signal">LBB / EDITORIAL NOTES</TechLabel>
-            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
-              ژورنال؛ راهنماها و یادداشت‌های منتشرشده LBB
-            </h1>
-            <p className="text-lede mt-5 max-w-[62ch]">
-              فهرست این صفحه مستقیماً از محتوای منتشرشده در Backend می‌آید.
-            </p>
-          </Shell>
+          <ManagedPageIntro presentation={page} />
         </Band>
         <Band>
           <Shell>

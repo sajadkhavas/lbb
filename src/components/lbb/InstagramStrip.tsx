@@ -2,6 +2,8 @@ import type { StorefrontLookDto } from "@/lib/storefront-control";
 import { useStorefrontControl } from "@/lib/storefront-control";
 import { homeCategoryImage } from "@/lib/home-category-images";
 import { communityStudio } from "@/lib/product-images";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 const SHOTS = [
   homeCategoryImage("tshirts"),
@@ -17,6 +19,7 @@ function isExternalHref(value: string) {
 
 export function InstagramStrip({ liveItems }: { liveItems?: StorefrontLookDto[] | null }) {
   const { source, brand, sectionCopy } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
 
   if (source === "live") {
     const items = liveItems ?? [];
@@ -78,12 +81,16 @@ export function InstagramStrip({ liveItems }: { liveItems?: StorefrontLookDto[] 
             >
               {copy.followCta}
             </a>
-            <a
-              href="/lookbook"
+            <MerchantNavigationLink
+              item={{
+                label: copy.lookbookCta,
+                latin: "LOOKBOOK",
+                href: presentation.sectionLinks.instagramLookbook,
+              }}
               className="tap-target inline-flex items-center justify-center rounded-xl border border-white/15 px-8 py-3 text-xs font-bold text-white/80 transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
             >
               {copy.lookbookCta}
-            </a>
+            </MerchantNavigationLink>
           </div>
         </div>
       </section>

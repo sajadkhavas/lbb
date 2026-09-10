@@ -14,7 +14,7 @@ import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
-import { BackendApiError, getCollection, getProduct, listProducts } from "@/lib/backend-api";
+import { BackendApiError, getCollection, getProduct } from "@/lib/backend-api";
 import { backendCard, type BackendCatalogCard } from "@/lib/backend-storefront";
 import { listStorefrontCategories, type StorefrontCategoryDto } from "@/lib/final-technical-api";
 import { productImage } from "@/lib/product-images";
@@ -25,6 +25,11 @@ import {
   type StorefrontControl,
   type StorefrontLookDto,
 } from "@/lib/storefront-control";
+import {
+  resolveStorefrontHomeProducts,
+  resolveStorefrontPresentation,
+  type StorefrontPresentation,
+} from "@/lib/storefront-presentation";
 
 type LiveHeroProduct = {
   slug: string;
@@ -35,6 +40,7 @@ type LiveHeroProduct = {
 
 type HomeLoaderData = {
   control: Awaited<ReturnType<typeof resolveStorefrontControl>>;
+  presentation: StorefrontPresentation;
   heroProduct: LiveHeroProduct | null;
   categories: StorefrontCategoryDto[] | null;
   products: BackendCatalogCard[] | null;
@@ -94,10 +100,14 @@ async function resolveLiveFeaturedStory(
 
 export const Route = createFileRoute("/")({
   loader: async (): Promise<HomeLoaderData> => {
-    const control = await resolveStorefrontControl();
+    const [control, presentation] = await Promise.all([
+      resolveStorefrontControl(),
+      resolveStorefrontPresentation(),
+    ]);
     if (control.source !== "live") {
       return {
         control,
+        presentation,
         heroProduct: null,
         categories: null,
         products: null,
@@ -106,19 +116,20 @@ export const Route = createFileRoute("/")({
       };
     }
 
-    const [heroProduct, categories, productResponse, lookbook, featuredStory] = await Promise.all([
+    const [heroProduct, categories, curatedProducts, lookbook, featuredStory] = await Promise.all([
       resolveLiveHeroProduct(control.home.heroProductSlug),
       listStorefrontCategories(),
-      listProducts({ sort: "newest", page: 1, per_page: 4 }),
+      resolveStorefrontHomeProducts(),
       resolveStorefrontLookbook(),
       resolveLiveFeaturedStory(control),
     ]);
 
     return {
       control,
+      presentation,
       heroProduct,
       categories,
-      products: productResponse.data.map(backendCard),
+      products: curatedProducts.map(backendCard),
       lookbook: lookbook ?? [],
       featuredStory,
     };
@@ -128,7 +139,7 @@ export const Route = createFileRoute("/")({
     if (!control) return {};
     const liveStore = control.source === "live";
     const heroImage = liveStore
-      ? (loaderData.heroProduct?.image ?? null)
+      ? (loaderData.presentation.hero.imageUrl ?? loaderData.heroProduct?.image ?? null)
       : productImage(control.home.heroProductSlug);
 
     const websiteJsonLd = {
@@ -184,7 +195,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { control, heroProduct, categories, products, lookbook, featuredStory } =
+  const { control, presentation, heroProduct, categories, products, lookbook, featuredStory } =
     Route.useLoaderData();
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
@@ -214,7 +225,9 @@ function Home() {
         style={{ paddingTop: offsetTop }}
         data-storefront-source={control.source}
       >
-        <HeroNarrative heroProduct={heroProduct} liveCategories={categories} />
+        {presentation.hero.enabled ? (
+          <HeroNarrative heroProduct={heroProduct} liveCategories={categories} />
+        ) : null}
         {control.home.sections.map((key) => (
           <div key={key}>{sections[key] ?? null}</div>
         ))}
