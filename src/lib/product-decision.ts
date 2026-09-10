@@ -6,6 +6,7 @@ import {
   type ProductEvidenceField,
   type ProductEvidenceRecord,
 } from "@/lib/product-evidence";
+import type { MannequinProfileDto } from "@/lib/style-mannequin";
 import { FIT_LABELS, type Product } from "@/lib/products";
 import {
   canPurchaseVariant,
@@ -25,6 +26,7 @@ export type DecisionMedia = {
   alt: string;
   width: number;
   height: number;
+  mannequin?: MannequinProfileDto;
 };
 
 export type DecisionSwatch =
@@ -247,7 +249,10 @@ export function buildProductDecisionViewModel(
 }
 
 export function mediaForColor(model: ProductDecisionViewModel, colorId: string | null) {
-  return chooseColorMedia(model.media, model.mediaByColor, colorId);
+  const selected = chooseColorMedia(model.media, model.mediaByColor, colorId);
+  const mannequin = model.media.find((item) => item.mannequin);
+  if (!mannequin || selected.some((item) => item.id === mannequin.id)) return selected;
+  return [...selected, mannequin];
 }
 
 export function variantForSelection(
