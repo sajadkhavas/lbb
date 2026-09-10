@@ -1,0 +1,61 @@
+name: Temporary validate 3D viewer
+
+on:
+  push:
+    branches:
+      - feature/lbb-pdp-3d-viewer-20260910
+
+permissions:
+  contents: write
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+  VITE_LBB_BACKEND_MODE: prototype
+
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/lbb-pdp-3d-viewer-20260910
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Format 3D feature files
+        run: |
+          npx prettier --write \
+            src/lib/product-3d-api.ts \
+            src/lib/product-3d-capability.ts \
+            src/components/lbb/product/ProductModel3dViewer.tsx \
+            src/components/lbb/product/Gallery.tsx \
+            'src/routes/product.$slug.tsx' \
+            tests/fc2-product-3d.spec.ts
+      - name: Commit formatting if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/lib/product-3d-api.ts \
+            src/lib/product-3d-capability.ts \
+            src/components/lbb/product/ProductModel3dViewer.tsx \
+            src/components/lbb/product/Gallery.tsx \
+            'src/routes/product.$slug.tsx' \
+            tests/fc2-product-3d.spec.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format 3D viewer feature"
+            git push origin HEAD:feature/lbb-pdp-3d-viewer-20260910
+          fi
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build production bundle
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run mannequin regression tests
+        run: npx playwright test tests/fc1-style-mannequin.spec.ts tests/fc2-product-3d.spec.ts
