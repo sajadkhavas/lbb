@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { SectionHead, Shell, StatePanel } from "@/components/lbb/ui/primitives";
@@ -82,6 +83,12 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
           label="انتخاب‌های ال‌بی‌بی"
           title={<span id="home-products-title">تازه‌ها و انتخاب‌های این هفته</span>}
           lede="چند انتخاب آماده برای شروع؛ قیمت، رنگ و سایز موجود همین‌جا مشخص است."
+          action={
+            <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
+              کاتالوگ کامل
+              <ArrowUpLeft size={15} aria-hidden="true" />
+            </Link>
+          }
         />
 
         <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
