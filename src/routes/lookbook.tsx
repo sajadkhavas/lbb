@@ -3,8 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpLeft, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
+import { ManagedPageHead, ManagedPageIntro } from "@/components/lbb/ManagedPageIntro";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { CATEGORIES } from "@/lib/categories";
 import { LOOKBOOK_SCENES, getLookbookSceneView } from "@/lib/editorial-commerce";
 import { heroMain } from "@/lib/product-images";
@@ -19,6 +21,8 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
 import { resolveStorefrontLookbook, type StorefrontLookDto } from "@/lib/storefront-control";
+import { isLiveBackend } from "@/lib/backend-api";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 const TITLE = "لوک‌بوک LBB | داستان‌های تصویری و مسیرهای مرتبط";
 const DESC =
@@ -28,7 +32,9 @@ const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1
 export const Route = createFileRoute("/lookbook")({
   loader: () => resolveStorefrontLookbook(),
   head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESC, path: "/lookbook", image: heroMain }),
+    meta: isLiveBackend()
+      ? []
+      : pageMeta({ title: TITLE, description: DESC, path: "/lookbook", image: heroMain }),
     links: canonical("/lookbook"),
     scripts: [
       {
@@ -51,8 +57,10 @@ function LookbookPage() {
 }
 
 function LiveLookbookPage({ items }: { items: StorefrontLookDto[] }) {
+  const page = useStorefrontPresentation().pages.lookbook;
   return (
     <>
+      <ManagedPageHead presentation={page} path="/lookbook" />
       <Navbar theme="light" />
       <main
         className="min-h-screen bg-obsidian pb-bottombar pt-16"
@@ -63,15 +71,7 @@ function LiveLookbookPage({ items }: { items: StorefrontLookDto[] }) {
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "لوک‌بوک" }]} />
         </Shell>
         <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
-          <Shell>
-            <TechLabel tone="signal">LBB / VISUAL STORIES</TechLabel>
-            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
-              لوک‌بوک؛ داستان‌های تصویری LBB
-            </h1>
-            <p className="text-lede mt-5 max-w-[60ch]">
-              تصاویر و مسیرهای این صفحه مستقیماً از محتوای منتشرشده فروشگاه می‌آیند.
-            </p>
-          </Shell>
+          <ManagedPageIntro presentation={page} maxWidth="max-w-[60ch]" />
         </Band>
         <Band>
           <Shell>
@@ -104,9 +104,12 @@ function LiveLookbookPage({ items }: { items: StorefrontLookDto[] }) {
                           <p className="mt-2 text-sm leading-7 text-metal">{item.caption}</p>
                         ) : null}
                         {item.linkUrl ? (
-                          <a href={item.linkUrl} className={`${CtaClasses("line", "sm")} mt-4`}>
+                          <MerchantNavigationLink
+                            item={{ label: "مسیر مرتبط", latin: "RELATED", href: item.linkUrl }}
+                            className={`${CtaClasses("line", "sm")} mt-4`}
+                          >
                             مسیر مرتبط <ArrowUpLeft size={15} aria-hidden="true" />
-                          </a>
+                          </MerchantNavigationLink>
                         ) : null}
                       </figcaption>
                     </figure>

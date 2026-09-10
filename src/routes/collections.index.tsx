@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpLeft, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
+import { ManagedPageHead, ManagedPageIntro } from "@/components/lbb/ManagedPageIntro";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { COLLECTIONS } from "@/lib/collections";
@@ -23,13 +24,16 @@ import {
   listCollections,
   type CollectionDto,
 } from "@/lib/backend-api";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 const TITLE = "کالکشن‌های LBB | روایت‌های ادیتوریال و مسیرهای کشف";
 const DESC = "کالکشن‌های منتشرشده LBB و مسیرهای کشف محصول.";
 const COLLECTION_VIEWS = COLLECTIONS.map(getCollectionEditorialView);
+type ManagedCollection = CollectionDto & { coverImage?: string | null };
 
 type LoaderData =
-  { mode: "live"; collections: CollectionDto[]; error: string | null } | { mode: "prototype" };
+  | { mode: "live"; collections: CollectionDto[]; error: string | null }
+  | { mode: "prototype" };
 
 export const Route = createFileRoute("/collections/")({
   loader: async (): Promise<LoaderData> => {
@@ -42,7 +46,7 @@ export const Route = createFileRoute("/collections/")({
     }
   },
   head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESC, path: "/collections" }),
+    meta: isLiveBackend() ? [] : pageMeta({ title: TITLE, description: DESC, path: "/collections" }),
     links: canonical("/collections"),
     scripts: [
       {
@@ -91,25 +95,12 @@ function LiveCollections({
   collections: CollectionDto[];
   error: string | null;
 }) {
+  const page = useStorefrontPresentation().pages.collections;
   return (
     <Chrome>
+      <ManagedPageHead presentation={page} path="/collections" />
       <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
-        <Shell>
-          <TechLabel tone="signal">LBB / PUBLISHED COLLECTIONS</TechLabel>
-          <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">کالکشن‌های منتشرشده</h1>
-          <p className="text-lede mt-5 max-w-[62ch]">
-            این فهرست از Backend می‌آید. فقط کالکشن و عضویت محصولی که برای انتشار معتبر است نمایش
-            داده می‌شود.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/shop" search={{}} className={CtaClasses("signal")}>
-              مرور فروشگاه
-            </Link>
-            <Link to="/lookbook" className={CtaClasses("line")}>
-              لوک‌بوک ادیتوریال
-            </Link>
-          </div>
-        </Shell>
+        <ManagedPageIntro presentation={page} />
       </Band>
       <Band>
         <Shell>
@@ -135,32 +126,47 @@ function LiveCollections({
             />
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {collections.map((collection) => (
-                <Link
-                  key={collection.publicId}
-                  to="/collections/$slug"
-                  params={{ slug: collection.slug }}
-                  className="group flex min-h-64 flex-col justify-between rounded-2xl border border-hairline bg-carbon p-6 transition hover:-translate-y-1 hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
-                >
-                  <div>
-                    <TechLabel tone="signal">
-                      {collection.isFeatured ? "FEATURED COLLECTION" : "COLLECTION"}
-                    </TechLabel>
-                    <h2 className="mt-4 text-display-3 text-bone">{collection.name}</h2>
-                    <p className="mt-3 text-sm leading-7 text-metal">
-                      {collection.description || "توضیح عمومی برای این کالکشن منتشر نشده است."}
-                    </p>
-                    {typeof collection.productCount === "number" ? (
-                      <StatusTag tone="neutral" className="mt-5">
-                        {collection.productCount.toLocaleString("fa-IR")} محصول منتشرشده
-                      </StatusTag>
+              {collections.map((collection) => {
+                const managed = collection as ManagedCollection;
+                return (
+                  <Link
+                    key={collection.publicId}
+                    to="/collections/$slug"
+                    params={{ slug: collection.slug }}
+                    className="group flex min-h-64 flex-col overflow-hidden rounded-2xl border border-hairline bg-carbon transition hover:-translate-y-1 hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  >
+                    {managed.coverImage ? (
+                      <img
+                        src={managed.coverImage}
+                        alt={`تصویر کالکشن ${collection.name}`}
+                        width={900}
+                        height={600}
+                        loading="lazy"
+                        className="aspect-[3/2] w-full object-cover"
+                      />
                     ) : null}
-                  </div>
-                  <span className="tech mt-8 inline-flex items-center gap-2 text-bone group-hover:text-signal">
-                    مشاهده کالکشن <ArrowUpLeft size={15} aria-hidden="true" />
-                  </span>
-                </Link>
-              ))}
+                    <div className="flex flex-1 flex-col justify-between p-6">
+                      <div>
+                        <TechLabel tone="signal">
+                          {collection.isFeatured ? "FEATURED COLLECTION" : "COLLECTION"}
+                        </TechLabel>
+                        <h2 className="mt-4 text-display-3 text-bone">{collection.name}</h2>
+                        <p className="mt-3 text-sm leading-7 text-metal">
+                          {collection.description || "توضیح عمومی برای این کالکشن منتشر نشده است."}
+                        </p>
+                        {typeof collection.productCount === "number" ? (
+                          <StatusTag tone="neutral" className="mt-5">
+                            {collection.productCount.toLocaleString("fa-IR")} محصول منتشرشده
+                          </StatusTag>
+                        ) : null}
+                      </div>
+                      <span className="tech mt-8 inline-flex items-center gap-2 text-bone group-hover:text-signal">
+                        مشاهده کالکشن <ArrowUpLeft size={15} aria-hidden="true" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </Shell>

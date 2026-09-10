@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { PointerEvent } from "react";
 import { ArrowUpLeft } from "lucide-react";
 import { CategoryIcon } from "@/components/lbb/BrandIcon";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { Frame, SectionHead, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { homeCategoryImage } from "@/lib/home-category-images";
 import { CATEGORIES } from "@/lib/categories";
@@ -9,6 +10,7 @@ import { ACTIVE_HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { fmtNum, productsByCategory } from "@/lib/products";
 import type { StorefrontCategoryDto } from "@/lib/final-technical-api";
 import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 export function CategoryGateway({
   liveCategories,
@@ -16,6 +18,7 @@ export function CategoryGateway({
   liveCategories?: StorefrontCategoryDto[] | null;
 }) {
   const { source, home, sectionCopy } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
   const tilt = (event: PointerEvent<HTMLAnchorElement>) => {
     if (event.pointerType === "touch") return;
     const box = event.currentTarget.getBoundingClientRect();
@@ -55,10 +58,13 @@ export function CategoryGateway({
             title={<span id="home-categories-title">{copy.title}</span>}
             lede={copy.lede}
             action={
-              <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
+              <MerchantNavigationLink
+                item={{ label: copy.actionLabel, latin: "SHOP", href: presentation.sectionLinks.categories }}
+                className="tech inline-flex min-h-11 items-center gap-2 text-signal"
+              >
                 {copy.actionLabel}
                 <ArrowUpLeft size={15} aria-hidden="true" />
-              </Link>
+              </MerchantNavigationLink>
             }
           />
 
@@ -217,7 +223,7 @@ function LiveCategoryOverlay({
       {category.icon ? (
         <span
           aria-hidden="true"
-          className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-black/10 bg-white/90 text-obsidian shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal md:right-5 md:top-5 md:size-16"
+          className="absolute right-4 top-4 grid size-14 place-items-center rounded-2xl border border-black/10 bg-white/90 text-obsidian shadow-raised backdrop-blur-md transition-[color,border-color,transform] duration-300 group-hover:-translate-y-1 group-hover:border-signal group-hover:text-signal md:right-5 md:top-5 md:size-16"
         >
           <img
             src={category.icon}

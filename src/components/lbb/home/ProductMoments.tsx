@@ -1,13 +1,15 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowUpLeft } from "lucide-react";
 import { ProductCard } from "@/components/lbb/ProductCard";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { SectionHead, Shell, StatePanel } from "@/components/lbb/ui/primitives";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
 import { products } from "@/lib/products";
 import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
+import { ArrowUpLeft } from "lucide-react";
 
 export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalogCard[] | null }) {
   const { source, sectionCopy } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
 
   if (source === "live") {
     const items = liveProducts ?? [];
@@ -25,20 +27,23 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
             title={<span id="home-products-title">{copy.title}</span>}
             lede={copy.lede}
             action={
-              <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
+              <MerchantNavigationLink
+                item={{ label: copy.actionLabel, latin: "CATALOG", href: presentation.sectionLinks.products }}
+                className="tech inline-flex min-h-11 items-center gap-2 text-signal"
+              >
                 {copy.actionLabel}
                 <ArrowUpLeft size={15} aria-hidden="true" />
-              </Link>
+              </MerchantNavigationLink>
             }
           />
 
           {items.length === 0 ? (
             <StatePanel className="mt-8" title="هنوز محصول واقعی برای این بخش منتشر نشده است">
-              بعد از انتشار محصول در پنل مدیریت، این بخش بدون نیاز به تغییر Frontend به‌روز می‌شود.
+              بعد از انتشار/انتخاب محصول در پنل مدیریت، این بخش بدون نیاز به تغییر Frontend به‌روز می‌شود.
             </StatePanel>
           ) : (
             <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
-              {items.slice(0, 4).map((product, index) => (
+              {items.map((product, index) => (
                 <div key={product.id} className="min-w-0">
                   <ProductCard p={product} priority={index === 0} />
                 </div>
@@ -72,12 +77,6 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
           label="انتخاب‌های ال‌بی‌بی"
           title={<span id="home-products-title">تازه‌ها و انتخاب‌های این هفته</span>}
           lede="چند انتخاب آماده برای شروع؛ قیمت، رنگ و سایز موجود همین‌جا مشخص است."
-          action={
-            <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
-              کاتالوگ کامل
-              <ArrowUpLeft size={15} aria-hidden="true" />
-            </Link>
-          }
         />
 
         <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">

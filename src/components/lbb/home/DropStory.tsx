@@ -7,6 +7,8 @@ import { getCollectionEditorialViewBySlug } from "@/lib/editorial-commerce";
 import { productImage } from "@/lib/product-images";
 import { useStorefrontControl } from "@/lib/storefront-control";
 
+type ManagedCollectionDto = CollectionDto & { coverImage?: string | null };
+
 export type LiveFeaturedStory = {
   collection: CollectionDto;
   products: BackendCatalogCard[];
@@ -19,7 +21,8 @@ export function DropStory({ liveStory }: { liveStory?: LiveFeaturedStory | null 
     if (!featuredStory.enabled || !liveStory) return null;
 
     const { collection, products } = liveStory;
-    const heroImage = products.find((product) => product.primaryImage)?.primaryImage ?? null;
+    const collectionCover = (collection as ManagedCollectionDto).coverImage ?? null;
+    const heroImage = collectionCover ?? products.find((product) => product.primaryImage)?.primaryImage ?? null;
 
     return (
       <section

@@ -2,12 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
+import { ManagedPageHead, ManagedPageIntro } from "@/components/lbb/ManagedPageIntro";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { Band, CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 import { contentParagraphs } from "@/lib/content-page";
 import { breadcrumbLd, canonical, pageMeta, ROBOTS } from "@/lib/site";
 import { resolveStorefrontFaqs, type StorefrontFaqDto } from "@/lib/storefront-control";
+import { isLiveBackend } from "@/lib/backend-api";
+import {
+  useStorefrontPresentation,
+  type FaqCategoryPresentation,
+} from "@/lib/storefront-presentation";
 
 const TITLE = "سوالات متداول LBB | سایز، ارسال و انتخاب محصول";
 const DESC =
@@ -20,10 +26,7 @@ type FaqGroup = {
   items: { question: string; answer: string }[];
 };
 
-/**
- * Prototype-only fallback. Production live mode treats the Backend list as authoritative;
- * an empty live list stays empty and must never resurrect prototype answers.
- */
+/** Prototype-only fallback. Live mode never resurrects prototype answers. */
 const FAQ_GROUPS: FaqGroup[] = [
   {
     id: "products",
@@ -78,21 +81,25 @@ const FAQ_GROUPS: FaqGroup[] = [
   },
 ];
 
-const FAQ_LABELS: Record<string, { label: string; title: string }> = {
+const FAQ_LABELS: Record<string, FaqCategoryPresentation> = {
   products: { label: "PRODUCT DATA", title: "محصول و موجودی" },
   sizing: { label: "FIT & SIZE", title: "فیت و انتخاب سایز" },
   ordering: { label: "ORDER FLOW", title: "قیمت و ثبت سفارش" },
   shipping: { label: "SHIPPING", title: "ارسال و تحویل" },
   returns: { label: "RETURNS", title: "تعویض و مرجوعی" },
   editorial: { label: "EDITORIAL", title: "محتوا و راهنما" },
+  general: { label: "GENERAL", title: "سوالات عمومی" },
 };
 
-function backendFaqGroups(items: StorefrontFaqDto[]): FaqGroup[] {
+function backendFaqGroups(
+  items: StorefrontFaqDto[],
+  labels: Record<string, FaqCategoryPresentation>,
+): FaqGroup[] {
   const groups = new Map<string, FaqGroup>();
 
   for (const item of [...items].sort((a, b) => a.sortOrder - b.sortOrder)) {
     const id = item.category?.trim() || "general";
-    const meta = FAQ_LABELS[id] ?? { label: id.toUpperCase(), title: "سوالات عمومی" };
+    const meta = labels[id] ?? FAQ_LABELS[id] ?? { label: id.toUpperCase(), title: "سوالات عمومی" };
     const group = groups.get(id) ?? { id, label: meta.label, title: meta.title, items: [] };
     const answer = contentParagraphs(item.answer).join(" ") || item.answer;
     group.items.push({ question: item.question, answer });
@@ -105,13 +112,17 @@ function backendFaqGroups(items: StorefrontFaqDto[]): FaqGroup[] {
 export const Route = createFileRoute("/faq")({
   loader: () => resolveStorefrontFaqs(),
   head: ({ loaderData }) => ({
-    meta: pageMeta({
-      title: TITLE,
-      description: DESC,
-      path: "/faq",
-      robots:
-        Array.isArray(loaderData) && loaderData.length === 0 ? ROBOTS.NOINDEX_FOLLOW : undefined,
-    }),
+    meta: isLiveBackend()
+      ? Array.isArray(loaderData) && loaderData.length === 0
+        ? [{ name: "robots", content: ROBOTS.NOINDEX_FOLLOW }]
+        : []
+      : pageMeta({
+          title: TITLE,
+          description: DESC,
+          path: "/faq",
+          robots:
+            Array.isArray(loaderData) && loaderData.length === 0 ? ROBOTS.NOINDEX_FOLLOW : undefined,
+        }),
     links: canonical("/faq"),
     scripts: [
       {
@@ -130,10 +141,16 @@ export const Route = createFileRoute("/faq")({
 
 function FaqPage() {
   const liveFaqs = Route.useLoaderData();
-  const faqGroups = liveFaqs === null ? FAQ_GROUPS : backendFaqGroups(liveFaqs);
+  const presentation = useStorefrontPresentation();
+  const isLive = liveFaqs !== null;
+  const faqGroups = isLive
+    ? backendFaqGroups(liveFaqs, presentation.faqCategories)
+    : FAQ_GROUPS;
+  const page = presentation.pages.faq;
 
   return (
     <>
+      {isLive ? <ManagedPageHead presentation={page} path="/faq" /> : null}
       <Navbar theme="light" />
       <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
         <Shell className="py-3">
@@ -141,15 +158,21 @@ function FaqPage() {
         </Shell>
 
         <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
-          <Shell>
-            <TechLabel tone="signal">FAQ / LBB</TechLabel>
-            <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
-              پاسخ‌های روشن پیش از انتخاب و ثبت سفارش
-            </h1>
-            <p className="text-lede mt-5 max-w-[62ch]">
-              در حالت live، فقط سؤال‌های فعال ثبت‌شده در پنل مدیریت نمایش داده می‌شوند.
-            </p>
+          {isLive ? (
+            <ManagedPageIntro presentation={page} />
+          ) : (
+            <Shell>
+              <TechLabel tone="signal">FAQ / LBB</TechLabel>
+              <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
+                پاسخ‌های روشن پیش از انتخاب و ثبت سفارش
+              </h1>
+              <p className="text-lede mt-5 max-w-[62ch]">
+                در حالت live، فقط سؤال‌های فعال ثبت‌شده در پنل مدیریت نمایش داده می‌شوند.
+              </p>
+            </Shell>
+          )}
 
+          <Shell>
             {faqGroups.length > 0 ? (
               <nav className="mt-8 flex flex-wrap gap-2" aria-label="دسته‌های سوالات متداول">
                 {faqGroups.map((group) => (
@@ -202,9 +225,7 @@ function FaqPage() {
                             </span>
                           </summary>
                           <div className="px-5 pb-6 md:px-6">
-                            <p className="max-w-[72ch] text-sm leading-8 text-metal">
-                              {item.answer}
-                            </p>
+                            <p className="max-w-[72ch] text-sm leading-8 text-metal">{item.answer}</p>
                           </div>
                         </details>
                       ))}

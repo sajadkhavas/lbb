@@ -1,17 +1,21 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft, Instagram, MapPin, MessageCircle } from "lucide-react";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import { BRAND } from "@/lib/brand";
 import { lifestyle2 } from "@/lib/product-images";
 import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 export function LocalStoreVisit() {
   const { source, brand, contact, localStore } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
 
   if (source === "live") {
     if (!localStore.enabled) return null;
     const imageUrl = localStore.imageUrl;
     const location = contact.addressLine || contact.locationLabel;
+    const instagramHref = presentation.localStoreLinks.instagram ?? contact.instagramUrl;
 
     return (
       <section
@@ -61,10 +65,12 @@ export function LocalStoreVisit() {
                   <p className="mt-1 text-xs leading-6 text-metal">{location}</p>
                 </div>
               </div>
-              <a
-                href={contact.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <MerchantNavigationLink
+                item={{
+                  label: localStore.instagramTitle,
+                  latin: "INSTAGRAM",
+                  href: instagramHref,
+                }}
                 className="flex items-start gap-3 rounded-2xl border border-hairline bg-carbon p-4 transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
               >
                 <Instagram size={20} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
@@ -72,32 +78,41 @@ export function LocalStoreVisit() {
                   <p className="text-sm font-black text-bone">{localStore.instagramTitle}</p>
                   <p className="mt-1 text-xs leading-6 text-metal">{contact.instagramHandle}</p>
                 </div>
-              </a>
+              </MerchantNavigationLink>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/contact" className={CtaClasses("signal", "lg")}>
+              <MerchantNavigationLink
+                item={{
+                  label: localStore.contactCta,
+                  latin: "CONTACT",
+                  href: presentation.localStoreLinks.contact,
+                }}
+                className={CtaClasses("signal", "lg")}
+              >
                 {localStore.contactCta}
                 <MapPin size={17} aria-hidden="true" />
-              </Link>
-              <a
-                href={contact.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              </MerchantNavigationLink>
+              <MerchantNavigationLink
+                item={{ label: localStore.instagramCta, latin: "INSTAGRAM", href: instagramHref }}
                 className={CtaClasses("line", "lg")}
               >
                 {localStore.instagramCta}
                 <MessageCircle size={17} aria-hidden="true" />
-              </a>
+              </MerchantNavigationLink>
             </div>
 
-            <Link
-              to="/shop"
+            <MerchantNavigationLink
+              item={{
+                label: localStore.shopCta,
+                latin: "SHOP",
+                href: presentation.localStoreLinks.shop,
+              }}
               className="mt-8 inline-flex min-h-11 items-center gap-2 self-start text-xs font-black text-signal"
             >
               {localStore.shopCta}
               <ArrowUpLeft size={16} aria-hidden="true" />
-            </Link>
+            </MerchantNavigationLink>
           </div>
         </Shell>
       </section>
