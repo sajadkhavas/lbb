@@ -139,7 +139,7 @@ export const Route = createFileRoute("/")({
     if (!control) return {};
     const liveStore = control.source === "live";
     const heroImage = liveStore
-      ? loaderData.presentation.hero.imageUrl ?? loaderData.heroProduct?.image ?? null
+      ? (loaderData.presentation.hero.imageUrl ?? loaderData.heroProduct?.image ?? null)
       : productImage(control.home.heroProductSlug);
 
     const websiteJsonLd = {

@@ -220,13 +220,9 @@ function optionalPublicHref(value: unknown) {
   return typeof value === "string" ? safePublicHref(value) : null;
 }
 
-function pagePresentation(
-  raw: unknown,
-  fallback: PagePresentation,
-): PagePresentation {
-  const value = raw && typeof raw === "object" && !Array.isArray(raw)
-    ? (raw as Record<string, unknown>)
-    : {};
+function pagePresentation(raw: unknown, fallback: PagePresentation): PagePresentation {
+  const value =
+    raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
   return {
     metaTitle: stringValue(value.metaTitle, fallback.metaTitle),
     metaDescription: stringValue(value.metaDescription, fallback.metaDescription),
@@ -254,9 +250,10 @@ export async function resolveStorefrontPresentation(): Promise<StorefrontPresent
   const instagramCopy = sectionCopy.instagram as Record<string, unknown> | undefined;
   const localStore = objectAt(bootstrap.settings, "home", "home.local_store");
   const shell = objectAt(bootstrap.settings, "shell", "shell.copy");
-  const rawFooterGroups = shell.footerGroups && typeof shell.footerGroups === "object"
-    ? (shell.footerGroups as Record<string, unknown>)
-    : {};
+  const rawFooterGroups =
+    shell.footerGroups && typeof shell.footerGroups === "object"
+      ? (shell.footerGroups as Record<string, unknown>)
+      : {};
   const rawUtilityLinks = Array.isArray(shell.utilityLinks) ? shell.utilityLinks : [];
   const rawPages = objectAt(bootstrap.settings, "page", "page.presentation");
   const rawFaqCategories = objectAt(bootstrap.settings, "faq", "faq.presentation");

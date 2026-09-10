@@ -121,7 +121,9 @@ export const Route = createFileRoute("/faq")({
           description: DESC,
           path: "/faq",
           robots:
-            Array.isArray(loaderData) && loaderData.length === 0 ? ROBOTS.NOINDEX_FOLLOW : undefined,
+            Array.isArray(loaderData) && loaderData.length === 0
+              ? ROBOTS.NOINDEX_FOLLOW
+              : undefined,
         }),
     links: canonical("/faq"),
     scripts: [
@@ -143,9 +145,7 @@ function FaqPage() {
   const liveFaqs = Route.useLoaderData();
   const presentation = useStorefrontPresentation();
   const isLive = liveFaqs !== null;
-  const faqGroups = isLive
-    ? backendFaqGroups(liveFaqs, presentation.faqCategories)
-    : FAQ_GROUPS;
+  const faqGroups = isLive ? backendFaqGroups(liveFaqs, presentation.faqCategories) : FAQ_GROUPS;
   const page = presentation.pages.faq;
 
   return (
@@ -225,7 +225,9 @@ function FaqPage() {
                             </span>
                           </summary>
                           <div className="px-5 pb-6 md:px-6">
-                            <p className="max-w-[72ch] text-sm leading-8 text-metal">{item.answer}</p>
+                            <p className="max-w-[72ch] text-sm leading-8 text-metal">
+                              {item.answer}
+                            </p>
                           </div>
                         </details>
                       ))}

@@ -32,8 +32,7 @@ const COLLECTION_VIEWS = COLLECTIONS.map(getCollectionEditorialView);
 type ManagedCollection = CollectionDto & { coverImage?: string | null };
 
 type LoaderData =
-  | { mode: "live"; collections: CollectionDto[]; error: string | null }
-  | { mode: "prototype" };
+  { mode: "live"; collections: CollectionDto[]; error: string | null } | { mode: "prototype" };
 
 export const Route = createFileRoute("/collections/")({
   loader: async (): Promise<LoaderData> => {
@@ -46,7 +45,9 @@ export const Route = createFileRoute("/collections/")({
     }
   },
   head: () => ({
-    meta: isLiveBackend() ? [] : pageMeta({ title: TITLE, description: DESC, path: "/collections" }),
+    meta: isLiveBackend()
+      ? []
+      : pageMeta({ title: TITLE, description: DESC, path: "/collections" }),
     links: canonical("/collections"),
     scripts: [
       {

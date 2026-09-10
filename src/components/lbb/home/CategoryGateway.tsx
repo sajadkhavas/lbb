@@ -59,7 +59,11 @@ export function CategoryGateway({
             lede={copy.lede}
             action={
               <MerchantNavigationLink
-                item={{ label: copy.actionLabel, latin: "SHOP", href: presentation.sectionLinks.categories }}
+                item={{
+                  label: copy.actionLabel,
+                  latin: "SHOP",
+                  href: presentation.sectionLinks.categories,
+                }}
                 className="tech inline-flex min-h-11 items-center gap-2 text-signal"
               >
                 {copy.actionLabel}

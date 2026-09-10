@@ -549,7 +549,11 @@ function ShopChrome({
             <div className="relative isolate min-h-[520px] overflow-hidden rounded-[24px] bg-carbon md:min-h-[590px] md:rounded-[32px]">
               <img
                 src={page.socialImageUrl ?? homeCategoryImage("tshirts")}
-                alt={presentation.source === "live" ? page.title : "تیشرت ال‌بی‌بی برای شروع مرور فروشگاه"}
+                alt={
+                  presentation.source === "live"
+                    ? page.title
+                    : "تیشرت ال‌بی‌بی برای شروع مرور فروشگاه"
+                }
                 width={1600}
                 height={2000}
                 fetchPriority="high"
@@ -601,7 +605,9 @@ function ShopChrome({
             <div className="mb-5 flex items-end justify-between gap-4">
               <div>
                 <TechLabel tone="signal">{page.sectionLabel}</TechLabel>
-                <h2 className="mt-2 text-2xl font-black text-bone md:text-4xl">{page.sectionTitle}</h2>
+                <h2 className="mt-2 text-2xl font-black text-bone md:text-4xl">
+                  {page.sectionTitle}
+                </h2>
               </div>
               <span className="tech hidden text-mute md:block">SWIPE / EXPLORE</span>
             </div>

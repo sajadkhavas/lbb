@@ -43,7 +43,7 @@ export function HeroNarrative({
         : null;
   const heroImage =
     source === "live"
-      ? presentation.hero.imageUrl ?? heroProduct?.image ?? null
+      ? (presentation.hero.imageUrl ?? heroProduct?.image ?? null)
       : productImage(home.heroProductSlug);
   const heroAlt =
     source === "live" && presentation.hero.imageAlt
@@ -101,14 +101,22 @@ export function HeroNarrative({
 
             <div className="mt-7 flex flex-wrap gap-3">
               <MerchantNavigationLink
-                item={{ label: copy.primaryCta, latin: "PRIMARY CTA", href: presentation.hero.primaryCtaHref }}
+                item={{
+                  label: copy.primaryCta,
+                  latin: "PRIMARY CTA",
+                  href: presentation.hero.primaryCtaHref,
+                }}
                 className={CtaClasses("signal", "lg")}
               >
                 {copy.primaryCta}
                 <ArrowUpLeft size={17} aria-hidden="true" />
               </MerchantNavigationLink>
               <MerchantNavigationLink
-                item={{ label: copy.secondaryCta, latin: "SECONDARY CTA", href: presentation.hero.secondaryCtaHref }}
+                item={{
+                  label: copy.secondaryCta,
+                  latin: "SECONDARY CTA",
+                  href: presentation.hero.secondaryCtaHref,
+                }}
                 className={CtaClasses("line", "lg")}
               >
                 {copy.secondaryCta}

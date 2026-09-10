@@ -28,7 +28,11 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
             lede={copy.lede}
             action={
               <MerchantNavigationLink
-                item={{ label: copy.actionLabel, latin: "CATALOG", href: presentation.sectionLinks.products }}
+                item={{
+                  label: copy.actionLabel,
+                  latin: "CATALOG",
+                  href: presentation.sectionLinks.products,
+                }}
                 className="tech inline-flex min-h-11 items-center gap-2 text-signal"
               >
                 {copy.actionLabel}
@@ -39,7 +43,8 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
 
           {items.length === 0 ? (
             <StatePanel className="mt-8" title="هنوز محصول واقعی برای این بخش منتشر نشده است">
-              بعد از انتشار/انتخاب محصول در پنل مدیریت، این بخش بدون نیاز به تغییر Frontend به‌روز می‌شود.
+              بعد از انتشار/انتخاب محصول در پنل مدیریت، این بخش بدون نیاز به تغییر Frontend به‌روز
+              می‌شود.
             </StatePanel>
           ) : (
             <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">

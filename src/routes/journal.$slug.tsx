@@ -224,7 +224,9 @@ function LiveJournalDetailPage({ article }: { article: StorefrontJournalDto }) {
           <Shell className="max-w-[980px]">
             <TechLabel tone="signal">{article.category ?? "JOURNAL"}</TechLabel>
             <h1 className="mt-5 max-w-[18ch] text-display-1 text-bone">{article.title}</h1>
-            {article.excerpt ? <p className="text-lede mt-5 max-w-[62ch]">{article.excerpt}</p> : null}
+            {article.excerpt ? (
+              <p className="text-lede mt-5 max-w-[62ch]">{article.excerpt}</p>
+            ) : null}
             {article.publishedAt ? (
               <time dateTime={article.publishedAt} className="mt-6 block text-xs text-mute">
                 {new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(
@@ -251,7 +253,10 @@ function LiveJournalDetailPage({ article }: { article: StorefrontJournalDto }) {
           <Shell className="max-w-[760px]">
             <article className="space-y-6">
               {paragraphs.map((paragraph, index) => (
-                <p key={`${index}-${paragraph.slice(0, 24)}`} className="text-[15px] leading-9 text-metal">
+                <p
+                  key={`${index}-${paragraph.slice(0, 24)}`}
+                  className="text-[15px] leading-9 text-metal"
+                >
                   {paragraph}
                 </p>
               ))}
@@ -321,12 +326,18 @@ function PrototypeJournalDetailPage({
 
         <Band>
           <Shell className="grid max-w-[1100px] gap-10 lg:grid-cols-[240px_minmax(0,720px)] lg:items-start lg:justify-center">
-            <aside className="rounded-2xl border border-hairline bg-carbon p-5 lg:sticky lg:top-24" aria-label="فهرست مقاله">
+            <aside
+              className="rounded-2xl border border-hairline bg-carbon p-5 lg:sticky lg:top-24"
+              aria-label="فهرست مقاله"
+            >
               <TechLabel tone="signal">IN THIS ARTICLE</TechLabel>
               <ol className="mt-4 space-y-3">
                 {article.sections.map((section, index) => (
                   <li key={section.heading}>
-                    <a href={`#section-${index + 1}`} className="text-xs leading-6 text-metal transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal">
+                    <a
+                      href={`#section-${index + 1}`}
+                      className="text-xs leading-6 text-metal transition-colors hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    >
                       {index + 1}. {section.heading}
                     </a>
                   </li>
@@ -336,7 +347,11 @@ function PrototypeJournalDetailPage({
 
             <article className="min-w-0">
               {article.sections.map((section, index) => (
-                <section id={`section-${index + 1}`} key={section.heading} className="scroll-mt-28 border-b border-hairline pb-9 pt-1 first:pt-0 last:border-b-0 last:pb-0">
+                <section
+                  id={`section-${index + 1}`}
+                  key={section.heading}
+                  className="scroll-mt-28 border-b border-hairline pb-9 pt-1 first:pt-0 last:border-b-0 last:pb-0"
+                >
                   <div className="mb-4 flex items-center gap-3">
                     <TechLabel tone="signal">{String(index + 1).padStart(2, "0")}</TechLabel>
                     <h2 className="text-display-3 text-bone">{section.heading}</h2>
@@ -393,7 +408,9 @@ function PrototypeJournalDetailPage({
                     <div className="flex flex-col justify-center p-5">
                       <TechLabel tone="signal">{item.category}</TechLabel>
                       <h3 className="mt-3 text-lg font-bold leading-8 text-bone">{item.title}</h3>
-                      <p className="mt-2 line-clamp-2 text-xs leading-6 text-metal">{item.excerpt}</p>
+                      <p className="mt-2 line-clamp-2 text-xs leading-6 text-metal">
+                        {item.excerpt}
+                      </p>
                       <span className="tech mt-4 inline-flex items-center gap-2 text-bone transition-colors group-hover:text-signal">
                         خواندن
                         <ArrowUpLeft aria-hidden="true" size={14} />

@@ -22,7 +22,8 @@ export function DropStory({ liveStory }: { liveStory?: LiveFeaturedStory | null 
 
     const { collection, products } = liveStory;
     const collectionCover = (collection as ManagedCollectionDto).coverImage ?? null;
-    const heroImage = collectionCover ?? products.find((product) => product.primaryImage)?.primaryImage ?? null;
+    const heroImage =
+      collectionCover ?? products.find((product) => product.primaryImage)?.primaryImage ?? null;
 
     return (
       <section

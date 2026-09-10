@@ -38,7 +38,8 @@ for (const [name, source] of Object.entries(files)) {
 const requireTokens = (name, tokens) => {
   const source = files[name] ?? "";
   for (const token of tokens) {
-    if (!source.includes(token)) failures.push(`${name} missing required admin-control token: ${token}`);
+    if (!source.includes(token))
+      failures.push(`${name} missing required admin-control token: ${token}`);
   }
 };
 
@@ -111,7 +112,11 @@ if ((files["src/components/lbb/Footer.tsx"] ?? "").includes("© 2026")) {
   failures.push("Footer copyright year is still hardcoded to 2026.");
 }
 
-if ((files["src/components/lbb/home/HeroNarrative.tsx"] ?? "").includes('source === "live" ? (heroProduct?.image ?? null)')) {
+if (
+  (files["src/components/lbb/home/HeroNarrative.tsx"] ?? "").includes(
+    'source === "live" ? (heroProduct?.image ?? null)',
+  )
+) {
   failures.push("Live Hero still ignores the independent Admin-uploaded Hero image.");
 }
 

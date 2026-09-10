@@ -126,7 +126,10 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
             <TrustMarks />
           </div>
 
-          <MerchantFooterList title={presentation.shell.footerGroups.shop} items={navigation.shop} />
+          <MerchantFooterList
+            title={presentation.shell.footerGroups.shop}
+            items={navigation.shop}
+          />
           <MerchantFooterList
             title={presentation.shell.footerGroups.editorial}
             items={navigation.editorial}
@@ -140,7 +143,10 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
               title={presentation.shell.footerGroups.personal}
               items={PERSONAL_NAVIGATION}
             />
-            <MerchantFooterList title={presentation.shell.footerGroups.brand} items={navigation.brand} />
+            <MerchantFooterList
+              title={presentation.shell.footerGroups.brand}
+              items={navigation.brand}
+            />
           </div>
         </div>
 
