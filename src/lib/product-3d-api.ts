@@ -47,10 +47,9 @@ function isTrustedModel(
 export async function getProductMannequinModel3d(
   productSlug: string,
 ): Promise<ProductMannequinModel3dDto | null> {
-  const backendOrigin = getBackendBaseUrl();
-  const url = `${backendOrigin}/api/v1/products/${encodeURIComponent(productSlug)}/mannequin-3d`;
-
   try {
+    const backendOrigin = getBackendBaseUrl();
+    const url = `${backendOrigin}/api/v1/products/${encodeURIComponent(productSlug)}/mannequin-3d`;
     const response = await fetch(url, {
       credentials: "include",
       headers: { Accept: "application/json" },
@@ -72,8 +71,8 @@ export async function getProductMannequinModel3d(
       url: new URL(payload.data.url, backendOrigin).toString(),
     };
   } catch {
-    // 3D is progressive enhancement. Any discovery/network/contract error must leave
-    // the already-rendered 2D mannequin untouched rather than breaking the PDP.
+    // 3D is progressive enhancement. Any discovery/network/config/contract error must
+    // leave the already-rendered 2D mannequin untouched rather than breaking the PDP.
     return null;
   }
 }
