@@ -139,7 +139,7 @@ export function ProductModel3dViewer({
         loadedRoot = root;
 
         const halfFov = THREE.MathUtils.degToRad(camera.fov * 0.5);
-        const distance = (maxDimension * 0.5) / Math.tan(halfFov) * 1.45;
+        const distance = ((maxDimension * 0.5) / Math.tan(halfFov)) * 1.45;
         const setInitialView = () => {
           camera.near = Math.max(distance / 100, 0.01);
           camera.far = Math.max(distance * 30, 100);

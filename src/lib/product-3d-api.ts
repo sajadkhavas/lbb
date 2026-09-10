@@ -1,8 +1,4 @@
-import {
-  getBackendBaseUrl,
-  LBB_CONTRACT_VERSION,
-  type ApiSuccess,
-} from "@/lib/backend-api";
+import { getBackendBaseUrl, LBB_CONTRACT_VERSION, type ApiSuccess } from "@/lib/backend-api";
 
 export type ProductMannequinModel3dDto = {
   url: string;

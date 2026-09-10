@@ -1,13 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Box, UserRound } from "lucide-react";
 import { StyleMannequin } from "@/components/lbb/product/StyleMannequin";
 import { getProductMannequinModel3d, type ProductMannequinModel3dDto } from "@/lib/product-3d-api";
@@ -196,11 +187,7 @@ export function Gallery({
     >
       <div
         role="tablist"
-        aria-label={
-          media.length > 0
-            ? "تصاویر و نماهای محصول"
-            : "تصاویر محصول — رسانه تأیید نشده"
-        }
+        aria-label={media.length > 0 ? "تصاویر و نماهای محصول" : "تصاویر محصول — رسانه تأیید نشده"}
         aria-orientation="vertical"
         className="hidden md:flex md:w-20 md:flex-col md:gap-3 lg:w-24"
       >

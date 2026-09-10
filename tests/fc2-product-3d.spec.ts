@@ -64,21 +64,21 @@ test.describe("FC2 progressive product 3D viewer", () => {
     );
     const route = readFileSync(resolve(root, "src/routes/product.$slug.tsx"), "utf8");
 
-    expect(gallery).toContain('lazy(() =>');
-    expect(gallery).toContain('index === active ? (');
-    expect(gallery).toContain('detectProduct3dViewerCapability()');
-    expect(gallery).toContain('getProductMannequinModel3d(productSlug)');
+    expect(gallery).toContain("lazy(() =>");
+    expect(gallery).toContain("index === active ? (");
+    expect(gallery).toContain("detectProduct3dViewerCapability()");
+    expect(gallery).toContain("getProductMannequinModel3d(productSlug)");
     expect(viewer).toContain('from "three"');
-    expect(viewer).toContain('GLTFLoader');
-    expect(viewer).toContain('OrbitControls');
-    expect(route).toContain('productSlug={product.slug} enable3d');
+    expect(viewer).toContain("GLTFLoader");
+    expect(viewer).toContain("OrbitControls");
+    expect(route).toContain("productSlug={product.slug} enable3d");
   });
 
   test("preserves the 2D mannequin as the explicit renderer failure fallback", () => {
     const gallery = readFileSync(resolve(root, "src/components/lbb/product/Gallery.tsx"), "utf8");
 
-    expect(gallery).toContain('setModel3dBroken(true)');
-    expect(gallery).toContain('<StyleMannequin');
-    expect(gallery).toContain('onError={handleModel3dError}');
+    expect(gallery).toContain("setModel3dBroken(true)");
+    expect(gallery).toContain("<StyleMannequin");
+    expect(gallery).toContain("onError={handleModel3dError}");
   });
 });
