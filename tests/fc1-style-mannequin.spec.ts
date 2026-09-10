@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { backendCard, backendDecisionModel } from "../src/lib/backend-storefront";
 import type { ProductDetailDto, ProductSummaryDto } from "../src/lib/backend-api";
-import { mediaForColor } from "../src/lib/product-decision";
+import { chooseColorMediaWithPersistentItems } from "../src/lib/product-decision-policy";
 import {
   isUsableMannequinProfile,
   mannequinAssetTransform,
@@ -135,10 +135,16 @@ test.describe("FC1 2D style mannequin contract", () => {
 
     const model = backendDecisionModel(detailPayload);
     const mannequinMedia = model.media.find((item) => item.mannequin);
+    const selectedMedia = chooseColorMediaWithPersistentItems(
+      model.media,
+      model.mediaByColor,
+      color.publicId,
+      (item) => Boolean(item.mannequin),
+    );
 
     expect(mannequinMedia?.mannequin).toEqual(validProfile);
     expect(mannequinMedia?.src).toBe(validProfile.assetUrl);
-    expect(mediaForColor(model, color.publicId).map((item) => item.id)).toEqual([
+    expect(selectedMedia.map((item) => item.id)).toEqual([
       photo.publicId,
       `${detailPayload.publicId}:mannequin`,
     ]);
