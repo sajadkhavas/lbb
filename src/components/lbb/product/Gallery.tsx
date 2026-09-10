@@ -103,6 +103,11 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
     return `نمایش تصویر ${index + 1} از ${items.length} برای ${name}`;
   };
 
+  const mobileItemLabel = (item: GalleryItem, index: number) => {
+    if (item.mannequin) return `رفتن به نمای مانکن ${name}`;
+    return `رفتن به ${item.placeholder ? "جایگاه رسانه" : "تصویر"} ${index + 1}`;
+  };
+
   return (
     <div
       dir="rtl"
@@ -233,16 +238,13 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
               ? `تصویر ${active + 1} از ${items.length}`
               : `جایگاه رسانه ${active + 1} از ${items.length}؛ رسانه تأیید نشده`}
         </p>
-        <div
-          className="mt-3 flex justify-center gap-1.5 md:hidden"
-          aria-label="انتخاب تصویر یا مانکن"
-        >
+        <div className="mt-3 flex justify-center gap-1.5 md:hidden" aria-label="انتخاب تصویر">
           {items.map((item, index) => (
             <button
               key={item.id}
               type="button"
               onClick={() => scrollToIndex(index)}
-              aria-label={itemLabel(item, index)}
+              aria-label={mobileItemLabel(item, index)}
               aria-current={index === active ? "true" : undefined}
               className={`min-h-11 min-w-11 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
                 index === active ? "text-signal" : "text-mute"
