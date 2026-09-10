@@ -1,9 +1,20 @@
-import { useEffect, useId, useRef, useState } from "react";
-import { UserRound } from "lucide-react";
+import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Box, UserRound } from "lucide-react";
 import { StyleMannequin } from "@/components/lbb/product/StyleMannequin";
+import { getProductMannequinModel3d, type ProductMannequinModel3dDto } from "@/lib/product-3d-api";
+import { detectProduct3dViewerCapability } from "@/lib/product-3d-capability";
 import type { DecisionMedia } from "@/lib/product-decision";
 
-type GalleryItem = DecisionMedia & { placeholder?: boolean };
+const ProductModel3dViewer = lazy(() =>
+  import("@/components/lbb/product/ProductModel3dViewer").then((module) => ({
+    default: module.ProductModel3dViewer,
+  })),
+);
+
+type GalleryItem = DecisionMedia & {
+  placeholder?: boolean;
+  model3d?: ProductMannequinModel3dDto;
+};
 
 const PLACEHOLDERS: GalleryItem[] = [
   {
@@ -24,12 +35,65 @@ const PLACEHOLDERS: GalleryItem[] = [
   },
 ];
 
-export function Gallery({ media, name }: { media: DecisionMedia[]; name: string }) {
-  const items: GalleryItem[] = media.length > 0 ? media : PLACEHOLDERS;
+export function Gallery({
+  media,
+  name,
+  productSlug,
+  enable3d = false,
+}: {
+  media: DecisionMedia[];
+  name: string;
+  productSlug?: string;
+  enable3d?: boolean;
+}) {
+  const [model3d, setModel3d] = useState<ProductMannequinModel3dDto | null>(null);
+  const [model3dBroken, setModel3dBroken] = useState(false);
+  const hasMannequin = media.some((item) => Boolean(item.mannequin));
+  const baseItems: GalleryItem[] = media.length > 0 ? media : PLACEHOLDERS;
+  const items = useMemo<GalleryItem[]>(() => {
+    if (!model3d || model3dBroken || !productSlug) return baseItems;
+
+    const mannequinIndex = baseItems.findIndex((item) => Boolean(item.mannequin));
+    if (mannequinIndex < 0) return baseItems;
+
+    const modelItem: GalleryItem = {
+      id: `${productSlug}:mannequin-3d`,
+      src: "",
+      alt: `نمای سه‌بعدی ${name}`,
+      width: 1200,
+      height: 1500,
+      model3d,
+    };
+
+    return [
+      ...baseItems.slice(0, mannequinIndex + 1),
+      modelItem,
+      ...baseItems.slice(mannequinIndex + 1),
+    ];
+  }, [baseItems, model3d, model3dBroken, name, productSlug]);
+
   const [active, setActive] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const id = useId();
+
+  useEffect(() => {
+    setModel3d(null);
+    setModel3dBroken(false);
+
+    if (!enable3d || !productSlug || !hasMannequin || !detectProduct3dViewerCapability()) {
+      return;
+    }
+
+    let cancelled = false;
+    void getProductMannequinModel3d(productSlug).then((model) => {
+      if (!cancelled) setModel3d(model);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [enable3d, hasMannequin, productSlug]);
 
   useEffect(() => {
     setActive(0);
@@ -45,6 +109,12 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
       child.scrollIntoView({ behavior, block: "nearest", inline: "center" });
     }
   };
+
+  const handleModel3dError = useCallback(() => {
+    const fallbackIndex = baseItems.findIndex((item) => Boolean(item.mannequin));
+    setModel3dBroken(true);
+    setActive(fallbackIndex >= 0 ? fallbackIndex : 0);
+  }, [baseItems]);
 
   const onScroll = () => {
     const track = trackRef.current;
@@ -98,12 +168,14 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
   };
 
   const itemLabel = (item: GalleryItem, index: number) => {
+    if (item.model3d) return `نمایش مدل سه‌بعدی ${name}`;
     if (item.mannequin) return `نمایش ${name} روی مانکن`;
     if (item.placeholder) return `جایگاه رسانه ${index + 1} از ${items.length} — تأیید نشده`;
     return `نمایش تصویر ${index + 1} از ${items.length} برای ${name}`;
   };
 
   const mobileItemLabel = (item: GalleryItem, index: number) => {
+    if (item.model3d) return `رفتن به نمای سه‌بعدی ${name}`;
     if (item.mannequin) return `رفتن به نمای مانکن ${name}`;
     return `رفتن به ${item.placeholder ? "جایگاه رسانه" : "تصویر"} ${index + 1}`;
   };
@@ -115,9 +187,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
     >
       <div
         role="tablist"
-        aria-label={
-          media.length > 0 ? "تصاویر و نمای مانکن محصول" : "تصاویر محصول — رسانه تأیید نشده"
-        }
+        aria-label={media.length > 0 ? "تصاویر و نماهای محصول" : "تصاویر محصول — رسانه تأیید نشده"}
         aria-orientation="vertical"
         className="hidden md:flex md:w-20 md:flex-col md:gap-3 lg:w-24"
       >
@@ -142,7 +212,12 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
                 : "border-hairline opacity-75 hover:border-metal hover:opacity-100"
             }`}
           >
-            {item.mannequin ? (
+            {item.model3d ? (
+              <span className="flex h-full w-full flex-col items-center justify-center gap-1.5 bg-[#f3f1ec] px-1 text-[10px] font-black text-obsidian">
+                <Box size={24} aria-hidden="true" />
+                <span>نمای 3D</span>
+              </span>
+            ) : item.mannequin ? (
               <span className="flex h-full w-full flex-col items-center justify-center gap-1.5 bg-[#f3f1ec] px-1 text-[10px] font-black text-obsidian">
                 <UserRound size={24} aria-hidden="true" />
                 <span>مانکن</span>
@@ -177,7 +252,7 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
           tabIndex={0}
           role="region"
           aria-roledescription="carousel"
-          aria-label={`گالری تصاویر و نمای مانکن ${name}`}
+          aria-label={`گالری تصاویر و نماهای ${name}`}
           className="group relative flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-xl border border-hairline bg-carbon shadow-[0_18px_55px_rgba(0,0,0,0.2)] [scrollbar-width:none] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal md:overflow-hidden md:rounded-2xl lg:shadow-[0_24px_75px_rgba(0,0,0,0.3)] [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, index) => (
@@ -189,7 +264,30 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
               aria-hidden={index !== active}
               className="relative aspect-[4/5] w-full flex-none snap-center overflow-hidden"
             >
-              {item.mannequin ? (
+              {item.model3d ? (
+                index === active ? (
+                  <Suspense
+                    fallback={
+                      <div className="grid h-full place-items-center bg-[#f3f1ec] text-xs font-bold text-obsidian">
+                        در حال بارگذاری Viewer سه‌بعدی…
+                      </div>
+                    }
+                  >
+                    <ProductModel3dViewer
+                      modelUrl={item.model3d.url}
+                      productName={name}
+                      onError={handleModel3dError}
+                    />
+                  </Suspense>
+                ) : (
+                  <div className="grid h-full place-items-center bg-[#f3f1ec] text-center text-obsidian">
+                    <div>
+                      <Box className="mx-auto" size={38} aria-hidden="true" />
+                      <p className="mt-3 text-xs font-black">نمای سه‌بعدی آماده است</p>
+                    </div>
+                  </div>
+                )
+              ) : item.mannequin ? (
                 <StyleMannequin
                   profile={item.mannequin}
                   productName={name}
@@ -232,11 +330,13 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
         </div>
 
         <p className="sr-only" aria-live="polite">
-          {items[active]?.mannequin
-            ? `نمای مانکن ${name}`
-            : media.length > 0
-              ? `تصویر ${active + 1} از ${items.length}`
-              : `جایگاه رسانه ${active + 1} از ${items.length}؛ رسانه تأیید نشده`}
+          {items[active]?.model3d
+            ? `نمای سه‌بعدی ${name}`
+            : items[active]?.mannequin
+              ? `نمای مانکن ${name}`
+              : media.length > 0
+                ? `تصویر ${active + 1} از ${items.length}`
+                : `جایگاه رسانه ${active + 1} از ${items.length}؛ رسانه تأیید نشده`}
         </p>
         <div className="mt-3 flex justify-center gap-1.5 md:hidden" aria-label="انتخاب تصویر">
           {items.map((item, index) => (
@@ -250,7 +350,17 @@ export function Gallery({ media, name }: { media: DecisionMedia[]; name: string 
                 index === active ? "text-signal" : "text-mute"
               }`}
             >
-              {item.mannequin ? (
+              {item.model3d ? (
+                <span
+                  aria-hidden="true"
+                  className={`mx-auto inline-flex min-h-7 items-center gap-1 rounded-full border px-2 text-[10px] font-black ${
+                    index === active ? "border-signal text-signal" : "border-hairline text-mute"
+                  }`}
+                >
+                  <Box size={13} />
+                  3D
+                </span>
+              ) : item.mannequin ? (
                 <span
                   aria-hidden="true"
                   className={`mx-auto inline-flex min-h-7 items-center gap-1 rounded-full border px-2 text-[10px] font-black ${

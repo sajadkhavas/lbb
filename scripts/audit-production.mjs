@@ -5,10 +5,13 @@ import process from "node:process";
 const root = process.cwd();
 const publicDir = path.join(root, ".output/public");
 const assetsDir = path.join(publicDir, "assets");
+// Keep the existing core bundle limits unchanged; the opt-in 3D renderer is measured
+// separately only while it remains a verified React.lazy dynamic chunk.
 const limits = {
   maxJavaScriptFile: 460 * 1024,
   maxCssFile: 160 * 1024,
   maxTotalJavaScript: 1_200 * 1024,
+  maxLazyProduct3dJavaScript: 700 * 1024,
 };
 const failures = [];
 
@@ -23,19 +26,53 @@ async function walk(directory) {
   return files;
 }
 
+function isLazyProduct3dChunk(file) {
+  return path.basename(file).startsWith("ProductModel3dViewer-");
+}
+
 const files = await walk(publicDir);
 const assetFiles = files.filter((file) => file.startsWith(assetsDir));
 const jsFiles = assetFiles.filter((file) => file.endsWith(".js"));
 const cssFiles = assetFiles.filter((file) => file.endsWith(".css"));
 const fontFiles = assetFiles.filter((file) => /\.(woff2?|ttf|otf)$/.test(file));
 
+const gallerySource = await readFile(
+  path.join(root, "src/components/lbb/product/Gallery.tsx"),
+  "utf8",
+).catch(() => "");
+if (
+  !gallerySource.includes("lazy(() =>") ||
+  !gallerySource.includes('import("@/components/lbb/product/ProductModel3dViewer")')
+) {
+  failures.push(
+    "Product 3D viewer must remain a React.lazy dynamic import before using the lazy budget.",
+  );
+}
+
 let totalJavaScript = 0;
+let coreJavaScript = 0;
+let lazyProduct3dJavaScript = 0;
+let lazyProduct3dChunks = 0;
 for (const file of jsFiles) {
   const size = (await stat(file)).size;
   totalJavaScript += size;
+
+  if (isLazyProduct3dChunk(file)) {
+    lazyProduct3dChunks += 1;
+    lazyProduct3dJavaScript += size;
+    if (size > limits.maxLazyProduct3dJavaScript) {
+      failures.push(`Lazy Product 3D budget exceeded: ${path.basename(file)} = ${size} bytes`);
+    }
+    continue;
+  }
+
+  coreJavaScript += size;
   if (size > limits.maxJavaScriptFile) {
     failures.push(`JavaScript budget exceeded: ${path.basename(file)} = ${size} bytes`);
   }
+}
+if (lazyProduct3dChunks > 1) {
+  failures.push(`Expected at most one lazy Product 3D chunk, found ${lazyProduct3dChunks}.`);
 }
 for (const file of cssFiles) {
   const size = (await stat(file)).size;
@@ -43,8 +80,8 @@ for (const file of cssFiles) {
     failures.push(`CSS budget exceeded: ${path.basename(file)} = ${size} bytes`);
   }
 }
-if (totalJavaScript > limits.maxTotalJavaScript) {
-  failures.push(`Total JavaScript budget exceeded: ${totalJavaScript} bytes`);
+if (coreJavaScript > limits.maxTotalJavaScript) {
+  failures.push(`Core JavaScript budget exceeded: ${coreJavaScript} bytes`);
 }
 if (fontFiles.length < 2) failures.push("Self-hosted font assets were not emitted.");
 
@@ -86,6 +123,9 @@ console.log(
       cssFiles: cssFiles.length,
       fontFiles: fontFiles.length,
       totalJavaScript,
+      coreJavaScript,
+      lazyProduct3dJavaScript,
+      lazyProduct3dChunks,
       budgets: limits,
     },
     null,
