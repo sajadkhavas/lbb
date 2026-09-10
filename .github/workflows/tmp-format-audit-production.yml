@@ -1,0 +1,36 @@
+name: Temporary format production audit
+
+on:
+  push:
+    branches:
+      - feature/lbb-pdp-3d-viewer-20260910
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feature/lbb-pdp-3d-viewer-20260910
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Format production audit and self-remove
+        run: |
+          npx prettier --write scripts/audit-production.mjs
+          rm .github/workflows/tmp-format-audit-production.yml
+      - name: Commit exact formatted source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/audit-production.mjs .github/workflows/tmp-format-audit-production.yml
+          git commit -m "style: format lazy 3D production budget audit"
+          git push origin HEAD:feature/lbb-pdp-3d-viewer-20260910
