@@ -10,7 +10,7 @@ import type { MannequinProfileDto } from "@/lib/style-mannequin";
 import { FIT_LABELS, type Product } from "@/lib/products";
 import {
   canPurchaseVariant,
-  chooseColorMedia,
+  chooseColorMediaWithPersistentItems,
   isEvidenceFieldPublic,
   selectedVariantAvailability,
   verifiedExtensionValue,
@@ -249,10 +249,12 @@ export function buildProductDecisionViewModel(
 }
 
 export function mediaForColor(model: ProductDecisionViewModel, colorId: string | null) {
-  const selected = chooseColorMedia(model.media, model.mediaByColor, colorId);
-  const mannequin = model.media.find((item) => item.mannequin);
-  if (!mannequin || selected.some((item) => item.id === mannequin.id)) return selected;
-  return [...selected, mannequin];
+  return chooseColorMediaWithPersistentItems(
+    model.media,
+    model.mediaByColor,
+    colorId,
+    (item) => Boolean(item.mannequin),
+  );
 }
 
 export function variantForSelection(
