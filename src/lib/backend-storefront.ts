@@ -13,10 +13,7 @@ import type {
   ProductDecisionViewModel,
 } from "@/lib/product-decision";
 import type { Filters, SortKey } from "@/lib/product-filter";
-import {
-  isUsableMannequinProfile,
-  type MannequinProfileDto,
-} from "@/lib/style-mannequin";
+import { isUsableMannequinProfile, type MannequinProfileDto } from "@/lib/style-mannequin";
 
 export type BackendCatalogCard = {
   source: "backend";
