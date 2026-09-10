@@ -27,6 +27,26 @@ export function detectProduct3dViewerCapability(): boolean {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
 
   const nav = navigator as NavigatorWithHints;
+  const deviceMemory =
+    typeof nav.deviceMemory === "number" && Number.isFinite(nav.deviceMemory)
+      ? nav.deviceMemory
+      : null;
+  const hardwareConcurrency =
+    typeof nav.hardwareConcurrency === "number" && Number.isFinite(nav.hardwareConcurrency)
+      ? nav.hardwareConcurrency
+      : null;
+  const saveData = nav.connection?.saveData === true;
+
+  // Reject mobile/constrained devices before creating even a temporary WebGL context.
+  if (
+    window.innerWidth < 1024 ||
+    saveData ||
+    (deviceMemory !== null && deviceMemory < 4) ||
+    (hardwareConcurrency !== null && hardwareConcurrency < 4)
+  ) {
+    return false;
+  }
+
   const canvas = document.createElement("canvas");
   let webgl2 = false;
 
@@ -50,15 +70,9 @@ export function detectProduct3dViewerCapability(): boolean {
 
   return shouldEnableProduct3dViewer({
     viewportWidth: window.innerWidth,
-    saveData: nav.connection?.saveData === true,
-    deviceMemory:
-      typeof nav.deviceMemory === "number" && Number.isFinite(nav.deviceMemory)
-        ? nav.deviceMemory
-        : null,
-    hardwareConcurrency:
-      typeof nav.hardwareConcurrency === "number" && Number.isFinite(nav.hardwareConcurrency)
-        ? nav.hardwareConcurrency
-        : null,
+    saveData,
+    deviceMemory,
+    hardwareConcurrency,
     webgl2,
   });
 }
