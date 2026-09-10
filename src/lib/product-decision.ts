@@ -249,11 +249,8 @@ export function buildProductDecisionViewModel(
 }
 
 export function mediaForColor(model: ProductDecisionViewModel, colorId: string | null) {
-  return chooseColorMediaWithPersistentItems(
-    model.media,
-    model.mediaByColor,
-    colorId,
-    (item) => Boolean(item.mannequin),
+  return chooseColorMediaWithPersistentItems(model.media, model.mediaByColor, colorId, (item) =>
+    Boolean(item.mannequin),
   );
 }
 
