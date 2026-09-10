@@ -1,0 +1,40 @@
+name: Temporary wire 3D gallery
+
+on:
+  push:
+    branches:
+      - feature/lbb-pdp-3d-viewer-20260910
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/lbb-pdp-3d-viewer-20260910
+      - name: Wire live PDP product identity into 3D gallery
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/routes/product.$slug.tsx')
+          text = path.read_text()
+          old = '<Gallery media={galleryMedia} name={product.name} />'
+          new = '<Gallery media={galleryMedia} name={product.name} productSlug={product.slug} enable3d />'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one live Gallery call, found {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+      - name: Commit wiring
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'src/routes/product.$slug.tsx'
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: enable 3D viewer on live product detail"
+          git push origin HEAD:feature/lbb-pdp-3d-viewer-20260910
