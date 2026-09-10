@@ -68,3 +68,15 @@ export function chooseColorMedia<T>(
   if (colorId && mediaByColor[colorId]?.length) return mediaByColor[colorId];
   return fallback;
 }
+
+export function chooseColorMediaWithPersistentItems<T extends { id: string }>(
+  fallback: T[],
+  mediaByColor: Record<string, T[]>,
+  colorId: string | null,
+  isPersistent: (item: T) => boolean,
+) {
+  const selected = chooseColorMedia(fallback, mediaByColor, colorId);
+  const selectedIds = new Set(selected.map((item) => item.id));
+  const persistent = fallback.filter((item) => isPersistent(item) && !selectedIds.has(item.id));
+  return persistent.length > 0 ? [...selected, ...persistent] : selected;
+}
