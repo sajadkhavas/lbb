@@ -27,7 +27,9 @@ test("D2 legal/content routes are wired to backend authority without stale expre
   expect(shipping).not.toContain("<ShippingState delivery={delivery} />");
   expect(shipping).not.toContain("پست پیشتاز");
 
-  expect(faq).toContain("liveFaqs === null ? FAQ_GROUPS : backendFaqGroups(liveFaqs)");
+  expect(faq).toContain("const isLive = liveFaqs !== null");
+  expect(faq).toContain("backendFaqGroups(liveFaqs, presentation.faqCategories)");
+  expect(faq).toContain(": FAQ_GROUPS");
   expect(faq).toContain("faqGroups.map((group, groupIndex)");
   expect(faq).not.toContain("FAQ_GROUPS.map((group, groupIndex)");
   expect(faq).not.toContain("پست پیشتاز");
