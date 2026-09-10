@@ -311,7 +311,7 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
         aria-label="تصمیم‌گیری محصول"
         className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
       >
-        <Gallery media={galleryMedia} name={product.name} />
+        <Gallery media={galleryMedia} name={product.name} productSlug={product.slug} enable3d />
         <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
       </Shell>
       <Band label="PRODUCT DECISION FACTS">
