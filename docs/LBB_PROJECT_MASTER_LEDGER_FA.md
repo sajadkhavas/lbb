@@ -531,3 +531,44 @@ Production state at this ledger entry:
 Required continuation:
 
 `EXPECTED_HEAD_MERGE -> IMMUTABLE_ATOMIC_FRONTEND_DEPLOY -> LIVE_ACCOUNT_WISHLIST_HERO_CHECKOUT_ACCEPTANCE`
+
+
+---
+
+## 18) Customer UI polish — merge, Production activation and live acceptance — 2026-09-16
+
+Final GitHub state:
+
+- Pull request: `#98`
+- final validated PR head: `b1a8b8323da9db3035b3af64934228338ce0b340`
+- merge commit: `e870051dc45f0ca9c7d5994fe0a990a28fd028d6`
+- final Quality Gates `#522`: `SUCCESS`
+- final P3 Live Integration `#166`: `SUCCESS`
+
+Production activation:
+
+- previous retained rollback release: `203f8676d6101bcaf3913d93b24e170085a6dfd9`
+- active immutable release: `e870051dc45f0ca9c7d5994fe0a990a28fd028d6`
+- active process CWD matched the exact target release;
+- direct Node readiness on `127.0.0.1:5173`: HTTP `200`;
+- Nginx origin and public acceptance returned HTTP `200` for Home, Shop, Account, Wishlist, Checkout, Order Confirmation and Track Order;
+- customer-facing copy acceptance: `PASS`;
+- Storefront bootstrap and Admin login: HTTP `200`;
+- Nginx, Frontend, PHP-FPM and MySQL services: `active`;
+- fatal Frontend log count: `0`.
+
+The first cutover attempt was automatically rolled back after an immediate Nginx readiness race. Read-only diagnosis found a healthy candidate artifact and no runtime crash. The second race-safe activation waited for direct Node readiness before origin/public acceptance and passed completely.
+
+Mutation boundary:
+
+`BACKEND_MUTATION = NO`
+
+`DATABASE_MUTATION = NO`
+
+`MIGRATIONS_RUN = NO`
+
+`COMMERCE_CONFIGURATION_CHANGED = NO`
+
+Final closure:
+
+`PR_98 = MERGED / PRODUCTION_DEPLOYED / LIVE_ACCEPTANCE_PASS / ROLLBACK_RETAINED`
