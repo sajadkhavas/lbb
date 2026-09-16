@@ -156,7 +156,8 @@ export const Route = createFileRoute("/$category")({
         return {
           meta: pageMeta({
             title: "این دسته‌بندی فعلاً در دسترس نیست | LBB",
-            description: "نمایش محصولات این دسته‌بندی موقتاً امکان‌پذیر نیست. لطفاً کمی بعد دوباره تلاش کنید.",
+            description:
+              "نمایش محصولات این دسته‌بندی موقتاً امکان‌پذیر نیست. لطفاً کمی بعد دوباره تلاش کنید.",
             path: "/shop",
             robots: "noindex, nofollow",
           }),
