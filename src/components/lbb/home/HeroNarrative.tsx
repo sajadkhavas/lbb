@@ -53,10 +53,10 @@ export function HeroNarrative({
         : heroProduct
           ? `${heroProduct.name} در ویترین ${brand.nameFa}`
           : `ویترین ${brand.nameFa}`;
-  const heroImageClass =
-    source === "live" && presentation.hero.imageFit === "cover"
-      ? "absolute inset-0 h-full w-full object-cover"
-      : "absolute inset-0 h-full w-full object-contain p-8 sm:p-12 lg:p-16";
+
+  // Hero artwork must visually fill its frame. The image position remains admin-controlled
+  // so important content can be re-centered without reintroducing white/empty gutters.
+  const heroImageClass = "absolute inset-0 h-full w-full object-cover";
 
   const liveOrder = new Map(home.categoryOrder.map((slug, index) => [slug, index]));
   const liveQuickCategories = [...(liveCategories ?? [])]
