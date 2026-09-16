@@ -155,8 +155,9 @@ export const Route = createFileRoute("/$category")({
       if (!category) {
         return {
           meta: pageMeta({
-            title: "دسته‌بندی موقتاً در دسترس نیست | LBB",
-            description: "اطلاعات دسته از Backend قابل دریافت نیست.",
+            title: "این دسته‌بندی فعلاً در دسترس نیست | LBB",
+            description:
+              "نمایش محصولات این دسته‌بندی موقتاً امکان‌پذیر نیست. لطفاً کمی بعد دوباره تلاش کنید.",
             path: "/shop",
             robots: "noindex, nofollow",
           }),

@@ -22,7 +22,7 @@ import { pageMeta, canonical, breadcrumbLd, ROBOTS } from "@/lib/site";
 import { useStorefrontControl, type ReturnsPolicyControl } from "@/lib/storefront-control";
 
 const TITLE = "ارسال، تعویض و مرجوعی | LBB";
-const DESC = "روش‌های ارسال فعال LBB و سیاست تعویض و مرجوعی منتشرشده از Backend و پنل مدیریت.";
+const DESC = "روش‌های ارسال LBB و شرایط تعویض و مرجوعی سفارش‌ها را پیش از خرید بررسی کنید.";
 
 type LiveDeliveryPolicy = {
   tehran: DeliveryOptionsDto;

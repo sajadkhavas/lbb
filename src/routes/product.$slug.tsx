@@ -105,8 +105,9 @@ export const Route = createFileRoute("/product/$slug")({
       if (!product) {
         return {
           meta: pageMeta({
-            title: "محصول موقتاً در دسترس نیست | LBB",
-            description: "اطلاعات تأییدشده محصول از Backend قابل دریافت نیست.",
+            title: "این محصول فعلاً در دسترس نیست | LBB",
+            description:
+              "نمایش اطلاعات این محصول موقتاً امکان‌پذیر نیست. لطفاً کمی بعد دوباره تلاش کنید.",
             path: "/shop",
             robots: ROBOTS.NOINDEX_NOFOLLOW,
           }),
@@ -178,7 +179,7 @@ export const Route = createFileRoute("/product/$slug")({
     if (!evidence.publishable) {
       return {
         meta: pageMeta({
-          title: "محصول در انتظار تأیید | LBB",
+          title: "این محصول فعلاً قابل سفارش نیست | LBB",
           description:
             "این صفحه تا زمان تأیید هویت و داده‌های محصول، اطلاعات تجاری تأییدنشده را منتشر نمی‌کند.",
           path,
