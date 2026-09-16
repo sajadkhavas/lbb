@@ -106,7 +106,8 @@ export const Route = createFileRoute("/product/$slug")({
         return {
           meta: pageMeta({
             title: "این محصول فعلاً در دسترس نیست | LBB",
-            description: "نمایش اطلاعات این محصول موقتاً امکان‌پذیر نیست. لطفاً کمی بعد دوباره تلاش کنید.",
+            description:
+              "نمایش اطلاعات این محصول موقتاً امکان‌پذیر نیست. لطفاً کمی بعد دوباره تلاش کنید.",
             path: "/shop",
             robots: ROBOTS.NOINDEX_NOFOLLOW,
           }),
