@@ -481,3 +481,53 @@ Do **not** reopen completed deployment, Product UX, SEO, content-authority, reco
 `PROJECT_FINAL_HANDOFF = DONE`
 
 Subject only to the explicitly documented merchant-owned external activation gates above.
+
+---
+
+## 17) Customer UI polish — 2026-09-16
+
+Change authority:
+
+- Production Frontend source lock: `203f8676d6101bcaf3913d93b24e170085a6dfd9`
+- Branch: `fix/customer-ui-polish-20260916`
+- Pull request: `#98`
+- accepted pre-ledger implementation head: `ee50f632bb3970fc2f88c7beb8091a73691ae497`
+- no history rewrite, force push, Backend schema change or business-data mutation
+
+Customer-facing UI scope:
+
+- Wishlist now resolves saved slugs against the live Backend catalog and prunes stale favorites;
+- Account now includes profile editing, saved-address management, order history, eligible cancellation and useful customer links;
+- Hero uses `cover` as the prototype/default presentation while preserving Admin-controlled `imageFit` and `imagePosition`;
+- internal terms such as Backend, Server, Verify and Customer Session were removed from customer-visible login, cart, Checkout, payment-result, order-confirmation and tracking copy;
+- order-confirmation remains fail-closed and cannot infer payment success from browser-local state;
+- Checkout remains fail-closed when authoritative commerce is unavailable and does not collect checkout PII in that state.
+
+Kavenegar / OTP ledger event:
+
+- this Frontend batch changed customer-facing authentication copy only;
+- OTP authority, rate limits, verification and provider behavior were not changed;
+- no Kavenegar credential, template identifier or secret was added to GitHub;
+- real Kavenegar activation remains a separate merchant-owned production gate.
+
+Zarinpal / payment ledger event:
+
+- this Frontend batch changed Checkout/payment-result copy only;
+- payment initiation, callback verification, provider configuration and Backend commerce authority were not changed;
+- no Zarinpal merchant credential or secret was added to GitHub;
+- Checkout/Payment must retain the currently accepted fail-closed state until the separate controlled activation gate is explicitly completed.
+
+Acceptance evidence on implementation head `ee50f632bb3970fc2f88c7beb8091a73691ae497`:
+
+- `P3 Live Integration #165`: `SUCCESS`
+- `Quality gates #521`: `SUCCESS`
+- formatting, lint, build, typecheck, dependency audit, production audit, Admin-control audit, commerce continuity, accessibility, RTL, SEO and complete Playwright regression suite: PASS
+- updated Account mobile visual baseline was reviewed against the intended customer UI.
+
+Production state at this ledger entry:
+
+`MERGED = NO / PRODUCTION_DEPLOYED = NO`
+
+Required continuation:
+
+`EXPECTED_HEAD_MERGE -> IMMUTABLE_ATOMIC_FRONTEND_DEPLOY -> LIVE_ACCOUNT_WISHLIST_HERO_CHECKOUT_ACCEPTANCE`
