@@ -86,7 +86,8 @@ function PaymentResultPage() {
               <StatePanel title="پرداخت با موفقیت تأیید شد" tone="success">
                 <span className="inline-flex items-center gap-2">
                   <CheckCircle2 size={17} aria-hidden="true" />
-                  سفارش {result.order.number} با وضعیت «{result.order.paymentStatusLabel}» ثبت شده است.
+                  سفارش {result.order.number} با وضعیت «{result.order.paymentStatusLabel}» ثبت شده
+                  است.
                 </span>
               </StatePanel>
               <Link to="/account" className={CtaClasses("signal")}>

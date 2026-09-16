@@ -407,7 +407,9 @@ function LiveCheckout() {
                       عدد
                     </p>
                   </div>
-                  <span className="shrink-0 text-xs text-mute">قیمت نهایی در مرحله بعد بررسی می‌شود</span>
+                  <span className="shrink-0 text-xs text-mute">
+                    قیمت نهایی در مرحله بعد بررسی می‌شود
+                  </span>
                 </div>
               ))}
             </div>
@@ -860,7 +862,8 @@ function PrototypeCheckout() {
                 <StatePanel title="روش‌های ارسال فروشگاه در دسترس هستند" tone="success">
                   <p>روش‌های فعال: {shippingMethods.map((method) => method.title).join("، ")}.</p>
                   <p className="mt-2">
-                    روش‌های فعال فعلی پس‌کرایه‌اند و هزینه حمل جدا از مبلغ پرداخت آنلاین دریافت می‌شود.
+                    روش‌های فعال فعلی پس‌کرایه‌اند و هزینه حمل جدا از مبلغ پرداخت آنلاین دریافت
+                    می‌شود.
                   </p>
                 </StatePanel>
               ) : (

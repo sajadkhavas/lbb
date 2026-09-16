@@ -388,11 +388,7 @@ function LiveAccount() {
                   دریافت اطلاع‌رسانی‌های فروشگاه
                 </label>
                 <div className="md:col-span-2">
-                  <button
-                    type="submit"
-                    disabled={profileSaving}
-                    className={CtaClasses("signal")}
-                  >
+                  <button type="submit" disabled={profileSaving} className={CtaClasses("signal")}>
                     {profileSaving ? (
                       <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                     ) : (
@@ -469,7 +465,9 @@ function LiveAccount() {
                   <AddressInput
                     label="عنوان آدرس"
                     value={addressDraft.title}
-                    onChange={(value) => setAddressDraft((current) => current && { ...current, title: value })}
+                    onChange={(value) =>
+                      setAddressDraft((current) => current && { ...current, title: value })
+                    }
                   />
                   <AddressInput
                     label="نام تحویل‌گیرنده"
@@ -482,7 +480,9 @@ function LiveAccount() {
                     label="شماره موبایل"
                     value={addressDraft.mobile}
                     dir="ltr"
-                    onChange={(value) => setAddressDraft((current) => current && { ...current, mobile: value })}
+                    onChange={(value) =>
+                      setAddressDraft((current) => current && { ...current, mobile: value })
+                    }
                   />
                   <AddressInput
                     label="استان"
@@ -494,7 +494,9 @@ function LiveAccount() {
                   <AddressInput
                     label="شهر"
                     value={addressDraft.city}
-                    onChange={(value) => setAddressDraft((current) => current && { ...current, city: value })}
+                    onChange={(value) =>
+                      setAddressDraft((current) => current && { ...current, city: value })
+                    }
                   />
                   <AddressInput
                     label="کد پستی"
@@ -531,11 +533,7 @@ function LiveAccount() {
                     استفاده به‌عنوان آدرس پیش‌فرض
                   </label>
                   <div className="md:col-span-2">
-                    <button
-                      type="submit"
-                      disabled={addressSaving}
-                      className={CtaClasses("signal")}
-                    >
+                    <button type="submit" disabled={addressSaving} className={CtaClasses("signal")}>
                       {addressSaving ? (
                         <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                       ) : (
