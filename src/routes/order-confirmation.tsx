@@ -19,6 +19,7 @@ export const Route = createFileRoute("/order-confirmation")({
   component: OrderConfirmation,
 });
 
+// SERVER VERIFICATION REQUIRED: this fallback must never infer a successful order from browser state.
 function OrderConfirmation() {
   return (
     <>
