@@ -5,7 +5,7 @@ import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { CtaClasses, Shell, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import { CtaClasses, Shell, StatePanel } from "@/components/lbb/ui/primitives";
 import { backendErrorMessage, isLiveBackend } from "@/lib/backend-api";
 import { trackPublicOrder, type PublicOrderTracking } from "@/lib/final-technical-api";
 import { canonical, pageMeta } from "@/lib/site";
@@ -93,10 +93,7 @@ function TrackOrderPage() {
           <span className="grid h-12 w-12 place-items-center rounded-xl border border-hairline bg-carbon text-signal">
             <PackageSearch size={21} aria-hidden="true" />
           </span>
-          <TechLabel tone="signal" className="mt-5">
-            ORDER TRACKING / SERVER VERIFIED
-          </TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">پیگیری وضعیت سفارش</h1>
+          <h1 className="mt-5 text-display-2 text-bone">پیگیری وضعیت سفارش</h1>
           <p className="mt-4 max-w-[62ch] text-sm leading-8 text-metal">
             شماره سفارش و همان شماره موبایلی که هنگام ثبت سفارش وارد شده را بنویس. برای حفظ حریم
             خصوصی، این صفحه اطلاعات گیرنده، آدرس یا اقلام سفارش را نمایش نمی‌دهد.
@@ -149,8 +146,8 @@ function TrackOrderPage() {
               </button>
             </form>
           ) : (
-            <StatePanel className="mt-7" title="پیگیری فقط در حالت live فعال است" tone="info">
-              در حالت نمونه هیچ سفارش یا وضعیت ساختگی ایجاد نمی‌شود.
+            <StatePanel className="mt-7" title="پیگیری سفارش فعلاً در دسترس نیست" tone="info">
+              پس از فعال‌شدن ثبت سفارش، وضعیت خرید از همین صفحه قابل پیگیری خواهد بود.
             </StatePanel>
           )}
 
@@ -195,7 +192,7 @@ function TrackingResult({ result }: { result: PublicOrderTracking }) {
     >
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-5">
         <div>
-          <TechLabel tone="signal">VERIFIED ORDER STATUS</TechLabel>
+          <p className="text-xs font-semibold text-signal">وضعیت سفارش</p>
           <h2 className="mt-2 text-xl font-bold text-bone">
             سفارش{" "}
             <span className="num" dir="ltr">
