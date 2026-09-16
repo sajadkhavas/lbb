@@ -3,7 +3,7 @@ import { ShieldAlert } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
-import { CtaClasses, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import { CtaClasses, StatePanel } from "@/components/lbb/ui/primitives";
 
 export const Route = createFileRoute("/order-confirmation")({
   head: () => ({
@@ -11,8 +11,7 @@ export const Route = createFileRoute("/order-confirmation")({
       { title: "تأیید سفارش | LBB" },
       {
         name: "description",
-        content:
-          "تأیید سفارش LBB فقط پس از پاسخ معتبر سمت سرور ممکن است؛ وضعیت مرورگر به‌تنهایی رسید خرید نیست.",
+        content: "وضعیت سفارش LBB پس از ثبت و تأیید پرداخت نمایش داده می‌شود.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -32,25 +31,21 @@ function OrderConfirmation() {
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-warning/50 bg-warning/10 text-warning">
             <ShieldAlert size={24} aria-hidden="true" />
           </span>
-          <TechLabel tone="signal" className="mt-5">
-            SERVER VERIFICATION REQUIRED
-          </TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">سفارشی برای تأیید معتبر وجود ندارد</h1>
+          <h1 className="mt-5 text-display-2 text-bone">سفارشی برای نمایش وجود ندارد</h1>
           <p className="mt-4 text-sm leading-8 text-metal">
-            این Route از Session Storage، Query String، شناسهٔ ساخته‌شده در مرورگر یا پارامتر
-            Callback برای اعلام موفقیت استفاده نمی‌کند. رسید و وضعیت موفق فقط باید از Order API و
-            Verify معتبر سمت سرور بیایند.
+            برای مشاهده نتیجه خرید، از مسیر تکمیل سفارش و پرداخت وارد شوید. اگر قبلاً سفارشی ثبت
+            کرده‌اید، وضعیت آن را از حساب کاربری یا صفحه پیگیری سفارش بررسی کنید.
           </p>
-          <StatePanel className="mt-6 text-start" title="مرز اعتماد سفارش" tone="warning">
-            تا زمانی که Backend سفارش و تأیید پرداخت متصل نشده‌اند، نمایش «پرداخت موفق»، «سفارش ثبت
-            شد» یا کد رهگیری واقعی در این صفحه ممنوع است.
+          <StatePanel className="mt-6 text-start" title="وضعیت سفارش" tone="warning">
+            تا زمانی که پرداخت سفارش تأیید نشده باشد، رسید نهایی یا وضعیت پرداخت موفق نمایش داده
+            نمی‌شود.
           </StatePanel>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/cart" className={CtaClasses("line")}>
-              مشاهده سبد
+            <Link to="/account" className={CtaClasses("line")}>
+              حساب کاربری
             </Link>
             <Link to="/shop" className={CtaClasses("signal")}>
-              ادامه مرور محصولات
+              ادامه خرید
             </Link>
           </div>
         </div>
