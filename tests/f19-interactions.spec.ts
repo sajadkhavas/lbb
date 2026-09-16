@@ -187,10 +187,8 @@ test("checkout either exposes accessible form controls or fails closed before co
   ] as const;
 
   if ((await form.count()) === 0) {
-    await expect(page.getByText("ثبت نهایی سفارش هنوز سمت سرور تأیید نشده است")).toBeVisible();
-    await expect(
-      page.getByText(/این صفحه فعلاً نام، تلفن، نشانی یا کدپستی جمع‌آوری نمی‌کند/),
-    ).toBeVisible();
+    await expect(page.getByText("تکمیل سفارش فعلاً در دسترس نیست")).toBeVisible();
+    await expect(page.getByText(/هنوز امکان ثبت نهایی سفارش را ندارد/)).toBeVisible();
     for (const [label] of expectations) {
       await expect(page.getByLabel(label)).toHaveCount(0);
     }
