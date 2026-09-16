@@ -11,7 +11,7 @@ import { fmtToman } from "@/lib/products";
 import { pageMeta, canonical } from "@/lib/site";
 
 const TITLE = "سبد خرید | LBB";
-const DESC = "مرور و ویرایش اقلام سبد خرید LBB و وضعیت عمومی آماده‌بودن ارسال پیش از Checkout.";
+const DESC = "مرور و ویرایش اقلام سبد خرید LBB پیش از تکمیل سفارش.";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -27,11 +27,10 @@ function ShippingReadiness() {
 
   if (methods.length > 0) {
     return (
-      <StatePanel title="روش ارسال عمومی تأیید شده است" tone="success">
+      <StatePanel title="روش‌های ارسال در دسترس هستند" tone="success">
         <p>روش‌های فعال: {methods.map((method) => method.title).join("، ")}</p>
         <p className="mt-1">
-          مبلغ یا زمان ارسال فقط جایی نمایش داده می‌شود که دادهٔ تأییدشدهٔ همان روش برای سفارش قابل
-          اعمال باشد.
+          هزینه و زمان تحویل نهایی بر اساس مقصد و روش انتخابی در مرحله تکمیل سفارش مشخص می‌شود.
         </p>
       </StatePanel>
     );
@@ -40,12 +39,11 @@ function ShippingReadiness() {
   return (
     <StatePanel
       title={
-        state === "pending" ? "تنظیمات ارسال در حال بررسی است" : "هزینه ارسال هنوز عمومی نشده است"
+        state === "pending" ? "تنظیمات ارسال در حال بررسی است" : "روش ارسال فعلاً در دسترس نیست"
       }
       tone={state === "pending" ? "warning" : "info"}
     >
-      سبد خرید هیچ هزینه، آستانهٔ ارسال رایگان یا زمان تحویل فرضی محاسبه نمی‌کند. جزئیات فقط پس از
-      تأیید تنظیمات ارسال قابل نمایش خواهند بود.
+      جزئیات ارسال پس از فعال‌شدن روش‌های قابل استفاده نمایش داده می‌شود.
     </StatePanel>
   );
 }
@@ -152,14 +150,14 @@ function CartPage() {
                   <ShippingReadiness />
                 </div>
                 <p className="mt-4 text-xs leading-6 text-metal">
-                  جمع نهایی سفارش تا زمانی که هزینه‌های عملیاتی قابل‌اعتماد و فرایند ثبت سفارش سمت
-                  سرور در دسترس نباشد، از روی دادهٔ فرضی ساخته نمی‌شود.
+                  قیمت، موجودی و مبلغ نهایی سفارش در مرحله بعد دوباره بررسی می‌شود تا آخرین اطلاعات
+                  نمایش داده شود.
                 </p>
                 <Link to="/checkout" className={`mt-5 flex w-full ${CtaClasses("signal")}`}>
-                  بررسی امکان تکمیل سفارش
+                  ادامه و تکمیل سفارش
                 </Link>
                 <Link to="/shipping-returns" className={`mt-2 flex w-full ${CtaClasses("line")}`}>
-                  وضعیت ارسال و مرجوعی
+                  ارسال و مرجوعی
                 </Link>
               </aside>
             </div>

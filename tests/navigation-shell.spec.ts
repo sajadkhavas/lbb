@@ -62,7 +62,7 @@ test("mobile navigation exposes product categories and independent account desti
   await expect(dialog.getByRole("link", { name: /هودی/ })).toBeVisible();
   await dialog.getByRole("link", { name: "حساب کاربری" }).click();
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.getByRole("heading", { level: 1, name: "مرکز حساب" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "حساب کاربری" })).toBeVisible();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
 });
 

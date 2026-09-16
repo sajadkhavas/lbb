@@ -53,8 +53,9 @@ export function HeroNarrative({
         : heroProduct
           ? `${heroProduct.name} در ویترین ${brand.nameFa}`
           : `ویترین ${brand.nameFa}`;
+
   const heroImageClass =
-    source === "live" && presentation.hero.imageFit === "cover"
+    presentation.hero.imageFit === "cover"
       ? "absolute inset-0 h-full w-full object-cover"
       : "absolute inset-0 h-full w-full object-contain p-8 sm:p-12 lg:p-16";
 

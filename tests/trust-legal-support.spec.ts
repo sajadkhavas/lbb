@@ -332,7 +332,7 @@ test("checkout with cart data cannot submit or claim payment success", async ({ 
   await page.goto("/checkout", { waitUntil: "networkidle" });
   await expect(page.getByRole("heading", { level: 1, name: "تکمیل سفارش" })).toBeVisible();
   await expect(page.locator("main form")).toHaveCount(0);
-  await expect(page.getByText("ثبت نهایی سفارش هنوز سمت سرور تأیید نشده است")).toBeVisible();
+  await expect(page.getByText("تکمیل سفارش فعلاً در دسترس نیست")).toBeVisible();
   await expect(page.getByText(/پرداخت موفق/)).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
@@ -340,11 +340,11 @@ test("checkout with cart data cannot submit or claim payment success", async ({ 
 test("order confirmation and tracking never trust browser-local success", async ({ page }) => {
   await page.goto("/order-confirmation?status=success&ref=fake", { waitUntil: "networkidle" });
   await expect(
-    page.getByRole("heading", { level: 1, name: "سفارشی برای تأیید معتبر وجود ندارد" }),
+    page.getByRole("heading", { level: 1, name: "سفارشی برای نمایش وجود ندارد" }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: /سفارش.*ثبت شد/ })).toHaveCount(0);
 
   await page.goto("/track-order", { waitUntil: "networkidle" });
   await expect(page.locator("main form")).toHaveCount(0);
-  await expect(page.getByText("پیگیری فقط در حالت live فعال است")).toBeVisible();
+  await expect(page.getByText("پیگیری سفارش فعلاً در دسترس نیست")).toBeVisible();
 });

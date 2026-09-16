@@ -154,7 +154,7 @@ const LOCAL_PRESENTATION: StorefrontPresentation = {
     enabled: true,
     imageUrl: null,
     imageAlt: "",
-    imageFit: "contain",
+    imageFit: "cover",
     imagePosition: "center center",
     primaryCtaHref: "/shop",
     secondaryCtaHref: "/contact",

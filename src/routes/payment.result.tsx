@@ -4,7 +4,7 @@ import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
-import { CtaClasses, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import { CtaClasses, StatePanel } from "@/components/lbb/ui/primitives";
 import {
   backendErrorMessage,
   isLiveBackend,
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/payment/result")({
   head: () => ({
     meta: pageMeta({
       title: TITLE,
-      description: "تأیید نتیجه پرداخت LBB از طریق Backend.",
+      description: "بررسی نتیجه پرداخت سفارش در LBB.",
       path: "/payment/result",
       noindex: true,
     }),
@@ -42,12 +42,12 @@ function PaymentResultPage() {
 
   useEffect(() => {
     if (!isLiveBackend()) {
-      setError("تأیید پرداخت فقط در حالت Backend live فعال است.");
+      setError("امکان بررسی نتیجه پرداخت در حال حاضر در دسترس نیست.");
       setLoading(false);
       return;
     }
     if (!search.Authority || !search.Status) {
-      setError("پارامترهای بازگشت درگاه کامل نیستند؛ پرداخت موفق تلقی نشد.");
+      setError("اطلاعات بازگشت از درگاه کامل نیست؛ پرداخت تأیید نشد.");
       setLoading(false);
       return;
     }
@@ -75,16 +75,15 @@ function PaymentResultPage() {
       <Navbar />
       <main dir="rtl" className="min-h-screen bg-obsidian px-4 pb-28 pt-24 md:px-6">
         <div className="mx-auto w-full max-w-[720px]">
-          <TechLabel tone="signal">PAYMENT / SERVER VERIFY</TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">نتیجه پرداخت</h1>
+          <h1 className="text-display-2 text-bone">نتیجه پرداخت</h1>
           {loading ? (
             <p className="mt-8 flex items-center gap-2 text-sm text-metal" role="status">
               <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-              در حال Verify نتیجه با Backend…
+              در حال تأیید پرداخت…
             </p>
           ) : result?.verified ? (
             <div className="mt-8 space-y-5">
-              <StatePanel title="پرداخت توسط Backend تأیید شد" tone="success">
+              <StatePanel title="پرداخت با موفقیت تأیید شد" tone="success">
                 <span className="inline-flex items-center gap-2">
                   <CheckCircle2 size={17} aria-hidden="true" />
                   سفارش {result.order.number} با وضعیت «{result.order.paymentStatusLabel}» ثبت شده
@@ -100,12 +99,12 @@ function PaymentResultPage() {
               <StatePanel title="پرداخت تأیید نشد" tone="warning">
                 <span className="inline-flex items-center gap-2">
                   <XCircle size={17} aria-hidden="true" />
-                  {error ?? "Backend این بازگشت را پرداخت موفق تشخیص نداد."}
+                  {error ?? "نتیجه این پرداخت تأیید نشد."}
                 </span>
               </StatePanel>
               <p className="text-sm leading-7 text-metal">
-                بازگشت مرورگر به‌تنهایی Success محسوب نمی‌شود؛ تنها پاسخ Verify سمت Backend ملاک
-                است.
+                اگر مبلغی از حساب شما کسر شده اما سفارش تأیید نشده است، چند دقیقه بعد دوباره وضعیت
+                سفارش را بررسی کنید یا با پشتیبانی تماس بگیرید.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link to="/account" className={CtaClasses("line")}>

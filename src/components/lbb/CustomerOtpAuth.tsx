@@ -3,7 +3,7 @@ import { CheckCircle2, KeyRound, Loader2, Smartphone } from "lucide-react";
 import { backendErrorMessage, requestOtp, verifyOtp, type CustomerDto } from "@/lib/backend-api";
 import { ensureBackendCsrf } from "@/lib/backend-session";
 import { notifyCustomerAuthenticated } from "@/components/lbb/AccountStorefrontSync";
-import { CtaClasses, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import { CtaClasses, StatePanel } from "@/components/lbb/ui/primitives";
 
 type Props = {
   onAuthenticated: (customer: CustomerDto) => void;
@@ -14,7 +14,7 @@ type Props = {
 export function CustomerOtpAuth({
   onAuthenticated,
   title = "ورود با شماره موبایل",
-  description = "برای تأیید قیمت، موجودی و سفارش باید نشست مشتری معتبر Backend ایجاد شود.",
+  description = "برای ادامه، شماره موبایل خود را وارد کنید تا کد یک‌بارمصرف برایتان ارسال شود.",
 }: Props) {
   const [mobile, setMobile] = useState("");
   const [challengeId, setChallengeId] = useState<string | null>(null);
@@ -77,8 +77,7 @@ export function CustomerOtpAuth({
           )}
         </div>
         <div>
-          <TechLabel tone="signal">CUSTOMER SESSION</TechLabel>
-          <h2 id="customer-auth-title" className="mt-2 text-xl font-semibold text-bone">
+          <h2 id="customer-auth-title" className="text-xl font-semibold text-bone">
             {title}
           </h2>
           <p className="mt-2 text-sm leading-7 text-metal">{description}</p>
@@ -113,7 +112,7 @@ export function CustomerOtpAuth({
         <form onSubmit={verifyCode} className="mt-6 grid gap-3">
           <div className="flex items-center gap-2 text-xs text-metal">
             <CheckCircle2 size={15} className="text-signal" aria-hidden="true" />
-            کد برای شماره واردشده درخواست شد.
+            کد ورود برای شماره واردشده ارسال شد.
           </div>
           <label htmlFor="customer-otp" className="text-xs font-semibold text-metal">
             کد یک‌بارمصرف
