@@ -5,9 +5,8 @@ import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Navbar } from "@/components/lbb/Navbar";
 import { CustomerOtpAuth } from "@/components/lbb/CustomerOtpAuth";
-import { CtaClasses, EmptyState, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
+import { CtaClasses, EmptyState, StatePanel } from "@/components/lbb/ui/primitives";
 import { cartLinesToBackendItems, useCart } from "@/lib/cart";
-import { getCommerceReadiness } from "@/lib/commerce";
 import { fmtToman } from "@/lib/products";
 import {
   STORE_SETTINGS,
@@ -42,8 +41,7 @@ import {
 } from "@/lib/checkout-continuity";
 
 const TITLE = "تکمیل سفارش | LBB";
-const DESC =
-  "تکمیل سفارش LBB با قیمت، موجودی، ارسال، ثبت سفارش و وضعیت پرداخت تأییدشده توسط Backend.";
+const DESC = "تکمیل سفارش LBB با بررسی قیمت، موجودی، روش ارسال و پرداخت امن.";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -318,7 +316,7 @@ function LiveCheckout() {
     } catch (error) {
       setActionError(
         error instanceof Error && error.message === "payment_redirect_missing"
-          ? "Backend آدرس معتبر درگاه را برنگرداند؛ پرداخت شروع نشد."
+          ? "امکان اتصال به درگاه پرداخت فراهم نشد؛ دوباره تلاش کنید."
           : backendErrorMessage(error),
       );
       setBusy(null);
@@ -334,13 +332,13 @@ function LiveCheckout() {
       (shouldRecoverPending && customer && !orderResult && !recoveryError) ? (
         <p className="mt-8 flex items-center gap-2 text-sm text-metal" role="status">
           <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-          در حال بررسی سبد و نشست مشتری…
+          در حال آماده‌کردن سفارش…
         </p>
       ) : lines.length === 0 && !orderResult && !continuity ? (
         <EmptyState
           className="mt-8"
           title="سبد خرید خالی است"
-          body="برای تکمیل سفارش ابتدا یک محصول منتشرشده را با رنگ و سایز مشخص به سبد اضافه کنید."
+          body="برای تکمیل سفارش ابتدا یک محصول را با رنگ و سایز موردنظر به سبد اضافه کنید."
           action={
             <Link to="/shop" className={CtaClasses("signal")}>
               رفتن به فروشگاه
@@ -349,7 +347,7 @@ function LiveCheckout() {
         />
       ) : sessionError ? (
         <div className="mt-8">
-          <StatePanel title="Backend قابل تأیید نیست" tone="warning">
+          <StatePanel title="امکان تکمیل سفارش وجود ندارد" tone="warning">
             {sessionError}
           </StatePanel>
         </div>
@@ -366,7 +364,7 @@ function LiveCheckout() {
         <div className="mt-8">
           <CustomerOtpAuth
             title="برای ادامه وارد شوید"
-            description="Checkout فقط بعد از ایجاد نشست واقعی مشتری در Backend ادامه پیدا می‌کند."
+            description="برای تکمیل سفارش و مشاهده وضعیت خرید، وارد حساب خود شوید."
             onAuthenticated={(value) => {
               setCustomer(value);
               setFullName(value.fullName ?? "");
@@ -383,9 +381,8 @@ function LiveCheckout() {
       ) : (
         <form onSubmit={requestQuote} noValidate className="mt-8 space-y-6">
           {!cartCompatible ? (
-            <StatePanel title="سبد قدیمی با Backend سازگار نیست" tone="warning">
-              یکی از اقلام شناسه Variant معتبر Backend ندارد. آن قلم را حذف و دوباره از صفحه محصول
-              انتخاب کنید.
+            <StatePanel title="یکی از اقلام سبد نیاز به انتخاب دوباره دارد" tone="warning">
+              آن کالا را از سبد حذف کنید و دوباره رنگ و سایز موردنظر را از صفحه محصول انتخاب کنید.
             </StatePanel>
           ) : null}
 
@@ -410,9 +407,7 @@ function LiveCheckout() {
                       عدد
                     </p>
                   </div>
-                  <span className="shrink-0 text-xs text-mute">
-                    قیمت در مرحله Quote بازبینی می‌شود
-                  </span>
+                  <span className="shrink-0 text-xs text-mute">قیمت نهایی در مرحله بعد بررسی می‌شود</span>
                 </div>
               ))}
             </div>
@@ -422,8 +417,7 @@ function LiveCheckout() {
             className="border border-hairline bg-carbon p-5"
             aria-labelledby="recipient-title"
           >
-            <TechLabel tone="signal">RECIPIENT</TechLabel>
-            <h2 id="recipient-title" className="mt-2 text-lg font-bold text-bone">
+            <h2 id="recipient-title" className="text-lg font-bold text-bone">
               اطلاعات تحویل
             </h2>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -508,14 +502,13 @@ function LiveCheckout() {
             className="border border-hairline bg-carbon p-5"
             aria-labelledby="delivery-title"
           >
-            <TechLabel tone="signal">DELIVERY</TechLabel>
-            <h2 id="delivery-title" className="mt-2 text-lg font-bold text-bone">
+            <h2 id="delivery-title" className="text-lg font-bold text-bone">
               روش تحویل
             </h2>
             {deliveryLoading ? (
               <p className="mt-4 flex items-center gap-2 text-sm text-metal">
                 <Loader2 size={15} className="animate-spin" aria-hidden="true" />
-                در حال دریافت روش‌های فعال از Backend…
+                در حال دریافت روش‌های ارسال…
               </p>
             ) : deliveryError ? (
               <div className="mt-4">
@@ -526,7 +519,7 @@ function LiveCheckout() {
             ) : enabledMethods.length === 0 ? (
               <div className="mt-4">
                 <StatePanel title="روش تحویل فعالی وجود ندارد" tone="warning">
-                  Checkout تا انتشار روش واقعی تحویل متوقف می‌ماند.
+                  در حال حاضر امکان ادامه سفارش با مقصد انتخاب‌شده وجود ندارد.
                 </StatePanel>
               </div>
             ) : (
@@ -569,8 +562,8 @@ function LiveCheckout() {
             <ServerQuote quote={quote} method={selectedMethod} />
           ) : (
             <StatePanel title="جمع نهایی هنوز محاسبه نشده است" tone="info">
-              قیمت Variantها و موجودی با دکمه «دریافت جمع نهایی» دوباره در Backend بررسی می‌شوند؛
-              کرایه روش‌های فعال فروشگاه پس‌کرایه است و به Total آنلاین اضافه نمی‌شود.
+              قیمت و موجودی با دکمه «محاسبه مبلغ نهایی» دوباره بررسی می‌شوند؛ کرایه روش‌های فعال
+              فروشگاه پس‌کرایه است و به مبلغ پرداخت آنلاین اضافه نمی‌شود.
             </StatePanel>
           )}
 
@@ -592,7 +585,7 @@ function LiveCheckout() {
                 ) : (
                   <ReceiptText size={16} aria-hidden="true" />
                 )}
-                دریافت جمع نهایی از Backend
+                محاسبه مبلغ نهایی
               </button>
             ) : (
               <button
@@ -606,7 +599,7 @@ function LiveCheckout() {
                 ) : (
                   <LockKeyhole size={16} aria-hidden="true" />
                 )}
-                ثبت سفارش با همین Quote
+                ثبت سفارش
               </button>
             )}
             <Link to="/cart" className={CtaClasses("line")}>
@@ -630,9 +623,8 @@ function ServerQuote({
 
   return (
     <section className="border border-signal/60 bg-carbon p-5" aria-labelledby="server-quote-title">
-      <TechLabel tone="signal">SERVER QUOTE</TechLabel>
-      <h2 id="server-quote-title" className="mt-2 text-lg font-bold text-bone">
-        جمع نهایی تأییدشده
+      <h2 id="server-quote-title" className="text-lg font-bold text-bone">
+        مبلغ نهایی سفارش
       </h2>
       <div className="mt-4 space-y-2 text-sm">
         <Row label="جمع کالاها" value={fmtToman(quote.totals.subtotal.amount)} />
@@ -660,8 +652,8 @@ function ServerQuote({
         </p>
       ) : null}
       <p className="mt-3 text-xs leading-6 text-metal">
-        Quote تا {new Date(quote.expiresAt).toLocaleString("fa-IR")} معتبر است؛ Commit دوباره Truth
-        را کنترل می‌کند.
+        این مبلغ تا {new Date(quote.expiresAt).toLocaleString("fa-IR")} معتبر است و هنگام ثبت سفارش
+        دوباره بررسی می‌شود.
       </p>
     </section>
   );
@@ -680,17 +672,17 @@ function OrderCreated({
 }) {
   return (
     <div className="mt-8 space-y-5">
-      <StatePanel title={`سفارش ${result.order.number} در Backend ثبت شد`} tone="success">
+      <StatePanel title={`سفارش ${result.order.number} ثبت شد`} tone="success">
         <p>مبلغ ثبت‌شده: {fmtToman(result.order.totals.grandTotal.amount)}</p>
         <p className="mt-1">وضعیت پرداخت: {result.order.paymentStatusLabel}</p>
       </StatePanel>
       {result.payment.available ? (
-        <StatePanel title="درگاه پرداخت آماده شروع است" tone="info">
-          ثبت سفارش به معنی پرداخت موفق نیست. موفقیت فقط بعد از Verify سمت Backend پذیرفته می‌شود.
+        <StatePanel title="درگاه پرداخت آماده است" tone="info">
+          برای تکمیل خرید، پرداخت را در درگاه بانکی انجام دهید و تا بازگشت به فروشگاه صبر کنید.
         </StatePanel>
       ) : (
-        <StatePanel title="پرداخت برای این محیط فعال نیست" tone="warning">
-          سفارش ثبت شده اما پرداخت نشده است. هیچ Success پرداختی شبیه‌سازی نمی‌شود.
+        <StatePanel title="درگاه پرداخت در دسترس نیست" tone="warning">
+          سفارش ثبت شده اما هنوز پرداخت نشده است. کمی بعد دوباره تلاش کنید.
         </StatePanel>
       )}
       {error ? (
@@ -709,7 +701,7 @@ function OrderCreated({
             {busy === "payment" ? (
               <Loader2 size={16} className="animate-spin" aria-hidden="true" />
             ) : null}
-            انتقال به درگاه واقعی
+            رفتن به درگاه پرداخت
           </button>
         ) : null}
         <Link to="/account" className={CtaClasses("line")}>
@@ -775,7 +767,7 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
       className={`flex items-center justify-between gap-4 ${bold ? "border-t border-hairline pt-3 text-base font-bold text-bone" : "text-metal"}`}
     >
       <span>{label}</span>
-      <span className={bold ? "num text-bone" : "num text-bone"}>{value}</span>
+      <span className="num text-bone">{value}</span>
     </div>
   );
 }
@@ -786,11 +778,10 @@ function CheckoutChrome({ children }: { children: React.ReactNode }) {
       <Navbar />
       <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian px-4 pb-28 pt-24 md:px-6">
         <div className="mx-auto w-full max-w-[820px]">
-          <TechLabel tone="signal">CHECKOUT / SERVER AUTHORITATIVE</TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">تکمیل سفارش</h1>
+          <h1 className="text-display-2 text-bone">تکمیل سفارش</h1>
           <p className="mt-3 max-w-[66ch] text-sm leading-8 text-metal">
-            قیمت، موجودی، روش ارسال، Order و Payment state در حالت live فقط از Backend پذیرفته
-            می‌شوند. کرایه روش‌های فعال فعلی پس‌کرایه است و داخل مبلغ آنلاین قرار نمی‌گیرد.
+            اطلاعات تحویل را تکمیل کنید، روش ارسال را انتخاب کنید و مبلغ نهایی را پیش از ثبت سفارش
+            بررسی کنید. کرایه روش‌های فعال فعلی پس‌کرایه است و داخل مبلغ آنلاین قرار نمی‌گیرد.
           </p>
           {children}
         </div>
@@ -803,7 +794,6 @@ function CheckoutChrome({ children }: { children: React.ReactNode }) {
 
 function PrototypeCheckout() {
   const { lines, subtotal, hydrated } = useCart();
-  const readiness = getCommerceReadiness();
   const shippingMethods = getPublicShippingMethods();
   const payment = getPublicPaymentSettings();
 
@@ -812,11 +802,9 @@ function PrototypeCheckout() {
       <Navbar />
       <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian px-4 pb-28 pt-24 md:px-6">
         <div className="mx-auto w-full max-w-[760px]">
-          <TechLabel tone="signal">CHECKOUT / TRUST BOUNDARY</TechLabel>
-          <h1 className="mt-3 text-display-2 text-bone">تکمیل سفارش</h1>
+          <h1 className="text-display-2 text-bone">تکمیل سفارش</h1>
           <p className="mt-3 max-w-[62ch] text-sm leading-8 text-metal">
-            این صفحه قبل از جمع‌آوری اطلاعات هویتی یا شروع پرداخت، آماده‌بودن سرویس‌های عمومی و سمت
-            سرور را بررسی می‌کند. نبودن یک سرویس با دادهٔ فرضی جبران نمی‌شود.
+            وضعیت روش‌های ارسال و پرداخت فروشگاه را پیش از ادامه بررسی کنید.
           </p>
 
           {!hydrated ? (
@@ -827,7 +815,7 @@ function PrototypeCheckout() {
             <EmptyState
               className="mt-8"
               title="سبد خرید خالی است"
-              body="برای بررسی Checkout ابتدا یک محصول به سبد اضافه کنید."
+              body="برای تکمیل سفارش ابتدا یک محصول به سبد اضافه کنید."
               action={
                 <Link to="/shop" className={CtaClasses("signal")}>
                   رفتن به فروشگاه
@@ -869,11 +857,10 @@ function PrototypeCheckout() {
               </section>
 
               {shippingMethods.length > 0 ? (
-                <StatePanel title="روش‌های ارسال فروشگاه تأیید شده‌اند" tone="success">
+                <StatePanel title="روش‌های ارسال فروشگاه در دسترس هستند" tone="success">
                   <p>روش‌های فعال: {shippingMethods.map((method) => method.title).join("، ")}.</p>
                   <p className="mt-2">
-                    همه روش‌های فعال فعلی پس‌کرایه‌اند؛ هزینه حمل هنگام استفاده از سرویس حمل جدا از
-                    مبلغ پرداخت آنلاین فروشگاه دریافت می‌شود.
+                    روش‌های فعال فعلی پس‌کرایه‌اند و هزینه حمل جدا از مبلغ پرداخت آنلاین دریافت می‌شود.
                   </p>
                 </StatePanel>
               ) : (
@@ -881,43 +868,33 @@ function PrototypeCheckout() {
                   title={
                     STORE_SETTINGS.shipping.verification === "pending"
                       ? "تنظیمات ارسال در حال بررسی است"
-                      : "روش ارسال عمومی در دسترس نیست"
+                      : "روش ارسال فعلاً در دسترس نیست"
                   }
                   tone={STORE_SETTINGS.shipping.verification === "pending" ? "warning" : "info"}
                 >
-                  Checkout هیچ هزینه، ارسال رایگان یا زمان تحویل فرضی تولید نمی‌کند.
+                  جزئیات ارسال پس از فعال‌شدن روش‌های قابل استفاده نمایش داده می‌شود.
                 </StatePanel>
               )}
 
               {payment ? (
-                <StatePanel title={`روش پرداخت عمومی: ${payment.displayName}`} tone="success">
-                  این اطلاعات فقط سطح عمومی پرداخت است. شروع تراکنش و نتیجهٔ پرداخت باید سمت سرور
-                  پیاده‌سازی و Verify شوند؛ Callback مرورگر به‌تنهایی Success نیست.
+                <StatePanel title={`روش پرداخت: ${payment.displayName}`} tone="success">
+                  پرداخت پس از ثبت سفارش از طریق درگاه بانکی انجام می‌شود.
                 </StatePanel>
               ) : (
                 <StatePanel
                   title={
                     STORE_SETTINGS.payment.verification === "pending"
                       ? "تنظیمات پرداخت در حال بررسی است"
-                      : "روش پرداخت عمومی هنوز فعال نیست"
+                      : "روش پرداخت فعلاً در دسترس نیست"
                   }
                   tone={STORE_SETTINGS.payment.verification === "pending" ? "warning" : "info"}
                 >
-                  نام درگاه، روش پرداخت، Merchant ID یا دادهٔ حساس دیگری از روی حدس نمایش داده
-                  نمی‌شود.
+                  پس از فعال‌شدن روش پرداخت، امکان ادامه خرید از همین صفحه فراهم می‌شود.
                 </StatePanel>
               )}
 
-              <StatePanel title="ثبت نهایی سفارش هنوز سمت سرور تأیید نشده است" tone="warning">
-                <p>
-                  آماده‌بودن عمومی Shipping: {readiness.shippingPublic ? "بله" : "خیر"}؛ Payment:{" "}
-                  {readiness.paymentPublic ? "بله" : "خیر"}. حتی با آماده‌شدن این دو، Order
-                  submission و Payment verification باید Backend تأییدشده داشته باشند.
-                </p>
-                <p className="mt-2">
-                  به همین دلیل این صفحه فعلاً نام، تلفن، نشانی یا کدپستی جمع‌آوری نمی‌کند و هیچ
-                  دکمهٔ موفقیت ساختگی ندارد.
-                </p>
+              <StatePanel title="تکمیل سفارش فعلاً در دسترس نیست" tone="warning">
+                این نسخه هنوز امکان ثبت نهایی سفارش را ندارد. برای راهنمایی با پشتیبانی تماس بگیرید.
               </StatePanel>
 
               <div className="flex flex-wrap gap-3">
