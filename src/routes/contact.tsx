@@ -207,8 +207,7 @@ function ContactPage() {
                 <LiveContactForm />
               ) : (
                 <StatePanel className="mt-6" title="فرم تماس در حالت نمونه غیرفعال است" tone="info">
-                  ثبت پیام فقط در حالت live و از طریق Backend انجام می‌شود؛ موفقیت ساختگی در مرورگر
-                  نمایش داده نمی‌شود.
+                  برای ارتباط با فروشگاه می‌توانید از شماره تماس، واتساپ یا اینستاگرام استفاده کنید.
                 </StatePanel>
               )}
             </section>
@@ -416,8 +415,7 @@ function LiveContactForm() {
         />
       </label>
       <p className="mt-3 text-[11px] leading-6 text-mute">
-        حداقل یکی از شماره موبایل یا ایمیل را وارد کنید. پیام مستقیماً در Backend فروشگاه ثبت
-        می‌شود.
+        حداقل یکی از شماره موبایل یا ایمیل را وارد کنید. پیام شما مستقیماً برای فروشگاه ثبت می‌شود.
       </p>
       <button
         type="submit"

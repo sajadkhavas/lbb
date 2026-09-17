@@ -123,7 +123,7 @@ function LiveCollections({
           ) : collections.length === 0 ? (
             <EmptyState
               title="کالکشن منتشرشده‌ای وجود ندارد"
-              body="تا زمان انتشار در Backend، کالکشن نمونه جایگزین نمی‌شود."
+              body="کالکشن‌های تازه LBB به‌زودی در این بخش قرار می‌گیرند."
             />
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

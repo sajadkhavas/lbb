@@ -109,8 +109,7 @@ function backendShippingCards(delivery: LiveDeliveryPolicy): ShippingCard[] {
           id: "immediate_courier",
           title: "ارسال فوری — اسنپ / اسنپ‌باکس",
           description:
-            immediateTehran.feeNotice ||
-            "روش ارسال فوری برای مقصدهایی که Backend مجاز اعلام می‌کند نمایش داده می‌شود.",
+            immediateTehran.feeNotice || "ارسال فوری برای مقصدهای تحت پوشش نمایش داده می‌شود.",
           deliveryTimeLabel: immediateTehran.eta.label,
         }
       : null,
@@ -118,8 +117,7 @@ function backendShippingCards(delivery: LiveDeliveryPolicy): ShippingCard[] {
       ? {
           id: "tipax",
           title: "تیپاکس",
-          description:
-            tipax.feeNotice || "این روش ارسال بر اساس تنظیمات فعال Backend نمایش داده می‌شود.",
+          description: tipax.feeNotice || "این روش بر اساس مقصد و شرایط سفارش نمایش داده می‌شود.",
           deliveryTimeLabel: tipax.eta.label,
         }
       : null,
@@ -128,7 +126,7 @@ function backendShippingCards(delivery: LiveDeliveryPolicy): ShippingCard[] {
           id: "decapost",
           title: "دکاپست",
           description:
-            decapost.feeNotice || "این روش ارسال بر اساس تنظیمات فعال Backend نمایش داده می‌شود.",
+            decapost.feeNotice || "این روش بر اساس مقصد و شرایط سفارش نمایش داده می‌شود.",
           deliveryTimeLabel: decapost.eta.label,
         }
       : null,
@@ -141,7 +139,7 @@ function ShippingState({ cards, live }: { cards: ShippingCard[] | null; live: bo
   if (!live) {
     return (
       <StatePanel title="روش‌های ارسال در حالت نمونه نمایش عملیاتی ندارند" tone="info">
-        در Production، روش‌های قابل نمایش مستقیماً از Delivery API خوانده می‌شوند.
+        روش‌های قابل انتخاب بر اساس مقصد و شرایط سفارش نمایش داده می‌شوند.
       </StatePanel>
     );
   }
@@ -149,8 +147,8 @@ function ShippingState({ cards, live }: { cards: ShippingCard[] | null; live: bo
   if (!cards || cards.length === 0) {
     return (
       <StatePanel title="روش ارسال عمومی در دسترس نیست" tone="warning">
-        Backend در حال حاضر هیچ روش فعال و مجاز قابل نمایش برنگردانده است؛ Frontend روش یا هزینه‌ای
-        حدس نمی‌زند.
+        در حال حاضر روش ارسال قابل انتخابی برای این مقصد وجود ندارد؛ سایت روش یا هزینه‌ای حدس
+        نمی‌زند.
       </StatePanel>
     );
   }
@@ -185,7 +183,7 @@ function ReturnsState({ policy, live }: { policy: ReturnsPolicyControl; live: bo
   if (!live) {
     return (
       <StatePanel title="سیاست مرجوعی در حالت نمونه مرجع تجاری نیست" tone="info">
-        در Production فقط سیاست ثبت‌شده و تأییدشده در پنل مدیریت نمایش داده می‌شود.
+        فقط سیاست رسمی و تأییدشده فروشگاه در این صفحه نمایش داده می‌شود.
       </StatePanel>
     );
   }
@@ -300,13 +298,13 @@ function ShippingReturnsPage() {
         </div>
 
         <header className="mx-auto max-w-[980px] px-4 py-10 md:px-8 md:py-14">
-          <TechLabel tone="signal">DELIVERY / RETURNS / BACKEND</TechLabel>
+          <TechLabel tone="signal">ارسال و مرجوعی</TechLabel>
           <h1 className="mt-3 text-display-2 text-bone">
             {page?.title || "ارسال، تعویض و مرجوعی"}
           </h1>
           <p className="mt-4 max-w-[70ch] text-sm leading-8 text-metal">
             {page?.excerpt ||
-              "روش ارسال از Delivery API و سیاست مرجوعی از پنل مدیریت خوانده می‌شود؛ اطلاعات منتشرنشده در Frontend حدس زده نمی‌شوند."}
+              "روش‌های ارسال و سیاست مرجوعی بر اساس اطلاعات رسمی فروشگاه نمایش داده می‌شوند."}
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <StatusTag tone={shippingPublished ? "success" : "neutral"}>
@@ -327,7 +325,7 @@ function ShippingReturnsPage() {
                 <Truck size={19} aria-hidden="true" />
               </span>
               <div>
-                <TechLabel tone="signal">DELIVERY API</TechLabel>
+                <TechLabel tone="signal">روش‌های ارسال</TechLabel>
                 <h2 id="shipping-title" className="mt-1 text-xl font-bold text-bone">
                   روش‌های ارسال
                 </h2>
@@ -342,7 +340,7 @@ function ShippingReturnsPage() {
                 <RotateCcw size={19} aria-hidden="true" />
               </span>
               <div>
-                <TechLabel tone="signal">ADMIN POLICY</TechLabel>
+                <TechLabel tone="signal">سیاست مرجوعی</TechLabel>
                 <h2 id="returns-title" className="mt-1 text-xl font-bold text-bone">
                   تعویض و مرجوعی
                 </h2>
@@ -353,8 +351,8 @@ function ShippingReturnsPage() {
 
           {!page && live ? (
             <StatePanel title="متن کامل سیاست هنوز از پنل منتشر نشده است" tone="info">
-              وضعیت عملیاتی بالا از Backend می‌آید؛ متن حقوقی تفصیلی فقط بعد از انتشار ContentPage
-              این مسیر نمایش داده خواهد شد.
+              وضعیت روش‌های ارسال از تنظیمات فروشگاه خوانده می‌شود؛ جزئیات کامل سیاست‌ها پس از
+              انتشار نسخه رسمی این مسیر نمایش داده خواهد شد.
             </StatePanel>
           ) : null}
 

@@ -90,7 +90,7 @@ function TermsPage() {
         </div>
 
         <header className="mx-auto max-w-[860px] px-4 py-10 md:px-8 md:py-14">
-          <TechLabel tone="signal">LEGAL / ADMIN AUTHORITY</TechLabel>
+          <TechLabel tone="signal">شرایط استفاده</TechLabel>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <h1 className="text-display-2 text-bone">{page?.title || "شرایط استفاده"}</h1>
             <StatusTag tone={publishedFromAdmin ? "success" : "warning"}>
@@ -98,8 +98,7 @@ function TermsPage() {
             </StatusTag>
           </div>
           <p className="mt-4 max-w-[68ch] text-sm leading-8 text-metal">
-            {page?.excerpt ||
-              "تا انتشار نسخه نهایی از پنل، Frontend شرط تجاری، مهلت، هزینه یا تعهد جدیدی ایجاد نمی‌کند."}
+            {page?.excerpt || "تا انتشار نسخه نهایی، فقط شرایط رسمی اعلام‌شده فروشگاه معتبر است."}
           </p>
         </header>
 
@@ -112,27 +111,27 @@ function TermsPage() {
             </StatePanel>
           )}
 
-          <section className="mt-8 grid gap-4 md:grid-cols-2" aria-label="وضعیت عملیاتی Backend">
+          <section className="mt-8 grid gap-4 md:grid-cols-2" aria-label="وضعیت خدمات فروشگاه">
             <div className="rounded-2xl border border-hairline bg-carbon p-5">
-              <p className="tech text-signal">CHECKOUT / RUNTIME</p>
+              <p className="tech text-signal">ثبت سفارش</p>
               <h2 className="mt-2 text-lg font-bold text-bone">ثبت سفارش</h2>
               <p className="mt-3 text-sm leading-7 text-metal">
                 {runtime.checkoutEnabled
-                  ? "Backend ثبت سفارش را فعال اعلام کرده است."
-                  : "Backend ثبت سفارش را غیرفعال اعلام کرده است."}
+                  ? "ثبت سفارش در حال حاضر فعال است."
+                  : "ثبت سفارش در حال حاضر غیرفعال است."}
               </p>
             </div>
             <div className="rounded-2xl border border-hairline bg-carbon p-5">
-              <p className="tech text-signal">PAYMENT / RUNTIME</p>
+              <p className="tech text-signal">پرداخت</p>
               <h2 className="mt-2 text-lg font-bold text-bone">پرداخت</h2>
               <p className="mt-3 text-sm leading-7 text-metal">
                 {runtime.payment.enabled
-                  ? `Backend درگاه «${runtime.payment.provider}» را فعال اعلام کرده است؛ موفقیت پرداخت فقط پس از Verify سمت سرور معتبر است.`
-                  : "هیچ درگاه پرداخت فعال از Backend اعلام نشده است."}
+                  ? `درگاه پرداخت «${runtime.payment.provider}» فعال است؛ نتیجه پرداخت پس از تأیید نهایی معتبر خواهد بود.`
+                  : "در حال حاضر درگاه پرداخت فعالی در دسترس نیست."}
               </p>
             </div>
             <div className="rounded-2xl border border-hairline bg-carbon p-5 md:col-span-2">
-              <p className="tech text-signal">RETURNS / ADMIN</p>
+              <p className="tech text-signal">مرجوعی و تعویض</p>
               <h2 className="mt-2 text-lg font-bold text-bone">مرجوعی و تعویض</h2>
               <p className="mt-3 text-sm leading-7 text-metal">
                 {returnsPublished

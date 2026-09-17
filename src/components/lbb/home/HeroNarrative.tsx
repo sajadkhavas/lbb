@@ -173,7 +173,7 @@ export function HeroNarrative({
             </nav>
             {source === "live" && liveQuickCategories.length === 0 ? (
               <p className="text-xs leading-6 text-mute">
-                هنوز دسته‌ای برای دسترسی سریع از پنل مدیریت فعال نشده است.
+                دسته‌بندی‌های منتخب فروشگاه به‌زودی در این بخش قرار می‌گیرند.
               </p>
             ) : null}
           </div>
@@ -195,7 +195,7 @@ export function HeroNarrative({
             />
           ) : (
             <div className="absolute inset-0 grid place-items-center p-8 text-center text-sm text-obsidian/60">
-              تصویر Hero هنوز از پنل مدیریت منتشر نشده است.
+              تصویر تازه این بخش به‌زودی اضافه می‌شود.
             </div>
           )}
           <span

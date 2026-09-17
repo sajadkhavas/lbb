@@ -47,11 +47,11 @@ export function Navbar({
   }, []);
 
   const isLight = theme === "light";
-  const ink = isLight && !scrolled ? "text-obsidian" : "text-bone";
+  const ink = "text-bone";
   const barSkin = scrolled
     ? "border-b border-hairline bg-[var(--lbb-surface-glass)] shadow-raised backdrop-blur-xl"
     : isLight
-      ? "border-b border-transparent bg-transparent"
+      ? "border-b border-transparent bg-gradient-to-b from-obsidian/85 via-obsidian/55 to-transparent"
       : "border-b border-transparent bg-gradient-to-b from-obsidian/75 to-transparent";
   const iconClass = `relative grid tap-target place-items-center border border-transparent transition-colors ${ink} hover:border-hairline hover:text-signal`;
   const shopActive = navigation.shop.some((item) => isMerchantNavigationItemActive(pathname, item));
