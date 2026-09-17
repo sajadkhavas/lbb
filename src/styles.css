@@ -194,7 +194,7 @@
 
   --font-display: "Estedad Variable", "Vazirmatn", sans-serif;
   --font-body: "Estedad Variable", "Vazirmatn", sans-serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --font-mono: "Estedad Variable", "Vazirmatn", sans-serif;
 
   /* Raw precision: controls are crisp, media can be softer. */
   --radius: 0.5rem;
@@ -389,7 +389,7 @@ img {
 }
 .font-mono,
 .num {
-  font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
   font-variant-numeric: tabular-nums;
 }
 .text-hero,
@@ -444,7 +444,7 @@ img {
   text-wrap: pretty;
 }
 .tech {
-  font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
   font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0.075em;

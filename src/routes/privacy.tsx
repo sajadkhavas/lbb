@@ -15,7 +15,7 @@ import { pageMeta, canonical, breadcrumbLd, ROBOTS } from "@/lib/site";
 import { useStorefrontControl } from "@/lib/storefront-control";
 
 const TITLE = "حریم خصوصی | LBB";
-const DESC = "سیاست حریم خصوصی LBB؛ نسخه منتشرشده از پنل مدیریت مرجع عمومی سایت است.";
+const DESC = "سیاست حریم خصوصی LBB و نحوه حفاظت از اطلاعات کاربران.";
 
 export const Route = createFileRoute("/privacy")({
   loader: () => resolveOptionalStorefrontPage("privacy"),
@@ -88,7 +88,7 @@ function PrivacyPage() {
         </div>
 
         <header className="mx-auto max-w-[860px] px-4 py-10 md:px-8 md:py-14">
-          <TechLabel tone="signal">PRIVACY / ADMIN AUTHORITY</TechLabel>
+          <TechLabel tone="signal">حریم خصوصی</TechLabel>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <h1 className="text-display-2 text-bone">{page?.title || "حریم خصوصی"}</h1>
             <StatusTag tone={publishedFromAdmin ? "success" : "warning"}>
@@ -97,7 +97,7 @@ function PrivacyPage() {
           </div>
           <p className="mt-4 max-w-[68ch] text-sm leading-8 text-metal">
             {page?.excerpt ||
-              "تا انتشار سیاست نهایی از پنل، Frontend درباره هدف پردازش، مدت نگهداری یا سرویس‌های فعال‌نشده ادعایی ایجاد نمی‌کند."}
+              "جزئیات مربوط به پردازش و نگهداری اطلاعات مطابق سیاست رسمی فروشگاه اعلام می‌شود."}
           </p>
         </header>
 
@@ -106,13 +106,13 @@ function PrivacyPage() {
             <ManagedPrivacy content={page.content} />
           ) : (
             <StatePanel title="سیاست نهایی پردازش داده هنوز از پنل منتشر نشده است" tone="warning">
-              متن عمومی این صفحه فقط پس از انتشار ContentPage توسط مدیر فروشگاه نمایش داده می‌شود.
+              نسخه رسمی سیاست حریم خصوصی پس از تأیید فروشگاه در این صفحه نمایش داده می‌شود.
             </StatePanel>
           )}
 
           <section className="mt-8 grid gap-4 md:grid-cols-2" aria-label="وضعیت عمومی سرویس‌ها">
             <div className="rounded-2xl border border-hairline bg-carbon p-5">
-              <p className="tech text-signal">CONTACT / BACKEND</p>
+              <p className="tech text-signal">راه‌های ارتباطی</p>
               <h2 className="mt-2 text-lg font-bold text-bone">راه ارتباط عمومی</h2>
               <p className="mt-3 text-sm leading-7 text-metal">
                 {contact.email || contact.phone || contact.instagramHandle}
@@ -122,10 +122,10 @@ function PrivacyPage() {
               </Link>
             </div>
             <div className="rounded-2xl border border-hairline bg-carbon p-5">
-              <p className="tech text-signal">COMMERCE / RUNTIME</p>
+              <p className="tech text-signal">خدمات فروشگاه</p>
               <h2 className="mt-2 text-lg font-bold text-bone">وضعیت سرویس‌های تجاری</h2>
               <p className="mt-3 text-sm leading-7 text-metal">
-                Checkout: {runtime.checkoutEnabled ? "فعال" : "غیرفعال"} — Payment:{" "}
+                ثبت سفارش: {runtime.checkoutEnabled ? "فعال" : "غیرفعال"} — پرداخت:{" "}
                 {runtime.payment.enabled ? "فعال" : "غیرفعال"}
               </p>
             </div>
