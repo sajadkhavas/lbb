@@ -89,7 +89,7 @@ function TypographySection() {
           index="02"
           label="TYPE SYSTEM"
           title="فارسی سنگین، متن آرام"
-          lede="Estedad Variable برای نمایش و متن فارسی و JetBrains Mono برای کد، عدد، SKU و Label فنی استفاده می‌شود."
+          lede="Estedad Variable برای تمام متن‌ها، عنوان‌ها، برچسب‌ها، اعداد و اطلاعات محصول استفاده می‌شود."
         />
         <Surface tone="subtle" className="mt-10 divide-y divide-hairline">
           {TYPE_TOKENS.map((item) => (
