@@ -74,7 +74,7 @@ export function CategoryGateway({
 
           {categories.length === 0 ? (
             <div className="mt-8 rounded-2xl border border-hairline bg-carbon p-6 text-sm leading-7 text-metal">
-              هنوز دسته‌ای برای نمایش در صفحه اصلی از پنل مدیریت فعال نشده است.
+              دسته‌بندی‌های فروشگاه به‌زودی در این بخش نمایش داده می‌شوند.
             </div>
           ) : (
             <div className="mt-8 grid gap-3 md:grid-cols-6 lg:gap-4">
@@ -108,7 +108,7 @@ export function CategoryGateway({
                       style={{ aspectRatio: "4/3" }}
                     >
                       <div className="absolute inset-0 grid place-items-center px-8 text-center text-sm text-obsidian/45">
-                        تصویر دسته هنوز در پنل مدیریت منتشر نشده است.
+                        تصویر این دسته به‌زودی اضافه می‌شود.
                       </div>
                       <LiveCategoryOverlay category={category} index={index} />
                     </div>

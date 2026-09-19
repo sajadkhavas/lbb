@@ -342,7 +342,7 @@ function LiveContactForm() {
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <TechLabel tone="signal">CONTACT FORM / BACKEND</TechLabel>
+          <TechLabel tone="signal">فرم تماس با فروشگاه</TechLabel>
           <h2 className="mt-2 text-xl font-bold text-bone">ارسال پیام به LBB</h2>
         </div>
         <Send size={20} className="text-signal" aria-hidden="true" />

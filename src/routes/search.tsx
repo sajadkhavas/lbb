@@ -219,7 +219,7 @@ function SearchHeader({
       <TechLabel tone="signal">DISCOVERY / SEARCH</TechLabel>
       <h1 className="text-display-2 mt-3 text-bone">جستجو در کاتالوگ</h1>
       <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">
-        در حالت live نتیجه، قیمت، موجودی و فیلترها از Backend می‌آیند.
+        نتایج جستجو همراه با قیمت، موجودی و فیلترهای قابل استفاده نمایش داده می‌شوند.
       </p>
       <form onSubmit={submit} className="relative mt-6" role="search">
         <label htmlFor="site-search" className="sr-only">
@@ -456,7 +456,7 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
       ) : null}
       {loader.error ? (
         <div className="mt-8">
-          <StatePanel title="جستجوی Backend در دسترس نیست" tone="warning">
+          <StatePanel title="جستجوی فروشگاه در دسترس نیست" tone="warning">
             {loader.error}
           </StatePanel>
         </div>

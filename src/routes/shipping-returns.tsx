@@ -159,7 +159,7 @@ function ShippingState({ cards, live }: { cards: ShippingCard[] | null; live: bo
         <article key={method.id} className="rounded-2xl border border-hairline bg-carbon p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="tech text-signal">BACKEND / DELIVERY</p>
+              <p className="tech text-signal">روش ارسال</p>
               <h3 className="mt-2 text-base font-bold text-bone">{method.title}</h3>
             </div>
             <StatusTag tone="success">فعال</StatusTag>
@@ -199,8 +199,7 @@ function ReturnsState({ policy, live }: { policy: ReturnsPolicyControl; live: bo
         }
         tone={policy.verification === "pending" ? "warning" : "info"}
       >
-        تا زمانی که سیاست در پنل به وضعیت فعال و تأییدشده نرسد، Frontend مهلت، هزینه یا تعهدی برای
-        مرجوعی ایجاد نمی‌کند.
+        تا زمان تأیید و انتشار سیاست مرجوعی، مهلت، هزینه یا تعهدی برای مرجوعی اعلام نمی‌شود.
       </StatePanel>
     );
   }
@@ -208,7 +207,7 @@ function ReturnsState({ policy, live }: { policy: ReturnsPolicyControl; live: bo
   return (
     <div className="rounded-2xl border border-hairline bg-carbon p-5 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-base font-bold text-bone">سیاست منتشرشده از پنل</h3>
+        <h3 className="text-base font-bold text-bone">سیاست تأییدشده فروشگاه</h3>
         <StatusTag tone="success">فعال و تأییدشده</StatusTag>
       </div>
       <dl className="mt-5 grid gap-3 text-sm md:grid-cols-2">
@@ -263,7 +262,7 @@ function ManagedPolicy({ content }: { content: string | null }) {
 
   return (
     <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
-      <TechLabel tone="signal">ADMIN / PUBLISHED POLICY</TechLabel>
+      <TechLabel tone="signal">سیاست رسمی فروشگاه</TechLabel>
       <div className="mt-5 space-y-4 text-sm leading-8 text-metal">
         {paragraphs.map((paragraph, index) => (
           <p key={`${index}-${paragraph.slice(0, 28)}`}>{paragraph}</p>
@@ -350,7 +349,7 @@ function ShippingReturnsPage() {
           </section>
 
           {!page && live ? (
-            <StatePanel title="متن کامل سیاست هنوز از پنل منتشر نشده است" tone="info">
+            <StatePanel title="جزئیات کامل سیاست هنوز منتشر نشده است" tone="info">
               وضعیت روش‌های ارسال از تنظیمات فروشگاه خوانده می‌شود؛ جزئیات کامل سیاست‌ها پس از
               انتشار نسخه رسمی این مسیر نمایش داده خواهد شد.
             </StatePanel>

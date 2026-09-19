@@ -77,7 +77,7 @@ function LiveLookbookPage({ items }: { items: StorefrontLookDto[] }) {
           <Shell>
             {items.length === 0 ? (
               <StatePanel title="هنوز تصویری برای لوک‌بوک منتشر نشده است">
-                پس از انتشار در پنل مدیریت، تصاویر اینجا نمایش داده می‌شوند.
+                تصاویر تازهٔ لوک‌بوک به‌زودی در این بخش نمایش داده می‌شوند.
               </StatePanel>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
