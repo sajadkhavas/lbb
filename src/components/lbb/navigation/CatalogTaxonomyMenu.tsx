@@ -139,7 +139,7 @@ function LiveTaxonomy({
   if (tree.length === 0) {
     return (
       <div className="mt-3 rounded-2xl border border-hairline bg-carbon p-5 text-sm leading-7 text-metal">
-        هنوز دسته‌ای برای نمایش در Header از پنل مدیریت فعال نشده است.
+        دسته‌بندی‌های فروشگاه به‌زودی در این منو نمایش داده می‌شوند.
       </div>
     );
   }

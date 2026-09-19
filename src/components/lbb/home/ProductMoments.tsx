@@ -44,8 +44,8 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
 
           {items.length === 0 ? (
             <StatePanel className="mt-8" title="هنوز محصول واقعی برای این بخش منتشر نشده است">
-              بعد از انتشار/انتخاب محصول در پنل مدیریت، این بخش بدون نیاز به تغییر Frontend به‌روز
-              می‌شود.
+              با اضافه‌شدن محصولات منتخب، تازه‌ترین پیشنهادهای فروشگاه در این بخش نمایش داده
+              می‌شوند.
             </StatePanel>
           ) : (
             <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">

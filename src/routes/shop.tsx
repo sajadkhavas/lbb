@@ -272,8 +272,8 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
       categories={categoryOptions ?? []}
       status={
         loader.error
-          ? "ارتباط کاتالوگ با Backend برقرار نیست. داده نمونه جایگزین نشده است."
-          : "قیمت، موجودی و گزینه‌های محصول مستقیماً از Backend خوانده می‌شوند."
+          ? "در حال حاضر دریافت اطلاعات فروشگاه امکان‌پذیر نیست. لطفاً کمی بعد دوباره تلاش کنید."
+          : "قیمت، موجودی و گزینه‌های قابل انتخاب هر محصول به‌روز نمایش داده می‌شوند."
       }
     >
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">

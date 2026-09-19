@@ -52,7 +52,7 @@ function ManagedPrivacy({ content }: { content: string | null }) {
   const paragraphs = contentParagraphs(content);
   return (
     <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
-      <TechLabel tone="signal">ADMIN / PUBLISHED POLICY</TechLabel>
+      <TechLabel tone="signal">سیاست حریم خصوصی</TechLabel>
       <div className="mt-5 space-y-4 text-sm leading-8 text-metal">
         {paragraphs.length > 0 ? (
           paragraphs.map((paragraph, index) => (

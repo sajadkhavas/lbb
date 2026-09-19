@@ -38,7 +38,7 @@ export function LocalStoreVisit() {
               />
             ) : (
               <div className="absolute inset-0 grid place-items-center p-8 text-center text-sm leading-7 text-metal">
-                تصویر فروشگاه هنوز از پنل مدیریت منتشر نشده است.
+                تصویر فروشگاه به‌زودی در این بخش نمایش داده می‌شود.
               </div>
             )}
             <span
