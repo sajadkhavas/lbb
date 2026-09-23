@@ -1,6 +1,6 @@
 # تحویل وضعیت و نقشه ادامه پروژه LBB
 
-> آخرین به‌روزرسانی: ۲۰۲۶-۰۹-۲۰  
+> آخرین به‌روزرسانی: ۲۰۲۶-۰۹-۲۳  
 > زبان سند: فارسی  
 > وضعیت: مرجع ادامه کار پس از انتشار PR #101
 
@@ -415,3 +415,206 @@ Backend باید مشابه یک پروژه Production کامل بررسی شو�
 ### تصحیح واژگان Backup
 
 عبارت درست در این سند «Backupهای محتوای مدیریت‌شده و تنظیمات فروشگاه» است. دو فایل JSON ثبت‌شده نباید به‌عنوان Backup کامل دیتابیس معرفی شوند. اگر در مراحل بعد Backup کامل دیتابیس تهیه شود، باید مسیر، زمان، روش Restore و سطح پوشش آن جداگانه در همین سند ثبت گردد.
+
+
+## ۱۳. به‌روزرسانی عملیاتی پنل، کاتالوگ و Production — ۲۰۲۶-۰۹-۲۳
+
+> این بخش ادامه‌ی مستقیم checkpoint قبلی است و وضعیت مشاهده‌شده در دیتابیس Production، API عمومی و پنل مدیریت را ثبت می‌کند. تغییرهای داده‌ای این مرحله مستقیماً در Backend Production انجام شده‌اند و بخشی از Commit فرانت‌اند نیستند.
+
+### ۱۳.۱. مرجع‌های فعلی
+
+| مورد | مقدار |
+|---|---|
+| شاخه مرجع ادامه | `fix/lbb-local-boutique-homepage` |
+| سند تحویل | `docs/LBB_PROJECT_HANDOFF_FA.md` |
+| Backend فعال مشاهده‌شده | `/var/www/lbb/backend/releases/ee83534bf28d0367a5547f02406bfec50f58b109` |
+| Frontend Production ثبت‌شده در checkpoint قبل | `/var/www/lbb/releases/199931b5b43a8e564f7ae5a21d39a0410063bef6` |
+| API عمومی | `https://api.lbbclo.com` |
+| Storefront | `https://lbbclo.com` |
+
+قبل از هر Deployment بعدی، SHA و Symlink واقعی Frontend و Backend دوباره به‌صورت Read-only بررسی شوند؛ مقادیر بالا آخرین وضعیت ثبت‌شده‌اند، نه مجوز فرض‌کردن وضعیت آینده.
+
+### ۱۳.۲. محصولات واقعی منتشرشده
+
+چهار محصول واقعی زیر منتشر، فعال و Featured شده‌اند. `ApparelPublicationGuard::issues()` برای هر چهار محصول آرایه خالی برگردانده است.
+
+| محصول | کد | Slug | دسته | موجودی | Variant فعال | Media | ردیف راهنمای سایز |
+|---|---|---|---|---:|---:|---:|---:|
+| کتونی Vans Knu Skool مشکی سفید | `LBB-SHOE-VANS-KNU-BW` | `ktony-vans-knu-skool-mshky-sfyd` | `shoes` | 160 | 8 | 3 | 8 |
+| جوراب Wake Up ایسی | `LBB-SOCK-EASY-WAKEUP-BL` | `gorab-wake-up-aysy` | `socks` | 40 | 2 | 1 | 4 |
+| تیشرت باکسی Dupu ذغالی | `LBB-TSHIRT-DUPU-BOX-CH` | `tyshrt-baksy-dupu-thghaly` | `tshirts` | 80 | 4 | 4 | 12 |
+| شلوار جین پرینتی Acne Studios | `LBB-JEANS-ACNE-PRINT-BAG` | `shloar-gyn-prynty-acne-studios` | `pants` | 60 | 3 | 4 | 12 |
+
+- API صفحه اصلی هر چهار محصول را برمی‌گرداند.
+- صفحه عمومی هر چهار محصول HTTP 200 دارد.
+- محصولات نمونه قدیمی با IDهای ۱ تا ۸ همچنان `archived`، غیرفعال و غیرفیچر هستند.
+- Mediaهای واقعی به `product_media_assets` منتقل شدند.
+- Evidenceهای `media` و `size_guide` برای انتشار تأیید شدند.
+- دسته canonical تیشرت از `tyshrt` به `tshirts` اصلاح شد؛ مسیر `/tshirts` اکنون 200 و مسیر قدیمی `/tyshrt` به‌طور مورد انتظار 404 است.
+- دسته‌های عمومی فعال: `tshirts`، `pants`، `shoes` و `socks`.
+- دسته هودی عمداً از Header و Home مخفی مانده است.
+
+### ۱۳.۳. راهنماهای سایز
+
+- راهنمای سایز و Measurementهای ساختاریافته برای هر چهار محصول متصل شده‌اند.
+- کتونی: سایزهای ۳۷ تا ۴۴ و طول پا:
+  - ۳۷ = ۲۳٫۵
+  - ۳۸ = ۲۴
+  - ۳۹ = ۲۵
+  - ۴۰ = ۲۶
+  - ۴۱ = ۲۶٫۵
+  - ۴۲ = ۲۷
+  - ۴۳ = ۲۸
+  - ۴۴ = ۲۸٫۵ سانتی‌متر
+- ترتیب سایزهای عددی کفش روی `sort_order`های ۱۰۰ تا ۱۰۷ تثبیت شد.
+- تیشرت: S/M/L/XL با سرشانه، عرض سینه و قد؛ ۱۲ ردیف.
+- شلوار: XL/XXL/XXXL با اندازه‌های تأییدشده؛ ۱۲ ردیف.
+- جوراب: M/L و بازه شماره کفش؛ ۴ ردیف.
+- جدول راهنمای سایز در Storefront اکنون داده دارد.
+
+مشکل باقی‌مانده Frontend: عنوان عمومی «اندازه خود لباس» برای کتونی مناسب نیست. در Deployment نهایی باید عنوان براساس نوع محصول نمایش داده شود؛ برای کفش عبارتی مانند «راهنمای سایز کفش / طول پا» استفاده شود.
+
+### ۱۳.۴. Backupهای داده‌ای این مرحله
+
+- `/var/www/lbb/backend/shared/backups/size-guides/before-size-guides-20260921-101734.json`
+- `/var/www/lbb/backend/shared/backups/product-publish/vans-before-publish-20260921-105814.json`
+- `/var/www/lbb/backend/shared/backups/size-guide-measurements/vans-before-measurements-20260921-112635.json`
+- `/var/www/lbb/backend/shared/backups/final-product-publish/before-final-three-products-20260921-125652.json`
+
+این فایل‌ها Backupهای موضوعی JSON هستند، نه Backup کامل دیتابیس.
+
+### ۱۳.۵. تنظیمات فروشگاه و صفحات عمومی
+
+اطلاعات زیر در تنظیمات عمومی ثبت و از Bootstrap API تأیید شده‌اند:
+
+- آدرس: کرج، پاساژ مهستان، واحد ۳۰
+- تلفن: `026-3256-0477`
+- واتساپ: `0902-858-4879`
+- اینستاگرام: `https://www.instagram.com/lbbclo`
+- ساعات کاری:
+  - همه‌روزه ۱۰:۳۰ تا ۱۴:۰۰
+  - همه‌روزه ۱۶:۰۰ تا ۲۲:۰۰
+- Hero Product: کتونی Vans
+- ترتیب دسته‌ها: `tshirts`، `pants`، `shoes`، `socks`
+- Home Product Curation: جدیدترین‌ها، تعداد ۴
+
+صفحات `about`، `contact`، `terms` و `privacy` منتشر شده‌اند و مسیرهای عمومی آن‌ها HTTP 200 دارند. Endpointهای `bootstrap`، `faqs`، `lookbook` و `home-products` نیز HTTP 200 دارند.
+
+URL Integrity دوباره بررسی شد و URL مارک‌داونی در مقادیر authoritative زیر باقی نمانده است:
+
+- `brand.identity`
+- `contact.public`
+- `home.local_store`
+- `seo.defaults`
+- URLهای Gallery
+
+تنظیم‌های scalar قدیمی `contact.phone`، `contact.email` و `contact.address` خالی‌اند؛ منبع authoritative فعلی `contact.public` است.
+
+### ۱۳.۶. پرداخت، ارسال و سفارش‌ها
+
+- پرداخت توسط کاربر تست شده است.
+- ارسال طبق خواسته کارفرما پیاده‌سازی شده است.
+- سفارش تست پرداخت‌شده `LBB-260915-K6OCLKRH`:
+  - `payment_status=paid`
+  - `status=ready`
+  - روش ارسال: Tipax
+  - جریان `confirmed → preparing → ready` طی شده است.
+- یک سفارش تست منقضی و پرداخت‌نشده با شماره `LBB-260915-YGCVYLFJ` هنوز در وضعیت `awaiting_payment/pending` باقی مانده است.
+- در `schedule:list` فرمان‌های زیر هر دقیقه ثبت‌اند:
+  - `inventory:release-expired`
+  - `commerce:expire-reservations`
+  - `notifications:dispatch --limit=100`
+
+کار باقی‌مانده: ابتدا بدون Mutation بررسی شود آیا OS cron/Systemd Scheduler واقعاً اجرا می‌شود یا فرمان Expiration آن سفارش قدیمی را طبق منطق خود نادیده می‌گیرد. تا پایان تشخیص، `schedule:run` یا فرمان Expiration دستی اجرا نشود.
+
+### ۱۳.۷. گالری و Instagram
+
+پنج ردیف Gallery برای Reelهای زیر ساخته شده‌اند و فعلاً همگی `is_active=false` هستند:
+
+1. `https://www.instagram.com/reel/DcGtXpCM7NY/`
+2. `https://www.instagram.com/reel/DaYWPa6s__B/`
+3. `https://www.instagram.com/reel/Db6OhugyOlC/`
+4. `https://www.instagram.com/reel/DbWBUn3yVWB/`
+5. `https://www.instagram.com/reel/DZ2MB2GsRhv/`
+
+وضعیت فعلی:
+
+| شماره | عنوان | تصویر | فعال |
+|---:|---|---|---|
+| ۱ | استایل‌های منتخب LBB — شماره ۱ | موجود | خیر |
+| ۲ | هنوز عنوان قدیمی دارد | فاقد `image_path` | خیر |
+| ۳ | استایل‌های منتخب LBB — شماره ۳ | موجود | خیر |
+| ۴ | هنوز عنوان قدیمی دارد | موجود | خیر |
+| ۵ | استایل‌های منتخب LBB — شماره ۵ | موجود | خیر |
+
+کارهای باقی‌مانده Gallery:
+
+- تصویر شماره ۲ بارگذاری شود.
+- عنوان شماره ۲ و ۴ به الگوی «استایل‌های منتخب LBB — شماره N» اصلاح شود.
+- تا اصلاح و پذیرش Crop در Frontend، همه ردیف‌ها غیرفعال بمانند.
+- در کارت‌ها پوشش لباس مرکز کادر باشد و سر/صورت مدل داخل Crop اصلی نیفتد.
+- `object-fit: cover` همراه با Position مناسب و تست Responsive موبایل/دسکتاپ پیاده شود.
+- لینک هر کارت به Reel صحیح باز شود.
+- ناسازگاری Schema/Form رفع شود: ستون `gallery_items.image_url` در دیتابیس `NOT NULL` است، ولی فرم Filament آن را اختیاری فرض می‌کند.
+
+### ۱۳.۸. رخداد Production و بازیابی
+
+هنگام بررسی مشکل Upload، اجرای `php artisan optimize:clear` باعث حذف Config Cache شد. Release فعال در آن لحظه Symlink معتبر `.env` نداشت؛ در نتیجه تنظیمات دیتابیس خالی شد و Admin/API پاسخ 500 دادند.
+
+بازیابی انجام‌شده:
+
+- Symlink فایل `.env` به `/var/www/lbb/backend/shared/.env` بازگردانده شد.
+- `php artisan config:cache` اجرا شد.
+- مالکیت و Permission فایل Config Cache روی `root:lbbapi` و `640` قرار گرفت.
+- Production environment، وجود تنظیمات DB، اتصال PDO، API عمومی و Admin Login تأیید شدند.
+- نتیجه نهایی: API HTTP 200 و Admin Login HTTP 200.
+
+قانون قطعی جدید:
+
+- روی Production از `php artisan optimize:clear` به‌صورت معمول استفاده نشود.
+- فقط Cache هدفمند و با تشخیص قبلی پاک شود.
+- اسکریپت Deployment باید پیش از Cache Build، Symlinkهای shared `.env` و shared storage را تضمین کند.
+- Release فعال هرگز in-place ویرایش نشود.
+
+### ۱۳.۹. Upload پنل
+
+برای Livewire temp upload:
+
+- مسیر `/var/www/lbb/backend/shared/storage/app/public/livewire-tmp` ایجاد و قابل نوشتن شد.
+- مالکیت `lbbapi:www-data` و Mode برابر `2775` ثبت شد.
+- Write test با کاربر `www-data` موفق بود.
+- چهار تصویر Gallery بارگذاری شدند؛ تصویر شماره ۲ هنوز باقی مانده است.
+
+### ۱۳.۱۰. وضعیت موارد باز
+
+| اولویت | مورد | وضعیت/اقدام بعدی |
+|---:|---|---|
+| P0 | Scheduler و سفارش منقضی | تشخیص Read-only cron/systemd و منطق command؛ سپس اقدام کنترل‌شده |
+| P1 | تصویر Gallery شماره ۲ | Upload، بررسی فایل و حفظ حالت غیرفعال |
+| P1 | Crop کارت‌های Instagram | اصلاح Frontend، تست موبایل/دسکتاپ، سپس فعال‌سازی |
+| P1 | `image_url` Gallery | هماهنگ‌کردن Migration/Schema با Form |
+| P1 | عنوان راهنمای سایز | Product-type aware برای کفش و پوشاک |
+| P1 | FAQ | جدول فعلاً خالی است؛ فقط پاسخ‌های تأییدشده کارفرما منتشر شوند |
+| P2 | Slug محصولات | Slugهای لاتین خواناتر + Redirect 301 از Slugهای فعلی |
+| P2 | اینماد | `trust.enamad_enabled=0` و Badge خالی؛ وابسته به اطلاعات کارفرما |
+| P2 | عنوان Gallery ۲ و ۴ | هماهنگ‌سازی با الگوی نهایی |
+| P2 | QA نهایی | Runtime، Responsive، Checkout failure states، SEO و Accessibility |
+
+### ۱۳.۱۱. مسیر پیشنهادی جلسه بعد
+
+1. این سند و آخرین PRهای باز خوانده شوند.
+2. SHA و Symlink واقعی Frontend/Backend و Health سرویس‌ها Read-only بررسی شوند.
+3. Scheduler/cron و سفارش منقضی تشخیص داده شوند؛ هیچ فرمان Mutating قبل از نتیجه اجرا نشود.
+4. تصویر Gallery شماره ۲ و عنوان‌های ۲ و ۴ تکمیل شوند، اما Gallery غیرفعال بماند.
+5. تغییرهای کدی باقی‌مانده در Branch مستقل انجام شوند:
+   - Crop/Focal Position گالری
+   - عنوان هوشمند راهنمای سایز
+   - Nullable contract برای `image_url`
+   - Redirectهای Slug
+6. Typecheck، Test، Build با `NITRO_PRESET=node-server`، Canary و Route/Flow QA اجرا شوند.
+7. با Backup و Rollback مشخص، Release تغییرناپذیر ساخته و Symlink اتمیک جابه‌جا شود.
+8. پس از پذیرش Public، SHAها و وضعیت نهایی در همین سند ثبت شوند.
+
+### ۱۳.۱۲. پیام آماده برای شروع چت بعدی
+
+> پروژه LBB را از روی GitHub ادامه بده. ابتدا فایل `docs/LBB_PROJECT_HANDOFF_FA.md` را کامل بخوان و وضعیت واقعی شاخه `fix/lbb-local-boutique-homepage`، PRهای باز، SHAهای Production Frontend/Backend، Symlinkهای Release و Health سرویس‌ها را بدون تغییر بررسی کن. آخرین checkpoint: چهار محصول واقعی منتشر، فعال و guard-clean هستند؛ Media/Evidence و راهنماهای سایز تکمیل شده‌اند؛ صفحات و APIهای اصلی HTTP 200 هستند؛ پنج آیتم Gallery غیرفعال‌اند و شماره ۲ تصویر ندارد؛ عنوان شماره‌های ۲ و ۴ هنوز اصلاح نشده؛ FAQ خالی است؛ یک سفارش پرداخت‌نشده منقضی هنوز `awaiting_payment/pending` است. اول Scheduler/cron و منطق Expiration را Read-only تشخیص بده و نتیجه را گزارش کن. سپس برای موارد باقی‌مانده Plan اجرایی بده. روی Production هرگز `php artisan optimize:clear` اجرا نکن، Release فعال را in-place تغییر نده و هیچ عملیات Expiration دستی را قبل از تشخیص اجرا نکن. تمام تغییرات کد باید Branch/PR، تست، Backup، Canary و Rollback مشخص داشته باشند.
