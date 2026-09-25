@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useCart } from "@/lib/cart";
-import { backendErrorMessage, getProduct } from "@/lib/backend-api";
+import { getProduct } from "@/lib/backend-api";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
 import { backendDecisionModel } from "@/lib/backend-storefront";
 import {
@@ -300,7 +300,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                   در حال دریافت اطلاعات واقعی محصول…
                 </p>
                 <p className="mt-2 text-xs leading-6 text-metal">
-                  قیمت، موجودی و تنوع از Backend خوانده می‌شود.
+                  قیمت، موجودی و تنوع همین محصول به‌روز نمایش داده می‌شود.
                 </p>
               </div>
             </div>
@@ -312,7 +312,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                   نمای سریع موقتاً در دسترس نیست
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-metal">
-                  {backendErrorMessage(productQuery.error)}
+                  اطلاعات این محصول فعلاً در دسترس نیست. کمی بعد دوباره تلاش کنید.
                 </p>
                 <button
                   type="button"
@@ -457,7 +457,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
               </Link>
 
               <p className="mt-5 border-t border-hairline pt-4 text-[11px] leading-6 text-mute">
-                قیمت، موجودی، رنگ و سایز این پنجره از محصول منتشرشده Backend خوانده می‌شود.
+                قیمت، موجودی، رنگ و سایز همین محصول را پیش از انتخاب بررسی کنید.
               </p>
             </>
           )}

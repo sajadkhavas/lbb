@@ -7,6 +7,7 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import {
   currentPushSubscription,
   getPushState,
+  initializePush,
   subscribeToPush,
   unsubscribeFromPush,
   type PushPreference,
@@ -21,7 +22,10 @@ function AppPage() {
   const [message, setMessage] = useState("");
   const [preferences, setPreferences] = useState<PushPreference[]>(["product_updates"]);
   useEffect(() => {
-    void currentPushSubscription().then((subscription) => setState(getPushState(subscription)));
+    void initializePush()
+      .then(() => currentPushSubscription())
+      .then((subscription) => setState(getPushState(subscription)))
+      .catch(() => setState("not-configured"));
   }, []);
   const toggle = (preference: PushPreference) =>
     setPreferences((items) =>
@@ -46,7 +50,7 @@ function AppPage() {
       setState(getPushState(await currentPushSubscription()));
       setMessage(
         error instanceof Error && error.message === "PUSH_NOT_CONFIGURED"
-          ? "اتصال امن اعلان‌ها پس از آماده شدن Backend فعال می‌شود."
+          ? "اعلان‌ها هنوز برای فروشگاه فعال نشده‌اند."
           : "فعال‌سازی انجام نشد؛ تنظیمات مرورگر و اتصال را بررسی کنید.",
       );
     } finally {
@@ -59,7 +63,7 @@ function AppPage() {
       : state === "denied"
         ? "مسدودشده در مرورگر"
         : state === "not-configured"
-          ? "در انتظار اتصال Backend"
+          ? "فعلاً فعال نیست"
           : state === "unsupported"
             ? "پشتیبانی‌نشده"
             : "غیرفعال";
@@ -149,8 +153,8 @@ function AppPage() {
             </article>
           </section>
           <p className="mt-6 rounded-xl border border-hairline p-4 text-xs leading-7 text-metal">
-            اعلان آزمایشی یا سفارش ساختگی نمایش داده نمی‌شود. ارسال اعلان فقط پس از اتصال امن
-            Backend، احراز هویت و ثبت subscription واقعی انجام خواهد شد.
+            اعلان‌ها با اجازه شما برای همین دستگاه فعال می‌شوند. برای لغو، همین‌جا اعلان‌ها را
+            غیرفعال کنید. دریافت اعلان در مرورگر و دستگاه‌های مختلف ممکن است متفاوت باشد.
           </p>
         </div>
       </main>

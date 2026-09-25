@@ -5,6 +5,7 @@ import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
 import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { Logo } from "@/components/lbb/Logo";
 import { TrustMarks } from "@/components/lbb/TrustMarks";
+import { PushOptIn } from "@/components/lbb/PushOptIn";
 import { useStorefrontControl, type MerchantNavigationItem } from "@/lib/storefront-control";
 import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
@@ -124,6 +125,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
               <span className="tech">{brand.instagramHandle.toUpperCase()}</span>
             </a>
             <TrustMarks />
+            <PushOptIn />
           </div>
 
           <MerchantFooterList
@@ -158,6 +160,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
                 : `© ${currentYear} ${brand.nameFa} — ${contact.locationLabel}`}
             </p>
             <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
+            <p className="mt-2 text-[11px] leading-6">طراحی شده توسط مجموعه shinethree</p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             {presentation.shell.utilityLinks.map((item) => (

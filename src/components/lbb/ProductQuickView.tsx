@@ -129,7 +129,7 @@ function PrototypeProductQuickView({ product: p }: { product: Product }) {
               const end = event.changedTouches[0]?.clientX ?? touchStart.current;
               const delta = end - touchStart.current;
               touchStart.current = null;
-              if (Math.abs(delta) < 45) return;
+              if (Math.abs(delta) < 24) return;
               setImage(delta > 0 ? img - 1 : img + 1);
             }}
           >

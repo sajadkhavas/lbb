@@ -34,10 +34,9 @@ export function MobileBottomBar() {
     <nav
       dir="rtl"
       aria-label="ناوبری موبایل"
-      className="fixed inset-x-0 bottom-0 z-[var(--z-nav)] flex border-t border-hairline bg-[var(--lbb-surface-glass)] shadow-raised backdrop-blur-xl md:hidden"
+      className="fixed inset-x-3 bottom-[calc(10px+env(safe-area-inset-bottom))] z-[var(--z-nav)] flex overflow-hidden rounded-[22px] border border-hairline bg-[var(--lbb-surface-glass)] shadow-raised backdrop-blur-xl sm:inset-x-6 md:hidden"
       style={{
-        height: "calc(64px + env(safe-area-inset-bottom))",
-        paddingBottom: "env(safe-area-inset-bottom)",
+        height: "64px",
       }}
     >
       <Link

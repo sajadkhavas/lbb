@@ -93,7 +93,7 @@ export function HeroNarrative({
 
             <h1
               id="home-hero-title"
-              className="mt-7 max-w-[12ch] text-hero leading-[0.95] text-bone"
+              className="mt-7 max-w-[12ch] text-hero leading-[1.18] text-bone"
             >
               {copy.heroTitle}
             </h1>
