@@ -4,7 +4,7 @@ test("reduced motion keeps the active ticker visually static and native scrollin
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const ticker = page.locator('[data-f18-motion="viewport-ticker"]');
   await expect(ticker).toHaveCSS("animation-name", "none");
@@ -23,7 +23,7 @@ test("reduced motion keeps the active ticker visually static and native scrollin
 
 test("ticker only spends animation work while near the viewport", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const ticker = page.locator('[data-f18-motion="viewport-ticker"]');
 

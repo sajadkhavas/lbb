@@ -160,7 +160,7 @@ test("F14 shop desktop visual contract", async ({ page }) => {
 
 test("F14 category desktop visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/hoodies", { waitUntil: "networkidle" });
+  await page.goto("/hoodies", { waitUntil: "domcontentloaded" });
   await stabilize(page);
   await expect(page).toHaveScreenshot("f14-category-desktop.png", {
     fullPage: true,
@@ -170,7 +170,7 @@ test("F14 category desktop visual contract", async ({ page }) => {
 
 test("F14 search results mobile visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/search?q=هودی", { waitUntil: "networkidle" });
+  await page.goto("/search?q=هودی", { waitUntil: "domcontentloaded" });
   await stabilize(page);
   await expect(page).toHaveScreenshot("f14-search-mobile.png", {
     fullPage: true,

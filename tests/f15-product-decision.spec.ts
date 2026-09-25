@@ -86,7 +86,7 @@ test("color-specific media falls back to verified general media", () => {
 });
 
 test("valid draft PDP hides unsupported commerce facts and disables purchase", async ({ page }) => {
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("اطلاعات محصول در انتظار تأیید");
   await expect(page.getByText("هودی کلاسیک LBB", { exact: true })).toHaveCount(0);
   await expect(page.getByText("۱٬۸۵۰٬۰۰۰ تومان", { exact: true })).toHaveCount(0);
@@ -99,7 +99,7 @@ test("valid draft PDP hides unsupported commerce facts and disables purchase", a
 });
 
 test("invalid PDP remains a designed page-level failure", async ({ page }) => {
-  await page.goto("/product/f15-does-not-exist", { waitUntil: "networkidle" });
+  await page.goto("/product/f15-does-not-exist", { waitUntil: "domcontentloaded" });
   await expect(page.locator("main")).toHaveCount(1);
   await expect(page.locator("h1")).toHaveCount(1);
   await expect(page.getByTestId("pdp-color-selector")).toHaveCount(0);
@@ -109,7 +109,7 @@ test("pending gallery is keyboard usable without borrowing another product image
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const tablist = page.getByRole("tablist", { name: /تصاویر محصول/ });
   const tabs = tablist.getByRole("tab");
   await expect(tabs).toHaveCount(2);
@@ -125,7 +125,7 @@ test("pending gallery is keyboard usable without borrowing another product image
 
 test("mobile PDP is RTL, touch-safe and does not overflow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).direction)).toBe(
     "rtl",
   );
@@ -147,7 +147,7 @@ test("sticky purchase surface stays above mobile navigation and reflects blocked
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const buyButton = page.getByRole("button", {
     name: "خرید در دسترس نیست",
   });
@@ -184,7 +184,7 @@ test("sticky purchase surface stays above mobile navigation and reflects blocked
 });
 
 test("draft PDP has no fabricated discovery or unsupported urgency claims", async ({ page }) => {
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   await expect(page.getByTestId("pdp-complete-look")).toHaveCount(0);
   await expect(page.getByTestId("pdp-related-products")).toHaveCount(0);
   const text = (await page.locator("main").innerText()).toLowerCase();

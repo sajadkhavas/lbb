@@ -14,16 +14,16 @@ function jsonLdTypes(page: Page) {
 }
 
 test("local intent stays concentrated on home and contact", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveTitle("LBB | پوشاک خیابانی و استریت‌ویر در کرج");
-  await page.goto("/contact", { waitUntil: "networkidle" });
+  await page.goto("/contact", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveTitle(/کرج/);
-  await page.goto("/about", { waitUntil: "networkidle" });
+  await page.goto("/about", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveTitle("درباره LBB | از رگال تا فروشگاه");
 });
 
 test("shop uses broad commerce intent without stale brand wording", async ({ page }) => {
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveTitle("فروشگاه LBB | خرید پوشاک خیابانی و استریت‌ویر");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
@@ -36,7 +36,7 @@ test("shop uses broad commerce intent without stale brand wording", async ({ pag
 });
 
 test("useful FAQ remains visible without retired FAQPage search markup", async ({ page }) => {
-  await page.goto("/faq", { waitUntil: "networkidle" });
+  await page.goto("/faq", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1 })).toContainText("پاسخ‌های روشن");
   const types = await jsonLdTypes(page);
   expect(types).not.toContain("FAQPage");
@@ -46,7 +46,7 @@ test("useful FAQ remains visible without retired FAQPage search markup", async (
 test("size guide keeps useful content and breadcrumb markup without retired HowTo markup", async ({
   page,
 }) => {
-  await page.goto("/size-guide", { waitUntil: "networkidle" });
+  await page.goto("/size-guide", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("راهنمای انتخاب اندازه");
   const types = await jsonLdTypes(page);
   expect(types).not.toContain("HowTo");
@@ -54,7 +54,7 @@ test("size guide keeps useful content and breadcrumb markup without retired HowT
 });
 
 test("category pages link naturally to the size guide", async ({ page }) => {
-  await page.goto("/tshirts", { waitUntil: "networkidle" });
+  await page.goto("/tshirts", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("link", { name: "راهنمای انتخاب اندازه" })).toHaveAttribute(
     "href",
     "/size-guide",

@@ -50,14 +50,14 @@ async function expectNoBlockingAxe(page: Page) {
 
 for (const [label, route] of templates) {
   test(`${label}: ${route} has no serious or critical Axe violations`, async ({ page }) => {
-    await page.goto(route, { waitUntil: "networkidle" });
+    await page.goto(route, { waitUntil: "domcontentloaded" });
     await expectNoBlockingAxe(page);
   });
 }
 
 test("navigation overlays preserve focus and Axe quality", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const shopTrigger = page.getByRole("button", { name: "فروشگاه" });
   await shopTrigger.click();
@@ -94,7 +94,7 @@ test("navigation overlays preserve focus and Axe quality", async ({ page }) => {
 
 test("catalogue and product dialogs have blocking Axe coverage", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   const filterTrigger = page.getByRole("button", { name: /فیلترها/ }).first();
   await filterTrigger.click();
@@ -114,7 +114,7 @@ test("catalogue and product dialogs have blocking Axe coverage", async ({ page }
   await expect(quickView).toBeHidden();
   await expect(quickViewTrigger).toBeFocused();
 
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const sizeGuideTrigger = page.getByRole("button", { name: "راهنمای اندازه" });
   if ((await sizeGuideTrigger.count()) > 0) {
     await sizeGuideTrigger.click();
@@ -132,7 +132,7 @@ test("catalogue and product dialogs have blocking Axe coverage", async ({ page }
 });
 
 test("lookbook lightbox has blocking Axe coverage", async ({ page }) => {
-  await page.goto("/lookbook", { waitUntil: "networkidle" });
+  await page.goto("/lookbook", { waitUntil: "domcontentloaded" });
   const opener = page.locator('button[aria-haspopup="dialog"]').first();
   await opener.click();
   const dialog = page.getByRole("dialog");

@@ -57,7 +57,7 @@ for (const route of routes) {
       }
     });
 
-    const response = await page.goto(route, { waitUntil: "networkidle" });
+    const response = await page.goto(route, { waitUntil: "domcontentloaded" });
     expect(response?.status(), `document status for ${route}`).toBeLessThan(400);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
     await expect(page.locator("h1")).toHaveCount(1);
@@ -69,20 +69,20 @@ for (const route of routes) {
     expect(errors).toEqual([]);
     expect(failedResources).toEqual([]);
 
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page.locator("h1")).toHaveCount(1);
   });
 }
 
 test("unknown route renders the designed 404 state", async ({ page }) => {
-  const response = await page.goto("/this-route-does-not-exist", { waitUntil: "networkidle" });
+  const response = await page.goto("/this-route-does-not-exist", { waitUntil: "domcontentloaded" });
   expect([200, 404]).toContain(response?.status());
   await expect(page.getByRole("heading", { level: 1, name: "این صفحه وجود ندارد" })).toBeVisible();
 });
 
 test("invalid dynamic slugs render designed page-level states", async ({ page }) => {
-  await page.goto("/collections/not-real", { waitUntil: "networkidle" });
+  await page.goto("/collections/not-real", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "این کالکشن پیدا نشد" })).toBeVisible();
-  await page.goto("/journal/not-real", { waitUntil: "networkidle" });
+  await page.goto("/journal/not-real", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "این مقاله پیدا نشد" })).toBeVisible();
 });

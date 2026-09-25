@@ -7,7 +7,7 @@ test("live checkout associates custom errors and focuses the first invalid field
   page,
 }) => {
   if (!liveMode) {
-    await page.goto("/checkout", { waitUntil: "networkidle" });
+    await page.goto("/checkout", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "تکمیل سفارش", level: 1 })).toBeVisible();
     await expect(page.getByRole("button", { name: "دریافت جمع نهایی از Backend" })).toHaveCount(0);
     await expect(
@@ -97,7 +97,7 @@ test("live checkout associates custom errors and focuses the first invalid field
     });
   });
 
-  await page.goto("/checkout", { waitUntil: "networkidle" });
+  await page.goto("/checkout", { waitUntil: "domcontentloaded" });
   const submit = page.getByRole("button", { name: "دریافت جمع نهایی از Backend" });
   await expect(submit).toBeEnabled();
   await submit.click();

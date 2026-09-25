@@ -149,7 +149,7 @@ test("backend Quick View decision model keeps exact variant availability", () =>
 
 test("product card media fills its frame without the old image inset", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   const media = page.locator(".product-card__media").first();
   await expect(media).toBeVisible();
@@ -182,7 +182,7 @@ test("PDP keeps mobile composition while desktop receives the polished surface",
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
 
   const panel = page.getByTestId("pdp-purchase-panel");
   const gallery = page.getByRole("region", { name: /گالری تصاویر/ });

@@ -37,7 +37,7 @@ async function expectTouchTarget(locator: Locator) {
 }
 
 async function addProductToCart(page: Page) {
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const purchase = page.getByRole("button", { name: /افزودن به سبد خرید|خرید در دسترس نیست/ });
 
   if (await purchase.isDisabled()) {
@@ -55,7 +55,7 @@ async function addProductToCart(page: Page) {
         ]),
       );
     });
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "domcontentloaded" });
     await page
       .getByRole("button", { name: /سبد خرید/ })
       .first()
@@ -81,7 +81,7 @@ for (const viewport of VIEWPORTS) {
   }) => {
     await page.setViewportSize(viewport);
     for (const route of RTL_ROUTES) {
-      await page.goto(route, { waitUntil: "networkidle" });
+      await page.goto(route, { waitUntil: "domcontentloaded" });
       await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
       await expect(page.getByRole("main")).toHaveCount(1);
       await expectNoPageOverflow(page);
@@ -92,13 +92,13 @@ for (const viewport of VIEWPORTS) {
 test("RTL pages keep external contact labels readable and directional media islands explicit", async ({
   page,
 }) => {
-  await page.goto("/contact", { waitUntil: "networkidle" });
+  await page.goto("/contact", { waitUntil: "domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   const instagram = page.getByRole("link", { name: "اینستاگرام رسمی LBB" });
   await expect(instagram).toBeVisible();
   await expect(instagram).toHaveAttribute("href", /^https:\/\/www\.instagram\.com\//);
 
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const gallery = page.locator('[aria-roledescription="carousel"]');
   await expect(gallery).toHaveAttribute("dir", "rtl");
   await expect(gallery).toHaveAttribute("aria-label", /گالری تصاویر/);
@@ -109,7 +109,7 @@ test("critical mobile shell and Quick View controls meet the 44px touch contract
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   await expectTouchTarget(page.getByRole("button", { name: "منوی اصلی" }));
   await expectTouchTarget(page.getByRole("button", { name: "جست‌وجو" }).first());
@@ -127,13 +127,13 @@ test("critical mobile shell and Quick View controls meet the 44px touch contract
 
 test("F19B-P1-003: PDP mobile gallery selectors meet the 44px touch contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   await expectTouchTarget(page.getByRole("button", { name: /رفتن به (?:تصویر|جایگاه رسانه) 1/ }));
 });
 
 test("F19B-P1-004: Quick View thumbnails must meet the 44px touch contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
   await page
     .getByRole("button", { name: /انتخاب سایز و خرید/ })
     .first()
@@ -151,7 +151,7 @@ test("F19B-P2-001: Cart quantity controls must meet the 44px touch contract", as
 
 test("F19B-P2-002: active filter chips must meet the 44px touch contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
   await page
     .getByRole("button", { name: /فیلترها/ })
     .first()
@@ -164,7 +164,7 @@ test("F19B-P2-002: active filter chips must meet the 44px touch contract", async
 
 test("reduced motion disables CSS motion and leaves Lenis inactive", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(
     true,
@@ -187,7 +187,7 @@ test("reduced motion disables CSS motion and leaves Lenis inactive", async ({ pa
   await expect(probe).toHaveCSS("animation-name", "none");
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
   await page
     .getByRole("button", { name: /انتخاب سایز و خرید/ })
     .first()
@@ -201,7 +201,7 @@ test("viewport metadata permits zoom and WCAG text spacing does not create page 
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/faq", { waitUntil: "networkidle" });
+  await page.goto("/faq", { waitUntil: "domcontentloaded" });
 
   const viewport = await page.locator('meta[name="viewport"]').getAttribute("content");
   expect(viewport ?? "").not.toMatch(/user-scalable\s*=\s*no/i);
@@ -225,8 +225,8 @@ test("viewport metadata permits zoom and WCAG text spacing does not create page 
 
 test("F19B-P2-004: FAQ and 404 secondary chips meet the 44px target", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/faq", { waitUntil: "networkidle" });
+  await page.goto("/faq", { waitUntil: "domcontentloaded" });
   await expectTouchTarget(page.getByRole("link", { name: "محصول و موجودی" }));
-  await page.goto("/f19-secondary-route-does-not-exist", { waitUntil: "networkidle" });
+  await page.goto("/f19-secondary-route-does-not-exist", { waitUntil: "domcontentloaded" });
   await expectTouchTarget(page.getByRole("link", { name: "فروشگاه" }).first());
 });
