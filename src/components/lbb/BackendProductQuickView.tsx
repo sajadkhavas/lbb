@@ -170,7 +170,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex max-h-[94svh] w-full flex-col overflow-hidden border-t border-hairline bg-obsidian shadow-2xl md:max-h-[88svh] md:max-w-5xl md:flex-row md:overflow-hidden md:rounded-2xl md:border"
+        className="relative z-10 flex max-h-[94svh] w-full flex-col overflow-y-auto overscroll-contain rounded-t-[28px] border-t border-hairline bg-obsidian shadow-2xl md:max-h-[88svh] md:max-w-5xl md:flex-row md:overflow-hidden md:rounded-2xl md:border"
         style={{ animation: "qv-up 0.35s cubic-bezier(0.22,1,0.36,1)" }}
       >
         <button
@@ -188,7 +188,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
 
         <div className="shrink-0 md:w-[48%]">
           <div
-            className="relative aspect-[4/5] w-full overflow-hidden bg-carbon touch-pan-y md:h-full md:min-h-[650px] md:aspect-auto"
+            className="relative aspect-[4/3] max-h-[38svh] w-full overflow-hidden bg-carbon touch-pan-y md:aspect-auto md:max-h-none md:min-h-[650px] md:h-full"
             tabIndex={gallery.length > 1 ? 0 : -1}
             role="region"
             aria-roledescription="carousel"
@@ -287,7 +287,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5 md:p-8 lg:p-9">
+        <div className="flex min-h-0 flex-1 flex-col p-5 pb-[calc(24px+env(safe-area-inset-bottom))] md:overflow-y-auto md:p-8 lg:p-9">
           {productQuery.isPending ? (
             <div className="grid min-h-[420px] place-items-center text-center">
               <div>

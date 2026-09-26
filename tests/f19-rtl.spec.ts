@@ -125,6 +125,26 @@ test("critical mobile shell and Quick View controls meet the 44px touch contract
   await expectTouchTarget(quickView.getByRole("button", { name: "افزایش تعداد" }));
 });
 
+test("mobile Quick View scrolls the image and details together", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
+  await page
+    .getByRole("button", { name: /انتخاب سایز و خرید/ })
+    .first()
+    .click();
+
+  const dialog = page.getByRole("dialog");
+  const gallery = dialog.getByRole("region", { name: /گالری نمای سریع/ });
+  await expect(dialog.getByRole("link", { name: "توضیحات بیشتر و جزئیات کامل" })).toBeVisible();
+  const imageBefore = await gallery.boundingBox();
+  await dialog.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect.poll(async () => dialog.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  const imageAfter = await gallery.boundingBox();
+  expect(imageAfter!.y).toBeLessThan(imageBefore!.y);
+});
+
 test("F19B-P1-003: PDP mobile gallery selectors meet the 44px touch contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
