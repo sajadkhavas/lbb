@@ -435,7 +435,7 @@ export function isLiveBackend(): boolean {
 export function getBackendBaseUrl(): string {
   const raw = clean(import.meta.env.VITE_LBB_API_BASE_URL);
   if (!raw) {
-    throw new BackendApiError("آدرس Backend برای حالت live تنظیم نشده است.", {
+    throw new BackendApiError("ارتباط فروشگاه تنظیم نشده است.", {
       code: "backend_not_configured",
     });
   }
@@ -444,12 +444,12 @@ export function getBackendBaseUrl(): string {
   try {
     parsed = new URL(raw);
   } catch {
-    throw new BackendApiError("آدرس Backend معتبر نیست.", { code: "backend_url_invalid" });
+    throw new BackendApiError("نشانی فروشگاه معتبر نیست.", { code: "backend_url_invalid" });
   }
 
   const local = parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
   if (parsed.protocol !== "https:" && !local) {
-    throw new BackendApiError("Backend live باید روی HTTPS در دسترس باشد.", {
+    throw new BackendApiError("اتصال امن فروشگاه در دسترس نیست.", {
       code: "backend_https_required",
     });
   }
@@ -502,7 +502,7 @@ async function request<T>(
       headers: buildRequestHeaders(init),
     });
   } catch {
-    throw new BackendApiError("ارتباط با Backend برقرار نشد.", {
+    throw new BackendApiError("ارتباط با فروشگاه برقرار نشد.", {
       code: "backend_network_error",
     });
   }
@@ -511,7 +511,7 @@ async function request<T>(
   try {
     payload = (await response.json()) as ApiSuccess<T> | ApiFailure;
   } catch {
-    throw new BackendApiError("پاسخ Backend قابل خواندن نیست.", {
+    throw new BackendApiError("پاسخ فروشگاه قابل خواندن نیست.", {
       status: response.status,
       code: "backend_invalid_json",
     });
@@ -521,7 +521,7 @@ async function request<T>(
 
   if (!response.ok || payload.success !== true) {
     const failure = payload as ApiFailure;
-    throw new BackendApiError(failure.message || "درخواست Backend ناموفق بود.", {
+    throw new BackendApiError(failure.message || "درخواست فروشگاه ناموفق بود.", {
       status: response.status,
       code: failure.code,
       errors: failure.errors,

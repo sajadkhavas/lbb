@@ -320,7 +320,7 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
         <EmptyState
           icon={<RefreshCcw size={40} aria-hidden="true" />}
           title="دسته‌بندی قابل تأیید نیست"
-          body={loader.error ?? "Backend پاسخ معتبر برنگرداند."}
+          body={loader.error ?? "اطلاعات این دسته فعلاً در دسترس نیست."}
           action={
             <button
               type="button"
@@ -377,9 +377,7 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
     <CategoryChrome
       categoryName={category.name}
       categorySlug={category.slug}
-      description={
-        category.description || "محصولات منتشرشده این دسته مستقیماً از Backend خوانده می‌شوند."
-      }
+      description={category.description || "محصولات منتشرشدهٔ این دسته را ببینید."}
       image={category.image}
       siblingCategories={facets?.categories
         .filter((item) => item.slug !== category.slug)
@@ -521,7 +519,7 @@ function CategoryChrome({
               <TechLabel tone="signal">CATEGORY / {categorySlug.toUpperCase()}</TechLabel>
               <h1 className="text-display-2 mt-3 text-bone">{categoryName}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">{description}</p>
-              <p className="tech mt-4 text-signal">قیمت و موجودی از Backend</p>
+              <p className="tech mt-4 text-signal">قیمت و موجودی به‌روز محصولات</p>
             </div>
           </Shell>
         </section>
@@ -537,9 +535,18 @@ function CategoryChrome({
                     key={category.publicId}
                     to="/$category"
                     params={{ category: category.slug }}
-                    className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    className="relative isolate grid min-h-28 overflow-hidden place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                   >
-                    {category.name}
+                    {category.image ? (
+                      <img
+                        src={category.image}
+                        alt=""
+                        loading="lazy"
+                        className="absolute inset-0 -z-20 h-full w-full object-cover"
+                      />
+                    ) : null}
+                    <span className="absolute inset-0 -z-10 bg-obsidian/65" aria-hidden="true" />
+                    <span className="px-3 text-center">{category.name}</span>
                   </Link>
                 ))}
               </div>

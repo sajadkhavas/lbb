@@ -49,7 +49,7 @@ export function PwaExperience() {
     <aside
       role="status"
       aria-live="polite"
-      className="fixed inset-x-3 bottom-[calc(72px+env(safe-area-inset-bottom))] z-[260] mx-auto flex max-w-lg items-center gap-3 rounded-xl border border-hairline bg-carbon p-3 text-bone shadow-2xl md:bottom-5"
+      className="fixed inset-x-3 bottom-[calc(90px+env(safe-area-inset-bottom))] z-[260] mx-auto flex max-w-lg items-center gap-3 rounded-xl border border-hairline bg-carbon p-3 text-bone shadow-2xl md:bottom-5"
     >
       {offline ? (
         <WifiOff aria-hidden="true" className="shrink-0 text-signal" size={20} />

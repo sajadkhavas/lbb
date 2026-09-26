@@ -135,7 +135,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       "@type": "Organization",
       name: control.brand.name,
       url: absUrl("/"),
-      logo: absUrl("/icons/icon-512.png"),
+      logo: absUrl("/brand/lbb-logo.jpeg"),
       description: control.seo.organizationDescription,
       sameAs: [control.seo.instagramUrl],
     };

@@ -69,6 +69,30 @@ export function ProductFilters({
       <div className="flex items-center gap-2">
         <SlidersHorizontal size={15} className="text-signal" aria-hidden="true" />
         <TechLabel tone="signal">فیلترها</TechLabel>
+        {filters.cats.length > 0 ||
+        filters.colors.length > 0 ||
+        filters.sizes.length > 0 ||
+        filters.max > 0 ||
+        filters.instock ||
+        filters.sale ? (
+          <button
+            type="button"
+            onClick={() =>
+              onChange({
+                ...filters,
+                cats: [],
+                colors: [],
+                sizes: [],
+                max: 0,
+                instock: false,
+                sale: false,
+              })
+            }
+            className="mr-auto min-h-11 text-xs text-signal underline-offset-4 hover:underline"
+          >
+            پاک‌کردن همه
+          </button>
+        ) : null}
       </div>
 
       {showCategory ? (
@@ -199,6 +223,22 @@ export function ProductFilters({
             onValueChange={([value]) => setDraftMax(value)}
             onValueCommit={([value]) => commitMax(value)}
           />
+          <div className="mt-4 flex flex-wrap gap-2" aria-label="محدوده‌های سریع قیمت">
+            {[0.25, 0.5, 0.75, 1].map((fraction) => {
+              const value = Math.floor((priceCeil * fraction) / 50000) * 50000;
+              return (
+                <button
+                  key={fraction}
+                  type="button"
+                  aria-pressed={fraction === 1 ? filters.max === 0 : filters.max === value}
+                  onClick={() => commitMax(value)}
+                  className="min-h-11 rounded-lg border border-hairline px-3 text-xs text-bone transition-colors hover:border-signal aria-pressed:border-signal aria-pressed:text-signal"
+                >
+                  {fraction === 1 ? "همه قیمت‌ها" : `تا ${fmtToman(value)}`}
+                </button>
+              );
+            })}
+          </div>
         </fieldset>
       ) : null}
 

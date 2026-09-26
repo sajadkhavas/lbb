@@ -84,7 +84,8 @@ function AppPage() {
               <Smartphone className="text-signal" aria-hidden="true" />
               <h2 className="mt-4 text-xl">نصب روی دستگاه</h2>
               <p className="mt-3 text-sm leading-7 text-metal">
-                از گزینه Install در مرورگر یا Add to Home Screen در iOS استفاده کنید.
+                در اندروید از گزینه «نصب برنامه» در مرورگر استفاده کنید. در آیفون از منوی
+                اشتراک‌گذاری، «افزودن به صفحهٔ اصلی» را بزنید.
               </p>
               <span className="mt-5 inline-flex items-center gap-2 text-xs text-bone">
                 <Download size={16} aria-hidden="true" />
