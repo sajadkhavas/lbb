@@ -24,30 +24,23 @@ export function LocalStoreVisit() {
         className="border-t border-hairline bg-carbon py-12 md:py-16"
       >
         <Shell className="grid overflow-hidden rounded-3xl border border-hairline bg-obsidian shadow-overlay lg:grid-cols-2">
-          <div className="relative min-h-[360px] overflow-hidden bg-carbon-2 lg:min-h-[520px]">
+          <div className="relative aspect-[3/5] self-start overflow-hidden bg-carbon-2">
             {imageUrl ? (
               <img
                 src={imageUrl}
                 alt={`فروشگاه حضوری ${brand.nameFa}`}
                 width={1200}
-                height={1500}
+                height={1600}
                 loading="lazy"
                 decoding="async"
                 sizes="(max-width: 1023px) 100vw, 50vw"
-                className="absolute inset-0 h-full w-full object-cover"
+                className="absolute left-0 top-0 h-full w-[125%] max-w-none object-cover object-left"
               />
             ) : (
-              <div className="absolute inset-0 grid place-items-center p-8 text-center text-sm leading-7 text-metal">
+              <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm leading-7 text-metal">
                 تصویر فروشگاه به‌زودی در این بخش نمایش داده می‌شود.
               </div>
             )}
-            <span
-              aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-t from-obsidian/70 to-transparent"
-            />
-            <span className="absolute bottom-5 right-5 rounded-xl border border-bone/30 bg-obsidian/80 px-4 py-3 text-sm font-black text-bone backdrop-blur">
-              {brand.slogan}
-            </span>
           </div>
 
           <div className="flex flex-col justify-center p-6 md:p-9 lg:p-11">
@@ -126,7 +119,7 @@ export function LocalStoreVisit() {
       className="border-t border-hairline bg-carbon py-12 md:py-16"
     >
       <Shell className="grid overflow-hidden rounded-3xl border border-hairline bg-obsidian shadow-overlay lg:grid-cols-2">
-        <div className="relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
+        <div className="relative self-start overflow-hidden">
           <img
             src={lifestyle2}
             alt="استایل پوشاک خیابانی ال‌بی‌بی"
@@ -135,15 +128,8 @@ export function LocalStoreVisit() {
             loading="lazy"
             decoding="async"
             sizes="(max-width: 1023px) 100vw, 50vw"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="block h-auto w-full"
           />
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-t from-obsidian/70 to-transparent"
-          />
-          <span className="absolute bottom-5 right-5 rounded-xl border border-bone/30 bg-obsidian/80 px-4 py-3 text-sm font-black text-bone backdrop-blur">
-            {BRAND.slogan}
-          </span>
         </div>
         <div className="flex flex-col justify-center p-6 md:p-9 lg:p-11">
           <TechLabel tone="signal">فروشگاه حضوری ال‌بی‌بی</TechLabel>

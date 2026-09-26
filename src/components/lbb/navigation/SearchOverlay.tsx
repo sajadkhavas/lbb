@@ -1,10 +1,9 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowUpLeft, Clock3, Search, X } from "lucide-react";
-import { categoryImage } from "@/lib/category-images";
-import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
-import { productImage } from "@/lib/product-images";
-import { fmtToman, products } from "@/lib/products";
+import { getCatalogFacets, isLiveBackend, searchProducts } from "@/lib/backend-api";
+import { fmtToman } from "@/lib/products";
+import { normalizeSearchTerm } from "@/lib/recent-searches";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useNavigationOverlay } from "@/lib/navigation-overlay";
 import { TechLabel } from "@/components/lbb/ui/primitives";
@@ -65,6 +64,9 @@ export function SearchOverlay() {
   const [query, setQuery] = useState("");
   const [recent, setRecent] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState(false);
 
   useFocusTrap(true, dialogRef, close);
 
@@ -74,43 +76,56 @@ export function SearchOverlay() {
     setRecent(readRecent());
   }, []);
 
-  const term = query.trim();
-  const suggestions = useMemo<Suggestion[]>(() => {
-    if (!term) return [];
-    const needle = term.toLocaleLowerCase("fa-IR");
-    const categories: Suggestion[] = CATEGORY_SLUGS.filter((slug) => {
-      const category = CATEGORIES[slug];
-      return `${category.nameFa} ${category.nameFaPlural} ${category.heroTagline}`
-        .toLocaleLowerCase("fa-IR")
-        .includes(needle);
-    })
-      .slice(0, 2)
-      .map((slug) => ({
-        kind: "category" as const,
-        key: `category-${slug}`,
-        label: CATEGORIES[slug].nameFa,
-        meta: "دسته محصول",
-        slug,
-        image: categoryImage(slug),
-      }));
-
-    const productMatches: Suggestion[] = products
-      .filter((product) =>
-        `${product.name} ${product.latinName} ${product.shortDescription} ${product.sku}`
-          .toLocaleLowerCase("fa-IR")
-          .includes(needle),
-      )
-      .slice(0, 6 - categories.length)
-      .map((product) => ({
-        kind: "product" as const,
-        key: `product-${product.slug}`,
-        label: product.name,
-        meta: fmtToman(product.price),
-        slug: product.slug,
-        image: productImage(product.slug),
-      }));
-
-    return [...categories, ...productMatches];
+  const term = normalizeSearchTerm(query);
+  useEffect(() => {
+    if (!term || !isLiveBackend()) {
+      setSuggestions([]);
+      setLoading(false);
+      return;
+    }
+    let stale = false;
+    setSuggestions([]);
+    setLoading(true);
+    setSearchError(false);
+    const timer = window.setTimeout(async () => {
+      try {
+        const [products, facets] = await Promise.all([
+          searchProducts({ q: term, per_page: 6 }),
+          getCatalogFacets().catch(() => null),
+        ]);
+        if (stale) return;
+        const categories = (facets?.data.categories ?? [])
+          .filter((category) => category.name.includes(term) && category.image)
+          .slice(0, 2)
+          .map((category): Suggestion => ({
+            kind: "category",
+            key: `category-${category.slug}`,
+            label: category.name,
+            meta: "دسته محصول",
+            slug: category.slug,
+            image: category.image!,
+          }));
+        const matches = products.data
+          .slice(0, 6 - categories.length)
+          .map((product): Suggestion => ({
+            kind: "product",
+            key: `product-${product.slug}`,
+            label: product.name,
+            meta: product.price.from ? fmtToman(product.price.from.amount) : "مشاهده محصول",
+            slug: product.slug,
+            image: product.primaryImage ?? "",
+          }));
+        setSuggestions([...categories, ...matches]);
+      } catch {
+        if (!stale) setSearchError(true);
+      } finally {
+        if (!stale) setLoading(false);
+      }
+    }, 220);
+    return () => {
+      stale = true;
+      window.clearTimeout(timer);
+    };
   }, [term]);
 
   useEffect(() => setActiveIndex(-1), [term]);
@@ -226,11 +241,19 @@ export function SearchOverlay() {
             </form>
 
             <p className="sr-only" aria-live="polite">
-              {term ? `${suggestions.length.toLocaleString("fa-IR")} پیشنهاد` : ""}
+              {term
+                ? loading
+                  ? "در حال جست‌وجو"
+                  : `${suggestions.length.toLocaleString("fa-IR")} پیشنهاد`
+                : ""}
             </p>
 
             {term ? (
-              suggestions.length > 0 ? (
+              loading ? (
+                <p className="py-12 text-center text-metal" role="status">
+                  در حال جست‌وجوی محصولات فروشگاه…
+                </p>
+              ) : suggestions.length > 0 ? (
                 <ul id={listboxId} role="listbox" className="mt-4 min-h-0 overflow-y-auto">
                   {suggestions.map((suggestion, index) => (
                     <li key={suggestion.key} role="presentation">
@@ -245,15 +268,19 @@ export function SearchOverlay() {
                           activeIndex === index ? "bg-carbon-2" : "hover:bg-carbon"
                         }`}
                       >
-                        <img
-                          src={suggestion.image}
-                          alt=""
-                          width={56}
-                          height={70}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-[70px] w-14 object-cover"
-                        />
+                        {suggestion.image ? (
+                          <img
+                            src={suggestion.image}
+                            alt=""
+                            width={56}
+                            height={70}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-[70px] w-14 object-cover"
+                          />
+                        ) : (
+                          <span aria-hidden="true" className="h-[70px] w-14 bg-carbon-2" />
+                        )}
                         <span className="min-w-0">
                           <span className="block truncate text-sm font-bold text-bone">
                             {suggestion.label}
@@ -272,9 +299,13 @@ export function SearchOverlay() {
               ) : (
                 <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
                   <TechLabel tone="signal">NO MATCH</TechLabel>
-                  <p className="mt-3 text-title text-bone">نتیجه مستقیم پیدا نشد</p>
+                  <p className="mt-3 text-title text-bone">
+                    {searchError ? "جست‌وجو در دسترس نیست" : "نتیجه مستقیم پیدا نشد"}
+                  </p>
                   <p className="mt-2 max-w-sm text-sm leading-7 text-metal">
-                    عبارت را کوتاه‌تر کن یا جست‌وجوی کامل را برای بررسی تمام توضیحات باز کن.
+                    {searchError
+                      ? "کمی بعد دوباره تلاش کنید."
+                      : "عبارت را کوتاه‌تر کن یا صفحه کامل جست‌وجو را باز کن."}
                   </p>
                   <button type="submit" formAction="/search" className="sr-only">
                     جست‌وجوی کامل
@@ -283,19 +314,7 @@ export function SearchOverlay() {
               )
             ) : (
               <div className="py-6">
-                <TechLabel>QUICK CATEGORIES</TechLabel>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {CATEGORY_SLUGS.map((slug) => (
-                    <button
-                      key={slug}
-                      type="button"
-                      onClick={() => setQuery(CATEGORIES[slug].nameFa)}
-                      className="min-h-11 border border-hairline px-4 text-xs font-semibold text-bone transition-colors hover:border-signal hover:text-signal"
-                    >
-                      {CATEGORIES[slug].nameFa}
-                    </button>
-                  ))}
-                </div>
+                <TechLabel>جست‌وجوی محصولات فروشگاه</TechLabel>
               </div>
             )}
           </section>

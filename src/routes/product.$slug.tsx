@@ -114,9 +114,16 @@ export const Route = createFileRoute("/product/$slug")({
         };
       }
       const path = backendCanonicalPath(product.seo, `/product/${product.slug}`);
-      const title = product.seo.metaTitle?.trim() || `${product.name} | LBB`;
+      const title = product.seo.metaTitle?.trim() || `خرید ${product.name} | فروشگاه LBB`;
       const description =
-        product.seo.metaDescription?.trim() || product.shortDescription || "مشاهده محصول LBB";
+        product.seo.metaDescription?.trim() ||
+        [
+          product.shortDescription || product.description,
+          `دسته ${product.category.name}`,
+          product.price.from ? `قیمت از ${fmtToman(product.price.from.amount)}` : null,
+        ]
+          .filter(Boolean)
+          .join("؛ ");
       const image = product.seo.primaryImage || product.primaryImage || undefined;
       const low = product.seo.structuredData?.lowPrice ?? product.price.from?.amount ?? null;
       const high = product.seo.structuredData?.highPrice ?? product.price.to?.amount ?? low;

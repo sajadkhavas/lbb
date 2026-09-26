@@ -156,7 +156,7 @@ export const Route = createFileRoute("/")({
       name: control.brand.nameFa,
       alternateName: control.brand.name,
       url: absUrl("/"),
-      logo: absUrl("/icons/icon-512.png"),
+      logo: absUrl("/brand/lbb-logo.jpeg"),
       description: control.brand.shortIntroduction,
       address: {
         "@type": "PostalAddress",

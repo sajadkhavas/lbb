@@ -471,7 +471,7 @@ const LOCAL_CONTROL: StorefrontControl = {
 function objectSetting<T>(settings: BootstrapDto["settings"], group: string, key: string): T {
   const value = settings[group]?.[key];
   if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new BackendApiError(`تنظیم ${key} در Backend معتبر نیست.`, {
+    throw new BackendApiError(`تنظیم ${key} در فروشگاه معتبر نیست.`, {
       code: "storefront_config_invalid",
     });
   }
@@ -481,7 +481,7 @@ function objectSetting<T>(settings: BootstrapDto["settings"], group: string, key
 function arraySetting<T>(settings: BootstrapDto["settings"], group: string, key: string): T[] {
   const value = settings[group]?.[key];
   if (!Array.isArray(value)) {
-    throw new BackendApiError(`تنظیم ${key} در Backend معتبر نیست.`, {
+    throw new BackendApiError(`تنظیم ${key} در فروشگاه معتبر نیست.`, {
       code: "storefront_config_invalid",
     });
   }
@@ -490,7 +490,7 @@ function arraySetting<T>(settings: BootstrapDto["settings"], group: string, key:
 
 export async function fetchStorefront<T>(path: `/api/v1/storefront/${string}`): Promise<T> {
   if (!isLiveBackend()) {
-    throw new BackendApiError("Storefront API فقط در حالت live خوانده می‌شود.", {
+    throw new BackendApiError("محتوای فروشگاه فعلاً در دسترس نیست.", {
       code: "storefront_api_not_live",
     });
   }
@@ -502,21 +502,21 @@ export async function fetchStorefront<T>(path: `/api/v1/storefront/${string}`): 
       credentials: "include",
     });
   } catch {
-    throw new BackendApiError("ارتباط با Backend محتوای فروشگاه برقرار نشد.", {
+    throw new BackendApiError("ارتباط با محتوای فروشگاه برقرار نشد.", {
       code: "backend_network_error",
     });
   }
 
   const payload = (await response.json().catch(() => null)) as Envelope<T> | FailureEnvelope | null;
   if (!payload) {
-    throw new BackendApiError("پاسخ Backend محتوای فروشگاه قابل خواندن نیست.", {
+    throw new BackendApiError("محتوای فروشگاه قابل خواندن نیست.", {
       status: response.status,
       code: "backend_invalid_json",
     });
   }
 
   if (payload.meta?.contractVersion !== LBB_CONTRACT_VERSION) {
-    throw new BackendApiError("نسخه قرارداد محتوای Backend با Frontend هم‌خوان نیست.", {
+    throw new BackendApiError("محتوای فروشگاه فعلاً قابل نمایش نیست.", {
       status: response.status,
       code: "contract_version_mismatch",
     });
@@ -524,7 +524,7 @@ export async function fetchStorefront<T>(path: `/api/v1/storefront/${string}`): 
 
   if (!response.ok || payload.success !== true) {
     const failure = payload as FailureEnvelope;
-    throw new BackendApiError(failure.message || "درخواست محتوای Backend ناموفق بود.", {
+    throw new BackendApiError(failure.message || "دریافت محتوای فروشگاه انجام نشد.", {
       status: response.status,
       code: failure.code || "storefront_request_failed",
       errors: failure.errors,
@@ -539,7 +539,7 @@ export async function resolveStorefrontControl(): Promise<StorefrontControl> {
 
   const bootstrap = await fetchStorefront<BootstrapDto>("/api/v1/storefront/bootstrap");
   if (bootstrap.contractVersion !== LBB_CONTRACT_VERSION) {
-    throw new BackendApiError("نسخه bootstrap فروشگاه با Frontend هم‌خوان نیست.", {
+    throw new BackendApiError("محتوای فروشگاه فعلاً قابل نمایش نیست.", {
       code: "contract_version_mismatch",
     });
   }
