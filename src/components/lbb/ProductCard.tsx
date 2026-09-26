@@ -25,7 +25,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const backend = isBackendCard(p);
   const [showMannequin, setShowMannequin] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
-  const touchStartX = useRef<number | null>(null);
+  const touchStart = useRef<{ x: number; y: number; index: number } | null>(null);
   const suppressNextMediaClick = useRef(false);
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
@@ -96,21 +96,24 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   };
 
   const startSwipe = (event: TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+    const touch = event.changedTouches[0];
+    touchStart.current = touch ? { x: touch.clientX, y: touch.clientY, index: previewIndex } : null;
     suppressNextMediaClick.current = false;
   };
 
-  const finishSwipe = (event: TouchEvent<HTMLDivElement>) => {
-    if (!backend || showMannequin || previewImages.length < 2 || touchStartX.current === null)
-      return;
-    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
-    const delta = touchStartX.current - endX;
-    touchStartX.current = null;
-    if (Math.abs(delta) < 36) return;
+  const moveSwipe = (event: TouchEvent<HTMLDivElement>) => {
+    const start = touchStart.current;
+    const touch = event.changedTouches[0];
+    if (!backend || showMannequin || previewImages.length < 2 || !start || !touch) return;
+    const dx = start.x - touch.clientX;
+    const dy = Math.abs(start.y - touch.clientY);
+    if (Math.abs(dx) < 18 || Math.abs(dx) <= dy * 1.2) return;
+    const target = dx > 0
+      ? Math.min(previewImages.length - 1, start.index + 1)
+      : Math.max(0, start.index - 1);
+    if (target === start.index) return;
     suppressNextMediaClick.current = true;
-    setPreviewIndex((current) =>
-      delta > 0 ? Math.min(previewImages.length - 1, current + 1) : Math.max(0, current - 1),
-    );
+    setPreviewIndex(target);
   };
 
   const overlay = (
@@ -138,13 +141,19 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       <div
         className="relative touch-pan-y"
         onPointerMove={selectPreviewFromPointer}
-        onPointerLeave={() => setPreviewIndex(0)}
+        onPointerLeave={(event) => {
+          if (event.pointerType === "mouse") setPreviewIndex(0);
+        }}
         onTouchStart={startSwipe}
+        onTouchMove={moveSwipe}
         onTouchCancel={() => {
-          touchStartX.current = null;
+          touchStart.current = null;
           suppressNextMediaClick.current = false;
         }}
-        onTouchEnd={finishSwipe}
+        onTouchEnd={(event) => {
+          moveSwipe(event);
+          touchStart.current = null;
+        }}
         onClickCapture={(event) => {
           if (!suppressNextMediaClick.current) return;
           suppressNextMediaClick.current = false;
@@ -165,6 +174,18 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         >
           {overlay}
         </Frame>
+        {backend && previewImages.length > 1 && previewIndex === 0 ? (
+          <img
+            src={previewImages[1]}
+            alt=""
+            aria-hidden="true"
+            width={1024}
+            height={1280}
+            loading="lazy"
+            decoding="async"
+            className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
+          />
+        ) : null}
         {backend && previewImages.length > 1 ? (
           <div
             aria-hidden="true"
