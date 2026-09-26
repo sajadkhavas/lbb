@@ -78,7 +78,7 @@ export function Navbar({
             aria-label={`${brand.nameFa} — خانه`}
             className="flex min-w-0 shrink-0 items-center gap-2"
           >
-            <Logo size={52} />
+            <Logo size={52} square />
           </Link>
 
           <div className="hidden min-w-0 items-center justify-center lg:flex">

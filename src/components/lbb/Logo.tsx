@@ -5,15 +5,17 @@ export function Logo({
   size = 34,
   className,
   withWordmark = false,
+  square = false,
 }: {
   size?: number;
   className?: string;
   withWordmark?: boolean;
+  square?: boolean;
 }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <img
-        src="/brand/lbb-logo.jpeg"
+        src={square ? "/icons/icon-192.png" : "/brand/lbb-logo.jpeg"}
         alt=""
         width={size}
         height={size}
