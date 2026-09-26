@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   VITE_SITE_URL: https://lbb.example.test
@@ -36,42 +36,6 @@ jobs:
 
       - name: Run complete quality suite
         run: npm run quality
-
-      - name: Capture current Chromium visual baselines for review
-        if: failure()
-        continue-on-error: true
-        run: >-
-          npx playwright test
-          tests/visual.spec.ts
-          tests/catalog-visual.spec.ts
-          tests/f15-pdp-visual.spec.ts
-          tests/f17-visual.spec.ts
-          tests/homepage-visual.spec.ts
-          --update-snapshots --workers=2 --retries=0
-
-      - name: Upload visual baselines for review
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: proposed-visual-baselines
-          path: tests/*-snapshots/*.png
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Commit reviewed visual baselines to the PR branch
-        if: failure() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tests/*-snapshots/*.png
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'test: update reviewed storefront visual baselines'
-          for attempt in 1 2 3; do
-            git fetch origin "${{ github.head_ref }}"
-            git rebase FETCH_HEAD
-            if git push origin "HEAD:refs/heads/${{ github.head_ref }}"; then exit 0; fi
-          done
-          exit 1
 
       - name: Upload browser report on failure
         if: failure()
