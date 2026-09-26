@@ -24,7 +24,7 @@ export function LocalStoreVisit() {
         className="border-t border-hairline bg-carbon py-12 md:py-16"
       >
         <Shell className="grid overflow-hidden rounded-3xl border border-hairline bg-obsidian shadow-overlay lg:grid-cols-2">
-          <div className="relative self-start overflow-hidden bg-carbon-2">
+          <div className="relative aspect-[3/4] overflow-hidden bg-carbon-2">
             {imageUrl ? (
               <img
                 src={imageUrl}
@@ -34,8 +34,7 @@ export function LocalStoreVisit() {
                 loading="lazy"
                 decoding="async"
                 sizes="(max-width: 1023px) 100vw, 50vw"
-                className="block"
-                style={{ width: "125%", maxWidth: "none", height: "auto" }}
+                className="absolute -top-1/4 -left-[27%] block h-auto max-w-none w-[160%]"
               />
             ) : (
               <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm leading-7 text-metal">
