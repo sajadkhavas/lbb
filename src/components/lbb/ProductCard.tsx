@@ -217,7 +217,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     >
       {cardImage}
 
-      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
+      <div className="flex h-[292px] min-w-0 flex-col p-3 sm:h-auto sm:flex-1 sm:p-4">
         <TechLabel tone="metal" className="truncate text-[9px] sm:text-[10px]">
           {backend ? categoryLabel : `${categoryLabel} / ${p.latinName}`}
         </TechLabel>
@@ -230,7 +230,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             {name}
           </Link>
         </h3>
-        <div className="mt-2 flex flex-wrap items-baseline gap-2">
+        <div className="mt-2 flex min-h-10 flex-wrap items-baseline gap-2">
           {priceFrom !== null ? (
             <span className="num text-[13px] font-bold text-bone sm:text-sm">
               {priceTo !== null && priceTo !== priceFrom
@@ -246,14 +246,14 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         </div>
         {sizeLabels.length > 0 ? (
           <div
-            className={`mt-3 flex flex-wrap gap-1.5 ${backend ? "" : "md:hidden"}`}
+            className={`mt-3 flex min-h-7 flex-nowrap gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${backend ? "" : "md:hidden"}`}
             aria-label="سایزهای محصول"
           >
             {backend
               ? sizeLabels.map((size) => (
                   <span
                     key={size}
-                    className={`grid min-h-7 min-w-8 place-items-center rounded-lg border px-1.5 text-[10px] font-black ${
+                    className={`grid min-h-7 min-w-8 shrink-0 place-items-center rounded-lg border px-1.5 text-[10px] font-black ${
                       available
                         ? "border-white/15 bg-white/5 text-bone"
                         : "border-white/10 bg-white/5 text-mute line-through"
@@ -267,7 +267,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
                   return (
                     <span
                       key={size}
-                      className={`grid min-h-7 min-w-8 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
+                      className={`grid min-h-7 min-w-8 shrink-0 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
                         sizeAvailable
                           ? "bg-signal text-obsidian"
                           : "border border-white/10 bg-white/5 text-mute line-through"
@@ -310,7 +310,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         <button
           type="button"
           onClick={(event) => openQuickView(p, event.currentTarget)}
-          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-signal/35 bg-signal/10 px-3 text-xs font-semibold text-signal transition hover:bg-signal hover:text-obsidian focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+          className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-signal/35 bg-signal/10 px-3 text-xs font-semibold text-signal transition hover:bg-signal hover:text-obsidian focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
         >
           <Eye size={15} aria-hidden="true" />
           {backend ? "نمای سریع و انتخاب سایز" : p.inStock ? "انتخاب سایز و خرید" : "مشاهده محصول"}
