@@ -55,10 +55,9 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     return (
       <article className="flex min-h-72 flex-col justify-between border border-hairline bg-carbon p-5">
         <div>
-          <TechLabel tone="metal">BACKEND PRODUCT ONLY</TechLabel>
+          <TechLabel tone="metal">محصولات فروشگاه</TechLabel>
           <p className="mt-4 text-sm leading-7 text-metal">
-            این جایگاه هنوز به محصول منتشرشده Backend متصل نشده است؛ داده نمونه در حالت live نمایش
-            داده نمی‌شود.
+            این محصول فعلاً برای خرید در دسترس نیست. محصولات موجود را در فروشگاه ببینید.
           </p>
         </div>
         <Link
@@ -66,7 +65,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
           search={{}}
           className="mt-6 inline-flex min-h-11 items-center justify-center border border-hairline px-3 text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
         >
-          مشاهده کاتالوگ زنده
+          مشاهده محصولات فروشگاه
         </Link>
       </article>
     );
