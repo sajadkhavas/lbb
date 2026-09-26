@@ -34,7 +34,8 @@ export function LocalStoreVisit() {
                 loading="lazy"
                 decoding="async"
                 sizes="(max-width: 1023px) 100vw, 50vw"
-                className="block h-auto w-full"
+                className="block"
+                style={{ width: "125%", maxWidth: "none", height: "auto" }}
               />
             ) : (
               <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm leading-7 text-metal">
