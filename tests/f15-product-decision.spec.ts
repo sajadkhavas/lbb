@@ -173,13 +173,17 @@ test("sticky purchase surface stays above mobile navigation and reflects blocked
 
   const sticky = page.getByTestId("pdp-sticky-buy-bar");
   await expect(sticky).toHaveAttribute("aria-hidden", "false");
-  const stickyBox = await sticky.boundingBox();
   const mobileNav = page
     .locator("nav")
     .filter({ has: page.getByText("خانه") })
     .last();
-  const navBox = await mobileNav.boundingBox();
-  if (stickyBox && navBox) expect(stickyBox.y + stickyBox.height).toBeLessThanOrEqual(navBox.y + 2);
+  await expect
+    .poll(async () => {
+      const stickyBox = await sticky.boundingBox();
+      const navBox = await mobileNav.boundingBox();
+      return stickyBox && navBox ? stickyBox.y + stickyBox.height - navBox.y : 0;
+    })
+    .toBeLessThanOrEqual(2);
   await expect(sticky.locator("button")).toBeDisabled();
 });
 
