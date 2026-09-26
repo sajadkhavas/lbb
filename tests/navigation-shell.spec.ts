@@ -10,7 +10,7 @@ test("desktop mega menu is category-first, keyboard reachable and history-backed
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const trigger = page.getByRole("button", { name: "فروشگاه" });
   await trigger.focus();
@@ -30,7 +30,7 @@ test("desktop mega menu is category-first, keyboard reachable and history-backed
 
 test("search supports Arrow navigation, Enter and shareable destination URLs", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await page.getByRole("button", { name: "جست‌وجو" }).first().click();
   const dialog = page.getByRole("dialog", { name: "جست‌وجوی محصولات" });
@@ -53,7 +53,7 @@ test("mobile navigation exposes product categories and independent account desti
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   await page.getByRole("button", { name: "منوی اصلی" }).click();
   const dialog = page.getByRole("dialog", { name: "منوی اصلی" });
@@ -68,7 +68,7 @@ test("mobile navigation exposes product categories and independent account desti
 
 test("mobile bottom search and cart drawer close with browser Back", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await page.getByRole("button", { name: "باز کردن جست‌وجو" }).click();
   const search = page.getByRole("dialog", { name: "جست‌وجوی محصولات" });
@@ -91,7 +91,7 @@ for (const viewport of [
 ]) {
   test(`global shell has no horizontal overflow at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/account", { waitUntil: "networkidle" });
+    await page.goto("/account", { waitUntil: "domcontentloaded" });
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

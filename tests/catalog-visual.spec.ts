@@ -16,8 +16,6 @@ async function stabilize(page: Page) {
 }
 
 async function settleFullPageLayout(page: Page) {
-  await page.waitForLoadState("networkidle");
-
   await page.evaluate(async () => {
     const sleep = (milliseconds: number) =>
       new Promise<void>((resolve) => {
@@ -125,29 +123,6 @@ test("F14 shop desktop visual contract", async ({ page }) => {
       state: "visible",
     });
 
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-
-    await Promise.all(
-      Array.from(document.images).map(async (image) => {
-        if (!image.complete) {
-          await new Promise<void>((resolve) => {
-            image.addEventListener("load", () => resolve(), {
-              once: true,
-            });
-            image.addEventListener("error", () => resolve(), {
-              once: true,
-            });
-          });
-        }
-
-        if (typeof image.decode === "function") {
-          await image.decode().catch(() => undefined);
-        }
-      }),
-    );
-  });
-
   await stabilize(page);
   await settleFullPageLayout(page);
 
@@ -160,7 +135,7 @@ test("F14 shop desktop visual contract", async ({ page }) => {
 
 test("F14 category desktop visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/hoodies", { waitUntil: "networkidle" });
+  await page.goto("/hoodies", { waitUntil: "domcontentloaded" });
   await stabilize(page);
   await expect(page).toHaveScreenshot("f14-category-desktop.png", {
     fullPage: true,
@@ -170,7 +145,7 @@ test("F14 category desktop visual contract", async ({ page }) => {
 
 test("F14 search results mobile visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/search?q=هودی", { waitUntil: "networkidle" });
+  await page.goto("/search?q=هودی", { waitUntil: "domcontentloaded" });
   await stabilize(page);
   await expect(page).toHaveScreenshot("f14-search-mobile.png", {
     fullPage: true,

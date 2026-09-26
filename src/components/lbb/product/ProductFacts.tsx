@@ -3,6 +3,18 @@ import type { ProductDecisionViewModel } from "@/lib/product-decision";
 import { Identifier } from "@/components/lbb/ui/Identifier";
 
 export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
+  const category = model.identity.categoryLabel;
+  const measurementHeading = /کتونی|کفش|اسنیکر/.test(category)
+    ? "راهنمای اندازه کفش و طول پا"
+    : /جوراب/.test(category)
+      ? "راهنمای اندازه پا و جوراب"
+      : /شلوار/.test(category)
+        ? "اندازه‌های شلوار"
+        : /تیشرت/.test(category)
+          ? "اندازه‌های تیشرت"
+          : /هودی/.test(category)
+            ? "اندازه‌های هودی"
+            : "اندازه‌های محصول";
   const hasDetails = Boolean(
     model.identity.description || model.identity.sku || model.identity.collection,
   );
@@ -95,7 +107,7 @@ export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
         >
           <TechLabel tone="signal">MEASUREMENTS / CM</TechLabel>
           <h2 id="pdp-measurements-heading" className="mt-2 text-xl font-bold text-bone">
-            اندازه خود لباس
+            {measurementHeading}
           </h2>
           <p className="mt-2 text-sm leading-7 text-metal">واحد همه اندازه‌ها سانتی‌متر است.</p>
           <div

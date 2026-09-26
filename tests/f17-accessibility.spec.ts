@@ -66,14 +66,14 @@ for (const route of [
   "/journal/materials-101-parche-shenasi",
 ]) {
   test(`F17 Axe gate: ${route}`, async ({ page }) => {
-    await page.goto(route, { waitUntil: "networkidle" });
+    await page.goto(route, { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
     await expectNoBlockingAxe(page);
   });
 }
 
 test("lookbook dialog traps focus, supports arrows and restores opener", async ({ page }) => {
-  await page.goto("/lookbook", { waitUntil: "networkidle" });
+  await page.goto("/lookbook", { waitUntil: "domcontentloaded" });
   const opener = page.getByTestId("lookbook-scene-0");
   await opener.focus();
   await opener.press("Enter");
@@ -104,7 +104,7 @@ test("lookbook commerce controls are touch-safe or fail closed without a product
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/lookbook", { waitUntil: "networkidle" });
+  await page.goto("/lookbook", { waitUntil: "domcontentloaded" });
 
   const hotspots = page.locator("[data-f17-product-hotspot]");
   if ((await hotspots.count()) > 0) {
@@ -129,7 +129,7 @@ for (const viewport of VIEWPORTS) {
   test(`editorial routes are RTL and overflow-safe at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
     for (const route of EDITORIAL_ROUTES) {
-      await page.goto(route, { waitUntil: "networkidle" });
+      await page.goto(route, { waitUntil: "domcontentloaded" });
       await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
       await expect(page.getByRole("main")).toHaveCount(1);
       await expectNoOverflow(page);
@@ -142,7 +142,7 @@ test("editorial routes remain usable with zoom-permitting viewport and WCAG text
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of ["/lookbook", "/journal/materials-101-parche-shenasi"]) {
-    await page.goto(route, { waitUntil: "networkidle" });
+    await page.goto(route, { waitUntil: "domcontentloaded" });
     const viewport = await page.locator('meta[name="viewport"]').getAttribute("content");
     expect(viewport ?? "").not.toMatch(/user-scalable\s*=\s*no/i);
     expect(viewport ?? "").not.toMatch(/maximum-scale\s*=\s*1/i);
@@ -164,7 +164,7 @@ test("editorial routes remain usable with zoom-permitting viewport and WCAG text
 
 test("lookbook remains operable under reduced motion preference", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/lookbook", { waitUntil: "networkidle" });
+  await page.goto("/lookbook", { waitUntil: "domcontentloaded" });
   expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(
     true,
   );

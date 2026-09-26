@@ -279,7 +279,7 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
           <EmptyState
             icon={<RefreshCcw size={40} aria-hidden="true" />}
             title="اطلاعات محصول قابل تأیید نیست"
-            body={loader.error ?? "Backend پاسخ معتبر برای این محصول برنگرداند."}
+            body="اطلاعات این محصول فعلاً در دسترس نیست. کمی بعد دوباره تلاش کنید."
             action={
               <Link to="/shop" className={CtaClasses("line")}>
                 بازگشت به فروشگاه
@@ -318,11 +318,10 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
       <Band label="PRODUCT DECISION FACTS">
         <Shell className="max-w-[980px]">
           <div className="mb-8">
-            <TechLabel tone="signal">BACKEND VERIFIED PRODUCT DATA</TechLabel>
+            <TechLabel tone="signal">مشخصات محصول</TechLabel>
             <h2 className="mt-2 text-display-3 text-bone">اطلاعات تصمیم‌گیری</h2>
             <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
-              قیمت، موجودی، رنگ، سایز و مشخصات نمایش‌داده‌شده از رکورد منتشرشده Backend خوانده
-              شده‌اند.
+              قیمت، موجودی، رنگ، سایز و مشخصات مربوط به همین محصول را اینجا ببینید.
             </p>
           </div>
           <ProductFacts model={model} />

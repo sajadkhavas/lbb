@@ -22,21 +22,21 @@ function schemaOfType(schemas: Record<string, unknown>[], type: string) {
 }
 
 test("clean listings index while faceted states noindex to clean canonicals", async ({ page }) => {
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
     "content",
     "index, follow",
   );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${siteOrigin}/shop`);
 
-  await page.goto("/shop?sizes=M&sort=price-asc", { waitUntil: "networkidle" });
+  await page.goto("/shop?sizes=M&sort=price-asc", { waitUntil: "domcontentloaded" });
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
     "content",
     "noindex, follow",
   );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${siteOrigin}/shop`);
 
-  await page.goto("/hoodies?sizes=M&sort=price-asc", { waitUntil: "networkidle" });
+  await page.goto("/hoodies?sizes=M&sort=price-asc", { waitUntil: "domcontentloaded" });
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
     "content",
     "noindex, follow",
@@ -50,7 +50,7 @@ test("clean listings index while faceted states noindex to clean canonicals", as
 test("internal search is crawlable-noindex, canonically clean and still shareable", async ({
   page,
 }) => {
-  await page.goto("/search?q=هودی&sizes=M", { waitUntil: "networkidle" });
+  await page.goto("/search?q=هودی&sizes=M", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
     "content",
@@ -117,7 +117,7 @@ test("sitemap excludes query, utility and F14C draft product URLs", async ({ req
 });
 
 test("draft products cannot become Product or Offer structured-data facts", async ({ page }) => {
-  await page.goto("/product/oversized-black-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/oversized-black-hoodie", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
     "content",
@@ -154,7 +154,7 @@ test("published journal detail exposes Article and absolute breadcrumb contracts
   );
   expect(match?.[1]).toBeTruthy();
 
-  await page.goto(match?.[1] ?? "/journal", { waitUntil: "networkidle" });
+  await page.goto(match?.[1] ?? "/journal", { waitUntil: "domcontentloaded" });
   const schemas = await jsonLd(page);
   const article = schemaOfType(schemas, "Article") as
     { datePublished?: string; mainEntityOfPage?: string; image?: string } | undefined;
@@ -175,7 +175,7 @@ test("published journal detail exposes Article and absolute breadcrumb contracts
 test("homepage local schema stays verified and excludes retired search metadata", async ({
   page,
 }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   const schemas = await jsonLd(page);
   const website = schemaOfType(schemas, "WebSite") as { potentialAction?: unknown } | undefined;
   const store = schemaOfType(schemas, "ClothingStore") as
@@ -206,14 +206,14 @@ test("homepage local schema stays verified and excludes retired search metadata"
 
 test("invalid dynamic and global routes are real noindex 404 responses", async ({ page }) => {
   const productResponse = await page.goto("/product/f20a-missing-product", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
   expect(productResponse?.status()).toBe(404);
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
   expect(schemaOfType(await jsonLd(page), "Product")).toBeUndefined();
 
   const globalResponse = await page.goto("/f20a-definitely-missing-route", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
   expect(globalResponse?.status()).toBe(404);
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
@@ -226,7 +226,7 @@ test("invalid dynamic and global routes are real noindex 404 responses", async (
 test("canonical and social metadata basics use absolute production-origin URLs", async ({
   page,
 }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${siteOrigin}/`);
   await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(

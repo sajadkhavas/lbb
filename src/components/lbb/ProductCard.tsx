@@ -25,7 +25,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   const backend = isBackendCard(p);
   const [showMannequin, setShowMannequin] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
-  const touchStartX = useRef<number | null>(null);
+  const touchStart = useRef<{ x: number; y: number; index: number } | null>(null);
   const suppressNextMediaClick = useRef(false);
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
@@ -55,10 +55,9 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     return (
       <article className="flex min-h-72 flex-col justify-between border border-hairline bg-carbon p-5">
         <div>
-          <TechLabel tone="metal">BACKEND PRODUCT ONLY</TechLabel>
+          <TechLabel tone="metal">محصولات فروشگاه</TechLabel>
           <p className="mt-4 text-sm leading-7 text-metal">
-            این جایگاه هنوز به محصول منتشرشده Backend متصل نشده است؛ داده نمونه در حالت live نمایش
-            داده نمی‌شود.
+            این محصول فعلاً برای خرید در دسترس نیست. محصولات موجود را در فروشگاه ببینید.
           </p>
         </div>
         <Link
@@ -66,7 +65,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
           search={{}}
           className="mt-6 inline-flex min-h-11 items-center justify-center border border-hairline px-3 text-xs font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
         >
-          مشاهده کاتالوگ زنده
+          مشاهده محصولات فروشگاه
         </Link>
       </article>
     );
@@ -97,21 +96,23 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   };
 
   const startSwipe = (event: TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+    const touch = event.changedTouches[0];
+    touchStart.current = touch ? { x: touch.clientX, y: touch.clientY, index: previewIndex } : null;
     suppressNextMediaClick.current = false;
   };
 
-  const finishSwipe = (event: TouchEvent<HTMLDivElement>) => {
-    if (!backend || showMannequin || previewImages.length < 2 || touchStartX.current === null)
-      return;
-    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
-    const delta = touchStartX.current - endX;
-    touchStartX.current = null;
-    if (Math.abs(delta) < 36) return;
+  const moveSwipe = (event: TouchEvent<HTMLDivElement>) => {
+    const start = touchStart.current;
+    const touch = event.changedTouches[0];
+    if (!backend || showMannequin || previewImages.length < 2 || !start || !touch) return;
+    const dx = start.x - touch.clientX;
+    const dy = Math.abs(start.y - touch.clientY);
+    if (Math.abs(dx) < 18 || Math.abs(dx) <= dy * 1.2) return;
+    const target =
+      dx > 0 ? Math.min(previewImages.length - 1, start.index + 1) : Math.max(0, start.index - 1);
+    if (target === start.index) return;
     suppressNextMediaClick.current = true;
-    setPreviewIndex((current) =>
-      delta > 0 ? Math.min(previewImages.length - 1, current + 1) : Math.max(0, current - 1),
-    );
+    setPreviewIndex(target);
   };
 
   const overlay = (
@@ -139,13 +140,19 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
       <div
         className="relative touch-pan-y"
         onPointerMove={selectPreviewFromPointer}
-        onPointerLeave={() => setPreviewIndex(0)}
+        onPointerLeave={(event) => {
+          if (event.pointerType === "mouse") setPreviewIndex(0);
+        }}
         onTouchStart={startSwipe}
+        onTouchMove={moveSwipe}
         onTouchCancel={() => {
-          touchStartX.current = null;
+          touchStart.current = null;
           suppressNextMediaClick.current = false;
         }}
-        onTouchEnd={finishSwipe}
+        onTouchEnd={(event) => {
+          moveSwipe(event);
+          touchStart.current = null;
+        }}
         onClickCapture={(event) => {
           if (!suppressNextMediaClick.current) return;
           suppressNextMediaClick.current = false;
@@ -166,6 +173,18 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         >
           {overlay}
         </Frame>
+        {backend && previewImages.length > 1 && previewIndex === 0 ? (
+          <img
+            src={previewImages[1]}
+            alt=""
+            aria-hidden="true"
+            width={1024}
+            height={1280}
+            loading="lazy"
+            decoding="async"
+            className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
+          />
+        ) : null}
         {backend && previewImages.length > 1 ? (
           <div
             aria-hidden="true"
@@ -198,7 +217,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     >
       {cardImage}
 
-      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
+      <div className="flex h-[292px] min-w-0 flex-col p-3 sm:h-auto sm:flex-1 sm:p-4">
         <TechLabel tone="metal" className="truncate text-[9px] sm:text-[10px]">
           {backend ? categoryLabel : `${categoryLabel} / ${p.latinName}`}
         </TechLabel>
@@ -211,7 +230,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             {name}
           </Link>
         </h3>
-        <div className="mt-2 flex flex-wrap items-baseline gap-2">
+        <div className="mt-2 flex min-h-10 flex-wrap items-baseline gap-2">
           {priceFrom !== null ? (
             <span className="num text-[13px] font-bold text-bone sm:text-sm">
               {priceTo !== null && priceTo !== priceFrom
@@ -227,14 +246,14 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         </div>
         {sizeLabels.length > 0 ? (
           <div
-            className={`mt-3 flex flex-wrap gap-1.5 ${backend ? "" : "md:hidden"}`}
+            className={`mt-3 flex min-h-7 flex-nowrap gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${backend ? "" : "md:hidden"}`}
             aria-label="سایزهای محصول"
           >
             {backend
               ? sizeLabels.map((size) => (
                   <span
                     key={size}
-                    className={`grid min-h-7 min-w-8 place-items-center rounded-lg border px-1.5 text-[10px] font-black ${
+                    className={`grid min-h-7 min-w-8 shrink-0 place-items-center rounded-lg border px-1.5 text-[10px] font-black ${
                       available
                         ? "border-white/15 bg-white/5 text-bone"
                         : "border-white/10 bg-white/5 text-mute line-through"
@@ -248,7 +267,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
                   return (
                     <span
                       key={size}
-                      className={`grid min-h-7 min-w-8 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
+                      className={`grid min-h-7 min-w-8 shrink-0 place-items-center rounded-lg px-1.5 text-[10px] font-black ${
                         sizeAvailable
                           ? "bg-signal text-obsidian"
                           : "border border-white/10 bg-white/5 text-mute line-through"
@@ -291,7 +310,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         <button
           type="button"
           onClick={(event) => openQuickView(p, event.currentTarget)}
-          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-signal/35 bg-signal/10 px-3 text-xs font-semibold text-signal transition hover:bg-signal hover:text-obsidian focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+          className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-signal/35 bg-signal/10 px-3 text-xs font-semibold text-signal transition hover:bg-signal hover:text-obsidian focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
         >
           <Eye size={15} aria-hidden="true" />
           {backend ? "نمای سریع و انتخاب سایز" : p.inStock ? "انتخاب سایز و خرید" : "مشاهده محصول"}
