@@ -125,29 +125,6 @@ test("F14 shop desktop visual contract", async ({ page }) => {
       state: "visible",
     });
 
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-
-    await Promise.all(
-      Array.from(document.images).map(async (image) => {
-        if (!image.complete) {
-          await new Promise<void>((resolve) => {
-            image.addEventListener("load", () => resolve(), {
-              once: true,
-            });
-            image.addEventListener("error", () => resolve(), {
-              once: true,
-            });
-          });
-        }
-
-        if (typeof image.decode === "function") {
-          await image.decode().catch(() => undefined);
-        }
-      }),
-    );
-  });
-
   await stabilize(page);
   await settleFullPageLayout(page);
 
