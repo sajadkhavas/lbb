@@ -26,16 +26,25 @@ export function LocalStoreVisit() {
         <Shell className="grid overflow-hidden rounded-3xl border border-hairline bg-obsidian shadow-overlay lg:grid-cols-2">
           <div className="relative min-h-[360px] overflow-hidden bg-carbon-2 lg:min-h-[520px]">
             {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={`فروشگاه حضوری ${brand.nameFa}`}
-                width={1200}
-                height={1500}
-                loading="lazy"
-                decoding="async"
-                sizes="(max-width: 1023px) 100vw, 50vw"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
+              <>
+                <img
+                  src={imageUrl}
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full scale-110 object-cover opacity-55 blur-xl"
+                />
+                <img
+                  src={imageUrl}
+                  alt={`فروشگاه حضوری ${brand.nameFa}`}
+                  width={1200}
+                  height={1500}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(max-width: 1023px) 100vw, 50vw"
+                  className="absolute inset-0 h-full w-full object-contain"
+                />
+              </>
             ) : (
               <div className="absolute inset-0 grid place-items-center p-8 text-center text-sm leading-7 text-metal">
                 تصویر فروشگاه به‌زودی در این بخش نمایش داده می‌شود.
@@ -129,13 +138,20 @@ export function LocalStoreVisit() {
         <div className="relative min-h-[360px] overflow-hidden lg:min-h-[520px]">
           <img
             src={lifestyle2}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            className="absolute inset-0 h-full w-full scale-110 object-cover opacity-55 blur-xl"
+          />
+          <img
+            src={lifestyle2}
             alt="استایل پوشاک خیابانی ال‌بی‌بی"
             width={1200}
             height={1500}
             loading="lazy"
             decoding="async"
             sizes="(max-width: 1023px) 100vw, 50vw"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-contain"
           />
           <span
             aria-hidden="true"
