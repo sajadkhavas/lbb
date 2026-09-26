@@ -97,9 +97,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
 
   const startSwipe = (event: TouchEvent<HTMLDivElement>) => {
     const touch = event.changedTouches[0];
-    touchStart.current = touch
-      ? { x: touch.clientX, y: touch.clientY, index: previewIndex }
-      : null;
+    touchStart.current = touch ? { x: touch.clientX, y: touch.clientY, index: previewIndex } : null;
     suppressNextMediaClick.current = false;
   };
 
@@ -111,9 +109,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
     const dy = Math.abs(start.y - touch.clientY);
     if (Math.abs(dx) < 18 || Math.abs(dx) <= dy * 1.2) return;
     const target =
-      dx > 0
-        ? Math.min(previewImages.length - 1, start.index + 1)
-        : Math.max(0, start.index - 1);
+      dx > 0 ? Math.min(previewImages.length - 1, start.index + 1) : Math.max(0, start.index - 1);
     if (target === start.index) return;
     suppressNextMediaClick.current = true;
     setPreviewIndex(target);
