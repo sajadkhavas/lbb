@@ -16,8 +16,6 @@ async function stabilize(page: Page) {
 }
 
 async function settleFullPageLayout(page: Page) {
-  await page.waitForLoadState("networkidle");
-
   await page.evaluate(async () => {
     const sleep = (milliseconds: number) =>
       new Promise<void>((resolve) => {
