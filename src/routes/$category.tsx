@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { PackageSearch, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -59,6 +59,7 @@ import {
   backendCard,
   backendCatalogQuery,
   backendFacetVisuals,
+  normalizeCatalogFilters,
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
 
@@ -111,8 +112,9 @@ export const Route = createFileRoute("/$category")({
         sizes: visuals.sizes,
         priceCeil: Math.max(1, visuals.priceCeil),
       };
-      const filters = normalizeBackendFilters(
+      const filters = normalizeCatalogFilters(
         parseBackendFilters(deps.search as unknown as Record<string, unknown>),
+        facets,
         scope,
       );
       const productsResponse = await listProducts({
@@ -297,6 +299,20 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
   const serialized = serializeBackendFilters(filters, scope);
   const searchKey = stableSearchString(serialized);
 
+  const getPreviewCount = useCallback(
+    async (candidate: Filters) => {
+      if (!facets || !category) return 0;
+      const response = await listProducts({
+        ...backendCatalogQuery(candidate, facets),
+        category: category.slug,
+        page: 1,
+        per_page: 1,
+      });
+      return response.meta.pagination?.total ?? response.data.length;
+    },
+    [facets, category],
+  );
+
   useEffect(() => {
     setItems(loader.items);
     setPage(1);
@@ -349,6 +365,12 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
       sizes={visuals.sizes}
       priceCeil={Math.max(1, visuals.priceCeil)}
       showSale={false}
+      colorLabels={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+      )}
+      colorSwatches={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.hex]),
+      )}
     />
   );
 
@@ -385,7 +407,7 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
     >
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)] max-h-[calc(100dvh-var(--lbb-nav-h)-40px)] overflow-y-auto overscroll-contain pe-3">
             {facets ? renderFilters(filters, setFilters) : null}
           </div>
         </aside>
@@ -400,8 +422,12 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
               resultCount={loader.total}
               filterSlot={renderFilters}
               getResultCount={() => loader.total}
+              getPreviewCount={getPreviewCount}
               lockedCategory
               supportedSorts={BACKEND_SUPPORTED_SORTS}
+              colorLabels={Object.fromEntries(
+                (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+              )}
             />
           ) : null}
           {loader.error ? (

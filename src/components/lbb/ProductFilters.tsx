@@ -20,6 +20,8 @@ type Props = {
   showCategory?: boolean;
   showSale?: boolean;
   categoryOptions?: readonly CategoryOption[];
+  colorLabels?: Readonly<Record<string, string>>;
+  colorSwatches?: Readonly<Record<string, string | null>>;
   facetCounts?: FacetCounts;
 };
 
@@ -49,6 +51,8 @@ export function ProductFilters({
   showCategory,
   showSale = true,
   categoryOptions,
+  colorLabels,
+  colorSwatches,
   facetCounts,
 }: Props) {
   const effectiveMax = filters.max > 0 ? Math.min(filters.max, priceCeil) : priceCeil;
@@ -127,16 +131,37 @@ export function ProductFilters({
         </fieldset>
       ) : null}
 
+      <fieldset className="flex flex-col gap-2">
+        <legend className="tech mb-1 text-metal">موجودی</legend>
+        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
+          <Checkbox
+            checked={filters.instock}
+            onCheckedChange={(value) => onChange({ ...filters, instock: value === true })}
+          />
+          فقط کالاهای موجود
+        </label>
+        {showSale ? (
+          <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
+            <Checkbox
+              checked={filters.sale}
+              onCheckedChange={(value) => onChange({ ...filters, sale: value === true })}
+            />
+            فقط تخفیف‌دارها
+          </label>
+        ) : null}
+      </fieldset>
+
       {colors.length > 0 ? (
         <fieldset>
           <legend className="tech mb-3 text-metal">رنگ</legend>
           <div className="flex flex-wrap gap-2.5">
             {colors.map((color) => {
               const active = filters.colors.includes(color);
-              const label = colorName(color) || color;
+              const label = colorLabels?.[color] || colorName(color) || color;
               const count = facetCounts?.colors[color];
               const unavailable = isUnavailable(active, count);
-              const visualColor = /^#[0-9a-f]{3,8}$/i.test(color) ? color : undefined;
+              const swatch = colorSwatches?.[color] ?? color;
+              const visualColor = /^#[0-9a-f]{3,8}$/i.test(swatch) ? swatch : undefined;
               return (
                 <button
                   key={color}
@@ -150,7 +175,7 @@ export function ProductFilters({
                   onClick={() =>
                     onChange({ ...filters, colors: toggleValue(filters.colors, color) })
                   }
-                  className="tap-target relative grid place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal disabled:cursor-not-allowed disabled:opacity-30"
+                  className="tap-target relative flex min-w-12 flex-col items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <span
                     aria-hidden="true"
@@ -163,6 +188,7 @@ export function ProductFilters({
                   >
                     {!visualColor ? label.slice(0, 1) : null}
                   </span>
+                  <span className="max-w-20 truncate text-[10px] text-metal">{label}</span>
                 </button>
               );
             })}
@@ -241,26 +267,6 @@ export function ProductFilters({
           </div>
         </fieldset>
       ) : null}
-
-      <fieldset className="flex flex-col gap-2">
-        <legend className="sr-only">وضعیت کالا</legend>
-        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
-          <Checkbox
-            checked={filters.instock}
-            onCheckedChange={(value) => onChange({ ...filters, instock: value === true })}
-          />
-          فقط کالاهای موجود
-        </label>
-        {showSale ? (
-          <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
-            <Checkbox
-              checked={filters.sale}
-              onCheckedChange={(value) => onChange({ ...filters, sale: value === true })}
-            />
-            فقط تخفیف‌دارها
-          </label>
-        ) : null}
-      </fieldset>
     </div>
   );
 }

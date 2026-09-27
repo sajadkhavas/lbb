@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Clock, PackageSearch, Search as SearchIcon, X } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -56,6 +56,7 @@ import {
   backendCard,
   backendCatalogQuery,
   backendFacetVisuals,
+  normalizeCatalogFilters,
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
 
@@ -131,8 +132,9 @@ export const Route = createFileRoute("/search")({
         sizes: visuals.sizes,
         priceCeil: Math.max(1, visuals.priceCeil),
       };
-      const filters = normalizeBackendFilters(
+      const filters = normalizeCatalogFilters(
         parseBackendFilters(deps.search as unknown as Record<string, unknown>),
+        facets,
         scope,
       );
       const q = queryFrom((deps.search as SearchParams).q);
@@ -344,6 +346,19 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
       }
     : {};
   const filters = normalizeBackendFilters(loader.filters, scope);
+  const getPreviewCount = useCallback(
+    async (candidate: Filters) => {
+      if (!facets || !query) return 0;
+      const response = await searchProducts({
+        q: query,
+        ...backendCatalogQuery(candidate, facets),
+        page: 1,
+        per_page: 1,
+      });
+      return response.meta.pagination?.total ?? response.data.length;
+    },
+    [facets, query],
+  );
   const expectedSearch = serializeSearch(query, filters, scope);
   const searchKey = stableSearchString(expectedSearch);
 
@@ -400,6 +415,12 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
       showCategory
       showSale={false}
       categoryOptions={categoryOptions}
+      colorLabels={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+      )}
+      colorSwatches={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.hex]),
+      )}
     />
   );
 
@@ -464,7 +485,7 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
       {query && !loader.error ? (
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
           <aside className="hidden lg:block">
-            <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+            <div className="sticky top-[calc(var(--lbb-nav-h)+24px)] max-h-[calc(100dvh-var(--lbb-nav-h)-40px)] overflow-y-auto overscroll-contain pe-3">
               {facets ? renderFilters(filters, setFilters) : null}
             </div>
           </aside>
@@ -479,8 +500,12 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
                 resultCount={loader.total}
                 filterSlot={renderFilters}
                 getResultCount={() => loader.total}
+                getPreviewCount={getPreviewCount}
                 supportedSorts={BACKEND_SUPPORTED_SORTS}
                 categoryLabels={categoryLabels}
+                colorLabels={Object.fromEntries(
+                  (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+                )}
               />
             ) : null}
             <p className="mt-4 text-[13px] text-metal" role="status" aria-live="polite">

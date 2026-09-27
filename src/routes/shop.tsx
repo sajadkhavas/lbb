@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowUpLeft, PackageSearch, RefreshCcw, Search } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -57,6 +57,7 @@ import {
   backendCard,
   backendCatalogQuery,
   backendFacetVisuals,
+  normalizeCatalogFilters,
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
 import { useStorefrontPresentation } from "@/lib/storefront-presentation";
@@ -116,8 +117,9 @@ export const Route = createFileRoute("/shop")({
         sizes: visuals.sizes,
         priceCeil: Math.max(1, visuals.priceCeil),
       };
-      const filters = normalizeBackendFilters(
+      const filters = normalizeCatalogFilters(
         parseBackendFilters(deps.search as unknown as Record<string, unknown>),
+        facets,
         scope,
       );
       const response = await listProducts({
@@ -234,6 +236,12 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
   const categoryLabels = Object.fromEntries(
     (categoryOptions ?? []).map((category) => [category.slug, category.label]),
   );
+  const colorLabels = Object.fromEntries(
+    (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+  );
+  const colorSwatches = Object.fromEntries(
+    (facets?.colors ?? []).map((color) => [color.slug, color.hex]),
+  );
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
       filters={candidate}
@@ -244,7 +252,22 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
       showCategory
       showSale={false}
       categoryOptions={categoryOptions}
+      colorLabels={colorLabels}
+      colorSwatches={colorSwatches}
     />
+  );
+
+  const getPreviewCount = useCallback(
+    async (candidate: Filters) => {
+      if (!facets) return 0;
+      const response = await listProducts({
+        ...backendCatalogQuery(candidate, facets),
+        page: 1,
+        per_page: 1,
+      });
+      return response.meta.pagination?.total ?? response.data.length;
+    },
+    [facets],
   );
 
   const loadMore = async () => {
@@ -278,7 +301,7 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
     >
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)] max-h-[calc(100dvh-var(--lbb-nav-h)-40px)] overflow-y-auto overscroll-contain pe-3">
             {facets ? renderFilters(filters, setFilters) : null}
           </div>
         </aside>
@@ -294,8 +317,10 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
               resultCount={loader.total}
               filterSlot={renderFilters}
               getResultCount={() => loader.total}
+              getPreviewCount={getPreviewCount}
               supportedSorts={BACKEND_SUPPORTED_SORTS}
               categoryLabels={categoryLabels}
+              colorLabels={colorLabels}
             />
           ) : null}
 
