@@ -56,6 +56,14 @@ export function ProductFilters({
   facetCounts,
 }: Props) {
   const effectiveMax = filters.max > 0 ? Math.min(filters.max, priceCeil) : priceCeil;
+  const priceStep = priceCeil < 50000 ? Math.max(1, Math.floor(priceCeil / 10)) : 50000;
+  const quickPrices = Array.from(
+    new Set(
+      [0.25, 0.5, 0.75]
+        .map((fraction) => Math.floor((priceCeil * fraction) / priceStep) * priceStep)
+        .filter((value) => value > 0 && value < priceCeil),
+    ),
+  );
   const [draftMax, setDraftMax] = useState<number | null>(null);
   const displayedMax = draftMax ?? effectiveMax;
   const categories: readonly CategoryOption[] =
@@ -243,27 +251,32 @@ export function ProductFilters({
             dir="ltr"
             min={0}
             max={priceCeil}
-            step={50000}
+            step={priceStep}
             aria-label="حداکثر قیمت"
             value={[displayedMax]}
             onValueChange={([value]) => setDraftMax(value)}
             onValueCommit={([value]) => commitMax(value)}
           />
           <div className="mt-4 flex flex-wrap gap-2" aria-label="محدوده‌های سریع قیمت">
-            {[0.25, 0.5, 0.75, 1].map((fraction) => {
-              const value = Math.max(1, Math.floor((priceCeil * fraction) / 50000) * 50000);
-              return (
-                <button
-                  key={fraction}
-                  type="button"
-                  aria-pressed={fraction === 1 ? filters.max === 0 : filters.max === value}
-                  onClick={() => commitMax(value)}
-                  className="min-h-11 rounded-lg border border-hairline px-3 text-xs text-bone transition-colors hover:border-signal aria-pressed:border-signal aria-pressed:text-signal"
-                >
-                  {fraction === 1 ? "همه قیمت‌ها" : `تا ${fmtToman(value)}`}
-                </button>
-              );
-            })}
+            {quickPrices.map((value) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={filters.max === value}
+                onClick={() => commitMax(value)}
+                className="min-h-11 rounded-lg border border-hairline px-3 text-xs text-bone transition-colors hover:border-signal aria-pressed:border-signal aria-pressed:text-signal"
+              >
+                تا {fmtToman(value)}
+              </button>
+            ))}
+            <button
+              type="button"
+              aria-pressed={filters.max === 0}
+              onClick={() => commitMax(priceCeil)}
+              className="min-h-11 rounded-lg border border-hairline px-3 text-xs text-bone transition-colors hover:border-signal aria-pressed:border-signal aria-pressed:text-signal"
+            >
+              همه قیمت‌ها
+            </button>
           </div>
         </fieldset>
       ) : null}
