@@ -36,7 +36,7 @@ export function MobileBottomBar() {
       aria-label="ناوبری موبایل"
       className="fixed inset-x-3 bottom-[calc(10px+env(safe-area-inset-bottom))] z-[var(--z-nav)] flex overflow-hidden rounded-[22px] border border-hairline bg-[var(--lbb-surface-glass)] shadow-raised backdrop-blur-xl sm:inset-x-6 md:hidden"
       style={{
-        height: "64px",
+        height: "72px",
       }}
     >
       <Link

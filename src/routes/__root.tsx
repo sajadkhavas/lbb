@@ -135,7 +135,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       "@type": "Organization",
       name: control.brand.name,
       url: absUrl("/"),
-      logo: absUrl("/icons/icon-512.png"),
+      logo: absUrl("/brand/lbb-logo.jpeg"),
       description: control.seo.organizationDescription,
       sameAs: [control.seo.instagramUrl],
     };
@@ -157,8 +157,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       links: [
         { rel: "stylesheet", href: fontCss },
         { rel: "stylesheet", href: appCss },
-        { rel: "icon", href: "/favicon.png?v=lbb-20260923", type: "image/png" },
-        { rel: "shortcut icon", href: "/favicon.ico?v=lbb-20260923", type: "image/x-icon" },
+        { rel: "icon", href: "/favicon.png?v=lbb-20260926", type: "image/png" },
+        { rel: "shortcut icon", href: "/favicon.ico?v=lbb-20260926", type: "image/x-icon" },
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
         { rel: "manifest", href: "/manifest.webmanifest" },
       ],

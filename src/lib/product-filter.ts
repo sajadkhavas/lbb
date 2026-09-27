@@ -117,17 +117,19 @@ const parseBoolean = (value: unknown) => {
   return text === "true" || text === "1" || text === "yes";
 };
 
-const safeBackendToken = (value: string) => {
+const safeBackendToken = (value: string, allowSpaces = false) => {
   const trimmed = value.trim();
   if (!trimmed || trimmed.length > 80) return null;
-  return /^[\p{L}\p{N}_.#-]+$/u.test(trimmed) ? trimmed : null;
+  return (allowSpaces ? /^[\p{L}\p{N}_.# -]+$/u : /^[\p{L}\p{N}_.#-]+$/u).test(trimmed)
+    ? trimmed
+    : null;
 };
 
-const backendList = (value: unknown) =>
+const backendList = (value: unknown, allowSpaces = false) =>
   Array.from(
     new Set(
       toArray(value)
-        .map(safeBackendToken)
+        .map((entry) => safeBackendToken(entry, allowSpaces))
         .filter((entry): entry is string => Boolean(entry)),
     ),
   ).sort((a, b) => a.localeCompare(b, "en"));
@@ -172,7 +174,7 @@ export function normalizeBackendFilters(filters: Filters, scope?: FilterScope): 
     : backendList(filters.colors);
   const sizes = scope?.sizes
     ? normalizeList(filters.sizes, scope.sizes)
-    : backendList(filters.sizes);
+    : backendList(filters.sizes, true);
   const priceCeil = Math.max(1, Math.floor(scope?.priceCeil ?? Number.MAX_SAFE_INTEGER));
   const rawMax = Number.isFinite(filters.max) ? Math.max(0, Math.floor(filters.max)) : 0;
   const max = rawMax > 0 && rawMax < priceCeil ? rawMax : 0;
@@ -210,7 +212,7 @@ export function parseBackendFilters(search: Record<string, unknown>): Filters {
   return normalizeBackendFilters({
     cats: backendList(search.cats),
     colors: backendList(search.colors),
-    sizes: backendList(search.sizes),
+    sizes: backendList(search.sizes, true),
     max: Number.isFinite(maxValue) ? maxValue : 0,
     instock: parseBoolean(search.instock),
     sale: false,

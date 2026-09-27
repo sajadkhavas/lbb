@@ -316,7 +316,7 @@ function ComponentStatesSection() {
                 وضعیت قبلی حفظ شده و می‌توان دوباره تلاش کرد.
               </StatePanel>
               <StatePanel title="این بخش پیش‌نمایش است" tone="info">
-                اتصال تجاری یا Backend در این مرحله فعال نیست.
+                امکان خرید در این بخش فعلاً فعال نیست.
               </StatePanel>
             </div>
           </Surface>

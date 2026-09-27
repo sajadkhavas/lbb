@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowUpLeft, PackageSearch, RefreshCcw, Search } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -57,6 +57,7 @@ import {
   backendCard,
   backendCatalogQuery,
   backendFacetVisuals,
+  normalizeCatalogFilters,
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
 import { useStorefrontPresentation } from "@/lib/storefront-presentation";
@@ -116,24 +117,37 @@ export const Route = createFileRoute("/shop")({
         sizes: visuals.sizes,
         priceCeil: Math.max(1, visuals.priceCeil),
       };
-      const filters = normalizeBackendFilters(
+      const filters = normalizeCatalogFilters(
         parseBackendFilters(deps.search as unknown as Record<string, unknown>),
+        facets,
         scope,
       );
-      const response = await listProducts({
-        ...backendCatalogQuery(filters, facets),
-        page: 1,
-        per_page: BACKEND_PAGE_SIZE,
-      });
-      return {
-        mode: "live",
-        products: response.data.map(backendCard),
-        facets,
-        total: response.meta.pagination?.total ?? response.data.length,
-        totalPages: response.meta.pagination?.totalPages ?? 1,
-        filters,
-        error: null,
-      };
+      try {
+        const response = await listProducts({
+          ...backendCatalogQuery(filters, facets),
+          page: 1,
+          per_page: BACKEND_PAGE_SIZE,
+        });
+        return {
+          mode: "live",
+          products: response.data.map(backendCard),
+          facets,
+          total: response.meta.pagination?.total ?? response.data.length,
+          totalPages: response.meta.pagination?.totalPages ?? 1,
+          filters,
+          error: null,
+        };
+      } catch (error) {
+        return {
+          mode: "live",
+          products: [],
+          facets,
+          total: 0,
+          totalPages: 0,
+          filters,
+          error: backendErrorMessage(error),
+        };
+      }
     } catch (error) {
       return {
         mode: "live",
@@ -166,7 +180,9 @@ export const Route = createFileRoute("/shop")({
     }
     return {
       meta: isLiveBackend()
-        ? []
+        ? hasSearchModifiers(filters)
+          ? [{ name: "robots", content: "noindex, follow" }]
+          : []
         : pageMeta({
             title: TITLE,
             description: DESC,
@@ -195,44 +211,71 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const facets = loader.facets;
   const visuals = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
-  const scope: FilterScope = facets
-    ? {
-        categories: facets.categories.map((category) => category.slug),
-        colors: visuals.colors,
-        sizes: visuals.sizes,
-        priceCeil: Math.max(1, visuals.priceCeil),
-      }
-    : {};
-  const filters = normalizeBackendFilters(loader.filters, scope);
-  const serialized = serializeBackendFilters(filters, scope);
+  const scope: FilterScope = useMemo(() => {
+    if (!facets) return {};
+    const options = backendFacetVisuals(facets);
+    return {
+      categories: facets.categories.map((category) => category.slug),
+      colors: options.colors,
+      sizes: options.sizes,
+      priceCeil: Math.max(1, options.priceCeil),
+    };
+  }, [facets]);
+  const appliedFilters = useMemo(
+    () => normalizeBackendFilters(loader.filters, scope),
+    [loader.filters, scope],
+  );
+  const [optimisticFilters, setOptimisticFilters] = useState(appliedFilters);
+  const filters = normalizeBackendFilters(optimisticFilters, scope);
+  const serialized = useMemo(
+    () => serializeBackendFilters(appliedFilters, scope),
+    [appliedFilters, scope],
+  );
   const searchKey = stableSearchString(serialized);
+  const requestKey = useRef(searchKey);
 
   useEffect(() => {
+    requestKey.current = searchKey;
+    setOptimisticFilters(appliedFilters);
     setItems(loader.products);
     setPage(1);
+    setLoadingMore(false);
     setLoadMoreError(null);
-  }, [loader.products, searchKey]);
+  }, [loader.products, searchKey, appliedFilters]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !facets) return;
+    if (typeof window === "undefined" || !facets || requestKey.current !== searchKey) return;
     if (!isCanonicalSearch(window.location.search, serialized)) {
-      navigate({ search: serialized, replace: true });
+      navigate({ search: serialized, replace: true, resetScroll: false });
     }
   }, [facets, navigate, searchKey, serialized]);
 
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
+    setOptimisticFilters(normalized);
+    requestKey.current = stableSearchString(serializeBackendFilters(normalized, scope));
     startTransition(() =>
-      navigate({ search: serializeBackendFilters(normalized, scope), replace: false }),
+      navigate({
+        search: serializeBackendFilters(normalized, scope),
+        replace: false,
+        resetScroll: false,
+      }),
     );
   };
 
   const categoryOptions = facets?.categories.map((category) => ({
     slug: category.slug,
     label: category.name,
+    image: category.image,
   }));
   const categoryLabels = Object.fromEntries(
     (categoryOptions ?? []).map((category) => [category.slug, category.label]),
+  );
+  const colorLabels = Object.fromEntries(
+    (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+  );
+  const colorSwatches = Object.fromEntries(
+    (facets?.colors ?? []).map((color) => [color.slug, color.hex]),
   );
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
     <ProductFilters
@@ -244,11 +287,27 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
       showCategory
       showSale={false}
       categoryOptions={categoryOptions}
+      colorLabels={colorLabels}
+      colorSwatches={colorSwatches}
     />
   );
 
+  const getPreviewCount = useCallback(
+    async (candidate: Filters) => {
+      if (!facets) return 0;
+      const response = await listProducts({
+        ...backendCatalogQuery(candidate, facets),
+        page: 1,
+        per_page: 1,
+      });
+      return response.meta.pagination?.total ?? response.data.length;
+    },
+    [facets],
+  );
+
   const loadMore = async () => {
-    if (!facets || loadingMore || page >= loader.totalPages) return;
+    if (!facets || loadingMore || page >= loader.totalPages || requestKey.current !== searchKey)
+      return;
     setLoadingMore(true);
     setLoadMoreError(null);
     try {
@@ -258,12 +317,19 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
         page: nextPage,
         per_page: BACKEND_PAGE_SIZE,
       });
-      setItems((current) => [...current, ...response.data.map(backendCard)]);
+      if (requestKey.current !== searchKey) return;
+      setItems((current) => {
+        const seen = new Set(current.map((product) => product.id));
+        return [
+          ...current,
+          ...response.data.map(backendCard).filter((product) => !seen.has(product.id)),
+        ];
+      });
       setPage(nextPage);
     } catch (error) {
-      setLoadMoreError(backendErrorMessage(error));
+      if (requestKey.current === searchKey) setLoadMoreError(backendErrorMessage(error));
     } finally {
-      setLoadingMore(false);
+      if (requestKey.current === searchKey) setLoadingMore(false);
     }
   };
 
@@ -278,7 +344,7 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
     >
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)] max-h-[calc(100dvh-var(--lbb-nav-h)-40px)] overflow-y-auto overscroll-contain pe-3">
             {facets ? renderFilters(filters, setFilters) : null}
           </div>
         </aside>
@@ -294,8 +360,10 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
               resultCount={loader.total}
               filterSlot={renderFilters}
               getResultCount={() => loader.total}
+              getPreviewCount={getPreviewCount}
               supportedSorts={BACKEND_SUPPORTED_SORTS}
               categoryLabels={categoryLabels}
+              colorLabels={colorLabels}
             />
           ) : null}
 
@@ -401,13 +469,15 @@ function PrototypeShop() {
     if (typeof window === "undefined") return;
     const expected = serializeFilters(filters);
     if (!isCanonicalSearch(window.location.search, expected)) {
-      navigate({ search: expected, replace: true });
+      navigate({ search: expected, replace: true, resetScroll: false });
     }
   }, [filters, navigate]);
 
   const setFilters = (nextFilters: Filters) => {
     const normalized = normalizeFilters(nextFilters, filterScope);
-    startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
+    startTransition(() =>
+      navigate({ search: serializeFilters(normalized), replace: false, resetScroll: false }),
+    );
   };
 
   const filtered = useMemo(() => applyFilters(seasonalProducts, filters), [filters]);
@@ -518,7 +588,7 @@ function ShopChrome({
   status,
   children,
 }: {
-  categories: readonly { slug: string; label: string }[];
+  categories: readonly { slug: string; label: string; image?: string | null }[];
   status: string;
   children: React.ReactNode;
 }) {
@@ -596,6 +666,13 @@ function ShopChrome({
                     <ArrowUpLeft size={18} aria-hidden="true" />
                   </button>
                 </form>
+                <a
+                  href="#shop-results"
+                  className="mt-4 inline-flex min-h-11 items-center gap-2 self-start text-xs font-bold text-bone underline-offset-4 hover:text-signal hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                >
+                  رفتن به فهرست محصولات
+                  <ArrowUpLeft size={16} aria-hidden="true" />
+                </a>
                 <p className="tech mt-4 text-bone/55">{status}</p>
               </div>
             </div>
@@ -620,7 +697,9 @@ function ShopChrome({
                   className="group relative aspect-[4/5] w-[72vw] max-w-[290px] shrink-0 snap-start overflow-hidden rounded-[20px] border border-white/10 bg-white shadow-raised transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-signal/60 hover:shadow-overlay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:w-auto md:max-w-none"
                 >
                   <img
-                    src={homeCategoryImage(category.slug as keyof typeof CATEGORIES)}
+                    src={
+                      category.image || homeCategoryImage(category.slug as keyof typeof CATEGORIES)
+                    }
                     alt=""
                     width={640}
                     height={800}
@@ -661,7 +740,7 @@ function ShopChrome({
             ))}
           </Shell>
         </header>
-        <Band hairline={false} className="!py-10 md:!py-14">
+        <Band id="shop-results" hairline={false} className="scroll-mt-24 !py-10 md:!py-14">
           <Shell>{children}</Shell>
         </Band>
       </main>

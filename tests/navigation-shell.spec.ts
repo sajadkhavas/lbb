@@ -28,7 +28,7 @@ test("desktop mega menu is category-first, keyboard reachable and history-backed
   await expect(trigger).toBeFocused();
 });
 
-test("search supports Arrow navigation, Enter and shareable destination URLs", async ({ page }) => {
+test("search opens shareable results when no verified suggestion exists", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
@@ -37,10 +37,10 @@ test("search supports Arrow navigation, Enter and shareable destination URLs", a
   const input = page.getByRole("searchbox", { name: "عبارت جست‌وجو" });
   await expect(input).toBeFocused();
   await input.fill("هودی");
-  await expect(dialog.getByRole("option")).not.toHaveCount(0);
-  await input.press("ArrowDown");
+  // Prototype mode has no verified backend products to suggest.
+  await expect(dialog.getByRole("option")).toHaveCount(0);
   await input.press("Enter");
-  await expect(page).toHaveURL(/\/hoodies$/);
+  await expect(page).toHaveURL(/\/search\?q=/);
 
   await page.getByRole("button", { name: "جست‌وجو" }).first().click();
   await input.fill("عبارت بدون نتیجه مستقیم");

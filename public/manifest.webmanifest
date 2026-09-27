@@ -24,7 +24,9 @@
   "shortcuts": [
     { "name": "فروشگاه", "url": "/shop" },
     { "name": "سبد خرید", "url": "/cart" },
-    { "name": "علاقه‌مندی‌ها", "url": "/wishlist" }
+    { "name": "علاقه‌مندی‌ها", "url": "/wishlist" },
+    { "name": "جست‌وجوی محصولات", "url": "/search" },
+    { "name": "وب‌اپ و اعلان‌ها", "url": "/app" }
   ],
   "id": "/",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"]

@@ -89,7 +89,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
       <div className="lbb-shell py-10 md:py-12">
         <div className="grid gap-0 pb-8 md:gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
           <div className="min-w-0 border-b border-hairline pb-8 sm:col-span-2 lg:col-span-1 lg:border-0 lg:pb-0">
-            <Logo size={48} withWordmark />
+            <Logo size={80} withWordmark />
             <p className="mt-4 max-w-xs text-sm leading-7 text-metal">{brand.descriptor}</p>
             <p className="mt-4 flex items-start gap-2 text-sm leading-7 text-metal">
               <MapPin size={16} className="mt-1 shrink-0 text-signal" aria-hidden="true" />

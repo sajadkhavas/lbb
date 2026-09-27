@@ -259,7 +259,7 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
             <EmptyState
               icon={<RefreshCcw aria-hidden="true" size={36} />}
               title="اطلاعات کالکشن قابل دریافت نیست"
-              body={loader.error || "Backend پاسخ عمومی معتبری برای این کالکشن برنگرداند."}
+              body={loader.error || "اطلاعات این کالکشن فعلاً در دسترس نیست."}
               action={
                 <button
                   type="button"
@@ -337,7 +337,7 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
             <EmptyState
               icon={<Layers3 aria-hidden="true" size={32} />}
               title="محصول منتشرشده‌ای برای این کالکشن وجود ندارد"
-              body="تا زمان انتشار عضویت واقعی محصول در Backend، محصول نمونه جایگزین نمی‌شود."
+              body="هنوز محصول منتشرشده‌ای در این کالکشن وجود ندارد."
               action={
                 <Link to="/shop" search={{}} className={CtaClasses("line")}>
                   مرور فروشگاه

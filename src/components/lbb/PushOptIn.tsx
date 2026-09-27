@@ -30,7 +30,15 @@ export function PushOptIn() {
     };
   }, []);
 
-  if (state === "not-configured" || state === "unsupported") return null;
+  if (state === "unsupported") return null;
+
+  if (state === "not-configured") {
+    return (
+      <p className="mt-5 text-xs text-metal" role="status">
+        اعلان‌های فروشگاه هنوز آمادهٔ فعال‌سازی نیستند.
+      </p>
+    );
+  }
 
   const toggle = async () => {
     setBusy(true);

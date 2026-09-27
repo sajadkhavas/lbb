@@ -20,6 +20,8 @@ type Props = {
   showCategory?: boolean;
   showSale?: boolean;
   categoryOptions?: readonly CategoryOption[];
+  colorLabels?: Readonly<Record<string, string>>;
+  colorSwatches?: Readonly<Record<string, string | null>>;
   facetCounts?: FacetCounts;
 };
 
@@ -49,9 +51,19 @@ export function ProductFilters({
   showCategory,
   showSale = true,
   categoryOptions,
+  colorLabels,
+  colorSwatches,
   facetCounts,
 }: Props) {
   const effectiveMax = filters.max > 0 ? Math.min(filters.max, priceCeil) : priceCeil;
+  const priceStep = priceCeil < 50000 ? Math.max(1, Math.floor(priceCeil / 10)) : 50000;
+  const quickPrices = Array.from(
+    new Set(
+      [0.25, 0.5, 0.75]
+        .map((fraction) => Math.floor((priceCeil * fraction) / priceStep) * priceStep)
+        .filter((value) => value > 0 && value < priceCeil),
+    ),
+  );
   const [draftMax, setDraftMax] = useState<number | null>(null);
   const displayedMax = draftMax ?? effectiveMax;
   const categories: readonly CategoryOption[] =
@@ -69,6 +81,30 @@ export function ProductFilters({
       <div className="flex items-center gap-2">
         <SlidersHorizontal size={15} className="text-signal" aria-hidden="true" />
         <TechLabel tone="signal">فیلترها</TechLabel>
+        {filters.cats.length > 0 ||
+        filters.colors.length > 0 ||
+        filters.sizes.length > 0 ||
+        filters.max > 0 ||
+        filters.instock ||
+        filters.sale ? (
+          <button
+            type="button"
+            onClick={() =>
+              onChange({
+                ...filters,
+                cats: [],
+                colors: [],
+                sizes: [],
+                max: 0,
+                instock: false,
+                sale: false,
+              })
+            }
+            className="mr-auto min-h-11 text-xs text-signal underline-offset-4 hover:underline"
+          >
+            پاک‌کردن همه
+          </button>
+        ) : null}
       </div>
 
       {showCategory ? (
@@ -103,16 +139,37 @@ export function ProductFilters({
         </fieldset>
       ) : null}
 
+      <fieldset className="flex flex-col gap-2">
+        <legend className="tech mb-1 text-metal">موجودی</legend>
+        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
+          <Checkbox
+            checked={filters.instock}
+            onCheckedChange={(value) => onChange({ ...filters, instock: value === true })}
+          />
+          فقط کالاهای موجود
+        </label>
+        {showSale ? (
+          <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
+            <Checkbox
+              checked={filters.sale}
+              onCheckedChange={(value) => onChange({ ...filters, sale: value === true })}
+            />
+            فقط تخفیف‌دارها
+          </label>
+        ) : null}
+      </fieldset>
+
       {colors.length > 0 ? (
         <fieldset>
           <legend className="tech mb-3 text-metal">رنگ</legend>
           <div className="flex flex-wrap gap-2.5">
             {colors.map((color) => {
               const active = filters.colors.includes(color);
-              const label = colorName(color) || color;
+              const label = colorLabels?.[color] || colorName(color) || color;
               const count = facetCounts?.colors[color];
               const unavailable = isUnavailable(active, count);
-              const visualColor = /^#[0-9a-f]{3,8}$/i.test(color) ? color : undefined;
+              const swatch = colorSwatches?.[color] ?? color;
+              const visualColor = /^#[0-9a-f]{3,8}$/i.test(swatch) ? swatch : undefined;
               return (
                 <button
                   key={color}
@@ -126,7 +183,7 @@ export function ProductFilters({
                   onClick={() =>
                     onChange({ ...filters, colors: toggleValue(filters.colors, color) })
                   }
-                  className="tap-target relative grid place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal disabled:cursor-not-allowed disabled:opacity-30"
+                  className="tap-target relative flex min-w-12 flex-col items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <span
                     aria-hidden="true"
@@ -139,6 +196,7 @@ export function ProductFilters({
                   >
                     {!visualColor ? label.slice(0, 1) : null}
                   </span>
+                  <span className="max-w-20 truncate text-[10px] text-metal">{label}</span>
                 </button>
               );
             })}
@@ -193,34 +251,35 @@ export function ProductFilters({
             dir="ltr"
             min={0}
             max={priceCeil}
-            step={50000}
+            step={priceStep}
             aria-label="حداکثر قیمت"
             value={[displayedMax]}
             onValueChange={([value]) => setDraftMax(value)}
             onValueCommit={([value]) => commitMax(value)}
           />
+          <div className="mt-4 flex flex-wrap gap-2" aria-label="محدوده‌های سریع قیمت">
+            {quickPrices.map((value) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={filters.max === value}
+                onClick={() => commitMax(value)}
+                className="min-h-11 rounded-lg border border-hairline px-3 text-xs text-bone transition-colors hover:border-signal aria-pressed:border-signal aria-pressed:text-signal"
+              >
+                تا {fmtToman(value)}
+              </button>
+            ))}
+            <button
+              type="button"
+              aria-pressed={filters.max === 0}
+              onClick={() => commitMax(priceCeil)}
+              className="min-h-11 rounded-lg border border-hairline px-3 text-xs text-bone transition-colors hover:border-signal aria-pressed:border-signal aria-pressed:text-signal"
+            >
+              همه قیمت‌ها
+            </button>
+          </div>
         </fieldset>
       ) : null}
-
-      <fieldset className="flex flex-col gap-2">
-        <legend className="sr-only">وضعیت کالا</legend>
-        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
-          <Checkbox
-            checked={filters.instock}
-            onCheckedChange={(value) => onChange({ ...filters, instock: value === true })}
-          />
-          فقط کالاهای موجود
-        </label>
-        {showSale ? (
-          <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-bone">
-            <Checkbox
-              checked={filters.sale}
-              onCheckedChange={(value) => onChange({ ...filters, sale: value === true })}
-            />
-            فقط تخفیف‌دارها
-          </label>
-        ) : null}
-      </fieldset>
     </div>
   );
 }
