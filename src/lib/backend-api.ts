@@ -459,16 +459,22 @@ export function getBackendBaseUrl(): string {
 
 function assertContract(meta: ApiMeta | undefined) {
   if (!meta?.contractVersion) {
-    throw new BackendApiError("Backend نسخه قرارداد را اعلام نکرد.", {
-      code: "contract_version_missing",
-      meta,
-    });
+    throw new BackendApiError(
+      "دریافت اطلاعات فروشگاه فعلاً امکان‌پذیر نیست. لطفاً دوباره تلاش کنید.",
+      {
+        code: "contract_version_missing",
+        meta,
+      },
+    );
   }
   if (meta.contractVersion !== LBB_CONTRACT_VERSION) {
-    throw new BackendApiError(`نسخه Backend با Frontend هم‌خوان نیست (${meta.contractVersion}).`, {
-      code: "contract_version_mismatch",
-      meta,
-    });
+    throw new BackendApiError(
+      "دریافت اطلاعات فروشگاه فعلاً امکان‌پذیر نیست. لطفاً دوباره تلاش کنید.",
+      {
+        code: "contract_version_mismatch",
+        meta,
+      },
+    );
   }
 }
 
@@ -653,5 +659,7 @@ export function isAuthenticationError(error: unknown): error is BackendApiError 
 }
 
 export function backendErrorMessage(error: unknown) {
-  return error instanceof BackendApiError ? error.message : "خطای نامشخص در ارتباط با Backend.";
+  return error instanceof BackendApiError
+    ? error.message
+    : "دریافت اطلاعات فروشگاه ناموفق بود. لطفاً دوباره تلاش کنید.";
 }

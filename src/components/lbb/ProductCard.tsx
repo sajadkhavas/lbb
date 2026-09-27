@@ -248,6 +248,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
           <div
             className={`mt-3 flex min-h-7 flex-nowrap gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${backend ? "" : "md:hidden"}`}
             aria-label="سایزهای محصول"
+            tabIndex={0}
           >
             {backend
               ? sizeLabels.map((size) => (

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { PackageSearch, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -298,6 +298,8 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
   const filters = normalizeBackendFilters(loader.filters, scope);
   const serialized = serializeBackendFilters(filters, scope);
   const searchKey = stableSearchString(serialized);
+  const currentKey = `${category?.slug ?? ""}?${searchKey}`;
+  const requestKey = useRef(currentKey);
 
   const getPreviewCount = useCallback(
     async (candidate: Filters) => {
@@ -314,10 +316,12 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
   );
 
   useEffect(() => {
+    requestKey.current = currentKey;
     setItems(loader.items);
     setPage(1);
+    setLoadingMore(false);
     setLoadMoreError(null);
-  }, [loader.items, searchKey, category?.slug]);
+  }, [loader.items, currentKey]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !facets) return;
@@ -353,6 +357,7 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
 
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
+    requestKey.current = `${category.slug}?${stableSearchString(serializeBackendFilters(normalized, scope))}`;
     startTransition(() =>
       navigate({ search: serializeBackendFilters(normalized, scope), replace: false }),
     );
@@ -375,7 +380,8 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
   );
 
   const loadMore = async () => {
-    if (!facets || loadingMore || page >= loader.totalPages) return;
+    if (!facets || loadingMore || page >= loader.totalPages || requestKey.current !== currentKey)
+      return;
     setLoadingMore(true);
     setLoadMoreError(null);
     try {
@@ -386,12 +392,19 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
         page: nextPage,
         per_page: BACKEND_PAGE_SIZE,
       });
-      setItems((current) => [...current, ...response.data.map(backendCard)]);
+      if (requestKey.current !== currentKey) return;
+      setItems((current) => {
+        const seen = new Set(current.map((product) => product.id));
+        return [
+          ...current,
+          ...response.data.map(backendCard).filter((product) => !seen.has(product.id)),
+        ];
+      });
       setPage(nextPage);
     } catch (error) {
-      setLoadMoreError(backendErrorMessage(error));
+      if (requestKey.current === currentKey) setLoadMoreError(backendErrorMessage(error));
     } finally {
-      setLoadingMore(false);
+      if (requestKey.current === currentKey) setLoadingMore(false);
     }
   };
 

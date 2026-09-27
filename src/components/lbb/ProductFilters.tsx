@@ -251,7 +251,7 @@ export function ProductFilters({
           />
           <div className="mt-4 flex flex-wrap gap-2" aria-label="محدوده‌های سریع قیمت">
             {[0.25, 0.5, 0.75, 1].map((fraction) => {
-              const value = Math.floor((priceCeil * fraction) / 50000) * 50000;
+              const value = Math.max(1, Math.floor((priceCeil * fraction) / 50000) * 50000);
               return (
                 <button
                   key={fraction}

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+} from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Clock, PackageSearch, Search as SearchIcon, X } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -361,6 +369,7 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
   );
   const expectedSearch = serializeSearch(query, filters, scope);
   const searchKey = stableSearchString(expectedSearch);
+  const requestKey = useRef(searchKey);
 
   useEffect(() => setDraft(query ?? ""), [query]);
   useEffect(() => setRecent(getRecentSearches()), []);
@@ -371,8 +380,10 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
     }
   }, [query]);
   useEffect(() => {
+    requestKey.current = searchKey;
     setItems(loader.items);
     setPage(1);
+    setLoadingMore(false);
     setLoadMoreError(null);
   }, [loader.items, searchKey]);
   useEffect(() => {
@@ -386,10 +397,12 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
 
   const commitQuery = (value: string, replace = false) => {
     const next = normalizeSearchTerm(value) || undefined;
+    requestKey.current = stableSearchString(serializeSearch(next, filters, scope));
     startTransition(() => navigate({ search: serializeSearch(next, filters, scope), replace }));
   };
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
+    requestKey.current = stableSearchString(serializeSearch(query, normalized, scope));
     startTransition(() =>
       navigate({ search: serializeSearch(query, normalized, scope), replace: false }),
     );
@@ -425,7 +438,14 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
   );
 
   const loadMore = async () => {
-    if (!query || !facets || loadingMore || page >= loader.totalPages) return;
+    if (
+      !query ||
+      !facets ||
+      loadingMore ||
+      page >= loader.totalPages ||
+      requestKey.current !== searchKey
+    )
+      return;
     setLoadingMore(true);
     setLoadMoreError(null);
     try {
@@ -436,12 +456,19 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
         page: nextPage,
         per_page: BACKEND_PAGE_SIZE,
       });
-      setItems((current) => [...current, ...response.data.map(backendCard)]);
+      if (requestKey.current !== searchKey) return;
+      setItems((current) => {
+        const seen = new Set(current.map((product) => product.id));
+        return [
+          ...current,
+          ...response.data.map(backendCard).filter((product) => !seen.has(product.id)),
+        ];
+      });
       setPage(nextPage);
     } catch (error) {
-      setLoadMoreError(backendErrorMessage(error));
+      if (requestKey.current === searchKey) setLoadMoreError(backendErrorMessage(error));
     } finally {
-      setLoadingMore(false);
+      if (requestKey.current === searchKey) setLoadingMore(false);
     }
   };
 
