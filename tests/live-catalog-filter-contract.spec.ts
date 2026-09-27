@@ -5,7 +5,11 @@ import {
   backendFacetVisuals,
   normalizeCatalogFilters,
 } from "../src/lib/backend-storefront";
-import { EMPTY_FILTERS, parseBackendFilters } from "../src/lib/product-filter";
+import {
+  EMPTY_FILTERS,
+  parseBackendFilters,
+  serializeBackendFilters,
+} from "../src/lib/product-filter";
 
 const facets = {
   categories: [],
@@ -31,4 +35,11 @@ test("catalog filters distinguish colors that share a swatch and accept existing
 
   const selected = { ...EMPTY_FILTERS, colors: ["charcoal"] };
   expect(backendCatalogQuery(selected, facets).color).toBe("charcoal");
+});
+
+test("backend size codes containing spaces survive a shared filter link", () => {
+  const parsed = parseBackendFilters({ sizes: "ONE SIZE" });
+  expect(parsed.sizes).toEqual(["ONE SIZE"]);
+  expect(serializeBackendFilters(parsed).sizes).toBe("ONE SIZE");
+  expect(backendCatalogQuery(parsed).size).toBe("ONE SIZE");
 });
