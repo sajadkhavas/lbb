@@ -43,3 +43,13 @@ test("backend size codes containing spaces survive a shared filter link", () => 
   expect(serializeBackendFilters(parsed).sizes).toBe("ONE SIZE");
   expect(backendCatalogQuery(parsed).size).toBe("ONE SIZE");
 });
+
+test("two selected colors survive the URL and API query, and clearing removes both", () => {
+  const selected = { ...EMPTY_FILTERS, colors: ["black", "charcoal"] };
+  const search = serializeBackendFilters(selected);
+  expect(search.colors).toBe("black,charcoal");
+  const restored = parseBackendFilters(search);
+  expect(restored.colors).toEqual(["black", "charcoal"]);
+  expect(backendCatalogQuery(restored, facets).color).toBe("black,charcoal");
+  expect(serializeBackendFilters(EMPTY_FILTERS).colors).toBeUndefined();
+});

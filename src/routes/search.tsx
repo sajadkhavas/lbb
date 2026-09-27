@@ -148,21 +148,33 @@ export const Route = createFileRoute("/search")({
       const q = queryFrom((deps.search as SearchParams).q);
       if (!q)
         return { mode: "live", facets, items: [], filters, total: 0, totalPages: 0, error: null };
-      const response = await searchProducts({
-        q,
-        ...backendCatalogQuery(filters, facets),
-        page: 1,
-        per_page: BACKEND_PAGE_SIZE,
-      });
-      return {
-        mode: "live",
-        facets,
-        items: response.data.map(backendCard),
-        filters,
-        total: response.meta.pagination?.total ?? response.data.length,
-        totalPages: response.meta.pagination?.totalPages ?? 1,
-        error: null,
-      };
+      try {
+        const response = await searchProducts({
+          q,
+          ...backendCatalogQuery(filters, facets),
+          page: 1,
+          per_page: BACKEND_PAGE_SIZE,
+        });
+        return {
+          mode: "live",
+          facets,
+          items: response.data.map(backendCard),
+          filters,
+          total: response.meta.pagination?.total ?? response.data.length,
+          totalPages: response.meta.pagination?.totalPages ?? 1,
+          error: null,
+        };
+      } catch (error) {
+        return {
+          mode: "live",
+          facets,
+          items: [],
+          filters,
+          total: 0,
+          totalPages: 0,
+          error: backendErrorMessage(error),
+        };
+      }
     } catch (error) {
       return {
         mode: "live",
@@ -345,15 +357,22 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const facets = loader.facets;
   const visuals = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
-  const scope: FilterScope = facets
-    ? {
-        categories: facets.categories.map((category) => category.slug),
-        colors: visuals.colors,
-        sizes: visuals.sizes,
-        priceCeil: Math.max(1, visuals.priceCeil),
-      }
-    : {};
-  const filters = normalizeBackendFilters(loader.filters, scope);
+  const scope: FilterScope = useMemo(() => {
+    if (!facets) return {};
+    const options = backendFacetVisuals(facets);
+    return {
+      categories: facets.categories.map((category) => category.slug),
+      colors: options.colors,
+      sizes: options.sizes,
+      priceCeil: Math.max(1, options.priceCeil),
+    };
+  }, [facets]);
+  const appliedFilters = useMemo(
+    () => normalizeBackendFilters(loader.filters, scope),
+    [loader.filters, scope],
+  );
+  const [optimisticFilters, setOptimisticFilters] = useState(appliedFilters);
+  const filters = normalizeBackendFilters(optimisticFilters, scope);
   const getPreviewCount = useCallback(
     async (candidate: Filters) => {
       if (!facets || !query) return 0;
@@ -367,7 +386,10 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
     },
     [facets, query],
   );
-  const expectedSearch = serializeSearch(query, filters, scope);
+  const expectedSearch = useMemo(
+    () => serializeSearch(query, appliedFilters, scope),
+    [query, appliedFilters, scope],
+  );
   const searchKey = stableSearchString(expectedSearch);
   const requestKey = useRef(searchKey);
 
@@ -381,19 +403,21 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
   }, [query]);
   useEffect(() => {
     requestKey.current = searchKey;
+    setOptimisticFilters(appliedFilters);
     setItems(loader.items);
     setPage(1);
     setLoadingMore(false);
     setLoadMoreError(null);
-  }, [loader.items, searchKey]);
+  }, [loader.items, searchKey, appliedFilters]);
   useEffect(() => {
     if (
       typeof window !== "undefined" &&
       facets &&
+      requestKey.current === searchKey &&
       !isCanonicalSearch(window.location.search, expectedSearch)
     )
-      navigate({ search: expectedSearch, replace: true });
-  }, [expectedSearch, facets, navigate]);
+      navigate({ search: expectedSearch, replace: true, resetScroll: false });
+  }, [expectedSearch, searchKey, facets, navigate]);
 
   const commitQuery = (value: string, replace = false) => {
     const next = normalizeSearchTerm(value) || undefined;
@@ -402,9 +426,14 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
   };
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
+    setOptimisticFilters(normalized);
     requestKey.current = stableSearchString(serializeSearch(query, normalized, scope));
     startTransition(() =>
-      navigate({ search: serializeSearch(query, normalized, scope), replace: false }),
+      navigate({
+        search: serializeSearch(query, normalized, scope),
+        replace: false,
+        resetScroll: false,
+      }),
     );
   };
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -629,7 +658,7 @@ function PrototypeSearch() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!isCanonicalSearch(window.location.search, expectedSearch)) {
-      navigate({ search: expectedSearch, replace: true });
+      navigate({ search: expectedSearch, replace: true, resetScroll: false });
     }
   }, [expectedSearch, navigate]);
 
@@ -654,7 +683,9 @@ function PrototypeSearch() {
 
   const setFilters = (nextFilters: Filters) => {
     const normalized = normalizeFilters(nextFilters, filterScope);
-    startTransition(() => navigate({ search: serializeSearch(query, normalized), replace: false }));
+    startTransition(() =>
+      navigate({ search: serializeSearch(query, normalized), replace: false, resetScroll: false }),
+    );
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {

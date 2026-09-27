@@ -117,22 +117,35 @@ export const Route = createFileRoute("/$category")({
         facets,
         scope,
       );
-      const productsResponse = await listProducts({
-        ...backendCatalogQuery(filters, facets),
-        category: category.slug,
-        page: 1,
-        per_page: BACKEND_PAGE_SIZE,
-      });
-      return {
-        mode: "live",
-        category,
-        items: productsResponse.data.map(backendCard),
-        facets,
-        filters,
-        total: productsResponse.meta.pagination?.total ?? productsResponse.data.length,
-        totalPages: productsResponse.meta.pagination?.totalPages ?? 1,
-        error: null,
-      };
+      try {
+        const productsResponse = await listProducts({
+          ...backendCatalogQuery(filters, facets),
+          category: category.slug,
+          page: 1,
+          per_page: BACKEND_PAGE_SIZE,
+        });
+        return {
+          mode: "live",
+          category,
+          items: productsResponse.data.map(backendCard),
+          facets,
+          filters,
+          total: productsResponse.meta.pagination?.total ?? productsResponse.data.length,
+          totalPages: productsResponse.meta.pagination?.totalPages ?? 1,
+          error: null,
+        };
+      } catch (error) {
+        return {
+          mode: "live",
+          category,
+          items: [],
+          facets,
+          filters,
+          total: 0,
+          totalPages: 0,
+          error: backendErrorMessage(error),
+        };
+      }
     } catch (error) {
       if (error instanceof BackendApiError && error.status === 404) throw notFound();
       return {
@@ -289,14 +302,25 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
   const category = loader.category;
   const facets = loader.facets;
   const visuals = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
-  const scope: FilterScope = {
-    categories: false,
-    colors: visuals.colors,
-    sizes: visuals.sizes,
-    priceCeil: Math.max(1, visuals.priceCeil),
-  };
-  const filters = normalizeBackendFilters(loader.filters, scope);
-  const serialized = serializeBackendFilters(filters, scope);
+  const scope: FilterScope = useMemo(() => {
+    const options = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
+    return {
+      categories: false,
+      colors: options.colors,
+      sizes: options.sizes,
+      priceCeil: Math.max(1, options.priceCeil),
+    };
+  }, [facets]);
+  const appliedFilters = useMemo(
+    () => normalizeBackendFilters(loader.filters, scope),
+    [loader.filters, scope],
+  );
+  const [optimisticFilters, setOptimisticFilters] = useState(appliedFilters);
+  const filters = normalizeBackendFilters(optimisticFilters, scope);
+  const serialized = useMemo(
+    () => serializeBackendFilters(appliedFilters, scope),
+    [appliedFilters, scope],
+  );
   const searchKey = stableSearchString(serialized);
   const currentKey = `${category?.slug ?? ""}?${searchKey}`;
   const requestKey = useRef(currentKey);
@@ -317,18 +341,19 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
 
   useEffect(() => {
     requestKey.current = currentKey;
+    setOptimisticFilters(appliedFilters);
     setItems(loader.items);
     setPage(1);
     setLoadingMore(false);
     setLoadMoreError(null);
-  }, [loader.items, currentKey]);
+  }, [loader.items, currentKey, appliedFilters]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !facets) return;
+    if (typeof window === "undefined" || !facets || requestKey.current !== currentKey) return;
     if (!isCanonicalSearch(window.location.search, serialized)) {
-      navigate({ search: serialized, replace: true });
+      navigate({ search: serialized, replace: true, resetScroll: false });
     }
-  }, [facets, navigate, searchKey, serialized]);
+  }, [facets, navigate, searchKey, currentKey, serialized]);
 
   if (!category) {
     return (
@@ -357,9 +382,14 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
 
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
+    setOptimisticFilters(normalized);
     requestKey.current = `${category.slug}?${stableSearchString(serializeBackendFilters(normalized, scope))}`;
     startTransition(() =>
-      navigate({ search: serializeBackendFilters(normalized, scope), replace: false }),
+      navigate({
+        search: serializeBackendFilters(normalized, scope),
+        replace: false,
+        resetScroll: false,
+      }),
     );
   };
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
@@ -619,13 +649,15 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
     if (typeof window === "undefined") return;
     const expected = serializeFilters(filters);
     if (!isCanonicalSearch(window.location.search, expected)) {
-      navigate({ search: expected, replace: true });
+      navigate({ search: expected, replace: true, resetScroll: false });
     }
   }, [filters, navigate]);
 
   const setFilters = (nextFilters: Filters) => {
     const normalized = normalizeFilters(nextFilters, scope);
-    startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
+    startTransition(() =>
+      navigate({ search: serializeFilters(normalized), replace: false, resetScroll: false }),
+    );
   };
 
   const filtered = useMemo(() => applyFilters(items, filters), [items, filters]);

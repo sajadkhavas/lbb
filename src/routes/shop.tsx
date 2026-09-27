@@ -122,20 +122,32 @@ export const Route = createFileRoute("/shop")({
         facets,
         scope,
       );
-      const response = await listProducts({
-        ...backendCatalogQuery(filters, facets),
-        page: 1,
-        per_page: BACKEND_PAGE_SIZE,
-      });
-      return {
-        mode: "live",
-        products: response.data.map(backendCard),
-        facets,
-        total: response.meta.pagination?.total ?? response.data.length,
-        totalPages: response.meta.pagination?.totalPages ?? 1,
-        filters,
-        error: null,
-      };
+      try {
+        const response = await listProducts({
+          ...backendCatalogQuery(filters, facets),
+          page: 1,
+          per_page: BACKEND_PAGE_SIZE,
+        });
+        return {
+          mode: "live",
+          products: response.data.map(backendCard),
+          facets,
+          total: response.meta.pagination?.total ?? response.data.length,
+          totalPages: response.meta.pagination?.totalPages ?? 1,
+          filters,
+          error: null,
+        };
+      } catch (error) {
+        return {
+          mode: "live",
+          products: [],
+          facets,
+          total: 0,
+          totalPages: 0,
+          filters,
+          error: backendErrorMessage(error),
+        };
+      }
     } catch (error) {
       return {
         mode: "live",
@@ -199,39 +211,55 @@ function LiveShop({ loader }: { loader: LiveLoader }) {
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const facets = loader.facets;
   const visuals = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
-  const scope: FilterScope = facets
-    ? {
-        categories: facets.categories.map((category) => category.slug),
-        colors: visuals.colors,
-        sizes: visuals.sizes,
-        priceCeil: Math.max(1, visuals.priceCeil),
-      }
-    : {};
-  const filters = normalizeBackendFilters(loader.filters, scope);
-  const serialized = serializeBackendFilters(filters, scope);
+  const scope: FilterScope = useMemo(() => {
+    if (!facets) return {};
+    const options = backendFacetVisuals(facets);
+    return {
+      categories: facets.categories.map((category) => category.slug),
+      colors: options.colors,
+      sizes: options.sizes,
+      priceCeil: Math.max(1, options.priceCeil),
+    };
+  }, [facets]);
+  const appliedFilters = useMemo(
+    () => normalizeBackendFilters(loader.filters, scope),
+    [loader.filters, scope],
+  );
+  const [optimisticFilters, setOptimisticFilters] = useState(appliedFilters);
+  const filters = normalizeBackendFilters(optimisticFilters, scope);
+  const serialized = useMemo(
+    () => serializeBackendFilters(appliedFilters, scope),
+    [appliedFilters, scope],
+  );
   const searchKey = stableSearchString(serialized);
   const requestKey = useRef(searchKey);
 
   useEffect(() => {
     requestKey.current = searchKey;
+    setOptimisticFilters(appliedFilters);
     setItems(loader.products);
     setPage(1);
     setLoadingMore(false);
     setLoadMoreError(null);
-  }, [loader.products, searchKey]);
+  }, [loader.products, searchKey, appliedFilters]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !facets) return;
+    if (typeof window === "undefined" || !facets || requestKey.current !== searchKey) return;
     if (!isCanonicalSearch(window.location.search, serialized)) {
-      navigate({ search: serialized, replace: true });
+      navigate({ search: serialized, replace: true, resetScroll: false });
     }
   }, [facets, navigate, searchKey, serialized]);
 
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
+    setOptimisticFilters(normalized);
     requestKey.current = stableSearchString(serializeBackendFilters(normalized, scope));
     startTransition(() =>
-      navigate({ search: serializeBackendFilters(normalized, scope), replace: false }),
+      navigate({
+        search: serializeBackendFilters(normalized, scope),
+        replace: false,
+        resetScroll: false,
+      }),
     );
   };
 
@@ -441,13 +469,15 @@ function PrototypeShop() {
     if (typeof window === "undefined") return;
     const expected = serializeFilters(filters);
     if (!isCanonicalSearch(window.location.search, expected)) {
-      navigate({ search: expected, replace: true });
+      navigate({ search: expected, replace: true, resetScroll: false });
     }
   }, [filters, navigate]);
 
   const setFilters = (nextFilters: Filters) => {
     const normalized = normalizeFilters(nextFilters, filterScope);
-    startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
+    startTransition(() =>
+      navigate({ search: serializeFilters(normalized), replace: false, resetScroll: false }),
+    );
   };
 
   const filtered = useMemo(() => applyFilters(seasonalProducts, filters), [filters]);
