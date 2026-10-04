@@ -54,8 +54,7 @@ export function backendCard(product: ProductSummaryDto): BackendCatalogCard {
     ...(presentation.previewImages ?? []),
     ...(product.primaryImage ? [product.primaryImage] : []),
   ]
-    .filter((value, index, all): value is string => Boolean(value) && all.indexOf(value) === index)
-    .slice(0, 3);
+    .filter((value, index, all): value is string => Boolean(value) && all.indexOf(value) === index);
 
   return {
     source: "backend",
