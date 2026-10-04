@@ -334,7 +334,10 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
           ) : (
             <>
               <TechLabel tone="signal">{model.identity.categoryLabel}</TechLabel>
-              <h2 id={titleId} className="mt-2 max-w-full break-words text-[clamp(1.35rem,6vw,2rem)] font-black leading-[1.45] text-bone [overflow-wrap:anywhere] md:text-display-3 md:leading-tight">
+              <h2
+                id={titleId}
+                className="mt-2 max-w-full break-words text-[clamp(1.35rem,6vw,2rem)] font-black leading-[1.45] text-bone [overflow-wrap:anywhere] md:text-display-3 md:leading-tight"
+              >
                 {model.identity.name ?? card.name}
               </h2>
               {model.identity.shortDescription ? (
