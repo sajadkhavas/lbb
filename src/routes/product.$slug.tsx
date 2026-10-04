@@ -317,7 +317,7 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
       <Shell
         as="section"
         aria-label="تصمیم‌گیری محصول"
-        className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
+        className="grid grid-cols-1 gap-8 pb-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-10"
       >
         <Gallery media={galleryMedia} name={product.name} productSlug={product.slug} enable3d />
         <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
@@ -409,7 +409,7 @@ function PrototypeProductPage({ loader }: { loader: PrototypeLoader }) {
         <Shell
           as="section"
           aria-label="تصمیم‌گیری محصول"
-          className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
+          className="grid grid-cols-1 gap-8 pb-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-10"
         >
           <Gallery media={galleryMedia} name={model.identity.name ?? "محصول"} />
           <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
