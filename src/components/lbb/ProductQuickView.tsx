@@ -97,7 +97,7 @@ function PrototypeProductQuickView({ product: p }: { product: Product }) {
 
         <div className="shrink-0 md:w-[46%]">
           <div
-            className="relative aspect-[4/3] max-h-[38svh] w-full overflow-hidden bg-carbon touch-pan-y md:aspect-[3/4] md:max-h-none md:h-full"
+            className="relative aspect-[4/5] max-h-[56svh] w-full overflow-hidden bg-white touch-pan-y md:aspect-[3/4] md:max-h-none md:h-full md:bg-carbon"
             tabIndex={gallery.length > 1 ? 0 : -1}
             role="region"
             aria-roledescription="carousel"
@@ -140,7 +140,7 @@ function PrototypeProductQuickView({ product: p }: { product: Product }) {
               height={1200}
               loading="eager"
               decoding="async"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain md:object-cover"
             />
             <div className="pointer-events-none absolute end-3 top-3 flex flex-col items-end gap-1.5">
               {p.isNew ? <StatusTag tone="signal">جدید</StatusTag> : null}
@@ -194,7 +194,7 @@ function PrototypeProductQuickView({ product: p }: { product: Product }) {
 
         <div className="flex min-h-0 flex-1 flex-col p-5 pb-[calc(24px+env(safe-area-inset-bottom))] md:overflow-y-auto md:p-7">
           <TechLabel tone="signal">{CATEGORIES[p.category].nameFa}</TechLabel>
-          <h2 id={titleId} className="mt-1.5 text-display-3 leading-tight text-bone">
+          <h2 id={titleId} className="mt-1.5 max-w-full break-words text-[clamp(1.35rem,6vw,2rem)] font-black leading-[1.45] text-bone [overflow-wrap:anywhere] md:text-display-3 md:leading-tight">
             {p.name}
           </h2>
           <p className="mt-2 text-xs leading-6 text-metal">{p.shortDescription}</p>
