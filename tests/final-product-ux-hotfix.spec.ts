@@ -108,11 +108,14 @@ test("backend card keeps public sizes and is a valid Quick View target", () => {
     previewImages: [
       summary.primaryImage!,
       "https://api.lbb.example.test/storage/products/hotfix-2.webp",
+      "https://api.lbb.example.test/storage/products/hotfix-3.webp",
+      "https://api.lbb.example.test/storage/products/hotfix-4.webp",
+      "https://api.lbb.example.test/storage/products/hotfix-5.webp",
     ],
   } as ProductSummaryDto & { previewImages: string[] });
 
   expect(card.sizes.map((size) => size.code)).toEqual(["M", "L"]);
-  expect(card.previewImages).toHaveLength(2);
+  expect(card.previewImages).toHaveLength(5);
   expect(isBackendQuickViewTarget(card)).toBe(true);
 });
 
@@ -205,6 +208,18 @@ test("PDP keeps mobile composition while desktop receives the polished surface",
   expect(mobile.radius).toBe("0px");
   expect(mobile.position).not.toBe("fixed");
   expect(Number.parseFloat(mobileGalleryRadius)).toBeGreaterThan(0);
+
+  const mobileLayout = await page.evaluate(() => {
+    const title = document.querySelector<HTMLElement>("#pdp-product-title");
+    return {
+      horizontalOverflow: document.documentElement.scrollWidth - window.innerWidth,
+      titleWidth: title?.getBoundingClientRect().width ?? window.innerWidth + 1,
+      titleOverflowWrap: title ? getComputedStyle(title).overflowWrap : "",
+    };
+  });
+  expect(mobileLayout.horizontalOverflow).toBeLessThanOrEqual(1);
+  expect(mobileLayout.titleWidth).toBeLessThanOrEqual(390);
+  expect(mobileLayout.titleOverflowWrap).toBe("anywhere");
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   const desktop = await panel.evaluate((element) => {
