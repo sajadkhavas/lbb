@@ -10,20 +10,20 @@
 
 ## ۲. مرجع‌های قطعی Git و Production
 
-| مورد | مقدار |
-|---|---|
-| مخزن Frontend | `sajadkhavas/lbb` |
-| شاخه مبنای Production | `fix/lbb-local-boutique-homepage` |
-| شاخه Hotfix تکمیل‌شده | `fix/final-home-customer-copy-20260917` |
-| Commit هات‌فیکس | `7f976777f4f735e30751c53d0127081b9b4230da` |
-| Pull Request | [#101](https://github.com/sajadkhavas/lbb/pull/101) |
-| Merge SHA و نسخه فعال | `199931b5b43a8e564f7ae5a21d39a0410063bef6` |
-| Release فعال | `/var/www/lbb/releases/199931b5b43a8e564f7ae5a21d39a0410063bef6` |
-| Release آماده Rollback | `/var/www/lbb/releases/58d3fbc037f7381846f3e43ba88a2074aaa1fc18` |
-| Backend فعال در زمان کار | `ee83534bf28d0367a5547f02406bfec50f58b109` |
-| سرویس Frontend | `lbb.service` |
-| دامنه Frontend | `https://lbbclo.com` |
-| API عمومی | `https://api.lbbclo.com` |
+| مورد                     | مقدار                                                            |
+| ------------------------ | ---------------------------------------------------------------- |
+| مخزن Frontend            | `sajadkhavas/lbb`                                                |
+| شاخه مبنای Production    | `fix/lbb-local-boutique-homepage`                                |
+| شاخه Hotfix تکمیل‌شده    | `fix/final-home-customer-copy-20260917`                          |
+| Commit هات‌فیکس          | `7f976777f4f735e30751c53d0127081b9b4230da`                       |
+| Pull Request             | [#101](https://github.com/sajadkhavas/lbb/pull/101)              |
+| Merge SHA و نسخه فعال    | `199931b5b43a8e564f7ae5a21d39a0410063bef6`                       |
+| Release فعال             | `/var/www/lbb/releases/199931b5b43a8e564f7ae5a21d39a0410063bef6` |
+| Release آماده Rollback   | `/var/www/lbb/releases/58d3fbc037f7381846f3e43ba88a2074aaa1fc18` |
+| Backend فعال در زمان کار | `ee83534bf28d0367a5547f02406bfec50f58b109`                       |
+| سرویس Frontend           | `lbb.service`                                                    |
+| دامنه Frontend           | `https://lbbclo.com`                                             |
+| API عمومی                | `https://api.lbbclo.com`                                         |
 
 نکته مهم: هنگام ایجاد این سند، شاخه `main` عقب‌تر از نسخه Production بود. بنابراین مبنای این مستند و PR آن، شاخه واقعی Production یعنی `fix/lbb-local-boutique-homepage` است. تا وقتی ساختار شاخه‌ها رسماً یکپارچه نشده، نباید صرفاً با فرض اینکه `main` مرجع انتشار است کار کرد.
 
@@ -99,7 +99,7 @@ Backupهای JSON ثبت‌شده پیش از تغییر محتوای مدیری
 - کامپوننت Sonner چون CSS داخلی خودش Font Stack سیستم داشت، به‌صورت صریح با این مقدار اصلاح شد:
 
 ```tsx
-fontFamily: '"Estedad Variable", "Vazirmatn", sans-serif'
+fontFamily: '"Estedad Variable", "Vazirmatn", sans-serif';
 ```
 
 نتیجه نهایی انتشار:
@@ -387,7 +387,6 @@ Backend باید مشابه یک پروژه Production کامل بررسی شو�
 - اطلاعات دستی کارفرما
 
 پس از آن، Schema واقعی Product/Variant/Media در Backend خوانده و Template ورود اطلاعات مطابق همان Contract ساخته شود. قبل از این مرحله نباید Import گسترده یا ادیت نهایی Copy انجام شود.
-
 
 ## ۱۲. راستی‌آزمایی ثبت GitHub پس از PR #102
 

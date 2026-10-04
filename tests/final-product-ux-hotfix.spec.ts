@@ -108,11 +108,14 @@ test("backend card keeps public sizes and is a valid Quick View target", () => {
     previewImages: [
       summary.primaryImage!,
       "https://api.lbb.example.test/storage/products/hotfix-2.webp",
+      "https://api.lbb.example.test/storage/products/hotfix-3.webp",
+      "https://api.lbb.example.test/storage/products/hotfix-4.webp",
+      "https://api.lbb.example.test/storage/products/hotfix-5.webp",
     ],
   } as ProductSummaryDto & { previewImages: string[] });
 
   expect(card.sizes.map((size) => size.code)).toEqual(["M", "L"]);
-  expect(card.previewImages).toHaveLength(2);
+  expect(card.previewImages).toHaveLength(5);
   expect(isBackendQuickViewTarget(card)).toBe(true);
 });
 
@@ -149,7 +152,7 @@ test("backend Quick View decision model keeps exact variant availability", () =>
 
 test("product card media fills its frame without the old image inset", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   const media = page.locator(".product-card__media").first();
   await expect(media).toBeVisible();
@@ -182,7 +185,7 @@ test("PDP keeps mobile composition while desktop receives the polished surface",
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
 
   const panel = page.getByTestId("pdp-purchase-panel");
   const gallery = page.getByRole("region", { name: /گالری تصاویر/ });
@@ -205,6 +208,16 @@ test("PDP keeps mobile composition while desktop receives the polished surface",
   expect(mobile.radius).toBe("0px");
   expect(mobile.position).not.toBe("fixed");
   expect(Number.parseFloat(mobileGalleryRadius)).toBeGreaterThan(0);
+
+  const mobileLayout = await page.evaluate(() => {
+    const title = document.querySelector<HTMLElement>("#pdp-product-title");
+    return {
+      horizontalOverflow: document.documentElement.scrollWidth - window.innerWidth,
+      titleWidth: title?.getBoundingClientRect().width ?? window.innerWidth + 1,
+    };
+  });
+  expect(mobileLayout.horizontalOverflow).toBeLessThanOrEqual(1);
+  expect(mobileLayout.titleWidth).toBeLessThanOrEqual(390);
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   const desktop = await panel.evaluate((element) => {

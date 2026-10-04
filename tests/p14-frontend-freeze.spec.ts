@@ -35,7 +35,7 @@ for (const viewport of viewports) {
       const errors = captureRuntimeErrors(page);
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
-      const response = await page.goto(route, { waitUntil: "networkidle" });
+      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
       expect(response?.status(), `document status for ${route}`).toBeLessThan(400);
       await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
       await expect(page.locator("h1")).toHaveCount(1);
@@ -45,7 +45,7 @@ for (const viewport of viewports) {
         ),
       ).toBeLessThanOrEqual(2);
 
-      await page.reload({ waitUntil: "networkidle" });
+      await page.reload({ waitUntil: "domcontentloaded" });
       await expect(page.locator("h1")).toHaveCount(1);
       expect(
         await page.evaluate(

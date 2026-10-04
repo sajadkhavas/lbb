@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { PackageSearch, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -59,6 +59,7 @@ import {
   backendCard,
   backendCatalogQuery,
   backendFacetVisuals,
+  normalizeCatalogFilters,
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
 
@@ -111,26 +112,40 @@ export const Route = createFileRoute("/$category")({
         sizes: visuals.sizes,
         priceCeil: Math.max(1, visuals.priceCeil),
       };
-      const filters = normalizeBackendFilters(
+      const filters = normalizeCatalogFilters(
         parseBackendFilters(deps.search as unknown as Record<string, unknown>),
+        facets,
         scope,
       );
-      const productsResponse = await listProducts({
-        ...backendCatalogQuery(filters, facets),
-        category: category.slug,
-        page: 1,
-        per_page: BACKEND_PAGE_SIZE,
-      });
-      return {
-        mode: "live",
-        category,
-        items: productsResponse.data.map(backendCard),
-        facets,
-        filters,
-        total: productsResponse.meta.pagination?.total ?? productsResponse.data.length,
-        totalPages: productsResponse.meta.pagination?.totalPages ?? 1,
-        error: null,
-      };
+      try {
+        const productsResponse = await listProducts({
+          ...backendCatalogQuery(filters, facets),
+          category: category.slug,
+          page: 1,
+          per_page: BACKEND_PAGE_SIZE,
+        });
+        return {
+          mode: "live",
+          category,
+          items: productsResponse.data.map(backendCard),
+          facets,
+          filters,
+          total: productsResponse.meta.pagination?.total ?? productsResponse.data.length,
+          totalPages: productsResponse.meta.pagination?.totalPages ?? 1,
+          error: null,
+        };
+      } catch (error) {
+        return {
+          mode: "live",
+          category,
+          items: [],
+          facets,
+          filters,
+          total: 0,
+          totalPages: 0,
+          error: backendErrorMessage(error),
+        };
+      }
     } catch (error) {
       if (error instanceof BackendApiError && error.status === 404) throw notFound();
       return {
@@ -287,28 +302,58 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
   const category = loader.category;
   const facets = loader.facets;
   const visuals = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
-  const scope: FilterScope = {
-    categories: false,
-    colors: visuals.colors,
-    sizes: visuals.sizes,
-    priceCeil: Math.max(1, visuals.priceCeil),
-  };
-  const filters = normalizeBackendFilters(loader.filters, scope);
-  const serialized = serializeBackendFilters(filters, scope);
+  const scope: FilterScope = useMemo(() => {
+    const options = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
+    return {
+      categories: false,
+      colors: options.colors,
+      sizes: options.sizes,
+      priceCeil: Math.max(1, options.priceCeil),
+    };
+  }, [facets]);
+  const appliedFilters = useMemo(
+    () => normalizeBackendFilters(loader.filters, scope),
+    [loader.filters, scope],
+  );
+  const [optimisticFilters, setOptimisticFilters] = useState(appliedFilters);
+  const filters = normalizeBackendFilters(optimisticFilters, scope);
+  const serialized = useMemo(
+    () => serializeBackendFilters(appliedFilters, scope),
+    [appliedFilters, scope],
+  );
   const searchKey = stableSearchString(serialized);
+  const currentKey = `${category?.slug ?? ""}?${searchKey}`;
+  const requestKey = useRef(currentKey);
+
+  const getPreviewCount = useCallback(
+    async (candidate: Filters) => {
+      if (!facets || !category) return 0;
+      const response = await listProducts({
+        ...backendCatalogQuery(candidate, facets),
+        category: category.slug,
+        page: 1,
+        per_page: 1,
+      });
+      return response.meta.pagination?.total ?? response.data.length;
+    },
+    [facets, category],
+  );
 
   useEffect(() => {
+    requestKey.current = currentKey;
+    setOptimisticFilters(appliedFilters);
     setItems(loader.items);
     setPage(1);
+    setLoadingMore(false);
     setLoadMoreError(null);
-  }, [loader.items, searchKey, category?.slug]);
+  }, [loader.items, currentKey, appliedFilters]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !facets) return;
+    if (typeof window === "undefined" || !facets || requestKey.current !== currentKey) return;
     if (!isCanonicalSearch(window.location.search, serialized)) {
-      navigate({ search: serialized, replace: true });
+      navigate({ search: serialized, replace: true, resetScroll: false });
     }
-  }, [facets, navigate, searchKey, serialized]);
+  }, [facets, navigate, searchKey, currentKey, serialized]);
 
   if (!category) {
     return (
@@ -320,7 +365,7 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
         <EmptyState
           icon={<RefreshCcw size={40} aria-hidden="true" />}
           title="دسته‌بندی قابل تأیید نیست"
-          body={loader.error ?? "Backend پاسخ معتبر برنگرداند."}
+          body={loader.error ?? "اطلاعات این دسته فعلاً در دسترس نیست."}
           action={
             <button
               type="button"
@@ -337,8 +382,14 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
 
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
+    setOptimisticFilters(normalized);
+    requestKey.current = `${category.slug}?${stableSearchString(serializeBackendFilters(normalized, scope))}`;
     startTransition(() =>
-      navigate({ search: serializeBackendFilters(normalized, scope), replace: false }),
+      navigate({
+        search: serializeBackendFilters(normalized, scope),
+        replace: false,
+        resetScroll: false,
+      }),
     );
   };
   const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
@@ -349,11 +400,18 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
       sizes={visuals.sizes}
       priceCeil={Math.max(1, visuals.priceCeil)}
       showSale={false}
+      colorLabels={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+      )}
+      colorSwatches={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.hex]),
+      )}
     />
   );
 
   const loadMore = async () => {
-    if (!facets || loadingMore || page >= loader.totalPages) return;
+    if (!facets || loadingMore || page >= loader.totalPages || requestKey.current !== currentKey)
+      return;
     setLoadingMore(true);
     setLoadMoreError(null);
     try {
@@ -364,12 +422,19 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
         page: nextPage,
         per_page: BACKEND_PAGE_SIZE,
       });
-      setItems((current) => [...current, ...response.data.map(backendCard)]);
+      if (requestKey.current !== currentKey) return;
+      setItems((current) => {
+        const seen = new Set(current.map((product) => product.id));
+        return [
+          ...current,
+          ...response.data.map(backendCard).filter((product) => !seen.has(product.id)),
+        ];
+      });
       setPage(nextPage);
     } catch (error) {
-      setLoadMoreError(backendErrorMessage(error));
+      if (requestKey.current === currentKey) setLoadMoreError(backendErrorMessage(error));
     } finally {
-      setLoadingMore(false);
+      if (requestKey.current === currentKey) setLoadingMore(false);
     }
   };
 
@@ -377,9 +442,7 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
     <CategoryChrome
       categoryName={category.name}
       categorySlug={category.slug}
-      description={
-        category.description || "محصولات منتشرشده این دسته مستقیماً از Backend خوانده می‌شوند."
-      }
+      description={category.description || "محصولات منتشرشدهٔ این دسته را ببینید."}
       image={category.image}
       siblingCategories={facets?.categories
         .filter((item) => item.slug !== category.slug)
@@ -387,7 +450,7 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
     >
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block" aria-label="فیلتر محصولات">
-          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)] max-h-[calc(100dvh-var(--lbb-nav-h)-40px)] overflow-y-auto overscroll-contain pe-3">
             {facets ? renderFilters(filters, setFilters) : null}
           </div>
         </aside>
@@ -402,8 +465,12 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
               resultCount={loader.total}
               filterSlot={renderFilters}
               getResultCount={() => loader.total}
+              getPreviewCount={getPreviewCount}
               lockedCategory
               supportedSorts={BACKEND_SUPPORTED_SORTS}
+              colorLabels={Object.fromEntries(
+                (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+              )}
             />
           ) : null}
           {loader.error ? (
@@ -521,7 +588,7 @@ function CategoryChrome({
               <TechLabel tone="signal">CATEGORY / {categorySlug.toUpperCase()}</TechLabel>
               <h1 className="text-display-2 mt-3 text-bone">{categoryName}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">{description}</p>
-              <p className="tech mt-4 text-signal">قیمت و موجودی از Backend</p>
+              <p className="tech mt-4 text-signal">قیمت و موجودی به‌روز محصولات</p>
             </div>
           </Shell>
         </section>
@@ -537,9 +604,18 @@ function CategoryChrome({
                     key={category.publicId}
                     to="/$category"
                     params={{ category: category.slug }}
-                    className="grid min-h-24 place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    className="relative isolate grid min-h-28 overflow-hidden place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                   >
-                    {category.name}
+                    {category.image ? (
+                      <img
+                        src={category.image}
+                        alt=""
+                        loading="lazy"
+                        className="absolute inset-0 -z-20 h-full w-full object-cover"
+                      />
+                    ) : null}
+                    <span className="absolute inset-0 -z-10 bg-obsidian/65" aria-hidden="true" />
+                    <span className="px-3 text-center">{category.name}</span>
                   </Link>
                 ))}
               </div>
@@ -573,13 +649,15 @@ function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
     if (typeof window === "undefined") return;
     const expected = serializeFilters(filters);
     if (!isCanonicalSearch(window.location.search, expected)) {
-      navigate({ search: expected, replace: true });
+      navigate({ search: expected, replace: true, resetScroll: false });
     }
   }, [filters, navigate]);
 
   const setFilters = (nextFilters: Filters) => {
     const normalized = normalizeFilters(nextFilters, scope);
-    startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
+    startTransition(() =>
+      navigate({ search: serializeFilters(normalized), replace: false, resetScroll: false }),
+    );
   };
 
   const filtered = useMemo(() => applyFilters(items, filters), [items, filters]);

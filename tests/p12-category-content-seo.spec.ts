@@ -34,7 +34,7 @@ test("category copy stays inside verified product-level truth and transactional 
 for (const [slug, category] of Object.entries(CATEGORIES)) {
   test(`${slug} exposes reconciled landing content and metadata`, async ({ page }) => {
     await page.goto(`/${slug}`, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
     });
 
     await expect(page).toHaveTitle(category.metaTitle);
@@ -73,7 +73,7 @@ for (const [slug, category] of Object.entries(CATEGORIES)) {
 
 test("filtered category state stays noindex with clean canonical", async ({ page }) => {
   await page.goto("/hoodies?sizes=M&sort=price-asc", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
 
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);

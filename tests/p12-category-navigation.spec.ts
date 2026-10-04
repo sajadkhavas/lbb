@@ -17,7 +17,7 @@ test("desktop shop menu exposes approved taxonomy without empty planned routes",
   });
 
   await page.goto("/", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
 
   const shopTrigger = page.getByRole("button", {

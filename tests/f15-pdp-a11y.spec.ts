@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("F15 PDP has no serious or critical Axe violations", async ({ page }) => {
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();
@@ -26,7 +26,7 @@ test("F15 PDP has no serious or critical Axe violations", async ({ page }) => {
 
 test("gallery focus, Home/End and RTL arrow semantics remain usable", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const gallery = page.getByRole("region", { name: /گالری تصاویر/ });
   await gallery.focus();
   await page.keyboard.press("End");
@@ -39,7 +39,7 @@ test("gallery focus, Home/End and RTL arrow semantics remain usable", async ({ p
 
 test("PDP survives text-spacing override at mobile width", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   await page.addStyleTag({
     content: `
       * {
@@ -64,7 +64,7 @@ test("reduced motion reduces sticky purchase transition to a negligible duration
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const duration = await page
     .getByTestId("pdp-sticky-buy-bar")
     .evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration));
@@ -72,7 +72,7 @@ test("reduced motion reduces sticky purchase transition to a negligible duration
 });
 
 test("PDP keeps one main landmark and one H1", async ({ page }) => {
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   await expect(page.locator("main")).toHaveCount(1);
   await expect(page.locator("h1")).toHaveCount(1);
 });

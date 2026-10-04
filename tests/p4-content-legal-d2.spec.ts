@@ -50,15 +50,15 @@ test("D2 legal/content routes are wired to backend authority without stale expre
 test("D2 prototype fallbacks remain truthful and accessible", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
 
-  await page.goto("/terms", { waitUntil: "networkidle" });
+  await page.goto("/terms", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "شرایط استفاده" })).toBeVisible();
   await expect(page.getByText("شرایط تجاری فروش هنوز از پنل منتشر نشده است")).toBeVisible();
   await expect(page.getByText(/۴۸ ساعت، حقوق قانونی را محدود نمی‌کند/)).toHaveCount(0);
 
-  await page.goto("/privacy", { waitUntil: "networkidle" });
+  await page.goto("/privacy", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "حریم خصوصی" })).toBeVisible();
 
-  await page.goto("/shipping-returns", { waitUntil: "networkidle" });
+  await page.goto("/shipping-returns", { waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", { level: 1, name: "ارسال، تعویض و مرجوعی" }),
   ).toBeVisible();
@@ -69,7 +69,7 @@ test("D2 prototype fallbacks remain truthful and accessible", async ({ page }) =
   await expect(page.getByText("دکاپست — پس‌کرایه", { exact: true })).toHaveCount(0);
   await expect(page.getByText("پست پیشتاز", { exact: true })).toHaveCount(0);
 
-  await page.goto("/faq", { waitUntil: "networkidle" });
+  await page.goto("/faq", { waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", { level: 1, name: "پاسخ‌های روشن پیش از انتخاب و ثبت سفارش" }),
   ).toBeVisible();

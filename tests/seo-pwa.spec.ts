@@ -6,7 +6,7 @@ test("canonical, robots and sitemap are absolute and environment-aware", async (
   page,
   request,
 }) => {
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
   const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
   expect(canonical).toBe("https://lbb.example.test/shop");
 
@@ -22,7 +22,7 @@ test("canonical, robots and sitemap are absolute and environment-aware", async (
 });
 
 test("filtered listing URLs are noindex with a clean canonical", async ({ page }) => {
-  await page.goto("/hoodies?sizes=M&sort=price-asc", { waitUntil: "networkidle" });
+  await page.goto("/hoodies?sizes=M&sort=price-asc", { waitUntil: "domcontentloaded" });
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
@@ -48,7 +48,7 @@ test("fonts are self-hosted, loaded and free of external font requests", async (
     }
   });
 
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.evaluate(async () => {
     await Promise.all([
       document.fonts.load('400 16px "Estedad Variable"', "فروشگاه لباس"),

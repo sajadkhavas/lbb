@@ -93,7 +93,12 @@ export function HeroNarrative({
 
             <h1
               id="home-hero-title"
-              className="mt-7 max-w-[12ch] text-hero leading-[0.95] text-bone"
+              className="mt-7 max-w-[12ch] text-hero text-bone"
+              style={{
+                fontSize: "clamp(3rem, 5.7vw, 7.25rem)",
+                lineHeight: 1.25,
+                letterSpacing: "-0.02em",
+              }}
             >
               {copy.heroTitle}
             </h1>

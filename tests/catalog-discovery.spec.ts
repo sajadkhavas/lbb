@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
 
 test("catalogue inventory and merchandising labels stay evidence-safe", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   await expect(page.getByText(/۶ قطعه در کاتالوگ.*۵ موجود.*۱ ناموجود/)).toBeVisible();
   await expect(page.getByText("پرفروش‌ترین", { exact: true })).toHaveCount(0);
@@ -25,7 +25,7 @@ test("catalogue inventory and merchandising labels stay evidence-safe", async ({
 
 test("desktop facets expose result counts and unavailable states", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   const filters = page.getByLabel("فیلتر محصولات");
   await expect(filters).toBeVisible();
@@ -36,7 +36,7 @@ test("desktop facets expose result counts and unavailable states", async ({ page
 
 test("mobile filter drawer stages, cancels and applies URL changes", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   const opener = page.getByRole("button", { name: /فیلترها/ }).first();
   await opener.focus();
@@ -60,7 +60,7 @@ test("mobile filter drawer stages, cancels and applies URL changes", async ({ pa
 
   await expect(page).toHaveURL(/instock=true/);
   await expect(page.getByRole("button", { name: "حذف فیلتر فقط موجود" })).toBeVisible();
-  await page.goBack({ waitUntil: "networkidle" });
+  await page.goBack({ waitUntil: "domcontentloaded" });
   await expect(page).not.toHaveURL(/instock/);
 });
 
@@ -68,7 +68,7 @@ test("filtered shop deep links canonicalize, survive refresh and stay noindex", 
   page,
 }) => {
   await page.goto("/shop?sizes=XL,M&sort=price-asc&instock=1", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
 
   const url = new URL(page.url());
@@ -78,13 +78,13 @@ test("filtered shop deep links canonicalize, survive refresh and stay noindex", 
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/shop$/);
 
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("button", { name: "حذف فیلتر فقط موجود" })).toBeVisible();
   await expect(page.getByRole("button", { name: "حذف فیلتر سایز M", exact: true })).toBeVisible();
 });
 
 test("empty catalogue state resets to the complete result set", async ({ page }) => {
-  await page.goto("/shop?max=150000", { waitUntil: "networkidle" });
+  await page.goto("/shop?max=150000", { waitUntil: "domcontentloaded" });
   await expect(page.getByText("محصولی با این ترکیب فیلتر پیدا نشد", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "بازگشت به همه قطعه‌ها" }).click();
@@ -95,27 +95,27 @@ test("empty catalogue state resets to the complete result set", async ({ page })
 test("search typing replaces the current history entry and remains refresh-safe", async ({
   page,
 }) => {
-  await page.goto("/shop", { waitUntil: "networkidle" });
-  await page.goto("/search?q=%D9%87%D9%88%D8%AF%DB%8C", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
+  await page.goto("/search?q=%D9%87%D9%88%D8%AF%DB%8C", { waitUntil: "domcontentloaded" });
 
   const searchbox = page.locator("#site-search");
   await expect(searchbox).toHaveValue("هودی");
   await searchbox.fill("شلوار");
   await expect(page).toHaveURL(/\/search\?q=%D8%B4%D9%84%D9%88%D8%A7%D8%B1/);
 
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(searchbox).toHaveValue("شلوار");
-  await page.goBack({ waitUntil: "networkidle" });
+  await page.goBack({ waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/shop$/);
 });
 
 test("search discovery avoids unsupported popularity claims", async ({ page }) => {
-  await page.goto("/search", { waitUntil: "networkidle" });
+  await page.goto("/search", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "جستجو در کاتالوگ" })).toBeVisible();
   await expect(page.getByText("دسته‌بندی‌های کاتالوگ", { exact: true })).toBeVisible();
   await expect(page.getByText(/پرطرفدار/)).toHaveCount(0);
 
-  await page.goto("/search?q=%D9%87%D9%88%D8%AF%DB%8C", { waitUntil: "networkidle" });
+  await page.goto("/search?q=%D9%87%D9%88%D8%AF%DB%8C", { waitUntil: "domcontentloaded" });
   await expect(page.getByText(/«هودی».*۲ نتیجه از.*۲ تطابق متنی/)).toBeVisible();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
 });
@@ -129,7 +129,7 @@ for (const viewport of [
   test(`listing routes avoid horizontal overflow at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
     for (const path of ["/shop", "/hoodies", "/search?q=هودی"]) {
-      await page.goto(path, { waitUntil: "networkidle" });
+      await page.goto(path, { waitUntil: "domcontentloaded" });
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

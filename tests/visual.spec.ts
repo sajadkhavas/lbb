@@ -167,7 +167,7 @@ const templates = [
 for (const template of templates) {
   test(`${template.name} visual baseline`, async ({ page }) => {
     await page.setViewportSize({ width: template.width, height: template.height });
-    await page.goto(template.route, { waitUntil: "networkidle" });
+    await page.goto(template.route, { waitUntil: "domcontentloaded" });
     await stabilize(page);
     await expect(page).toHaveScreenshot(`${template.name}.png`, {
       fullPage: true,
@@ -215,7 +215,7 @@ for (const viewport of trustSurfaceViewports) {
 
 test("desktop mega menu visual baseline", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "فروشگاه" }).click();
   await stabilize(page);
   await expect(page).toHaveScreenshot("navigation-mega-desktop.png", {
@@ -225,7 +225,7 @@ test("desktop mega menu visual baseline", async ({ page }) => {
 
 test("desktop search overlay visual baseline", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "جست‌وجو" }).first().click();
   await page.getByRole("searchbox", { name: "عبارت جست‌وجو" }).fill("هودی");
   await stabilize(page);
@@ -236,7 +236,7 @@ test("desktop search overlay visual baseline", async ({ page }) => {
 
 test("mobile main menu visual baseline", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "منوی اصلی" }).click();
   await stabilize(page);
   await expect(page).toHaveScreenshot("navigation-menu-mobile.png", {
@@ -246,7 +246,7 @@ test("mobile main menu visual baseline", async ({ page }) => {
 
 test("mobile empty cart drawer preserves visual layout", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /باز کردن سبد خرید/ }).click();
   await stabilize(page);
   const cart = page.getByRole("dialog", { name: "سبد خرید" });

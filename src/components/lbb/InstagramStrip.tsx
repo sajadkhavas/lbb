@@ -56,7 +56,7 @@ export function InstagramStrip({ liveItems }: { liveItems?: StorefrontLookDto[] 
                     width={640}
                     height={640}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="h-full w-full origin-bottom scale-[1.18] object-cover object-[center_82%] transition-transform duration-500 group-hover:scale-[1.23]"
                   />
                   <span className="absolute inset-0 flex items-end bg-gradient-to-t from-black/75 via-transparent to-transparent p-4 text-start opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
                     <span>

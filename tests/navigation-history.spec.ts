@@ -1,44 +1,44 @@
 import { expect, test } from "@playwright/test";
 
 test("search URL and refresh stay synchronized without per-keystroke history", async ({ page }) => {
-  await page.goto("/shop", { waitUntil: "networkidle" });
-  await page.goto("/search?q=%D9%87%D9%88%D8%AF%DB%8C", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
+  await page.goto("/search?q=%D9%87%D9%88%D8%AF%DB%8C", { waitUntil: "domcontentloaded" });
   const searchbox = page.locator("#site-search");
   await expect(searchbox).toHaveValue("هودی");
 
   await searchbox.fill("شلوار");
   await expect(page).toHaveURL(/\/search\?q=%D8%B4%D9%84%D9%88%D8%A7%D8%B1/);
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(searchbox).toHaveValue("شلوار");
 
-  await page.goBack({ waitUntil: "networkidle" });
+  await page.goBack({ waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/shop$/);
 });
 
 test("filtered category deep links survive refresh", async ({ page }) => {
-  await page.goto("/hoodies?sizes=M&sort=price-asc", { waitUntil: "networkidle" });
+  await page.goto("/hoodies?sizes=M&sort=price-asc", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/sizes=M/);
   await expect(page).toHaveURL(/sort=price-asc/);
   await expect(page.locator("h1")).toHaveCount(1);
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/sizes=M/);
   await expect(page).toHaveURL(/sort=price-asc/);
 });
 
 test("product deep link and keyboard gallery remain usable", async ({ page }) => {
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   const gallery = page.getByRole("region", { name: /گالری تصاویر/ });
   await gallery.focus();
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("ArrowRight");
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   await expect(page.getByRole("region", { name: /گالری تصاویر/ })).toBeVisible();
 });
 
 test("lookbook dialog supports arrows, Escape and focus restoration", async ({ page }) => {
-  await page.goto("/lookbook", { waitUntil: "networkidle" });
+  await page.goto("/lookbook", { waitUntil: "domcontentloaded" });
   const opener = page.locator('button[aria-haspopup="dialog"]').first();
   await opener.focus();
   await opener.press("Enter");

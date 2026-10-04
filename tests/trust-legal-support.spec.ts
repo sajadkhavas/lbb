@@ -222,7 +222,7 @@ test("shipping, contact, legal and privacy routes are truth-safe at mobile width
   });
 
   await page.goto("/shipping-returns", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
 
   await expect(
@@ -263,7 +263,7 @@ test("shipping, contact, legal and privacy routes are truth-safe at mobile width
   await expectNoHorizontalOverflow(page);
 
   await page.goto("/contact", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
 
   await expect(
@@ -285,7 +285,7 @@ test("shipping, contact, legal and privacy routes are truth-safe at mobile width
   await expectNoHorizontalOverflow(page);
 
   await page.goto("/terms", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
 
   await expect(
@@ -298,7 +298,7 @@ test("shipping, contact, legal and privacy routes are truth-safe at mobile width
   await expectNoHorizontalOverflow(page);
 
   await page.goto("/privacy", {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
 
   await expect(
@@ -329,7 +329,7 @@ test("checkout with cart data cannot submit or claim payment success", async ({ 
     );
   });
 
-  await page.goto("/checkout", { waitUntil: "networkidle" });
+  await page.goto("/checkout", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "تکمیل سفارش" })).toBeVisible();
   await expect(page.locator("main form")).toHaveCount(0);
   await expect(page.getByText("تکمیل سفارش فعلاً در دسترس نیست")).toBeVisible();
@@ -338,13 +338,13 @@ test("checkout with cart data cannot submit or claim payment success", async ({ 
 });
 
 test("order confirmation and tracking never trust browser-local success", async ({ page }) => {
-  await page.goto("/order-confirmation?status=success&ref=fake", { waitUntil: "networkidle" });
+  await page.goto("/order-confirmation?status=success&ref=fake", { waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", { level: 1, name: "سفارشی برای نمایش وجود ندارد" }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: /سفارش.*ثبت شد/ })).toHaveCount(0);
 
-  await page.goto("/track-order", { waitUntil: "networkidle" });
+  await page.goto("/track-order", { waitUntil: "domcontentloaded" });
   await expect(page.locator("main form")).toHaveCount(0);
   await expect(page.getByText("پیگیری سفارش فعلاً در دسترس نیست")).toBeVisible();
 });

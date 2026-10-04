@@ -5,6 +5,7 @@ import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
 import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { Logo } from "@/components/lbb/Logo";
 import { TrustMarks } from "@/components/lbb/TrustMarks";
+import { PushOptIn } from "@/components/lbb/PushOptIn";
 import { useStorefrontControl, type MerchantNavigationItem } from "@/lib/storefront-control";
 import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
@@ -88,7 +89,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
       <div className="lbb-shell py-10 md:py-12">
         <div className="grid gap-0 pb-8 md:gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
           <div className="min-w-0 border-b border-hairline pb-8 sm:col-span-2 lg:col-span-1 lg:border-0 lg:pb-0">
-            <Logo size={48} withWordmark />
+            <Logo size={80} withWordmark />
             <p className="mt-4 max-w-xs text-sm leading-7 text-metal">{brand.descriptor}</p>
             <p className="mt-4 flex items-start gap-2 text-sm leading-7 text-metal">
               <MapPin size={16} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
@@ -124,6 +125,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
               <span className="tech">{brand.instagramHandle.toUpperCase()}</span>
             </a>
             <TrustMarks />
+            <PushOptIn />
           </div>
 
           <MerchantFooterList
@@ -158,6 +160,7 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
                 : `© ${currentYear} ${brand.nameFa} — ${contact.locationLabel}`}
             </p>
             <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
+            <p className="mt-2 text-[11px] leading-6">طراحی شده توسط مجموعه shinethree</p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             {presentation.shell.utilityLinks.map((item) => (

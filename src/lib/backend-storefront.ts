@@ -12,7 +12,12 @@ import type {
   GarmentMeasurements,
   ProductDecisionViewModel,
 } from "@/lib/product-decision";
-import type { Filters, SortKey } from "@/lib/product-filter";
+import {
+  normalizeBackendFilters,
+  type FilterScope,
+  type Filters,
+  type SortKey,
+} from "@/lib/product-filter";
 import { isUsableMannequinProfile, type MannequinProfileDto } from "@/lib/style-mannequin";
 
 export type BackendCatalogCard = {
@@ -48,9 +53,7 @@ export function backendCard(product: ProductSummaryDto): BackendCatalogCard {
   const previewImages = [
     ...(presentation.previewImages ?? []),
     ...(product.primaryImage ? [product.primaryImage] : []),
-  ]
-    .filter((value, index, all): value is string => Boolean(value) && all.indexOf(value) === index)
-    .slice(0, 3);
+  ].filter((value, index, all): value is string => Boolean(value) && all.indexOf(value) === index);
 
   return {
     source: "backend",
@@ -274,10 +277,22 @@ export function backendCatalogQuery(filters: Filters, facets?: FacetsDto): Catal
 
 export function backendFacetVisuals(facets: FacetsDto) {
   return {
-    colors: facets.colors
-      .map((color) => color.hex || color.slug)
-      .filter((value): value is string => Boolean(value)),
+    colors: facets.colors.map((color) => color.slug),
     sizes: facets.sizes.map((size) => size.code || size.name),
     priceCeil: facets.price.max?.amount ?? 1,
   };
+}
+
+/** Keep old color links usable while storing stable, unambiguous color slugs in new links. */
+export function normalizeCatalogFilters(filters: Filters, facets: FacetsDto, scope: FilterScope) {
+  const colors = filters.colors.map((value) => {
+    const match = facets.colors.find(
+      (color) =>
+        color.slug.toLowerCase() === value.toLowerCase() ||
+        color.code.toLowerCase() === value.toLowerCase() ||
+        color.hex?.toLowerCase() === value.toLowerCase(),
+    );
+    return match?.slug ?? value;
+  });
+  return normalizeBackendFilters({ ...filters, colors }, scope);
 }

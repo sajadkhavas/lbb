@@ -22,6 +22,28 @@ function nodeLabels(nodes: readonly CatalogTaxonomyNode[] | undefined) {
 
 type LiveCategoryNode = StorefrontCategoryDto & { children: LiveCategoryNode[] };
 
+let cachedCategories: StorefrontCategoryDto[] | null = null;
+let categoryRequest: Promise<StorefrontCategoryDto[]> | null = null;
+let categoryCachedAt = 0;
+
+function loadCategories(): Promise<StorefrontCategoryDto[]> {
+  if (cachedCategories && Date.now() - categoryCachedAt < 60_000) {
+    return Promise.resolve(cachedCategories);
+  }
+  if (!categoryRequest) {
+    categoryRequest = listStorefrontCategories()
+      .then((items) => {
+        cachedCategories = items;
+        categoryCachedAt = Date.now();
+        return items;
+      })
+      .finally(() => {
+        categoryRequest = null;
+      });
+  }
+  return categoryRequest;
+}
+
 function buildLiveTree(categories: StorefrontCategoryDto[]): LiveCategoryNode[] {
   const nodes = new Map<string, LiveCategoryNode>();
   for (const category of categories) {
@@ -61,14 +83,14 @@ export function CatalogTaxonomyMenu({
   compact?: boolean;
 }) {
   const live = isLiveBackend();
-  const [categories, setCategories] = useState<StorefrontCategoryDto[] | null>(null);
+  const [categories, setCategories] = useState<StorefrontCategoryDto[] | null>(cachedCategories);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!live) return;
     let cancelled = false;
     setFailed(false);
-    void listStorefrontCategories()
+    void loadCategories()
       .then((items) => {
         if (!cancelled) setCategories(items);
       })
@@ -183,11 +205,6 @@ function LiveTaxonomy({
                   >
                     {root.name}
                   </span>
-                  {root.description ? (
-                    <span className="mt-1 line-clamp-2 block text-[11px] leading-6 text-mute">
-                      {root.description}
-                    </span>
-                  ) : null}
                 </span>
               </Link>
               <ArrowUpLeft size={15} className="mt-1 shrink-0 text-mute" aria-hidden="true" />

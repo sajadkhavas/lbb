@@ -32,7 +32,7 @@ test.beforeEach(async ({ page }) => {
 for (const viewport of viewports) {
   test(`F15 PDP default evidence-safe visual ${viewport.name}`, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+    await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
     await stabilize(page);
     expect(
       await page.evaluate(
@@ -48,7 +48,7 @@ for (const viewport of viewports) {
 
 test("F15 mobile sticky blocked state visual", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
 
   const sticky = page.getByTestId("pdp-sticky-buy-bar");
   const buyButton = page.getByRole("button", {
@@ -85,7 +85,7 @@ test("F15 mobile sticky blocked state visual", async ({ page }) => {
 
 test("F15 gallery focused state visual", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   await page.getByRole("region", { name: /گالری/ }).focus();
   await page.keyboard.press("End");
   await stabilize(page);

@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+} from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Clock, PackageSearch, Search as SearchIcon, X } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -56,6 +64,7 @@ import {
   backendCard,
   backendCatalogQuery,
   backendFacetVisuals,
+  normalizeCatalogFilters,
   type BackendCatalogCard,
 } from "@/lib/backend-storefront";
 
@@ -131,28 +140,41 @@ export const Route = createFileRoute("/search")({
         sizes: visuals.sizes,
         priceCeil: Math.max(1, visuals.priceCeil),
       };
-      const filters = normalizeBackendFilters(
+      const filters = normalizeCatalogFilters(
         parseBackendFilters(deps.search as unknown as Record<string, unknown>),
+        facets,
         scope,
       );
       const q = queryFrom((deps.search as SearchParams).q);
       if (!q)
         return { mode: "live", facets, items: [], filters, total: 0, totalPages: 0, error: null };
-      const response = await searchProducts({
-        q,
-        ...backendCatalogQuery(filters, facets),
-        page: 1,
-        per_page: BACKEND_PAGE_SIZE,
-      });
-      return {
-        mode: "live",
-        facets,
-        items: response.data.map(backendCard),
-        filters,
-        total: response.meta.pagination?.total ?? response.data.length,
-        totalPages: response.meta.pagination?.totalPages ?? 1,
-        error: null,
-      };
+      try {
+        const response = await searchProducts({
+          q,
+          ...backendCatalogQuery(filters, facets),
+          page: 1,
+          per_page: BACKEND_PAGE_SIZE,
+        });
+        return {
+          mode: "live",
+          facets,
+          items: response.data.map(backendCard),
+          filters,
+          total: response.meta.pagination?.total ?? response.data.length,
+          totalPages: response.meta.pagination?.totalPages ?? 1,
+          error: null,
+        };
+      } catch (error) {
+        return {
+          mode: "live",
+          facets,
+          items: [],
+          filters,
+          total: 0,
+          totalPages: 0,
+          error: backendErrorMessage(error),
+        };
+      }
     } catch (error) {
       return {
         mode: "live",
@@ -335,17 +357,41 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const facets = loader.facets;
   const visuals = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
-  const scope: FilterScope = facets
-    ? {
-        categories: facets.categories.map((category) => category.slug),
-        colors: visuals.colors,
-        sizes: visuals.sizes,
-        priceCeil: Math.max(1, visuals.priceCeil),
-      }
-    : {};
-  const filters = normalizeBackendFilters(loader.filters, scope);
-  const expectedSearch = serializeSearch(query, filters, scope);
+  const scope: FilterScope = useMemo(() => {
+    if (!facets) return {};
+    const options = backendFacetVisuals(facets);
+    return {
+      categories: facets.categories.map((category) => category.slug),
+      colors: options.colors,
+      sizes: options.sizes,
+      priceCeil: Math.max(1, options.priceCeil),
+    };
+  }, [facets]);
+  const appliedFilters = useMemo(
+    () => normalizeBackendFilters(loader.filters, scope),
+    [loader.filters, scope],
+  );
+  const [optimisticFilters, setOptimisticFilters] = useState(appliedFilters);
+  const filters = normalizeBackendFilters(optimisticFilters, scope);
+  const getPreviewCount = useCallback(
+    async (candidate: Filters) => {
+      if (!facets || !query) return 0;
+      const response = await searchProducts({
+        q: query,
+        ...backendCatalogQuery(candidate, facets),
+        page: 1,
+        per_page: 1,
+      });
+      return response.meta.pagination?.total ?? response.data.length;
+    },
+    [facets, query],
+  );
+  const expectedSearch = useMemo(
+    () => serializeSearch(query, appliedFilters, scope),
+    [query, appliedFilters, scope],
+  );
   const searchKey = stableSearchString(expectedSearch);
+  const requestKey = useRef(searchKey);
 
   useEffect(() => setDraft(query ?? ""), [query]);
   useEffect(() => setRecent(getRecentSearches()), []);
@@ -356,27 +402,38 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
     }
   }, [query]);
   useEffect(() => {
+    requestKey.current = searchKey;
+    setOptimisticFilters(appliedFilters);
     setItems(loader.items);
     setPage(1);
+    setLoadingMore(false);
     setLoadMoreError(null);
-  }, [loader.items, searchKey]);
+  }, [loader.items, searchKey, appliedFilters]);
   useEffect(() => {
     if (
       typeof window !== "undefined" &&
       facets &&
+      requestKey.current === searchKey &&
       !isCanonicalSearch(window.location.search, expectedSearch)
     )
-      navigate({ search: expectedSearch, replace: true });
-  }, [expectedSearch, facets, navigate]);
+      navigate({ search: expectedSearch, replace: true, resetScroll: false });
+  }, [expectedSearch, searchKey, facets, navigate]);
 
   const commitQuery = (value: string, replace = false) => {
     const next = normalizeSearchTerm(value) || undefined;
+    requestKey.current = stableSearchString(serializeSearch(next, filters, scope));
     startTransition(() => navigate({ search: serializeSearch(next, filters, scope), replace }));
   };
   const setFilters = (next: Filters) => {
     const normalized = normalizeBackendFilters(next, scope);
+    setOptimisticFilters(normalized);
+    requestKey.current = stableSearchString(serializeSearch(query, normalized, scope));
     startTransition(() =>
-      navigate({ search: serializeSearch(query, normalized, scope), replace: false }),
+      navigate({
+        search: serializeSearch(query, normalized, scope),
+        replace: false,
+        resetScroll: false,
+      }),
     );
   };
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -400,11 +457,24 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
       showCategory
       showSale={false}
       categoryOptions={categoryOptions}
+      colorLabels={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+      )}
+      colorSwatches={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.hex]),
+      )}
     />
   );
 
   const loadMore = async () => {
-    if (!query || !facets || loadingMore || page >= loader.totalPages) return;
+    if (
+      !query ||
+      !facets ||
+      loadingMore ||
+      page >= loader.totalPages ||
+      requestKey.current !== searchKey
+    )
+      return;
     setLoadingMore(true);
     setLoadMoreError(null);
     try {
@@ -415,12 +485,19 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
         page: nextPage,
         per_page: BACKEND_PAGE_SIZE,
       });
-      setItems((current) => [...current, ...response.data.map(backendCard)]);
+      if (requestKey.current !== searchKey) return;
+      setItems((current) => {
+        const seen = new Set(current.map((product) => product.id));
+        return [
+          ...current,
+          ...response.data.map(backendCard).filter((product) => !seen.has(product.id)),
+        ];
+      });
       setPage(nextPage);
     } catch (error) {
-      setLoadMoreError(backendErrorMessage(error));
+      if (requestKey.current === searchKey) setLoadMoreError(backendErrorMessage(error));
     } finally {
-      setLoadingMore(false);
+      if (requestKey.current === searchKey) setLoadingMore(false);
     }
   };
 
@@ -464,7 +541,7 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
       {query && !loader.error ? (
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
           <aside className="hidden lg:block">
-            <div className="sticky top-[calc(var(--lbb-nav-h)+24px)]">
+            <div className="sticky top-[calc(var(--lbb-nav-h)+24px)] max-h-[calc(100dvh-var(--lbb-nav-h)-40px)] overflow-y-auto overscroll-contain pe-3">
               {facets ? renderFilters(filters, setFilters) : null}
             </div>
           </aside>
@@ -479,8 +556,12 @@ function LiveSearch({ loader }: { loader: LiveLoader }) {
                 resultCount={loader.total}
                 filterSlot={renderFilters}
                 getResultCount={() => loader.total}
+                getPreviewCount={getPreviewCount}
                 supportedSorts={BACKEND_SUPPORTED_SORTS}
                 categoryLabels={categoryLabels}
+                colorLabels={Object.fromEntries(
+                  (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+                )}
               />
             ) : null}
             <p className="mt-4 text-[13px] text-metal" role="status" aria-live="polite">
@@ -577,7 +658,7 @@ function PrototypeSearch() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!isCanonicalSearch(window.location.search, expectedSearch)) {
-      navigate({ search: expectedSearch, replace: true });
+      navigate({ search: expectedSearch, replace: true, resetScroll: false });
     }
   }, [expectedSearch, navigate]);
 
@@ -602,7 +683,9 @@ function PrototypeSearch() {
 
   const setFilters = (nextFilters: Filters) => {
     const normalized = normalizeFilters(nextFilters, filterScope);
-    startTransition(() => navigate({ search: serializeSearch(query, normalized), replace: false }));
+    startTransition(() =>
+      navigate({ search: serializeSearch(query, normalized), replace: false, resetScroll: false }),
+    );
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {

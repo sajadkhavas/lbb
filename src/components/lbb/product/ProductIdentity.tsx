@@ -30,7 +30,7 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
       </TechLabel>
       <h1
         id="pdp-product-title"
-        className="mt-2 text-display-2 text-bone lg:mt-3 lg:max-w-[12ch] lg:text-[clamp(2rem,3vw,3.35rem)] lg:leading-[1.08]"
+        className="mt-2 max-w-full break-words text-[clamp(1.75rem,8vw,2.5rem)] font-black leading-[1.35] tracking-[-0.025em] text-bone [overflow-wrap:anywhere] sm:text-[clamp(2rem,6vw,3rem)] lg:mt-3 lg:max-w-[12ch] lg:text-[clamp(2rem,3vw,3.35rem)] lg:leading-[1.15]"
       >
         {identity.name ?? "اطلاعات محصول در انتظار تأیید"}
       </h1>

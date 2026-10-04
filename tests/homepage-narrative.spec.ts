@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
 
 test("homepage communicates current identity, catalog and primary action", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await expect(page).toHaveTitle("LBB | پوشاک خیابانی و استریت‌ویر در کرج");
 
@@ -62,7 +62,7 @@ test("homepage communicates current identity, catalog and primary action", async
 });
 
 test("hero LCP image uses the current production asset contract", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const image = page.getByRole("img", {
     name: "تیشرت مشکی ال‌بی‌بی روی زمینه روشن",
@@ -95,7 +95,7 @@ test("hero LCP image uses the current production asset contract", async ({ page 
 });
 
 test("category gateway exposes current promoted categories", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const gateway = page.locator("#home-categories");
 
@@ -114,7 +114,7 @@ test("category gateway exposes current promoted categories", async ({ page }) =>
 });
 
 test("homepage follows the current production narrative order", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const ids = [
     "home-hero-title",
@@ -140,7 +140,7 @@ test("homepage follows the current production narrative order", async ({ page })
 });
 
 test("product moments expose current merchandising products", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const section = page.locator('section[aria-labelledby="home-products-title"]');
 
@@ -158,7 +158,7 @@ test("product moments expose current merchandising products", async ({ page }) =
 });
 
 test("drop story exposes current denim capsule", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const section = page.locator('section[aria-labelledby="drop-story-title"]');
 
@@ -178,7 +178,7 @@ test("drop story exposes current denim capsule", async ({ page }) => {
 });
 
 test("decision-support and physical-store paths remain actionable", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const decision = page.locator('section[aria-labelledby="decision-support-title"]');
 
@@ -228,7 +228,7 @@ for (const viewport of [
     page,
   }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
     expect(
       await page.evaluate(

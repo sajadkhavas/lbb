@@ -152,7 +152,7 @@ export function ProductPurchasePanel({
         <div ref={sizeRegionRef}>
           {model.sizes.length > 0 ? (
             <>
-              <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="mb-2 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-xs text-metal">موجودی سایز بر اساس رنگ انتخابی</span>
                 {model.measurements ? (
                   <SizeGuideDialog

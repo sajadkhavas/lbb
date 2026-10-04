@@ -114,9 +114,16 @@ export const Route = createFileRoute("/product/$slug")({
         };
       }
       const path = backendCanonicalPath(product.seo, `/product/${product.slug}`);
-      const title = product.seo.metaTitle?.trim() || `${product.name} | LBB`;
+      const title = product.seo.metaTitle?.trim() || `خرید ${product.name} | فروشگاه LBB`;
       const description =
-        product.seo.metaDescription?.trim() || product.shortDescription || "مشاهده محصول LBB";
+        product.seo.metaDescription?.trim() ||
+        [
+          product.shortDescription || product.description,
+          `دسته ${product.category.name}`,
+          product.price.from ? `قیمت از ${fmtToman(product.price.from.amount)}` : null,
+        ]
+          .filter(Boolean)
+          .join("؛ ");
       const image = product.seo.primaryImage || product.primaryImage || undefined;
       const low = product.seo.structuredData?.lowPrice ?? product.price.from?.amount ?? null;
       const high = product.seo.structuredData?.highPrice ?? product.price.to?.amount ?? low;
@@ -279,7 +286,7 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
           <EmptyState
             icon={<RefreshCcw size={40} aria-hidden="true" />}
             title="اطلاعات محصول قابل تأیید نیست"
-            body={loader.error ?? "Backend پاسخ معتبر برای این محصول برنگرداند."}
+            body="اطلاعات این محصول فعلاً در دسترس نیست. کمی بعد دوباره تلاش کنید."
             action={
               <Link to="/shop" className={CtaClasses("line")}>
                 بازگشت به فروشگاه
@@ -310,7 +317,7 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
       <Shell
         as="section"
         aria-label="تصمیم‌گیری محصول"
-        className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
+        className="grid grid-cols-1 gap-8 pb-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-10"
       >
         <Gallery media={galleryMedia} name={product.name} productSlug={product.slug} enable3d />
         <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
@@ -318,11 +325,10 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
       <Band label="PRODUCT DECISION FACTS">
         <Shell className="max-w-[980px]">
           <div className="mb-8">
-            <TechLabel tone="signal">BACKEND VERIFIED PRODUCT DATA</TechLabel>
+            <TechLabel tone="signal">مشخصات محصول</TechLabel>
             <h2 className="mt-2 text-display-3 text-bone">اطلاعات تصمیم‌گیری</h2>
             <p className="mt-3 max-w-[68ch] text-sm leading-8 text-metal">
-              قیمت، موجودی، رنگ، سایز و مشخصات نمایش‌داده‌شده از رکورد منتشرشده Backend خوانده
-              شده‌اند.
+              قیمت، موجودی، رنگ، سایز و مشخصات مربوط به همین محصول را اینجا ببینید.
             </p>
           </div>
           <ProductFacts model={model} />
@@ -403,7 +409,7 @@ function PrototypeProductPage({ loader }: { loader: PrototypeLoader }) {
         <Shell
           as="section"
           aria-label="تصمیم‌گیری محصول"
-          className="grid grid-cols-1 gap-8 pb-12 md:grid-cols-[minmax(0,60%)_minmax(0,40%)] md:gap-10"
+          className="grid grid-cols-1 gap-8 pb-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-10"
         >
           <Gallery media={galleryMedia} name={model.identity.name ?? "محصول"} />
           <ProductPurchasePanel model={model} onMediaChange={updateGallery} />

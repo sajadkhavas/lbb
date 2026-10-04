@@ -27,7 +27,7 @@ async function expectFocusWrap(page: Page, root: Locator) {
 }
 
 async function addProductToCart(page: Page) {
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
   const addButton = page.getByRole("button", { name: /افزودن به سبد خرید|خرید در دسترس نیست/ });
 
   if (await addButton.isDisabled()) {
@@ -61,7 +61,7 @@ test.beforeEach(async ({ page }) => {
 
 test("mega menu traps Tab and Shift+Tab and restores focus", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const trigger = page.getByRole("button", { name: "فروشگاه" });
   await trigger.focus();
@@ -76,7 +76,7 @@ test("mega menu traps Tab and Shift+Tab and restores focus", async ({ page }) =>
 
 test("mobile menu and cart drawer contain focus and support Escape", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const menuTrigger = page.getByRole("button", { name: "منوی اصلی" });
   await menuTrigger.click();
@@ -99,7 +99,7 @@ test("mobile menu and cart drawer contain focus and support Escape", async ({ pa
 
 test("filter drawer and Quick View trap and restore focus", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   const filterTrigger = page.getByRole("button", { name: /فیلترها/ }).first();
   await filterTrigger.click();
@@ -123,7 +123,7 @@ test("filter drawer and Quick View trap and restore focus", async ({ page }) => 
 test("lookbook lightbox traps focus and supports arrows, Escape and restoration", async ({
   page,
 }) => {
-  await page.goto("/lookbook", { waitUntil: "networkidle" });
+  await page.goto("/lookbook", { waitUntil: "domcontentloaded" });
   const opener = page.locator('button[aria-haspopup="dialog"]').first();
   await opener.focus();
   await opener.press("Enter");
@@ -143,7 +143,7 @@ test("lookbook lightbox traps focus and supports arrows, Escape and restoration"
 
 test("product gallery supports roving focus, arrows, Home and End", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "networkidle" });
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
 
   const tablist = page.getByRole("tablist", { name: /تصاویر محصول/ });
   const tabs = tablist.getByRole("tab");
@@ -159,7 +159,7 @@ test("product gallery supports roving focus, arrows, Home and End", async ({ pag
 });
 
 test("FAQ disclosures work with Enter and Space", async ({ page }) => {
-  await page.goto("/faq", { waitUntil: "networkidle" });
+  await page.goto("/faq", { waitUntil: "domcontentloaded" });
   const summary = page.locator("summary").first();
   const details = summary.locator("xpath=..");
 
@@ -174,7 +174,7 @@ test("checkout either exposes accessible form controls or fails closed before co
   page,
 }) => {
   await addProductToCart(page);
-  await page.goto("/checkout", { waitUntil: "networkidle" });
+  await page.goto("/checkout", { waitUntil: "domcontentloaded" });
 
   const form = page.locator("form");
   const expectations = [
@@ -207,7 +207,7 @@ test("F19B-P1-002: checkout errors are associated and first-error focus is manag
   page,
 }) => {
   await addProductToCart(page);
-  await page.goto("/checkout", { waitUntil: "networkidle" });
+  await page.goto("/checkout", { waitUntil: "domcontentloaded" });
 
   const form = page.locator("form");
   if ((await form.count()) === 0) {
@@ -228,7 +228,7 @@ test("F19B-P1-002: checkout errors are associated and first-error focus is manag
 });
 
 test("route navigation never leaves focus in a disconnected overlay", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "جست‌وجو" }).first().click();
   const dialog = page.getByRole("dialog", { name: "جست‌وجوی محصولات" });
   await expect(dialog).toBeVisible();
@@ -267,7 +267,7 @@ test("major route families expose one main landmark and one H1", async ({ page }
   ];
 
   for (const route of routes) {
-    await page.goto(route, { waitUntil: "networkidle" });
+    await page.goto(route, { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("main")).toHaveCount(1);
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   }

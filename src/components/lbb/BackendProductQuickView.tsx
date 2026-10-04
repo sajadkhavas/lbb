@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useCart } from "@/lib/cart";
-import { backendErrorMessage, getProduct } from "@/lib/backend-api";
+import { getProduct } from "@/lib/backend-api";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
 import { backendDecisionModel } from "@/lib/backend-storefront";
 import {
@@ -86,12 +86,12 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
 
   const gallery = useMemo(() => {
     if (!model) return fallbackMedia(card);
+    if (model.media.length === 0) return fallbackMedia(card);
+
     const selected = mediaForColor(model, colorId);
-    return selected.length > 0
-      ? selected
-      : model.media.length > 0
-        ? model.media
-        : fallbackMedia(card);
+    return [...selected, ...model.media].filter(
+      (media, index, all) => all.findIndex((candidate) => candidate.id === media.id) === index,
+    );
   }, [card, colorId, model]);
 
   useEffect(() => {
@@ -170,7 +170,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex max-h-[94svh] w-full flex-col overflow-hidden border-t border-hairline bg-obsidian shadow-2xl md:max-h-[88svh] md:max-w-5xl md:flex-row md:overflow-hidden md:rounded-2xl md:border"
+        className="relative z-10 flex max-h-[94svh] w-full flex-col overflow-y-auto overscroll-contain rounded-t-[28px] border-t border-hairline bg-obsidian shadow-2xl md:max-h-[88svh] md:max-w-5xl md:flex-row md:overflow-hidden md:rounded-2xl md:border"
         style={{ animation: "qv-up 0.35s cubic-bezier(0.22,1,0.36,1)" }}
       >
         <button
@@ -188,7 +188,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
 
         <div className="shrink-0 md:w-[48%]">
           <div
-            className="relative aspect-[4/5] w-full overflow-hidden bg-carbon touch-pan-y md:h-full md:min-h-[650px] md:aspect-auto"
+            className="relative aspect-[4/5] max-h-[56svh] w-full overflow-hidden bg-white touch-pan-y md:aspect-auto md:max-h-none md:min-h-[650px] md:h-full md:bg-carbon"
             tabIndex={gallery.length > 1 ? 0 : -1}
             role="region"
             aria-roledescription="carousel"
@@ -232,7 +232,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                 height={gallery[img].height}
                 loading="eager"
                 decoding="async"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain md:object-cover"
               />
             ) : (
               <div className="grid h-full min-h-80 place-items-center px-8 text-center text-sm leading-7 text-metal">
@@ -287,7 +287,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5 md:p-8 lg:p-9">
+        <div className="flex min-h-0 flex-1 flex-col p-5 pb-[calc(24px+env(safe-area-inset-bottom))] md:overflow-y-auto md:p-8 lg:p-9">
           {productQuery.isPending ? (
             <div className="grid min-h-[420px] place-items-center text-center">
               <div>
@@ -300,7 +300,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                   در حال دریافت اطلاعات واقعی محصول…
                 </p>
                 <p className="mt-2 text-xs leading-6 text-metal">
-                  قیمت، موجودی و تنوع از Backend خوانده می‌شود.
+                  قیمت، موجودی و تنوع همین محصول به‌روز نمایش داده می‌شود.
                 </p>
               </div>
             </div>
@@ -312,7 +312,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                   نمای سریع موقتاً در دسترس نیست
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-metal">
-                  {backendErrorMessage(productQuery.error)}
+                  اطلاعات این محصول فعلاً در دسترس نیست. کمی بعد دوباره تلاش کنید.
                 </p>
                 <button
                   type="button"
@@ -334,7 +334,10 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
           ) : (
             <>
               <TechLabel tone="signal">{model.identity.categoryLabel}</TechLabel>
-              <h2 id={titleId} className="mt-2 text-display-3 leading-tight text-bone">
+              <h2
+                id={titleId}
+                className="mt-2 max-w-full break-words text-[clamp(1.35rem,6vw,2rem)] font-black leading-[1.45] text-bone [overflow-wrap:anywhere] md:text-display-3 md:leading-tight"
+              >
                 {model.identity.name ?? card.name}
               </h2>
               {model.identity.shortDescription ? (
@@ -457,7 +460,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
               </Link>
 
               <p className="mt-5 border-t border-hairline pt-4 text-[11px] leading-6 text-mute">
-                قیمت، موجودی، رنگ و سایز این پنجره از محصول منتشرشده Backend خوانده می‌شود.
+                قیمت، موجودی، رنگ و سایز همین محصول را پیش از انتخاب بررسی کنید.
               </p>
             </>
           )}

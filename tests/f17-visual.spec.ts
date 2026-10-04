@@ -57,7 +57,7 @@ for (const item of ROUTES) {
   for (const viewport of SNAPSHOT_VIEWPORTS) {
     test(`${item.name} F17 visual ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      await page.goto(item.route, { waitUntil: "networkidle" });
+      await page.goto(item.route, { waitUntil: "domcontentloaded" });
       await stabilize(page);
       await expectLayoutSafe(page);
       await expect(page).toHaveScreenshot(`f17-${item.name}-${viewport.name}.png`, {

@@ -28,7 +28,7 @@ for (const viewport of [
 ]) {
   test(`F13 hero ${viewport.name} visual contract`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await stabilize(page);
     await expect(page.locator('section[aria-labelledby="home-hero-title"]')).toHaveScreenshot(
       `f13-hero-${viewport.name}.png`,
@@ -39,7 +39,7 @@ for (const viewport of [
 
 test("F13 category gateway desktop visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await stabilize(page);
   await expect(page.locator("#home-categories")).toHaveScreenshot(
     "f13-category-gateway-desktop.png",
@@ -49,7 +49,7 @@ test("F13 category gateway desktop visual contract", async ({ page }) => {
 
 test("F13 product moments mobile visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await stabilize(page);
   await expect(page.locator('section[aria-labelledby="home-products-title"]')).toHaveScreenshot(
     "f13-product-moments-mobile.png",
@@ -59,7 +59,7 @@ test("F13 product moments mobile visual contract", async ({ page }) => {
 
 test("F13 drop story desktop visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await stabilize(page);
   await expect(page.locator('section[aria-labelledby="drop-story-title"]')).toHaveScreenshot(
     "f13-drop-story-desktop.png",
@@ -69,7 +69,7 @@ test("F13 drop story desktop visual contract", async ({ page }) => {
 
 test("F13 local store mobile visual contract", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await stabilize(page);
 
   await expect(page.locator('[aria-labelledby="local-store-title"]')).toHaveScreenshot(
