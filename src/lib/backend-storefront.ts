@@ -18,10 +18,7 @@ import {
   type Filters,
   type SortKey,
 } from "@/lib/product-filter";
-import {
-  isUsableMannequinProfile,
-  type MannequinProfileDto,
-} from "@/lib/style-mannequin";
+import { isUsableMannequinProfile, type MannequinProfileDto } from "@/lib/style-mannequin";
 
 export type BackendCatalogCard = {
   source: "backend";
@@ -56,10 +53,7 @@ export function backendCard(product: ProductSummaryDto): BackendCatalogCard {
   const previewImages = [
     ...(presentation.previewImages ?? []),
     ...(product.primaryImage ? [product.primaryImage] : []),
-  ].filter(
-    (value, index, all): value is string =>
-      Boolean(value) && all.indexOf(value) === index,
-  );
+  ].filter((value, index, all): value is string => Boolean(value) && all.indexOf(value) === index);
 
   return {
     source: "backend",
@@ -112,8 +106,7 @@ function toMeasurements(product: ProductDetailDto): GarmentMeasurements | null {
 }
 
 function normalizeCare(value: ProductDetailDto["care"]): string[] {
-  if (Array.isArray(value))
-    return value.filter((item): item is string => typeof item === "string");
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
   if (typeof value === "string" && value.trim()) return [value.trim()];
   return [];
 }
@@ -130,9 +123,7 @@ function validMedia(media: ProductDetailDto["media"]): DecisionMedia[] {
     }));
 }
 
-export function backendDecisionModel(
-  product: ProductDetailDto,
-): ProductDecisionViewModel {
+export function backendDecisionModel(product: ProductDetailDto): ProductDecisionViewModel {
   const variants: DecisionVariant[] = product.variants
     .filter((variant) => variant.color && variant.size)
     .map((variant) => ({
@@ -153,9 +144,7 @@ export function backendDecisionModel(
         ? { type: "solid" as const, value: color.hex }
         : undefined,
     availability: variants.some(
-      (variant) =>
-        variant.colorId === color.publicId &&
-        variant.availability === "available",
+      (variant) => variant.colorId === color.publicId && variant.availability === "available",
     )
       ? "available"
       : "sold-out",
@@ -195,23 +184,17 @@ export function backendDecisionModel(
     }),
   );
 
-  const visibleVariants = product.variants.filter(
-    (variant) => variant.isActive,
-  );
+  const visibleVariants = product.variants.filter((variant) => variant.isActive);
   const commonPrice =
     visibleVariants.length > 0 &&
-    visibleVariants.every(
-      (variant) => variant.price.amount === visibleVariants[0].price.amount,
-    )
+    visibleVariants.every((variant) => variant.price.amount === visibleVariants[0].price.amount)
       ? visibleVariants[0].price.amount
       : null;
   const commonPrevious =
     visibleVariants.length > 0 &&
     visibleVariants[0].compareAtPrice &&
     visibleVariants.every(
-      (variant) =>
-        variant.compareAtPrice?.amount ===
-        visibleVariants[0].compareAtPrice?.amount,
+      (variant) => variant.compareAtPrice?.amount === visibleVariants[0].compareAtPrice?.amount,
     )
       ? (visibleVariants[0].compareAtPrice?.amount ?? null)
       : null;
@@ -228,8 +211,7 @@ export function backendDecisionModel(
       name: product.name,
       latinName: null,
       categoryLabel: product.category.name,
-      collection:
-        product.collections[0]?.name ?? product.drops[0]?.name ?? null,
+      collection: product.collections[0]?.name ?? product.drops[0]?.name ?? null,
       sku: product.variants.length === 1 ? product.variants[0].sku : null,
       description: product.description,
       shortDescription: product.shortDescription,
@@ -267,16 +249,9 @@ const backendSort = (sort: SortKey): CatalogQuery["sort"] => {
   return "newest";
 };
 
-export const BACKEND_SUPPORTED_SORTS: SortKey[] = [
-  "newest",
-  "price-asc",
-  "price-desc",
-];
+export const BACKEND_SUPPORTED_SORTS: SortKey[] = ["newest", "price-asc", "price-desc"];
 
-export function backendCatalogQuery(
-  filters: Filters,
-  facets?: FacetsDto,
-): CatalogQuery {
+export function backendCatalogQuery(filters: Filters, facets?: FacetsDto): CatalogQuery {
   const colorSlugByVisual = new Map<string, string>();
   for (const color of facets?.colors ?? []) {
     if (color.hex) colorSlugByVisual.set(color.hex.toLowerCase(), color.slug);
@@ -309,11 +284,7 @@ export function backendFacetVisuals(facets: FacetsDto) {
 }
 
 /** Keep old color links usable while storing stable, unambiguous color slugs in new links. */
-export function normalizeCatalogFilters(
-  filters: Filters,
-  facets: FacetsDto,
-  scope: FilterScope,
-) {
+export function normalizeCatalogFilters(filters: Filters, facets: FacetsDto, scope: FilterScope) {
   const colors = filters.colors.map((value) => {
     const match = facets.colors.find(
       (color) =>
