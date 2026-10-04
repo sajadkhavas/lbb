@@ -194,7 +194,10 @@ function PrototypeProductQuickView({ product: p }: { product: Product }) {
 
         <div className="flex min-h-0 flex-1 flex-col p-5 pb-[calc(24px+env(safe-area-inset-bottom))] md:overflow-y-auto md:p-7">
           <TechLabel tone="signal">{CATEGORIES[p.category].nameFa}</TechLabel>
-          <h2 id={titleId} className="mt-1.5 max-w-full break-words text-[clamp(1.35rem,6vw,2rem)] font-black leading-[1.45] text-bone [overflow-wrap:anywhere] md:text-display-3 md:leading-tight">
+          <h2
+            id={titleId}
+            className="mt-1.5 max-w-full break-words text-[clamp(1.35rem,6vw,2rem)] font-black leading-[1.45] text-bone [overflow-wrap:anywhere] md:text-display-3 md:leading-tight"
+          >
             {p.name}
           </h2>
           <p className="mt-2 text-xs leading-6 text-metal">{p.shortDescription}</p>
