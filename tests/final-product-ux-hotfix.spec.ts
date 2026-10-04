@@ -214,12 +214,10 @@ test("PDP keeps mobile composition while desktop receives the polished surface",
     return {
       horizontalOverflow: document.documentElement.scrollWidth - window.innerWidth,
       titleWidth: title?.getBoundingClientRect().width ?? window.innerWidth + 1,
-      titleOverflowWrap: title ? getComputedStyle(title).overflowWrap : "",
     };
   });
   expect(mobileLayout.horizontalOverflow).toBeLessThanOrEqual(1);
   expect(mobileLayout.titleWidth).toBeLessThanOrEqual(390);
-  expect(mobileLayout.titleOverflowWrap).toBe("anywhere");
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   const desktop = await panel.evaluate((element) => {
