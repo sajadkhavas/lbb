@@ -86,12 +86,12 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
 
   const gallery = useMemo(() => {
     if (!model) return fallbackMedia(card);
+    if (model.media.length === 0) return fallbackMedia(card);
+
     const selected = mediaForColor(model, colorId);
-    return selected.length > 0
-      ? selected
-      : model.media.length > 0
-        ? model.media
-        : fallbackMedia(card);
+    return [...selected, ...model.media].filter(
+      (media, index, all) => all.findIndex((candidate) => candidate.id === media.id) === index,
+    );
   }, [card, colorId, model]);
 
   useEffect(() => {
@@ -188,7 +188,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
 
         <div className="shrink-0 md:w-[48%]">
           <div
-            className="relative aspect-[4/3] max-h-[38svh] w-full overflow-hidden bg-carbon touch-pan-y md:aspect-auto md:max-h-none md:min-h-[650px] md:h-full"
+            className="relative aspect-[4/5] max-h-[56svh] w-full overflow-hidden bg-white touch-pan-y md:aspect-auto md:max-h-none md:min-h-[650px] md:h-full md:bg-carbon"
             tabIndex={gallery.length > 1 ? 0 : -1}
             role="region"
             aria-roledescription="carousel"
@@ -232,7 +232,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                 height={gallery[img].height}
                 loading="eager"
                 decoding="async"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain md:object-cover"
               />
             ) : (
               <div className="grid h-full min-h-80 place-items-center px-8 text-center text-sm leading-7 text-metal">
@@ -334,7 +334,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
           ) : (
             <>
               <TechLabel tone="signal">{model.identity.categoryLabel}</TechLabel>
-              <h2 id={titleId} className="mt-2 text-display-3 leading-tight text-bone">
+              <h2 id={titleId} className="mt-2 max-w-full break-words text-[clamp(1.35rem,6vw,2rem)] font-black leading-[1.45] text-bone [overflow-wrap:anywhere] md:text-display-3 md:leading-tight">
                 {model.identity.name ?? card.name}
               </h2>
               {model.identity.shortDescription ? (
