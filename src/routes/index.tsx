@@ -226,7 +226,7 @@ function Home() {
     trust: <TrustStrip />,
     categories: <CategoryGateway liveCategories={categories} />,
     products: <ProductMoments liveProducts={products} />,
-    drop_story: <DropStory liveStory={featuredStory} />,
+    drop_story: <DropStory liveStory={featuredStory} storySettings={control.featuredStory} />,
     decision_support: <DecisionSupport />,
     local_store: <LocalStoreVisit />,
     instagram: <InstagramStrip liveItems={lookbook} />,
