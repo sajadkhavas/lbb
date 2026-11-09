@@ -289,6 +289,9 @@ export type CheckoutQuoteDto = CartValidationDto & {
 };
 
 export type OrderItemDto = {
+  imageUrl?: string | null;
+  color?: string | null;
+  size?: string | null;
   id?: string;
   productId?: string;
   variantId?: string;

@@ -681,6 +681,44 @@ function LiveAccount() {
                         </p>
                       </div>
                     </div>
+                    {order.items?.length > 0 && (
+                      <ul className="mt-4 grid gap-3 border-t border-hairline pt-4 md:grid-cols-2">
+                        {order.items.map((item, index) => (
+                          <li key={item.id ?? index} className="flex min-w-0 items-center gap-3">
+                            <div className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-carbon-2 text-xs text-signal/50">
+                              <span aria-hidden="true">LBB</span>
+                              {item.imageUrl && (
+                                <img
+                                  src={item.imageUrl}
+                                  alt=""
+                                  loading="lazy"
+                                  className="absolute inset-0 h-full w-full object-cover"
+                                  onError={(event) => {
+                                    event.currentTarget.hidden = true;
+                                  }}
+                                />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-bone">
+                                {item.productName || "محصول سفارش"}
+                              </p>
+                              <p className="mt-1 text-xs text-metal">
+                                {[
+                                  item.color ?? item.colorName,
+                                  item.size ?? item.sizeName,
+                                  item.quantity != null
+                                    ? `تعداد: ${item.quantity.toLocaleString("fa-IR")}`
+                                    : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     <div className="mt-4 grid gap-2 border-t border-hairline pt-4 text-xs text-metal md:grid-cols-2">
                       <p>روش ارسال: {order.delivery.methodLabel}</p>
                       <p>تحویل‌گیرنده: {order.recipient.fullName}</p>
