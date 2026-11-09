@@ -7,6 +7,7 @@ import { InstagramStrip } from "@/components/lbb/InstagramStrip";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Navbar } from "@/components/lbb/Navbar";
 import { CategoryGateway } from "@/components/lbb/home/CategoryGateway";
+import { CollectionRack } from "@/components/lbb/home/CollectionRack";
 import { DecisionSupport } from "@/components/lbb/home/DecisionSupport";
 import { DropStory, type LiveFeaturedStory } from "@/components/lbb/home/DropStory";
 import { HeroNarrative } from "@/components/lbb/home/HeroNarrative";
@@ -14,6 +15,7 @@ import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
+import { Band, Shell } from "@/components/lbb/ui/primitives";
 import { BackendApiError, getCollection, getProduct } from "@/lib/backend-api";
 import { backendCard, type BackendCatalogCard } from "@/lib/backend-storefront";
 import { listStorefrontCategories, type StorefrontCategoryDto } from "@/lib/final-technical-api";
@@ -200,12 +202,26 @@ function Home() {
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
+  const storyProducts = featuredStory?.products.filter((product) => product.primaryImage) ?? [];
+  const showStoryRack = control.home.sections.includes("drop_story") && storyProducts.length > 0;
+  const rackProducts = products?.filter((product) => product.primaryImage).slice(0, 3) ?? [];
 
   const sections: Record<string, ReactNode> = {
     ticker: <TickerStrip />,
     trust: <TrustStrip />,
     categories: <CategoryGateway liveCategories={categories} />,
-    products: <ProductMoments liveProducts={products} />,
+    products: (
+      <>
+        <ProductMoments liveProducts={products} />
+        {!showStoryRack && rackProducts.length > 0 ? (
+          <Band>
+            <Shell>
+              <CollectionRack products={rackProducts} title="رگال فروشگاه" />
+            </Shell>
+          </Band>
+        ) : null}
+      </>
+    ),
     drop_story: <DropStory liveStory={featuredStory} />,
     decision_support: <DecisionSupport />,
     local_store: <LocalStoreVisit />,

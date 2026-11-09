@@ -4,7 +4,13 @@ import { ArrowUpLeft } from "lucide-react";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
 
-export function CollectionRack({ products }: { products: BackendCatalogCard[] }) {
+export function CollectionRack({
+  products,
+  title = "رگال کالکشن",
+}: {
+  products: BackendCatalogCard[];
+  title?: string;
+}) {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const selected = products.find((product) => product.slug === selectedSlug) ?? products[0];
 
@@ -12,7 +18,7 @@ export function CollectionRack({ products }: { products: BackendCatalogCard[] })
 
   return (
     <div className="mt-8" data-testid="collection-rack">
-      <TechLabel>رگال کالکشن</TechLabel>
+      <TechLabel>{title}</TechLabel>
       <p className="mt-2 text-xs leading-6 text-metal">
         برای دیدن هر لباس، روی آن مکث کنید یا لمسش کنید.
       </p>

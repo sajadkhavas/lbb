@@ -93,7 +93,9 @@ export function DropStory({ liveStory }: { liveStory?: LiveFeaturedStory | null 
               </ol>
             ) : null}
 
-            <CollectionRack products={products.slice(0, 3)} />
+            <CollectionRack
+              products={products.filter((product) => product.primaryImage).slice(0, 3)}
+            />
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
