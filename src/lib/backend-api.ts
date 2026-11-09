@@ -579,11 +579,35 @@ export async function getCategory(slug: string) {
   return get<CategoryDto>(`/api/v1/categories/${encodeURIComponent(slug)}`);
 }
 
+async function previewCollection(query: CatalogQuery = {}) {
+  const response = await listProducts(query);
+  const products = response.data;
+  const slug = "lbb-preview";
+  const collection: CollectionDto & { coverImage: string | null } = {
+    publicId: slug,
+    slug,
+    name: "منتخب استریت‌ویر LBB",
+    description: "ترکیبی از آیتم‌های منتشرشده فروشگاه برای دیدن چیدمان کالکشن LBB.",
+    isFeatured: true,
+    productCount: products.length,
+    coverImage: products.find((product) => product.primaryImage)?.primaryImage ?? null,
+    seo: { slug, canonicalPath: `/collections/${slug}`, publication: "published" },
+  };
+  return { ...response, data: { collection, products } };
+}
+
 export async function listCollections() {
+  if (import.meta.env.VITE_LBB_PREVIEW_COLLECTION_SLUG === "lbb-preview") {
+    const response = await previewCollection({ per_page: 12 });
+    return { ...response, data: [response.data.collection] };
+  }
   return get<CollectionDto[]>("/api/v1/collections");
 }
 
 export async function getCollection(slug: string, query: CatalogQuery = {}) {
+  if (slug === "lbb-preview" && import.meta.env.VITE_LBB_PREVIEW_COLLECTION_SLUG === slug) {
+    return previewCollection(query);
+  }
   return get<{ collection: CollectionDto; products: ProductSummaryDto[] }>(
     `/api/v1/collections/${encodeURIComponent(slug)}${queryString(query)}` as `/api/v1/${string}`,
   );
