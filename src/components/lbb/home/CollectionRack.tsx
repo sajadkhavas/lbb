@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft } from "lucide-react";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
+import { fmtToman } from "@/lib/products";
 
 export function CollectionRack({
   products,
@@ -22,18 +23,21 @@ export function CollectionRack({
       <p className="mt-2 text-xs leading-6 text-metal">
         برای دیدن هر لباس، روی آن مکث کنید یا لمسش کنید.
       </p>
-      <div className="relative mt-3 rounded-xl border border-hairline bg-carbon px-2 pb-3 pt-7 sm:px-4">
+      <div className="relative isolate mt-3 overflow-hidden rounded-xl bg-[#eeebe5] px-3 pt-10 sm:px-6">
         <div
           aria-hidden="true"
-          className="absolute inset-x-3 top-5 h-1 rounded-full bg-gradient-to-b from-white/60 to-white/15"
+          className="absolute inset-x-3 top-10 h-2 rounded-full bg-gradient-to-b from-[#77746f] via-[#403d39] to-[#25231f] shadow-md sm:inset-x-6"
         />
-        <ul className="relative flex justify-center gap-1 sm:gap-2">
+        <ul className="relative mx-auto flex max-w-3xl items-start justify-center pb-5">
           {products.map((product) => {
             const active = selected.slug === product.slug;
             const select = () => setSelectedSlug(product.slug);
+            const trousers = /pants|jeans|trousers|shorts|shalvar|شلوار/i.test(
+              `${product.categorySlug} ${product.categoryLabel} ${product.name}`,
+            );
 
             return (
-              <li key={product.slug} className="w-full max-w-36 min-w-0">
+              <li key={product.slug} className="w-full max-w-56 min-w-0">
                 <button
                   type="button"
                   aria-label={product.name}
@@ -43,24 +47,28 @@ export function CollectionRack({
                   }}
                   onFocus={select}
                   onClick={select}
-                  className="relative flex w-full flex-col items-center rounded-lg pb-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  className="relative block w-full rounded-lg px-1 pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                 >
                   <span
-                    aria-hidden="true"
-                    className="-mt-2 h-5 w-3 rounded-t-full border-2 border-b-0 border-white/50"
-                  />
-                  <span
-                    aria-hidden="true"
-                    className="h-5 w-4/5 [clip-path:polygon(50%_0,100%_100%,0_100%)] bg-white/30"
-                  />
-                  <span
-                    className="flex aspect-[3/4] w-full items-center justify-center overflow-hidden rounded-md bg-obsidian transition-transform duration-500 ease-out motion-reduce:transition-none"
-                    style={{
-                      transform: active
-                        ? "perspective(500px) rotateY(0deg)"
-                        : "perspective(500px) rotateY(-55deg)",
-                    }}
+                    className={`relative mx-auto block origin-top transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none ${active ? "scale-x-100 opacity-100" : "scale-x-[0.58] -rotate-3 opacity-75"}`}
                   >
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 100 34"
+                      className="mx-auto h-9 w-4/5 overflow-visible text-[#35312b]"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M50 20v-7a5 5 0 1 0-5-5" />
+                      {trousers ? (
+                        <path d="M17 21h66M25 21v11m50-11v11" strokeWidth="4" />
+                      ) : (
+                        <path d="m50 19 34 13H16z" />
+                      )}
+                    </svg>
                     {product.primaryImage ? (
                       <img
                         src={product.primaryImage}
@@ -69,7 +77,7 @@ export function CollectionRack({
                         height={192}
                         loading="lazy"
                         decoding="async"
-                        className="h-full w-full object-contain"
+                        className={`mx-auto -mt-1 block w-full object-contain object-top mix-blend-multiply ${trousers ? "aspect-[2/3]" : "aspect-[4/5]"}`}
                       />
                     ) : (
                       <span className="text-xs text-metal">LBB</span>
@@ -80,8 +88,13 @@ export function CollectionRack({
             );
           })}
         </ul>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-hairline px-2 pt-3">
-          <p className="text-sm font-bold text-bone">{selected.name}</p>
+        <div className="-mx-3 flex flex-wrap items-center justify-between gap-3 bg-carbon px-4 py-3 sm:-mx-6 sm:px-6">
+          <div>
+            <p className="text-sm font-bold text-bone">{selected.name}</p>
+            {selected.priceFromToman != null && (
+              <p className="mt-1 text-xs text-metal">{fmtToman(selected.priceFromToman)}</p>
+            )}
+          </div>
           <Link to="/product/$slug" params={{ slug: selected.slug }} className={CtaClasses("line")}>
             مشاهده محصول <ArrowUpLeft size={15} aria-hidden="true" />
           </Link>
