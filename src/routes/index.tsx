@@ -100,10 +100,30 @@ async function resolveLiveFeaturedStory(
 
 export const Route = createFileRoute("/")({
   loader: async (): Promise<HomeLoaderData> => {
-    const [control, presentation] = await Promise.all([
+    const [baseControl, presentation] = await Promise.all([
       resolveStorefrontControl(),
       resolveStorefrontPresentation(),
     ]);
+    const previewSlug = import.meta.env.VITE_LBB_PREVIEW_COLLECTION_SLUG?.trim();
+    const control: StorefrontControl =
+      baseControl.source === "live" && previewSlug
+        ? {
+            ...baseControl,
+            home: {
+              ...baseControl.home,
+              sections: [...new Set([...baseControl.home.sections, "drop_story" as const])],
+            },
+            featuredStory: {
+              ...baseControl.featuredStory,
+              enabled: true,
+              collectionSlug: previewSlug,
+              eyebrow: baseControl.featuredStory.eyebrow || "کالکشن منتخب LBB",
+              collectionCta: baseControl.featuredStory.collectionCta || "مشاهده کالکشن",
+              lookbookCta: baseControl.featuredStory.lookbookCta || "مشاهده لوک‌بوک",
+            },
+          }
+        : baseControl;
+
     if (control.source !== "live") {
       return {
         control,
