@@ -5,7 +5,7 @@ import type { CollectionDto } from "@/lib/backend-api";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
 import { getCollectionEditorialViewBySlug } from "@/lib/editorial-commerce";
 import { productImage } from "@/lib/product-images";
-import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontControl, type FeaturedStoryControl } from "@/lib/storefront-control";
 
 type ManagedCollectionDto = CollectionDto & { coverImage?: string | null };
 
@@ -14,8 +14,15 @@ export type LiveFeaturedStory = {
   products: BackendCatalogCard[];
 };
 
-export function DropStory({ liveStory }: { liveStory?: LiveFeaturedStory | null }) {
-  const { source, featuredStory } = useStorefrontControl();
+export function DropStory({
+  liveStory,
+  storySettings,
+}: {
+  liveStory?: LiveFeaturedStory | null;
+  storySettings?: FeaturedStoryControl;
+}) {
+  const { source, featuredStory: globalStorySettings } = useStorefrontControl();
+  const featuredStory = storySettings ?? globalStorySettings;
 
   if (source === "live") {
     if (!featuredStory.enabled || !liveStory) return null;
