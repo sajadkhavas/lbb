@@ -1,3 +1,4 @@
+import { ProductDescription } from "./ProductDescription";
 import { StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 import type { ProductDecisionViewModel } from "@/lib/product-decision";
 import { Identifier } from "@/components/lbb/ui/Identifier";
@@ -32,96 +33,22 @@ export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
   }
 
   return (
-    <div className="grid min-w-0 gap-8 lg:grid-cols-2" data-testid="pdp-product-facts">
-      {hasDetails ? (
-        <section
-          aria-labelledby="pdp-details-heading"
-          className="min-w-0 border-t border-hairline pt-5"
-        >
-          <TechLabel tone="signal">DETAILS</TechLabel>
-          <h2 id="pdp-details-heading" className="mt-2 text-xl font-bold text-bone">
-            جزئیات
-          </h2>
-          {model.identity.description ? (
-            <p className="mt-3 break-words text-sm leading-8 text-metal [overflow-wrap:anywhere]">
-              {model.identity.description}
-            </p>
-          ) : null}
-          <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-            {model.identity.collection ? (
-              <div>
-                <dt className="text-mute">مجموعه</dt>
-                <dd className="mt-1 font-semibold text-bone">{model.identity.collection}</dd>
-              </div>
-            ) : null}
-            {model.identity.sku ? (
-              <div>
-                <dt className="text-mute">کد محصول</dt>
-                <dd className="mt-1 font-semibold text-bone">
-                  <Identifier>{model.identity.sku}</Identifier>
-                </dd>
-              </div>
-            ) : null}
-          </dl>
-        </section>
-      ) : null}
-
-      {hasDecisionFacts ? (
-        <section
-          aria-labelledby="pdp-wear-heading"
-          className="min-w-0 border-t border-hairline pt-5"
-        >
-          <TechLabel tone="signal">WEAR / CARE</TechLabel>
-          <h2 id="pdp-wear-heading" className="mt-2 text-xl font-bold text-bone">
-            جنس، تن‌خور و نگهداری
-          </h2>
-          <dl className="mt-4 grid gap-4 text-sm">
-            {model.facts.material ? (
-              <div>
-                <dt className="text-mute">جنس</dt>
-                <dd className="mt-1 break-words leading-7 text-bone [overflow-wrap:anywhere]">
-                  {model.facts.material}
-                </dd>
-              </div>
-            ) : null}
-            {model.facts.fit ? (
-              <div>
-                <dt className="text-mute">تن‌خور</dt>
-                <dd className="mt-1 break-words leading-7 text-bone [overflow-wrap:anywhere]">
-                  {model.facts.fit}
-                  {model.facts.fitNote ? ` — ${model.facts.fitNote}` : ""}
-                </dd>
-              </div>
-            ) : null}
-          </dl>
-          {model.facts.care.length > 0 ? (
-            <div className="mt-5">
-              <h3 className="text-sm font-bold text-bone">نگهداری</h3>
-              <ul className="mt-2 space-y-2 text-sm leading-7 text-metal">
-                {model.facts.care.map((instruction) => (
-                  <li key={instruction} className="flex min-w-0 gap-2">
-                    <span aria-hidden="true" className="mt-3 h-px w-3 shrink-0 bg-signal" />
-                    <span className="min-w-0 break-words [overflow-wrap:anywhere]">
-                      {instruction}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </section>
-      ) : null}
-
+    <div
+      className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-6"
+      data-testid="pdp-product-facts"
+    >
       {model.measurements ? (
         <section
           aria-labelledby="pdp-measurements-heading"
-          className="min-w-0 border-t border-hairline pt-5 lg:col-span-2"
+          className="min-w-0 rounded-xl border border-hairline bg-carbon/20 p-4 sm:p-6 lg:col-span-2"
         >
           <TechLabel tone="signal">MEASUREMENTS / CM</TechLabel>
           <h2 id="pdp-measurements-heading" className="mt-2 text-xl font-bold text-bone">
-            {measurementHeading}
+            راهنمای سایز
           </h2>
-          <p className="mt-2 text-sm leading-7 text-metal">واحد همه اندازه‌ها سانتی‌متر است.</p>
+          <p className="mt-2 text-sm leading-7 text-metal">
+            {measurementHeading} · واحد همه اندازه‌ها سانتی‌متر است.
+          </p>
           <div className="mt-4 grid gap-3 sm:hidden" aria-label="اندازه‌های محصول">
             {model.measurements.rows.map((row) => (
               <article
@@ -187,6 +114,83 @@ export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
               </tbody>
             </table>
           </div>
+        </section>
+      ) : null}
+
+      {hasDetails ? (
+        <section
+          aria-labelledby="pdp-details-heading"
+          className={`min-w-0 rounded-xl border border-hairline bg-carbon/20 p-4 sm:p-6 ${hasDecisionFacts ? "" : "lg:col-span-2"}`}
+        >
+          <TechLabel tone="signal">DETAILS</TechLabel>
+          <h2 id="pdp-details-heading" className="mt-2 text-xl font-bold text-bone">
+            جزئیات
+          </h2>
+          {model.identity.description ? (
+            <ProductDescription description={model.identity.description} />
+          ) : null}
+          <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+            {model.identity.collection ? (
+              <div>
+                <dt className="text-mute">مجموعه</dt>
+                <dd className="mt-1 font-semibold text-bone">{model.identity.collection}</dd>
+              </div>
+            ) : null}
+            {model.identity.sku ? (
+              <div>
+                <dt className="text-mute">کد محصول</dt>
+                <dd className="mt-1 font-semibold text-bone">
+                  <Identifier>{model.identity.sku}</Identifier>
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </section>
+      ) : null}
+
+      {hasDecisionFacts ? (
+        <section
+          aria-labelledby="pdp-wear-heading"
+          className="min-w-0 rounded-xl border border-hairline bg-carbon/20 p-4 sm:p-6"
+        >
+          <TechLabel tone="signal">WEAR / CARE</TechLabel>
+          <h2 id="pdp-wear-heading" className="mt-2 text-xl font-bold text-bone">
+            جنس، تن‌خور و نگهداری
+          </h2>
+          <dl className="mt-4 grid gap-4 text-sm">
+            {model.facts.material ? (
+              <div>
+                <dt className="text-mute">جنس</dt>
+                <dd className="mt-1 break-words leading-7 text-bone [overflow-wrap:anywhere]">
+                  {model.facts.material}
+                </dd>
+              </div>
+            ) : null}
+            {model.facts.fit ? (
+              <div>
+                <dt className="text-mute">تن‌خور</dt>
+                <dd className="mt-1 break-words leading-7 text-bone [overflow-wrap:anywhere]">
+                  {model.facts.fit}
+                  {model.facts.fitNote ? ` — ${model.facts.fitNote}` : ""}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+          {model.facts.care.length > 0 ? (
+            <div className="mt-5">
+              <h3 className="text-sm font-bold text-bone">نگهداری</h3>
+              <ul className="mt-2 space-y-2 text-sm leading-7 text-metal">
+                {model.facts.care.map((instruction) => (
+                  <li key={instruction} className="flex min-w-0 gap-2">
+                    <span aria-hidden="true" className="mt-3 h-px w-3 shrink-0 bg-signal" />
+                    <span className="min-w-0 break-words [overflow-wrap:anywhere]">
+                      {instruction}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
       ) : null}
     </div>
