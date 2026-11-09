@@ -4,7 +4,7 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { fmtToman } from "@/lib/products";
-import { productImage } from "@/lib/product-images";
+import { CartProductImage } from "@/components/lbb/CartProductImage";
 import { STORE_SETTINGS, getPublicShippingMethods } from "@/lib/store-settings";
 import { CtaClasses, StatePanel, TechLabel } from "@/components/lbb/ui/primitives";
 
@@ -122,15 +122,7 @@ export function CartDrawer() {
                       onClick={dismissDrawer}
                       className="overflow-hidden bg-carbon"
                     >
-                      <img
-                        src={productImage(line.slug)}
-                        alt={line.name}
-                        width={76}
-                        height={95}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-[95px] w-[76px] object-cover"
-                      />
+                      <CartProductImage line={line} className="h-[95px] w-[76px] object-cover" />
                     </Link>
                     <div className="flex min-w-0 flex-col">
                       <div className="flex items-start justify-between gap-3">

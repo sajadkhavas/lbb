@@ -136,6 +136,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
     add({
       slug: model.slug,
       name,
+      imageUrl: gallery[0]?.src,
       price: selectedPrice,
       variantId: selectedVariant.id,
       source: "backend",
