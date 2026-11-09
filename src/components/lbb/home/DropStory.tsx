@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft } from "lucide-react";
+import { CollectionRack } from "@/components/lbb/home/CollectionRack";
 import { CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
 import type { CollectionDto } from "@/lib/backend-api";
 import type { BackendCatalogCard } from "@/lib/backend-storefront";
@@ -92,49 +93,7 @@ export function DropStory({ liveStory }: { liveStory?: LiveFeaturedStory | null 
               </ol>
             ) : null}
 
-            {products.length > 0 ? (
-              <div className="mt-8">
-                <TechLabel>محصولات این کالکشن</TechLabel>
-                <ul className="mt-3 space-y-2">
-                  {products.slice(0, 3).map((product) => (
-                    <li key={product.slug}>
-                      <Link
-                        to="/product/$slug"
-                        params={{ slug: product.slug }}
-                        className="group grid min-h-[78px] grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 border border-hairline bg-carbon p-2 transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
-                      >
-                        {product.primaryImage ? (
-                          <img
-                            src={product.primaryImage}
-                            alt=""
-                            width={56}
-                            height={70}
-                            loading="lazy"
-                            decoding="async"
-                            className="h-[70px] w-14 object-cover"
-                          />
-                        ) : (
-                          <span aria-hidden="true" className="h-[70px] w-14 bg-carbon-2" />
-                        )}
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-black text-bone">
-                            {product.name}
-                          </span>
-                          <span className="mt-1 block text-xs leading-6 text-metal">
-                            دیدن رنگ، سایز و جزئیات محصول
-                          </span>
-                        </span>
-                        <ArrowUpLeft
-                          size={16}
-                          aria-hidden="true"
-                          className="text-mute transition-colors group-hover:text-signal"
-                        />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
+            <CollectionRack products={products.slice(0, 3)} />
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
