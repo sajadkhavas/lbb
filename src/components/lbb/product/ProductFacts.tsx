@@ -54,81 +54,85 @@ export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
               {model.measurements.description}
             </p>
           ) : null}
-          {model.measurements.image ? (
-            <figure className="mx-auto mt-4 max-w-sm overflow-hidden rounded-xl border border-hairline">
-              <img
-                src={model.measurements.image.url}
-                alt={model.measurements.image.alt}
-                loading="lazy"
-                decoding="async"
-                className="block h-auto w-full"
-              />
-            </figure>
-          ) : null}
-          <div className="mt-4 grid gap-3 sm:hidden" aria-label="اندازه‌های محصول">
-            {model.measurements.rows.map((row) => (
-              <article
-                key={row.size}
-                className="min-w-0 rounded-xl border border-hairline bg-carbon/40 p-4"
-              >
-                <div className="flex items-center justify-between gap-4 border-b border-hairline pb-3">
-                  <span className="text-sm text-mute">سایز</span>
-                  <strong className="num text-base text-bone">{row.size}</strong>
-                </div>
-
-                <dl className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-0">
-                  {model.measurements?.columns.map((column) => (
-                    <div
-                      key={column.key}
-                      className="min-w-0 border-b border-hairline py-3 last:border-b-0"
-                    >
-                      <dt className="break-words text-[11px] leading-5 text-mute [overflow-wrap:anywhere]">
-                        {column.label}
-                      </dt>
-                      <dd className="num mt-1 text-sm font-semibold text-bone">
-                        {row.values[column.key] ?? "—"} cm
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </article>
-            ))}
-          </div>
-
           <div
-            className="mt-4 hidden overflow-x-auto border border-hairline sm:block"
-            tabIndex={0}
-            aria-label="اندازه‌های محصول"
+            className={`mt-4${model.measurements.image ? " grid min-w-0 items-start gap-4 lg:grid-cols-2 lg:gap-6" : ""}`}
           >
-            <table className="w-full min-w-[560px] text-xs">
-              <caption className="sr-only">اندازه‌های تأییدشده محصول با واحد سانتی‌متر</caption>
-              <thead>
-                <tr className="bg-carbon text-metal">
-                  <th scope="col" className="p-3 text-start">
-                    سایز
-                  </th>
-                  {model.measurements.columns.map((column) => (
-                    <th key={column.key} scope="col" className="p-3 text-start">
-                      {column.label} (cm)
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {model.measurements.rows.map((row) => (
-                  <tr key={row.size} className="border-t border-hairline">
-                    <th scope="row" className="num p-3 text-start text-bone">
-                      {row.size}
-                    </th>
+            {model.measurements.image ? (
+              <figure className="mx-auto w-full max-w-sm lg:max-w-none overflow-hidden rounded-xl border border-hairline">
+                <img
+                  src={model.measurements.image.url}
+                  alt={model.measurements.image.alt}
+                  loading="lazy"
+                  decoding="async"
+                  className="mx-auto block h-auto max-h-[32rem] max-w-full object-contain"
+                />
+              </figure>
+            ) : null}
+            <div className="grid gap-3 sm:hidden" aria-label="اندازه‌های محصول">
+              {model.measurements.rows.map((row) => (
+                <article
+                  key={row.size}
+                  className="min-w-0 rounded-xl border border-hairline bg-carbon/40 p-4"
+                >
+                  <div className="flex items-center justify-between gap-4 border-b border-hairline pb-3">
+                    <span className="text-sm text-mute">سایز</span>
+                    <strong className="num text-base text-bone">{row.size}</strong>
+                  </div>
+
+                  <dl className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-0">
                     {model.measurements?.columns.map((column) => (
-                      <td key={column.key} className="num p-3 text-metal">
-                        {row.values[column.key] ?? "—"}
-                      </td>
+                      <div
+                        key={column.key}
+                        className="min-w-0 border-b border-hairline py-3 last:border-b-0"
+                      >
+                        <dt className="break-words text-[11px] leading-5 text-mute [overflow-wrap:anywhere]">
+                          {column.label}
+                        </dt>
+                        <dd className="num mt-1 text-sm font-semibold text-bone">
+                          {row.values[column.key] ?? "—"} cm
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </article>
+              ))}
+            </div>
+
+            <div
+              className="hidden min-w-0 overflow-x-auto border border-hairline sm:block"
+              tabIndex={0}
+              aria-label="اندازه‌های محصول"
+            >
+              <table className={`w-full min-w-[560px] text-xs${model.measurements.image ? " lg:min-w-0" : ""}`}>
+                <caption className="sr-only">اندازه‌های تأییدشده محصول با واحد سانتی‌متر</caption>
+                <thead>
+                  <tr className="bg-carbon text-metal">
+                    <th scope="col" className="p-3 text-start">
+                      سایز
+                    </th>
+                    {model.measurements.columns.map((column) => (
+                      <th key={column.key} scope="col" className="p-3 text-start">
+                        {column.label} (cm)
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {model.measurements.rows.map((row) => (
+                    <tr key={row.size} className="border-t border-hairline">
+                      <th scope="row" className="num p-3 text-start text-bone">
+                        {row.size}
+                      </th>
+                      {model.measurements?.columns.map((column) => (
+                        <td key={column.key} className="num p-3 text-metal">
+                          {row.values[column.key] ?? "—"}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
       ) : null}
