@@ -49,6 +49,11 @@ export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
           <p className="mt-2 text-sm leading-7 text-metal">
             {measurementHeading} · واحد همه اندازه‌ها سانتی‌متر است.
           </p>
+          {model.measurements.description?.trim() ? (
+            <p className="mt-2 whitespace-pre-line text-sm leading-7 text-metal">
+              {model.measurements.description}
+            </p>
+          ) : null}
           <div className="mt-4 grid gap-3 sm:hidden" aria-label="اندازه‌های محصول">
             {model.measurements.rows.map((row) => (
               <article

@@ -340,6 +340,31 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
             </p>
           </div>
           <ProductFacts model={model} />
+          {product.faqs?.length ? (
+            <section aria-labelledby="pdp-faq-heading" className="mt-8">
+              <h2 id="pdp-faq-heading" className="text-xl font-bold">
+                سؤال‌های متداول این محصول
+              </h2>
+              <div className="mt-4 divide-y divide-hairline rounded-xl border border-hairline">
+                {product.faqs.map(({ question, answer }, index) => (
+                  <details key={index} className="group">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-4 py-3 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] [&::-webkit-details-marker]:hidden">
+                      <span>{question}</span>
+                      <span aria-hidden="true" className="shrink-0 text-lg group-open:hidden">
+                        +
+                      </span>
+                      <span aria-hidden="true" className="hidden shrink-0 text-lg group-open:inline">
+                        −
+                      </span>
+                    </summary>
+                    <p className="whitespace-pre-line px-4 pb-4 text-sm leading-7 text-metal">
+                      {answer}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ) : null}
           <div className="mt-8 border-t border-hairline pt-6">
             <p className="text-sm leading-7 text-metal">
               قوانین ارسال، مرجوعی و پشتیبانی مستقل از مشخصات محصول نگهداری می‌شوند.

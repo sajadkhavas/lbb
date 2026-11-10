@@ -63,6 +63,7 @@ export type GarmentMeasurementRow = {
 };
 
 export type GarmentMeasurements = {
+  description?: string | null;
   unit: "cm";
   columns: Array<{ key: string; label: string }>;
   rows: GarmentMeasurementRow[];

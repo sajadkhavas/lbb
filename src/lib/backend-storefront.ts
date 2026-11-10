@@ -97,6 +97,7 @@ function toMeasurements(product: ProductDetailDto): GarmentMeasurements | null {
 
   return {
     unit: "cm",
+    description: guide.description,
     columns: guide.definitions.map((definition) => ({
       key: definition.code,
       label: definition.label,

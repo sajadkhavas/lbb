@@ -170,6 +170,7 @@ export type SizeGuideDto = {
 };
 
 export type ProductDetailDto = ProductSummaryDto & {
+  faqs?: Array<{ question: string; answer: string }>;
   description: string | null;
   publication: "published";
   collections: CollectionDto[];
