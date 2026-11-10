@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstack/react-router";
 import { PackageSearch, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
@@ -86,7 +86,10 @@ type PrototypeLoader = {
 type CategoryLoader = LiveLoader | PrototypeLoader;
 
 export const Route = createFileRoute("/$category")({
-  beforeLoad: ({ params }) => {
+  beforeLoad: ({ params, search }) => {
+    if (params.category === "shloar") {
+      throw redirect({ to: "/$category", params: { category: "pants" }, search, statusCode: 301 });
+    }
     if (!isLiveBackend() && !isValidCategory(params.category)) throw notFound();
   },
   validateSearch: (search: Record<string, unknown>) =>

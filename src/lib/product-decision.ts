@@ -254,6 +254,17 @@ export function mediaForColor(model: ProductDecisionViewModel, colorId: string |
   );
 }
 
+export function mediaForSelection(
+  model: ProductDecisionViewModel,
+  colorId: string | null,
+  variant?: DecisionVariant | null,
+) {
+  const colorMedia = mediaForColor(model, colorId);
+  if (!variant?.mediaIds?.length) return colorMedia;
+  const variantMedia = model.media.filter((item) => variant.mediaIds?.includes(item.id));
+  return [...variantMedia, ...colorMedia.filter((item) => !variantMedia.includes(item))];
+}
+
 export function variantForSelection(
   model: ProductDecisionViewModel,
   colorId: string | null,

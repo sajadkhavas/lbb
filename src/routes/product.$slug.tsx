@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowUpLeft, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -12,8 +12,13 @@ import { CompleteTheLook, RelatedProducts } from "@/components/lbb/product/Produ
 import { RecentlyViewed } from "@/components/lbb/product/RecentlyViewed";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { CATEGORIES } from "@/lib/categories";
-import { buildProductDecisionViewModel, type DecisionMedia } from "@/lib/product-decision";
+import {
+  buildProductDecisionViewModel,
+  mediaForSelection,
+  type DecisionMedia,
+} from "@/lib/product-decision";
 import { evaluateProductEvidence } from "@/lib/product-evidence";
+import { productPlainText, productStructuredData } from "@/lib/product-structured-data";
 import { productImage } from "@/lib/product-images";
 import { fmtToman, productBySlug, productsByCategory, type Product } from "@/lib/products";
 import { recordRecentlyViewed } from "@/lib/recently-viewed";
@@ -58,6 +63,19 @@ type LiveLoader = {
 type ProductLoader = PrototypeLoader | LiveLoader;
 
 export const Route = createFileRoute("/product/$slug")({
+  validateSearch: (search: Record<string, unknown>): { variant?: string } => ({
+    variant: typeof search.variant === "string" ? search.variant : undefined,
+  }),
+  beforeLoad: ({ params, search }) => {
+    if (isLiveBackend() && params.slug === "lightweight-grey-baggy-balloon-jeans") {
+      throw redirect({
+        to: "/product/$slug",
+        params: { slug: "shloar-gyn-bg-balony-tosy-roshn-mdl-layt" },
+        search,
+        statusCode: 301,
+      });
+    }
+  },
   loader: async ({ params }): Promise<ProductLoader> => {
     if (isLiveBackend()) {
       try {
@@ -118,39 +136,14 @@ export const Route = createFileRoute("/product/$slug")({
       const description =
         product.seo.metaDescription?.trim() ||
         [
-          product.shortDescription || product.description,
+          productPlainText(product.shortDescription || product.description),
           `دسته ${product.category.name}`,
           product.price.from ? `قیمت از ${fmtToman(product.price.from.amount)}` : null,
         ]
           .filter(Boolean)
           .join("؛ ");
       const image = product.seo.primaryImage || product.primaryImage || undefined;
-      const low = product.seo.structuredData?.lowPrice ?? product.price.from?.amount ?? null;
-      const high = product.seo.structuredData?.highPrice ?? product.price.to?.amount ?? low;
-      const offers =
-        low !== null
-          ? {
-              "@type": high !== null && high !== low ? "AggregateOffer" : "Offer",
-              url: absUrl(path),
-              priceCurrency: "IRR",
-              ...(high !== null && high !== low
-                ? { lowPrice: low * 10, highPrice: high * 10 }
-                : { price: low * 10 }),
-              availability: product.availability
-                ? "https://schema.org/InStock"
-                : "https://schema.org/OutOfStock",
-            }
-          : undefined;
-      const productLd = {
-        "@context": "https://schema.org",
-        "@type": "Product",
-        name: product.name,
-        brand: { "@type": "Brand", name: "LBB" },
-        description: product.description || product.shortDescription || undefined,
-        image: image ? [image] : undefined,
-        sku: product.variants.length === 1 ? product.variants[0].sku || undefined : undefined,
-        offers,
-      };
+      const productLd = productStructuredData(product, path);
       const crumbs = buildBreadcrumbLd(
         product.breadcrumbs.length
           ? product.breadcrumbs.map((item) => ({ name: item.label, path: item.path }))
@@ -172,7 +165,10 @@ export const Route = createFileRoute("/product/$slug")({
         }),
         links: canonical(path),
         scripts: [
-          { type: "application/ld+json", children: JSON.stringify(productLd) },
+          {
+            type: "application/ld+json",
+            children: JSON.stringify(productLd).replaceAll("<", "\\u003c"),
+          },
           { type: "application/ld+json", children: JSON.stringify(crumbs) },
         ],
       };
@@ -274,10 +270,18 @@ function ProductPage() {
 function LiveProductPage({ loader }: { loader: LiveLoader }) {
   const product = loader.product;
   const model = useMemo(() => (product ? backendDecisionModel(product) : null), [product]);
-  const [galleryMedia, setGalleryMedia] = useState<DecisionMedia[]>(model?.media ?? []);
+  const { variant } = Route.useSearch();
+  const preselected = model?.variants.find((item) => item.id === variant);
+  const colorId = preselected?.colorId ?? null;
+  const [galleryMedia, setGalleryMedia] = useState<DecisionMedia[]>(() =>
+    model ? mediaForSelection(model, colorId, preselected) : [],
+  );
   const updateGallery = useCallback((media: DecisionMedia[]) => setGalleryMedia(media), []);
 
-  useEffect(() => setGalleryMedia(model?.media ?? []), [model]);
+  useEffect(
+    () => setGalleryMedia(model ? mediaForSelection(model, colorId, preselected) : []),
+    [model, colorId, preselected],
+  );
 
   if (!product || !model) {
     return (
@@ -320,7 +324,11 @@ function LiveProductPage({ loader }: { loader: LiveLoader }) {
         className="grid grid-cols-1 gap-8 pb-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-10"
       >
         <Gallery media={galleryMedia} name={product.name} productSlug={product.slug} enable3d />
-        <ProductPurchasePanel model={model} onMediaChange={updateGallery} />
+        <ProductPurchasePanel
+          model={model}
+          onMediaChange={updateGallery}
+          initialVariantId={preselected?.id}
+        />
       </Shell>
       <Band label="PRODUCT DECISION FACTS">
         <Shell className="max-w-[980px]">

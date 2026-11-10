@@ -1,9 +1,25 @@
 import { StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
 import { fmtToman } from "@/lib/products";
-import type { ProductDecisionViewModel } from "@/lib/product-decision";
+import type { DecisionVariant, ProductDecisionViewModel } from "@/lib/product-decision";
 
-export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) {
-  const { identity, pricing, stock } = model;
+export function ProductIdentity({
+  model,
+  variant,
+}: {
+  model: ProductDecisionViewModel;
+  variant?: DecisionVariant | null;
+}) {
+  const { identity } = model;
+  const pricing =
+    variant?.priceToman !== undefined
+      ? {
+          priceToman: variant.priceToman,
+          fromToman: null,
+          toToman: null,
+          originalPriceToman: variant.originalPriceToman ?? null,
+        }
+      : model.pricing;
+  const availability = variant?.availability ?? model.stock.availability;
   const hasIdentity = Boolean(identity.name);
   const effectivePrice = pricing.priceToman ?? pricing.fromToman ?? null;
   const priceRange =
@@ -46,9 +62,9 @@ export function ProductIdentity({ model }: { model: ProductDecisionViewModel }) 
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2 lg:mt-5" aria-label="وضعیت محصول">
-        {stock.availability === "available" ? <StatusTag tone="success">موجود</StatusTag> : null}
-        {stock.availability === "sold-out" ? <StatusTag tone="out">ناموجود</StatusTag> : null}
-        {stock.availability === "unknown" ? (
+        {availability === "available" ? <StatusTag tone="success">موجود</StatusTag> : null}
+        {availability === "sold-out" ? <StatusTag tone="out">ناموجود</StatusTag> : null}
+        {availability === "unknown" ? (
           <StatusTag tone="neutral">موجودی منتشر نشده</StatusTag>
         ) : null}
         {discount > 0 ? <StatusTag tone="bone">{discount}٪ تخفیف</StatusTag> : null}
