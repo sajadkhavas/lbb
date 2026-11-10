@@ -22,7 +22,11 @@
 - **ترتیب بعدی:** حرکت خودکار زمان‌بندی‌شدهٔ کاروسل‌های فعلی صفحهٔ اصلی، حرکت مستقل عکس محصولات، افزودن یک کاروسل تازه، سپس بررسی سئوی تک‌تک بخش‌های سایت. Search Console، ثبت sitemap و URL Inspection **مرحلهٔ آخر** است.
 - **پیام انتقال و دستورات نمونه:** [LBB_NEXT_CHAT_2026-11-10_FA.md](./LBB_NEXT_CHAT_2026-11-10_FA.md).
 
-بخش‌های بعدی سوابق تاریخی‌اند. برای وضعیت جاری و NEXT از بخش بالا استفاده شود.
+## نقطهٔ ادامهٔ فعلی
+
+**Exact NEXT:** `CATALOG_NEXT_UNLISTED_PRODUCT` — ادامه پس از تأیید گزارش شناخت پروژه توسط سجاد. مراحل قدیمی در ادامه فقط سابقه‌اند.
+
+# بایگانی مراحل اولیهٔ پروژه
 
 ---
 
@@ -281,7 +285,7 @@ Final evidence:
 
 ---
 
-# 10) CURRENT NEXT — اینجاست که باید ادامه دهیم
+# 10) مرحلهٔ تاریخی واردکردن کاتالوگ
 
 ## `S3-DATA-B1-R2 — Controlled Catalog Import + SSR Acceptance`
 
@@ -565,7 +569,7 @@ Kernel note from deployment:
 
 ---
 
-# 16) کل مسیر باقی‌مانده تا تحویل نهایی
+# 16) نقشهٔ تاریخی تحویل پیش از انتشار
 
 به ترتیب:
 
@@ -615,7 +619,7 @@ Frontend Issue #78 / Backend Issue #21 evidence sequence:
 
 ---
 
-# 18) Mandatory continuation rules for next chat
+# 18) قواعد و نقطهٔ تحویل تاریخی
 
 یک چت جدید **نباید از اول پروژه را دوباره audit یا اجرا کند** مگر اینکه drift واقعی مشاهده شود.
 
@@ -625,11 +629,11 @@ Frontend Issue #78 / Backend Issue #21 evidence sequence:
 2. `docs/LBB_MASTER_HANDOFF_FA.md` را برای Business Truth بخواند.
 3. Frontend Issue #78 و Backend Issue #21 را بخواند.
 4. exact runtime SHAها را روی VPS lock کند.
-5. اگر SHA/state با این checkpoint برابر بود، از `CURRENT NEXT` ادامه دهد.
+5. این رویه مربوط به تحویل تاریخی بود. برای ادامهٔ فعلی از بخش بالای همین سند استفاده شود.
 
-### Current NEXT marker
+### نشانگر تاریخی
 
-`NEXT=S3_DATA_B1_R2_CATALOG_IMPORT_AND_SSR_ACCEPTANCE`
+`HISTORICAL_NEXT=S3_DATA_B1_R2_CATALOG_IMPORT_AND_SSR_ACCEPTANCE`
 
 ### Safety boundaries
 
@@ -645,10 +649,10 @@ Frontend Issue #78 / Backend Issue #21 evidence sequence:
 
 ---
 
-## END CHECKPOINT
+## پایان سابقهٔ تاریخی
 
 **Status:** `P4-ACT IN PROGRESS`
 
 **Last closed gate:** `S3-DATA-MEDIA-R1 = PASS`
 
-**Exact NEXT:** `S3-DATA-B1-R2 — Controlled Catalog Import + SSR Acceptance`
+**مرحلهٔ بعدی در آن تاریخ:** `S3-DATA-B1-R2 — Controlled Catalog Import + SSR Acceptance`
