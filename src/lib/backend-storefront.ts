@@ -98,6 +98,9 @@ function toMeasurements(product: ProductDetailDto): GarmentMeasurements | null {
   return {
     unit: "cm",
     description: guide.description,
+    ...(guide.imageUrl
+      ? { image: { url: guide.imageUrl, alt: guide.imageAlt?.trim() || guide.name } }
+      : {}),
     columns: guide.definitions.map((definition) => ({
       key: definition.code,
       label: definition.label,

@@ -153,6 +153,8 @@ export type MediaDto = {
 };
 
 export type SizeGuideDto = {
+  imageUrl?: string | null;
+  imageAlt?: string | null;
   publicId: string;
   name: string;
   description: string | null;

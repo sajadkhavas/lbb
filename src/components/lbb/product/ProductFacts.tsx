@@ -54,6 +54,17 @@ export function ProductFacts({ model }: { model: ProductDecisionViewModel }) {
               {model.measurements.description}
             </p>
           ) : null}
+          {model.measurements.image ? (
+            <figure className="mx-auto mt-4 max-w-sm overflow-hidden rounded-xl border border-hairline">
+              <img
+                src={model.measurements.image.url}
+                alt={model.measurements.image.alt}
+                loading="lazy"
+                decoding="async"
+                className="block h-auto w-full"
+              />
+            </figure>
+          ) : null}
           <div className="mt-4 grid gap-3 sm:hidden" aria-label="اندازه‌های محصول">
             {model.measurements.rows.map((row) => (
               <article

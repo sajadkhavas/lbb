@@ -63,6 +63,7 @@ export type GarmentMeasurementRow = {
 };
 
 export type GarmentMeasurements = {
+  image?: { url: string; alt: string };
   description?: string | null;
   unit: "cm";
   columns: Array<{ key: string; label: string }>;
