@@ -6,6 +6,23 @@ import type { BackendCatalogCard } from "@/lib/backend-storefront";
 import { fmtToman } from "@/lib/products";
 import { getProductMannequinModel3d, type ProductMannequinModel3dDto } from "@/lib/product-3d-api";
 
+type RackModel = ProductMannequinModel3dDto & { garment?: "tee" | "trousers" };
+
+const RACK_MODELS: Readonly<Record<string, RackModel>> = {
+  "dupu-boxy-distressed-tshirt-charcoal": {
+    url: "/models/collection-rack/lbb-dupu-boxy-charcoal-web.glb",
+    format: "glb",
+    bytes: 1403456,
+    garment: "tee",
+  },
+  "shloar-gyn-prynty-acne-studios": {
+    url: "/models/collection-rack/lbb-nature-printed-denim-web.glb",
+    format: "glb",
+    bytes: 1798828,
+    garment: "trousers",
+  },
+};
+
 const RackScene = lazy(() =>
   import("./CollectionRackScene").catch(() => ({ default: () => <></> })),
 );
@@ -20,12 +37,17 @@ export function CollectionRack({ products }: { products: BackendCatalogCard[] })
   const [page, setPage] = useState(0);
   const [modelPage, setModelPage] = useState<{
     key: string;
-    models: ProductMannequinModel3dDto[];
+    models: RackModel[];
   } | null>(null);
   const [selection, setSelection] = useState(0);
-  const pageCount = Math.ceil(products.length / PAGE_SIZE);
+  const prepared = products.filter(({ slug }) => Object.hasOwn(RACK_MODELS, slug));
+  const remaining = products.filter(({ slug }) => !Object.hasOwn(RACK_MODELS, slug));
+  const preparedPages = prepared.length > 0 ? 1 : 0;
+  const pageCount = preparedPages + Math.ceil(remaining.length / PAGE_SIZE);
   const pageIndex = Math.min(page, Math.max(0, pageCount - 1));
-  const garments = products.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+  const offset = (pageIndex - preparedPages) * PAGE_SIZE;
+  const garments =
+    preparedPages && pageIndex === 0 ? prepared : remaining.slice(offset, offset + PAGE_SIZE);
   const active = Math.min(selection, garments.length - 1);
   const selected = garments[active];
   const productKey = garments.map(({ slug }) => slug).join("|");
@@ -52,7 +74,11 @@ export function CollectionRack({ products }: { products: BackendCatalogCard[] })
 
     let cancelled = false;
     const slugs = productKey.split("|");
-    void Promise.all(slugs.map(getProductMannequinModel3d)).then((results) => {
+    void Promise.all(
+      slugs.map((slug) =>
+        Object.hasOwn(RACK_MODELS, slug) ? RACK_MODELS[slug] : getProductMannequinModel3d(slug),
+      ),
+    ).then((results) => {
       if (cancelled) return;
       const models = results.filter((model) => model !== null);
       if (

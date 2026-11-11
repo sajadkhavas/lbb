@@ -28,7 +28,7 @@ export default function CollectionRackScene({
   active,
   visible,
 }: {
-  models: ProductMannequinModel3dDto[];
+  models: Array<ProductMannequinModel3dDto & { garment?: "tee" | "trousers" }>;
   active: number;
   visible: boolean;
 }) {
@@ -84,14 +84,41 @@ export default function CollectionRackScene({
       rail.rotation.z = Math.PI / 2;
       scene.add(rail);
 
-      const pivots = models.map(() => {
+      const pivots = models.map(({ garment }) => {
         const pivot = new THREE.Group();
         const hook = new THREE.Mesh(
           new THREE.TorusGeometry(0.065, 0.013, 8, 24, Math.PI * 1.65),
           metal,
         );
         hook.rotation.z = -Math.PI / 4;
-        pivot.add(hook);
+        const hanger = new THREE.Group();
+        hanger.add(hook);
+        const bar = (from: THREE.Vector3, to: THREE.Vector3) => {
+          const mesh = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.014, 0.014, from.distanceTo(to), 8),
+            metal,
+          );
+          mesh.position.copy(from).lerp(to, 0.5);
+          mesh.quaternion.setFromUnitVectors(
+            new THREE.Vector3(0, 1, 0),
+            to.clone().sub(from).normalize(),
+          );
+          hanger.add(mesh);
+        };
+        if (garment === "trousers") {
+          bar(new THREE.Vector3(0, -0.06, 0), new THREE.Vector3(0, -0.12, 0));
+          bar(new THREE.Vector3(-0.25, -0.12, 0), new THREE.Vector3(0.25, -0.12, 0));
+          for (const x of [-0.19, 0.19]) {
+            const clip = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.095, 0.055), metal);
+            clip.position.set(x, -0.15, 0);
+            hanger.add(clip);
+          }
+        } else if (garment === "tee") {
+          for (const x of [-0.33, 0.33]) {
+            bar(new THREE.Vector3(0, -0.08, 0), new THREE.Vector3(x, -0.22, 0));
+          }
+        }
+        pivot.add(hanger);
         scene.add(pivot);
         return pivot;
       });
@@ -204,7 +231,7 @@ export default function CollectionRackScene({
       roots.forEach((root, index) => {
         const box = new THREE.Box3().setFromObject(root);
         const size = box.getSize(new THREE.Vector3());
-        const fit = 2.38 / Math.max(0.001, size.y);
+        const fit = (models[index].garment === "tee" ? 1.57 : 2.38) / Math.max(0.001, size.y);
         const center = box.getCenter(new THREE.Vector3());
         root.position.sub(new THREE.Vector3(center.x, box.max.y, center.z));
         const garment = new THREE.Group();
