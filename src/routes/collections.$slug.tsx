@@ -6,6 +6,7 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { EditorialCommerceBridge } from "@/components/lbb/editorial/EditorialCommerceBridge";
+import { ShopTheLook, type LookProduct } from "@/components/lbb/editorial/ShopTheLook";
 import { collectionBySlug, type Collection } from "@/lib/collections";
 import { CATEGORIES } from "@/lib/categories";
 import { getCollectionEditorialView } from "@/lib/editorial-commerce";
@@ -29,6 +30,26 @@ import {
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd, absUrl } from "@/lib/site";
 import { backendCanonicalPath } from "@/lib/seo-live";
+
+const COLLECTION_LOOK_SPOTS = [
+  { slug: "dupu-boxy-distressed-tshirt-charcoal", x: 53, y: 32 },
+  { slug: "shloar-gyn-prynty-acne-studios", x: 51, y: 68 },
+];
+
+function collectionLookProducts(products: ProductSummaryDto[]): LookProduct[] {
+  return COLLECTION_LOOK_SPOTS.flatMap((spot) => {
+    const product = products.find(({ slug }) => slug === spot.slug);
+    if (!product) return [];
+    return [
+      {
+        ...spot,
+        name: product.name,
+        image: product.primaryImage,
+        priceToman: product.price.from?.amount ?? null,
+      },
+    ];
+  });
+}
 
 type LiveLoader = {
   mode: "live";
@@ -277,6 +298,7 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
   }
 
   const image = collection.seo.primaryImage;
+  const lookProducts = collectionLookProducts(loader.products);
   const categories = Array.from(
     new Map(
       loader.products.map((product) => [
@@ -330,6 +352,10 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
           )}
         </Shell>
       </Band>
+
+      {lookProducts.length === COLLECTION_LOOK_SPOTS.length ? (
+        <ShopTheLook products={lookProducts} />
+      ) : null}
 
       <Band id="collection-products" label={`محصولات ${collection.name}`}>
         <Shell>
