@@ -64,8 +64,8 @@ export default function CollectionRackScene({
         return;
       }
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-      renderer.setClearColor("#dedbd3");
-      renderer.domElement.className = "h-full w-full";
+      renderer.setClearColor(getComputedStyle(target).backgroundColor);
+      Object.assign(renderer.domElement.style, { display: "block", width: "100%", height: "100%" });
 
       const scene = new THREE.Scene();
       const camera = new THREE.OrthographicCamera(-3, 3, 1.7, -1.7, 0.1, 30);
@@ -76,8 +76,8 @@ export default function CollectionRackScene({
       scene.add(light);
 
       const metal = new THREE.MeshStandardMaterial({
-        color: 0x363636,
-        metalness: 0.65,
+        color: 0x767676,
+        metalness: 0.35,
         roughness: 0.36,
       });
       const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 1, 16), metal);
@@ -261,5 +261,11 @@ export default function CollectionRackScene({
     };
   }, [models]);
 
-  return <div ref={host} aria-hidden="true" className="pointer-events-none absolute inset-0" />;
+  return (
+    <div
+      ref={host}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+    />
+  );
 }

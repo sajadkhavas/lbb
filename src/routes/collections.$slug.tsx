@@ -6,7 +6,6 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { EditorialCommerceBridge } from "@/components/lbb/editorial/EditorialCommerceBridge";
-import { CollectionRack } from "@/components/lbb/editorial/CollectionRack";
 import { collectionBySlug, type Collection } from "@/lib/collections";
 import { CATEGORIES } from "@/lib/categories";
 import { getCollectionEditorialView } from "@/lib/editorial-commerce";
@@ -331,8 +330,6 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
           )}
         </Shell>
       </Band>
-
-      <CollectionRack key={collection.slug} products={loader.products.map(backendCard)} />
 
       <Band id="collection-products" label={`محصولات ${collection.name}`}>
         <Shell>

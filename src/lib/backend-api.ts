@@ -567,8 +567,8 @@ export async function searchProducts(query: CatalogQuery & { q: string }) {
   return get<ProductSummaryDto[]>(`/api/v1/search${queryString(query)}` as `/api/v1/${string}`);
 }
 
-export async function getProduct(slug: string) {
-  return get<ProductDetailDto>(`/api/v1/products/${encodeURIComponent(slug)}`);
+export async function getProduct(slug: string, signal?: AbortSignal) {
+  return request<ProductDetailDto>(`/api/v1/products/${encodeURIComponent(slug)}`, { signal });
 }
 
 export async function listCategories() {

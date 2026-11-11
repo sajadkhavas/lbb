@@ -6,6 +6,8 @@ import { BrandIntro } from "@/components/lbb/BrandIntro";
 import { InstagramStrip } from "@/components/lbb/InstagramStrip";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Navbar } from "@/components/lbb/Navbar";
+import { CollectionRack } from "@/components/lbb/editorial/CollectionRack";
+import { rackProductSlugs, type RackProduct } from "@/lib/rack-products";
 import { CategoryGateway } from "@/components/lbb/home/CategoryGateway";
 import { DecisionSupport } from "@/components/lbb/home/DecisionSupport";
 import { DropStory, type LiveFeaturedStory } from "@/components/lbb/home/DropStory";
@@ -46,6 +48,7 @@ type HomeLoaderData = {
   products: BackendCatalogCard[] | null;
   lookbook: StorefrontLookDto[] | null;
   featuredStory: LiveFeaturedStory | null;
+  rackProducts: RackProduct[];
 };
 
 async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | null> {
@@ -98,6 +101,17 @@ async function resolveLiveFeaturedStory(
   }
 }
 
+async function resolveRackProducts(): Promise<RackProduct[]> {
+  const signal = AbortSignal.timeout(2500);
+  const results = await Promise.allSettled(
+    rackProductSlugs.map(async (slug) => {
+      const { data } = await getProduct(slug, signal);
+      return { slug, name: data.name, image: data.primaryImage };
+    }),
+  );
+  return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+}
+
 export const Route = createFileRoute("/")({
   loader: async (): Promise<HomeLoaderData> => {
     const [control, presentation] = await Promise.all([
@@ -113,16 +127,19 @@ export const Route = createFileRoute("/")({
         products: null,
         lookbook: null,
         featuredStory: null,
+        rackProducts: [],
       };
     }
 
-    const [heroProduct, categories, curatedProducts, lookbook, featuredStory] = await Promise.all([
-      resolveLiveHeroProduct(control.home.heroProductSlug),
-      listStorefrontCategories(),
-      resolveStorefrontHomeProducts(),
-      resolveStorefrontLookbook(),
-      resolveLiveFeaturedStory(control),
-    ]);
+    const [heroProduct, categories, curatedProducts, lookbook, featuredStory, rackProducts] =
+      await Promise.all([
+        resolveLiveHeroProduct(control.home.heroProductSlug),
+        listStorefrontCategories(),
+        resolveStorefrontHomeProducts(),
+        resolveStorefrontLookbook(),
+        resolveLiveFeaturedStory(control),
+        resolveRackProducts(),
+      ]);
 
     return {
       control,
@@ -132,6 +149,7 @@ export const Route = createFileRoute("/")({
       products: curatedProducts.map(backendCard),
       lookbook: lookbook ?? [],
       featuredStory,
+      rackProducts,
     };
   },
   head: ({ loaderData }) => {
@@ -195,8 +213,16 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { control, presentation, heroProduct, categories, products, lookbook, featuredStory } =
-    Route.useLoaderData();
+  const {
+    control,
+    presentation,
+    heroProduct,
+    categories,
+    products,
+    lookbook,
+    featuredStory,
+    rackProducts,
+  } = Route.useLoaderData();
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
@@ -205,7 +231,12 @@ function Home() {
     ticker: <TickerStrip />,
     trust: <TrustStrip />,
     categories: <CategoryGateway liveCategories={categories} />,
-    products: <ProductMoments liveProducts={products} />,
+    products: (
+      <>
+        <ProductMoments liveProducts={products} />
+        <CollectionRack products={rackProducts} />
+      </>
+    ),
     drop_story: <DropStory liveStory={featuredStory} />,
     decision_support: <DecisionSupport />,
     local_store: <LocalStoreVisit />,
@@ -231,6 +262,7 @@ function Home() {
         {control.home.sections.map((key) => (
           <div key={key}>{sections[key] ?? null}</div>
         ))}
+        {!control.home.sections.includes("products") && <CollectionRack products={rackProducts} />}
       </main>
       <Footer theme="dark" />
       <MobileBottomBar />
