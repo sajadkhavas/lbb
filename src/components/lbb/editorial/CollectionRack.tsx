@@ -7,7 +7,7 @@ import { fmtToman } from "@/lib/products";
 import { getProductMannequinModel3d, type ProductMannequinModel3dDto } from "@/lib/product-3d-api";
 
 const RackScene = lazy(() =>
-  import("./CollectionRackScene").catch(() => ({ default: () => null })),
+  import("./CollectionRackScene").catch(() => ({ default: () => <></> })),
 );
 const PAGE_SIZE = 5;
 const MAX_PAGE_BYTES = 5 * 1024 * 1024;
