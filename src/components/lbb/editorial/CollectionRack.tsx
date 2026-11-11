@@ -9,7 +9,7 @@ import { getProductMannequinModel3d, type ProductMannequinModel3dDto } from "@/l
 type RackModel = ProductMannequinModel3dDto & { garment?: "tee" | "trousers" };
 
 const RACK_MODELS: Readonly<Record<string, RackModel>> = {
-  "dupu-boxy-distressed-tshirt-charcoal": {
+  "tyshrt-baksy-dupu-thghaly": {
     url: "/models/collection-rack/lbb-dupu-boxy-charcoal-web.glb",
     format: "glb",
     bytes: 1403456,
