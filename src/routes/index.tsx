@@ -12,6 +12,7 @@ import { DropStory, type LiveFeaturedStory } from "@/components/lbb/home/DropSto
 import { HeroNarrative } from "@/components/lbb/home/HeroNarrative";
 import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
+import { ShopTheLook, shopTheLookSpots, type LookProduct } from "@/components/lbb/home/ShopTheLook";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
 import { BackendApiError, getCollection, getProduct } from "@/lib/backend-api";
@@ -46,12 +47,16 @@ type HomeLoaderData = {
   products: BackendCatalogCard[] | null;
   lookbook: StorefrontLookDto[] | null;
   featuredStory: LiveFeaturedStory | null;
+  lookProducts: LookProduct[];
 };
 
-async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | null> {
+async function resolveLiveHeroProduct(
+  slug: string,
+  signal?: AbortSignal,
+): Promise<LiveHeroProduct | null> {
   if (!slug.trim()) return null;
   try {
-    const response = await getProduct(slug);
+    const response = await getProduct(slug, signal);
     return {
       slug: response.data.slug,
       name: response.data.name,
@@ -98,6 +103,15 @@ async function resolveLiveFeaturedStory(
   }
 }
 
+async function resolveLookProducts(): Promise<LookProduct[]> {
+  const results = await Promise.allSettled(
+    shopTheLookSpots.map(({ slug }) => resolveLiveHeroProduct(slug, AbortSignal.timeout(2500))),
+  );
+  return results.flatMap((result) =>
+    result.status === "fulfilled" && result.value ? [result.value] : [],
+  );
+}
+
 export const Route = createFileRoute("/")({
   loader: async (): Promise<HomeLoaderData> => {
     const [control, presentation] = await Promise.all([
@@ -113,16 +127,19 @@ export const Route = createFileRoute("/")({
         products: null,
         lookbook: null,
         featuredStory: null,
+        lookProducts: [],
       };
     }
 
-    const [heroProduct, categories, curatedProducts, lookbook, featuredStory] = await Promise.all([
-      resolveLiveHeroProduct(control.home.heroProductSlug),
-      listStorefrontCategories(),
-      resolveStorefrontHomeProducts(),
-      resolveStorefrontLookbook(),
-      resolveLiveFeaturedStory(control),
-    ]);
+    const [heroProduct, categories, curatedProducts, lookbook, featuredStory, lookProducts] =
+      await Promise.all([
+        resolveLiveHeroProduct(control.home.heroProductSlug),
+        listStorefrontCategories(),
+        resolveStorefrontHomeProducts(),
+        resolveStorefrontLookbook(),
+        resolveLiveFeaturedStory(control),
+        control.home.sections.includes("products") ? resolveLookProducts() : [],
+      ]);
 
     return {
       control,
@@ -132,6 +149,7 @@ export const Route = createFileRoute("/")({
       products: curatedProducts.map(backendCard),
       lookbook: lookbook ?? [],
       featuredStory,
+      lookProducts,
     };
   },
   head: ({ loaderData }) => {
@@ -195,8 +213,16 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { control, presentation, heroProduct, categories, products, lookbook, featuredStory } =
-    Route.useLoaderData();
+  const {
+    control,
+    presentation,
+    heroProduct,
+    categories,
+    products,
+    lookbook,
+    featuredStory,
+    lookProducts,
+  } = Route.useLoaderData();
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
@@ -205,7 +231,12 @@ function Home() {
     ticker: <TickerStrip />,
     trust: <TrustStrip />,
     categories: <CategoryGateway liveCategories={categories} />,
-    products: <ProductMoments liveProducts={products} />,
+    products: (
+      <>
+        <ProductMoments liveProducts={products} />
+        <ShopTheLook products={lookProducts} />
+      </>
+    ),
     drop_story: <DropStory liveStory={featuredStory} />,
     decision_support: <DecisionSupport />,
     local_store: <LocalStoreVisit />,
