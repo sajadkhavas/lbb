@@ -1,11 +1,20 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Shell } from "@/components/lbb/ui/primitives";
 
 import { RACK_MODELS, type RackProduct } from "@/lib/rack-products";
 
+function RackSceneFallback({ onSettled }: { onSettled: () => void }) {
+  useEffect(() => {
+    onSettled();
+  }, [onSettled]);
+  return <></>;
+}
+
 const RackScene = lazy(() =>
-  import("./CollectionRackScene").catch(() => ({ default: () => <></> })),
+  import("./CollectionRackScene")
+    .then(({ default: Scene }) => ({ default: Scene }))
+    .catch(() => ({ default: RackSceneFallback })),
 );
 
 export function CollectionRack({ products }: { products: RackProduct[] }) {
@@ -14,9 +23,18 @@ export function CollectionRack({ products }: { products: RackProduct[] }) {
   const [active, setActive] = useState(0);
   const [visible, setVisible] = useState(false);
   const [started, setStarted] = useState(false);
+  const [settledKey, setSettledKey] = useState<string | null>(null);
   const hasProducts = products.length > 0;
   const models = useMemo(() => products.map(({ slug }) => RACK_MODELS[slug]), [products]);
   const productKey = products.map(({ slug }) => slug).join("|");
+  const loading = started && settledKey !== productKey;
+  const finishLoading = useCallback(() => setSettledKey(productKey), [productKey]);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timer = window.setTimeout(finishLoading, 20000);
+    return () => window.clearTimeout(timer);
+  }, [finishLoading, loading]);
 
   useEffect(() => {
     const element = host.current;
@@ -70,9 +88,42 @@ export function CollectionRack({ products }: { products: RackProduct[] }) {
           </div>
           {started && (
             <Suspense fallback={null}>
-              <RackScene key={productKey} models={models} active={active} visible={visible} />
+              <RackScene
+                key={productKey}
+                models={models}
+                active={active}
+                visible={visible}
+                onSettled={finishLoading}
+              />
             </Suspense>
           )}
+          <div
+            aria-hidden={!loading}
+            className={`pointer-events-none absolute inset-0 z-20 grid place-items-center bg-obsidian transition-opacity duration-300 motion-reduce:transition-none ${loading ? "opacity-100" : "opacity-0"}`}
+          >
+            {started && (
+              <div className="grid justify-items-center gap-4">
+                <img
+                  src="/favicon.png"
+                  alt=""
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 rounded-xl object-cover"
+                />
+                <div
+                  aria-hidden="true"
+                  className="h-0.5 w-12 overflow-hidden rounded-full bg-carbon"
+                >
+                  <span className="block h-full w-full bg-signal motion-safe:animate-pulse" />
+                </div>
+                {loading && (
+                  <span role="status" className="sr-only">
+                    در حال بارگیری رگال
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
           <div className="absolute inset-x-[7%] top-[12%] z-10 flex h-[77%]">
             {products.map(({ slug, name }, index) => (
               <Link

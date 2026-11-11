@@ -27,10 +27,12 @@ export default function CollectionRackScene({
   models,
   active,
   visible,
+  onSettled,
 }: {
   models: Array<ProductMannequinModel3dDto & { garment?: "tee" | "trousers" }>;
   active: number;
   visible: boolean;
+  onSettled: () => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const selected = useRef(active);
@@ -50,8 +52,10 @@ export default function CollectionRackScene({
       !element ||
       !target ||
       (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
-    )
+    ) {
+      onSettled();
       return;
+    }
 
     let disposed = false;
     let releaseScene: (() => void) | undefined;
@@ -61,6 +65,7 @@ export default function CollectionRackScene({
       try {
         renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "low-power" });
       } catch {
+        onSettled();
         return;
       }
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -125,6 +130,7 @@ export default function CollectionRackScene({
 
       let frame = 0;
       let ready = false;
+      let firstFrame = true;
       let drag: { id: number; x: number; angle: number } | null = null;
       let angle = 0;
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -145,6 +151,10 @@ export default function CollectionRackScene({
           moving ||= Math.abs(delta) > 0.001 || Math.abs(pivot.rotation.z) > 0.002;
         });
         renderer.render(scene, camera);
+        if (firstFrame) {
+          firstFrame = false;
+          onSettled();
+        }
         if (moving) requestDraw();
       }
 
@@ -199,6 +209,7 @@ export default function CollectionRackScene({
         event.preventDefault();
         ready = false;
         renderer.domElement.remove();
+        onSettled();
       };
 
       releaseScene = () => {
@@ -225,6 +236,7 @@ export default function CollectionRackScene({
         roots.forEach(disposeObject);
         releaseScene?.();
         releaseScene = undefined;
+        if (!disposed) onSettled();
         return;
       }
 
@@ -252,14 +264,17 @@ export default function CollectionRackScene({
       resize.observe(element);
     };
 
-    void start().catch(() => releaseScene?.());
+    void start().catch(() => {
+      releaseScene?.();
+      if (!disposed) onSettled();
+    });
 
     return () => {
       disposed = true;
       releaseScene?.();
       releaseScene = undefined;
     };
-  }, [models]);
+  }, [models, onSettled]);
 
   return (
     <div
