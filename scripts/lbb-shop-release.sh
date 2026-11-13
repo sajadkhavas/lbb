@@ -21,17 +21,25 @@ switch_release() {
 }
 
 check_release() {
-  local target="$1" marker="${2:-}" pid attempt body
+  local target="$1" marker="${2:-}" pid attempt body http_code
+  body="$(mktemp)" || return 1
   for attempt in {1..12}; do
     pid="$(systemctl show -p MainPID --value "$service")"
     if [[ "$pid" != 0 && "$(readlink -f "/proc/$pid/cwd" || true)" == "$target" ]] &&
-      body="$(curl -fsS --max-time 5 -H 'Cache-Control: no-cache'         "https://lbbclo.com/shop?lbb_release=$(date +%s%N)")" &&
-      [[ -n "$body" ]] &&
-      { [[ -z "$marker" ]] || [[ "$body" == *'id="shop-category-track"'* ]]; }; then
-      return 0
+      http_code="$(curl -fsS --compressed --max-time 5 -H 'Cache-Control: no-cache' \
+        -o "$body" -w '%{http_code}' "https://lbbclo.com/shop?lbb_release=$(date +%s%N)")" &&
+      [[ "$http_code" == 200 && -s "$body" ]]; then
+      if [[ -z "$marker" ]] || LC_ALL=C grep -aqF 'id="shop-category-track"' "$body"; then
+        rm -f -- "$body"
+        return 0
+      fi
+      echo "SHOP_CHECK attempt=$attempt HTTP=200 release marker missing" >&2
+    else
+      echo "SHOP_CHECK attempt=$attempt HTTP=${http_code:-unavailable} PID=${pid:-unknown}" >&2
     fi
     sleep 2
   done
+  rm -f -- "$body"
   return 1
 }
 
