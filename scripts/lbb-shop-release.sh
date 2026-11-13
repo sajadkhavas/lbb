@@ -312,11 +312,48 @@ fi
 if [[ ! -x node_modules/.bin/vite ]]; then
   npm ci --include=dev
 fi
+NITRO_PRESET=node-server \
 VITE_SITE_URL=https://lbbclo.com \
 VITE_LBB_BACKEND_MODE=live \
 VITE_LBB_API_BASE_URL=https://api.lbbclo.com \
 npm run build
 test -s .output/server/index.mjs
+/usr/bin/node -e 'if (require("./.output/nitro.json").preset !== "node-server") process.exit(1)'
+canary="lbb-shop-check-${candidate##*-}.service"
+canary_body="$(mktemp)"
+cleanup_canary() {
+  systemctl stop "$canary" >/dev/null 2>&1 || true
+  rm -f -- "$canary_body"
+}
+trap cleanup_canary EXIT
+if [[ -n "$(ss -H -ltn 'sport = :18573')" ]]; then
+  echo 'STOP: canary port 18573 is already in use.' >&2
+  exit 1
+fi
+systemd-run --unit="$canary" --property=User=lbb --property=Group=lbb \
+  --property="WorkingDirectory=$candidate" --setenv=NODE_ENV=production \
+  --setenv=NITRO_HOST=127.0.0.1 --setenv=NITRO_PORT=18573 \
+  /usr/bin/node "$candidate/.output/server/index.mjs"
+
+canary_ok=0
+for attempt in {1..12}; do
+  if systemctl is-active --quiet "$canary" &&
+    curl -fsS --compressed --max-time 5 -H 'Host: lbbclo.com' \
+      -o "$canary_body" http://127.0.0.1:18573/shop &&
+    LC_ALL=C grep -aqF 'id="shop-category-track"' "$canary_body"; then
+    canary_ok=1
+    break
+  fi
+  sleep 2
+done
+if [[ "$canary_ok" != 1 ]]; then
+  journalctl -u "$canary" -n 30 --no-pager >&2 || true
+  echo 'LBB_SHOP_CANARY_FAILED' >&2
+  exit 1
+fi
+cleanup_canary
+trap - EXIT
+echo 'LBB_SHOP_CANARY_OK'
 printf '%s\n' "$baseline" > .lbb-shop-previous
 
 rollback_on_failure() {
