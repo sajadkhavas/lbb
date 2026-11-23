@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { BackendCatalogCard } from "@/lib/backend-storefront";
 import type { Product } from "./products";
 import {
   closeOverlayHistory,
@@ -16,9 +17,15 @@ import {
   openOverlayHistory,
 } from "@/lib/overlay-history";
 
+export type QuickViewTarget = Product | BackendCatalogCard;
+
+export function isBackendQuickViewTarget(target: QuickViewTarget): target is BackendCatalogCard {
+  return "source" in target && target.source === "backend";
+}
+
 type QuickViewCtx = {
-  product: Product | null;
-  open: (product: Product, trigger?: HTMLElement | null) => void;
+  product: QuickViewTarget | null;
+  open: (product: QuickViewTarget, trigger?: HTMLElement | null) => void;
   close: () => void;
   dismissForNavigation: () => void;
 };
@@ -26,11 +33,11 @@ type QuickViewCtx = {
 const Ctx = createContext<QuickViewCtx | null>(null);
 
 export function QuickViewProvider({ children }: { children: ReactNode }) {
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<QuickViewTarget | null>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const wasOpenRef = useRef(false);
 
-  const open = useCallback((nextProduct: Product, trigger?: HTMLElement | null) => {
+  const open = useCallback((nextProduct: QuickViewTarget, trigger?: HTMLElement | null) => {
     returnFocusRef.current =
       trigger ??
       (typeof document !== "undefined" && document.activeElement instanceof HTMLElement

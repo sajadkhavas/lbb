@@ -30,3 +30,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Production secrets and patch leftovers
+.env
+.env.*
+!.env.example
+*.orig
+*.rej

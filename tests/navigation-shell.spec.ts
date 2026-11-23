@@ -2,8 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
 });
 
@@ -11,7 +10,7 @@ test("desktop mega menu is category-first, keyboard reachable and history-backed
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const trigger = page.getByRole("button", { name: "فروشگاه" });
   await trigger.focus();
@@ -29,19 +28,19 @@ test("desktop mega menu is category-first, keyboard reachable and history-backed
   await expect(trigger).toBeFocused();
 });
 
-test("search supports Arrow navigation, Enter and shareable destination URLs", async ({ page }) => {
+test("search opens shareable results when no verified suggestion exists", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await page.getByRole("button", { name: "جست‌وجو" }).first().click();
   const dialog = page.getByRole("dialog", { name: "جست‌وجوی محصولات" });
   const input = page.getByRole("searchbox", { name: "عبارت جست‌وجو" });
   await expect(input).toBeFocused();
   await input.fill("هودی");
-  await expect(dialog.getByRole("option")).not.toHaveCount(0);
-  await input.press("ArrowDown");
+  // Prototype mode has no verified backend products to suggest.
+  await expect(dialog.getByRole("option")).toHaveCount(0);
   await input.press("Enter");
-  await expect(page).toHaveURL(/\/hoodies$/);
+  await expect(page).toHaveURL(/\/search\?q=/);
 
   await page.getByRole("button", { name: "جست‌وجو" }).first().click();
   await input.fill("عبارت بدون نتیجه مستقیم");
@@ -54,7 +53,7 @@ test("mobile navigation exposes product categories and independent account desti
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/shop", { waitUntil: "networkidle" });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
 
   await page.getByRole("button", { name: "منوی اصلی" }).click();
   const dialog = page.getByRole("dialog", { name: "منوی اصلی" });
@@ -63,13 +62,13 @@ test("mobile navigation exposes product categories and independent account desti
   await expect(dialog.getByRole("link", { name: /هودی/ })).toBeVisible();
   await dialog.getByRole("link", { name: "حساب کاربری" }).click();
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.getByRole("heading", { level: 1, name: "مرکز حساب" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "حساب کاربری" })).toBeVisible();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
 });
 
 test("mobile bottom search and cart drawer close with browser Back", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await page.getByRole("button", { name: "باز کردن جست‌وجو" }).click();
   const search = page.getByRole("dialog", { name: "جست‌وجوی محصولات" });
@@ -92,7 +91,7 @@ for (const viewport of [
 ]) {
   test(`global shell has no horizontal overflow at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/account", { waitUntil: "networkidle" });
+    await page.goto("/account", { waitUntil: "domcontentloaded" });
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

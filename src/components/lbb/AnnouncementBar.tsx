@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/commerce";
-import { fmtToman } from "@/lib/products";
+import { safePublicHref } from "@/lib/public-href";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
-const MESSAGES = [
-  { text: "نسخه نمایشی — پرداخت و ارسال واقعی غیرفعال است", to: "/shipping-returns" as const },
-  { text: "DROP 001 — کاتالوگ و تجربه محصول فعال است", to: "/collections" as const },
-  { text: `ارسال رایگان نمایشی از ${fmtToman(FREE_SHIPPING_THRESHOLD)}`, to: "/cart" as const },
-];
-
-const STORAGE_KEY = "lbb-announcement-f12-v1-dismissed";
+const STORAGE_KEY = "lbb-announcement-seasonal-v2-dismissed";
 export const ANNOUNCEMENT_HEIGHT = 32;
 
-export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
+export function AnnouncementBar({
+  onDismiss,
+  onVisibilityChange,
+}: {
+  onDismiss?: () => void;
+  onVisibilityChange?: (visible: boolean) => void;
+}) {
+  const { announcements, brand } = useStorefrontControl();
+  const safeAnnouncements = announcements.flatMap((item) => {
+    const href = safePublicHref(item.href);
+    return href ? [{ ...item, href }] : [];
+  });
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [index, setIndex] = useState(0);
@@ -23,27 +27,34 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
     setMounted(true);
     try {
       if (localStorage.getItem(STORAGE_KEY) === "1") {
+        onVisibilityChange?.(false);
         onDismiss?.();
         return;
       }
     } catch {
       // Storage can be unavailable; the announcement remains visible.
     }
-    setVisible(true);
-  }, [onDismiss]);
+    setVisible(safeAnnouncements.length > 0);
+    onVisibilityChange?.(safeAnnouncements.length > 0);
+  }, [safeAnnouncements.length, onDismiss, onVisibilityChange]);
 
   useEffect(() => {
-    if (!visible || paused) return;
+    if (!visible || paused || safeAnnouncements.length < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const id = window.setInterval(
-      () => setIndex((current) => (current + 1) % MESSAGES.length),
+      () => setIndex((current) => (current + 1) % safeAnnouncements.length),
       5200,
     );
     return () => window.clearInterval(id);
-  }, [paused, visible]);
+  }, [safeAnnouncements.length, paused, visible]);
+
+  useEffect(() => {
+    if (index >= safeAnnouncements.length) setIndex(0);
+  }, [safeAnnouncements.length, index]);
 
   const dismiss = () => {
     setVisible(false);
+    onVisibilityChange?.(false);
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {
@@ -52,13 +63,14 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
     onDismiss?.();
   };
 
-  if (!mounted || !visible) return null;
-  const current = MESSAGES[index];
+  if (!mounted || !visible || safeAnnouncements.length === 0) return null;
+  const current = safeAnnouncements[index] ?? safeAnnouncements[0];
+  const external = current.href.startsWith("https://");
 
   return (
     <aside
       dir="rtl"
-      aria-label="اطلاعیه‌های LBB"
+      aria-label={`اطلاعیه‌های ${brand.nameFa}`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -67,24 +79,26 @@ export function AnnouncementBar({ onDismiss }: { onDismiss?: () => void }) {
       style={{ height: ANNOUNCEMENT_HEIGHT }}
     >
       <span aria-hidden="true" className="tech ps-3 text-obsidian">
-        LBB / INFO
+        {brand.nameFa} / خبر
       </span>
-      <Link
-        to={current.to}
+      <a
+        href={current.href}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noopener noreferrer" : undefined}
         className="tech flex min-w-0 items-center justify-center gap-3 truncate px-3 text-center text-obsidian focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-obsidian"
       >
         <span aria-live="polite" className="truncate">
           {current.text}
         </span>
         <span aria-hidden="true" className="hidden gap-1 sm:flex">
-          {MESSAGES.map((message, messageIndex) => (
+          {safeAnnouncements.map((message, messageIndex) => (
             <span
-              key={message.text}
+              key={`${message.href}-${message.text}`}
               className={`h-1 w-3 ${messageIndex === index ? "bg-obsidian" : "bg-obsidian/30"}`}
             />
           ))}
         </span>
-      </Link>
+      </a>
       <button
         type="button"
         aria-label="بستن نوار اطلاعیه"

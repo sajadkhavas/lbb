@@ -1,20 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowUpLeft, X } from "lucide-react";
 import { useRef } from "react";
-import { categoryImage } from "@/lib/category-images";
-import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
-import {
-  EDITORIAL_NAVIGATION,
-  PERSONAL_NAVIGATION,
-  SERVICE_NAVIGATION,
-  isNavigationItemActive,
-} from "@/lib/navigation";
+import { PERSONAL_NAVIGATION } from "@/lib/navigation";
 import { useNavigationOverlay } from "@/lib/navigation-overlay";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { TechLabel } from "@/components/lbb/ui/primitives";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
+import {
+  isMerchantNavigationItemActive,
+  MerchantNavigationLink,
+} from "@/components/lbb/navigation/MerchantNavigationLink";
+import { CatalogTaxonomyMenu } from "@/components/lbb/navigation/CatalogTaxonomyMenu";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
 export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
+  const { navigation } = useStorefrontControl();
   const { close, dismissForNavigation } = useNavigationOverlay();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const panelRef = useRef<HTMLDivElement>(null);
@@ -42,11 +42,11 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
         <div className="lbb-shell py-6 lg:py-9">
           <div className="flex items-start justify-between gap-6">
             <div>
-              <TechLabel tone="signal">SHOP INDEX / F12</TechLabel>
+              <TechLabel tone="signal">LBB / CATALOG INDEX</TechLabel>
               <h2 className="mt-2 text-display-3 text-bone">انتخاب سریع، بدون حدس</h2>
               <p className="mt-2 max-w-[54ch] text-sm leading-7 text-metal">
-                دسته‌ها در سطح اول قرار گرفته‌اند؛ هر مسیر مستقیماً به صفحه قابل‌اشتراک و
-                قابل‌جست‌وجوی خودش می‌رسد.
+                ساختار دسته‌بندی تأییدشده LBB را ببین؛ فقط دسته‌هایی که موجودی واقعی دارند لینک خرید
+                می‌گیرند و برای دسته‌های بدون موجودی صفحه خالی ساخته نمی‌شود.
               </p>
             </div>
             <button
@@ -75,46 +75,7 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                   <ArrowUpLeft size={14} aria-hidden="true" />
                 </Link>
               </div>
-
-              <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-5">
-                {CATEGORY_SLUGS.map((slug) => {
-                  const active = pathname === `/${slug}`;
-                  return (
-                    <Link
-                      key={slug}
-                      to="/$category"
-                      params={{ category: slug }}
-                      onClick={dismissForNavigation}
-                      aria-current={active ? "page" : undefined}
-                      className="group relative min-w-0 overflow-hidden border border-hairline bg-carbon focus-visible:ring-2 focus-visible:ring-signal"
-                    >
-                      <div className="relative aspect-[4/5] overflow-hidden">
-                        <img
-                          src={categoryImage(slug)}
-                          alt=""
-                          width={640}
-                          height={800}
-                          loading="lazy"
-                          decoding="async"
-                          className="frame-zoom h-full w-full object-cover opacity-75 transition-opacity group-hover:opacity-100"
-                        />
-                        <span
-                          aria-hidden="true"
-                          className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent"
-                        />
-                        <span className="absolute inset-x-0 bottom-0 p-3">
-                          <span
-                            className={`block text-sm font-black ${active ? "text-signal" : "text-bone"}`}
-                          >
-                            {CATEGORIES[slug].nameFa}
-                          </span>
-                          <span className="tech mt-1 block text-metal">{slug.toUpperCase()}</span>
-                        </span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
+              <CatalogTaxonomyMenu pathname={pathname} onNavigate={dismissForNavigation} />
             </section>
 
             <aside className="grid gap-6 sm:grid-cols-2 xl:grid-cols-1">
@@ -123,28 +84,35 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                   داستان و کالکشن
                 </h3>
                 <ul className="mt-2">
-                  {EDITORIAL_NAVIGATION.map((item) => (
-                    <li key={String(item.to)}>
-                      <NavigationLink
+                  {navigation.editorial.map((item) => (
+                    <li key={`${item.href}-${item.label}`}>
+                      <MerchantNavigationLink
                         item={item}
-                        active={isNavigationItemActive(pathname, item)}
                         onNavigate={dismissForNavigation}
                         className="group flex min-h-14 items-center justify-between gap-4 border-b border-hairline-soft py-2"
                       >
                         <span>
-                          <span className="block text-sm font-bold text-bone transition-colors group-hover:text-signal">
+                          <span
+                            className={`block text-sm font-bold transition-colors group-hover:text-signal ${
+                              isMerchantNavigationItemActive(pathname, item)
+                                ? "text-signal"
+                                : "text-bone"
+                            }`}
+                          >
                             {item.label}
                           </span>
-                          <span className="mt-1 block text-[11px] text-mute">
-                            {item.description}
-                          </span>
+                          {item.description ? (
+                            <span className="mt-1 block text-[11px] text-mute">
+                              {item.description}
+                            </span>
+                          ) : null}
                         </span>
                         <ArrowUpLeft
                           size={15}
                           aria-hidden="true"
                           className="text-mute group-hover:text-signal"
                         />
-                      </NavigationLink>
+                      </MerchantNavigationLink>
                     </li>
                   ))}
                 </ul>
@@ -156,9 +124,9 @@ export function MegaMenuOverlay({ offsetTop = 0 }: { offsetTop?: number }) {
                     راهنما
                   </h3>
                   <ul className="mt-3 space-y-2">
-                    {SERVICE_NAVIGATION.slice(0, 4).map((item) => (
-                      <li key={String(item.to)}>
-                        <NavigationLink
+                    {navigation.service.slice(0, 4).map((item) => (
+                      <li key={`${item.href}-${item.label}`}>
+                        <MerchantNavigationLink
                           item={item}
                           onNavigate={dismissForNavigation}
                           className="text-xs leading-6 text-metal transition-colors hover:text-bone"

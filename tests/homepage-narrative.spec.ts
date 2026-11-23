@@ -1,11 +1,22 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-const CATEGORY_LINKS = ["هودی‌ها", "شلوارها", "تیشرت‌ها", "کتونی‌ها", "جوراب‌ها"];
+const ACTIVE_CATEGORIES = [
+  { label: "شلوارها", href: "/pants" },
+  { label: "تیشرت‌ها", href: "/tshirts" },
+  { label: "کتونی‌ها", href: "/shoes" },
+  { label: "جوراب‌ها", href: "/socks" },
+] as const;
 
-async function hideAnnouncement(page: import("@playwright/test").Page) {
+const CURRENT_PRODUCT_SLUGS = [
+  "lbb-signature-tee",
+  "denim-baggy-jean",
+  "urban-runner-sneaker",
+  "lbb-crew-socks",
+] as const;
+
+async function hideAnnouncement(page: Page) {
   await page.addInitScript(() => {
-    localStorage.setItem("lbb-announcement-dismissed", "1");
-    localStorage.setItem("lbb-announcement-f12-v1-dismissed", "1");
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
   });
 }
 
@@ -14,27 +25,49 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 });
 
-test("homepage communicates identity, catalog and primary action above the fold", async ({
-  page,
-}) => {
+test("homepage communicates current identity, catalog and primary action", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  await expect(page).toHaveTitle(/LBB \| استریت‌ویر تهران — دراپ ۰۰۱/);
+  await expect(page).toHaveTitle("LBB | پوشاک خیابانی و استریت‌ویر در کرج");
+
   await expect(
-    page.getByRole("heading", { level: 1, name: /تهران را.*با فرم.*خودت بپوش/ }),
+    page.getByRole("heading", {
+      level: 1,
+      name: "از پینترست تا رگال LBB",
+    }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: /خرید DROP 001/ })).toBeVisible();
+
+  const hero = page.locator('section[aria-labelledby="home-hero-title"]');
+
+  await expect(hero.getByRole("link", { name: "خرید جدیدترین‌ها" })).toHaveAttribute(
+    "href",
+    "/shop",
+  );
+
+  await expect(hero.getByRole("link", { name: "اطلاعات فروشگاه حضوری" })).toHaveAttribute(
+    "href",
+    "/contact",
+  );
+
+  const localStore = page.locator('section[aria-labelledby="local-store-title"]');
+
   await expect(
-    page.getByText("8", { exact: true }).or(page.getByText("۸", { exact: true })),
+    localStore.getByRole("heading", {
+      name: "آنلاین ببین، در مهستان از نزدیک انتخاب کن.",
+    }),
   ).toBeVisible();
-  await expect(page.getByText("پرداخت و ارسال واقعی در این نسخه فعال نیست")).toBeVisible();
+
+  await expect(localStore.getByText("کرج، پاساژ مهستان").first()).toBeVisible();
 });
 
-test("hero LCP image is preloaded, eager and dimensioned", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+test("hero LCP image uses the current production asset contract", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  const image = page.getByRole("img", { name: "استایل شبانه LBB از دراپ ۰۰۱ در فضای شهری" });
+  const image = page.getByRole("img", {
+    name: "تیشرت مشکی ال‌بی‌بی روی زمینه روشن",
+  });
+
   await expect(image).toBeVisible();
   await expect(image).toHaveAttribute("loading", "eager");
   await expect(image).toHaveAttribute("fetchpriority", "high");
@@ -44,10 +77,13 @@ test("hero LCP image is preloaded, eager and dimensioned", async ({ page }) => {
 
   const source = await image.getAttribute("src");
   expect(source).toBeTruthy();
+
   const heroPath = new URL(source ?? "", page.url()).pathname;
+
   const preloadPaths = await page
     .locator('link[rel="preload"][as="image"]')
     .evaluateAll((links) => links.map((link) => new URL((link as HTMLLinkElement).href).pathname));
+
   expect(preloadPaths).toContain(heroPath);
 
   expect(
@@ -58,75 +94,128 @@ test("hero LCP image is preloaded, eager and dimensioned", async ({ page }) => {
   ).toBe(true);
 });
 
-test("category gateway exposes every product family as a direct route", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-  const gateway = page.locator("#home-categories");
-  await expect(gateway.getByRole("heading", { name: "از چیزی که می‌خوای شروع کن" })).toBeVisible();
+test("category gateway exposes current promoted categories", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  for (const label of CATEGORY_LINKS) {
-    const link = gateway.getByRole("link", { name: new RegExp(`مشاهده ${label}`) });
+  const gateway = page.locator("#home-categories");
+
+  await expect(gateway.getByRole("heading", { name: "دنبال چی می‌گردی؟" })).toBeVisible();
+
+  for (const category of ACTIVE_CATEGORIES) {
+    const link = gateway.getByRole("link", {
+      name: new RegExp(`^مشاهده ${category.label} —`),
+    });
+
     await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute("href", /^\/(hoodies|pants|tshirts|shoes|socks)$/);
+    await expect(link).toHaveAttribute("href", category.href);
+  }
+
+  await expect(gateway.locator('a[href="/hoodies"]')).toHaveCount(0);
+});
+
+test("homepage follows the current production narrative order", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  const ids = [
+    "home-hero-title",
+    "home-categories-title",
+    "home-products-title",
+    "drop-story-title",
+    "decision-support-title",
+    "local-store-title",
+  ];
+
+  const positions = await page.evaluate((sectionIds) => {
+    return sectionIds.map((id) => {
+      const element = document.getElementById(id);
+
+      if (!element) return -1;
+
+      return element.getBoundingClientRect().top + window.scrollY;
+    });
+  }, ids);
+
+  expect(positions.every((value) => value >= 0)).toBe(true);
+  expect(positions).toEqual([...positions].sort((a, b) => a - b));
+});
+
+test("product moments expose current merchandising products", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  const section = page.locator('section[aria-labelledby="home-products-title"]');
+
+  await expect(
+    section.getByRole("heading", {
+      name: "تازه‌ها و انتخاب‌های این هفته",
+    }),
+  ).toBeVisible();
+
+  await expect(section.locator("article")).toHaveCount(4);
+
+  for (const slug of CURRENT_PRODUCT_SLUGS) {
+    await expect(section.locator(`a[href="/product/${slug}"]`).first()).toBeVisible();
   }
 });
 
-test("homepage narrative follows identity to product to story to support", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-
-  const order = await page.evaluate(() => {
-    const ids = [
-      "home-hero-title",
-      "home-categories-title",
-      "home-products-title",
-      "drop-story-title",
-      "shop-look-title",
-      "decision-support-title",
-      "editorial-gateway-title",
-      "brand-statement-title",
-      "newsletter-title",
-    ];
-    return ids.map((id) => {
-      const element = document.getElementById(id);
-      if (!element) return -1;
-      let index = 0;
-      let current: Element | null = element;
-      while (current.previousElementSibling) {
-        index += 1;
-        current = current.previousElementSibling;
-      }
-      return element.getBoundingClientRect().top + window.scrollY;
-    });
-  });
-
-  expect(order.every((value) => value >= 0)).toBe(true);
-  expect(order).toEqual([...order].sort((a, b) => a - b));
-});
-
-test("product moments and shop the look expose truthful direct product paths", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-
-  const productSection = page.locator('section[aria-labelledby="home-products-title"]');
-  await expect(productSection.getByRole("link", { name: "مشاهده هودی کلاسیک LBB" })).toBeVisible();
-  await expect(productSection.getByText("منتخب‌ها بر اساس جایگاه Merchandising")).toBeVisible();
-
-  const look = page.locator('section[aria-labelledby="shop-look-title"]');
-  await expect(look.getByRole("link", { name: /هودی کلاسیک LBB/ })).toBeVisible();
-  await expect(look.getByRole("link", { name: /شلوار کارگو استریت/ })).toBeVisible();
-  await expect(look.getByRole("link", { name: /کتونی اربن رانر/ })).toBeVisible();
-  await expect(look.getByText("تصویر برای نمایش ترکیب است")).toBeVisible();
-});
-
-test("drop story avoids manufactured urgency and links to a real collection", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+test("drop story exposes current denim capsule", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const section = page.locator('section[aria-labelledby="drop-story-title"]');
-  await expect(section.getByRole("heading", { name: "دراپ ۰۱ — شبگرد" })).toBeVisible();
-  await expect(section.getByText(/تاریخ انتشار تاییدشده ندارد/)).toBeVisible();
-  await expect(section.getByRole("link", { name: "مشاهده کالکشن شبگرد" })).toHaveAttribute(
-    "href",
-    "/collections/drop-01-shabgard",
-  );
+
+  await expect(section.getByRole("heading", { name: "کپسول دنیم" })).toBeVisible();
+
+  await expect(
+    section.getByRole("link", {
+      name: "دیدن کالکشن کپسول دنیم",
+    }),
+  ).toHaveAttribute("href", "/collections/capsule-denim");
+
+  await expect(section.locator("[data-f17-public-product-link]")).toHaveCount(0);
+
+  await expect(section.locator('a[href^="/product/"]')).toHaveCount(0);
+
   await expect(page.getByText("دراپ بعدی در حال طراحی است", { exact: true })).toHaveCount(0);
+});
+
+test("decision-support and physical-store paths remain actionable", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  const decision = page.locator('section[aria-labelledby="decision-support-title"]');
+
+  await expect(
+    decision.getByRole("heading", {
+      name: "قبل از انتخاب، جواب‌ها را داشته باش",
+    }),
+  ).toBeVisible();
+
+  await expect(decision.getByRole("link", { name: /راهنمای انتخاب سایز/ })).toHaveAttribute(
+    "href",
+    "/size-guide",
+  );
+
+  await expect(decision.getByRole("link", { name: /ارسال و مرجوعی/ })).toHaveAttribute(
+    "href",
+    "/shipping-returns",
+  );
+
+  await expect(decision.getByRole("link", { name: /پارچه و نگهداری/ })).toHaveAttribute(
+    "href",
+    "/journal/materials-101-parche-shenasi",
+  );
+
+  const localStore = page.locator('section[aria-labelledby="local-store-title"]');
+
+  await expect(
+    localStore.getByRole("link", {
+      name: /اطلاعات تماس و مراجعه/,
+    }),
+  ).toHaveAttribute("href", "/contact");
+
+  await expect(
+    localStore.getByRole("link", {
+      name: /قبل از مراجعه محصولات را ببین/,
+    }),
+  ).toHaveAttribute("href", "/shop");
 });
 
 for (const viewport of [
@@ -139,12 +228,14 @@ for (const viewport of [
     page,
   }) => {
     await page.setViewportSize(viewport);
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       ),
     ).toBeLessThanOrEqual(2);
+
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });

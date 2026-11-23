@@ -1,25 +1,114 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpLeft } from "lucide-react";
-import { Frame, SectionHead, Shell, TechLabel } from "@/components/lbb/ui/primitives";
-import { categoryImage } from "@/lib/category-images";
+import { ArrowUpLeft, LayoutGrid } from "lucide-react";
+import { CategoryIcon } from "@/components/lbb/BrandIcon";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
+import { SectionHead, Shell } from "@/components/lbb/ui/primitives";
 import { CATEGORIES } from "@/lib/categories";
-import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
+import { ACTIVE_HOME_CATEGORY_ORDER } from "@/lib/homepage";
 import { fmtNum, productsByCategory } from "@/lib/products";
+import type { CategorySlug } from "@/lib/products";
+import type { StorefrontCategoryDto } from "@/lib/final-technical-api";
+import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
-export function CategoryGateway() {
+export function CategoryGateway({
+  liveCategories,
+}: {
+  liveCategories?: StorefrontCategoryDto[] | null;
+}) {
+  const { source, home, sectionCopy } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
+  if (source === "live") {
+    const copy = sectionCopy.categories;
+    const order = new Map(home.categoryOrder.map((slug, index) => [slug, index]));
+    const categories = [...(liveCategories ?? [])]
+      .filter((category) => category.showOnHome === true)
+      .sort((left, right) => {
+        const leftOrder = order.get(left.slug) ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder = order.get(right.slug) ?? Number.MAX_SAFE_INTEGER;
+        return leftOrder - rightOrder || left.name.localeCompare(right.name, "fa");
+      });
+
+    return (
+      <section
+        id="home-categories"
+        dir="rtl"
+        aria-labelledby="home-categories-title"
+        className="border-t border-hairline bg-obsidian py-12 md:py-16"
+      >
+        <Shell>
+          <SectionHead
+            index="01"
+            label={copy.label}
+            title={<span id="home-categories-title">{copy.title}</span>}
+            lede={copy.lede}
+            action={
+              <MerchantNavigationLink
+                item={{
+                  label: copy.actionLabel,
+                  latin: "SHOP",
+                  href: presentation.sectionLinks.categories,
+                }}
+                className="tech inline-flex min-h-11 items-center gap-2 text-signal"
+              >
+                {copy.actionLabel}
+                <ArrowUpLeft size={15} aria-hidden="true" />
+              </MerchantNavigationLink>
+            }
+          />
+
+          {categories.length === 0 ? (
+            <div className="mt-8 rounded-2xl border border-hairline bg-carbon p-6 text-sm leading-7 text-metal">
+              دسته‌بندی‌های فروشگاه به‌زودی در این بخش نمایش داده می‌شوند.
+            </div>
+          ) : (
+            <div className="mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4 [scrollbar-width:thin]">
+              {categories.map((category) => (
+                <Link
+                  key={category.publicId}
+                  to="/$category"
+                  params={{ category: category.slug }}
+                  aria-label={`مشاهده ${category.name}${typeof category.productCount === "number" ? ` — ${fmtNum(category.productCount)} محصول` : ""}`}
+                  className="group flex min-h-28 w-40 shrink-0 snap-start flex-col items-center justify-center gap-3 rounded-2xl border border-hairline bg-carbon p-4 text-center text-bone transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:w-48"
+                >
+                  {category.icon ? (
+                    <img
+                      src={category.icon}
+                      alt=""
+                      className="size-9 object-contain"
+                      loading="lazy"
+                    />
+                  ) : category.slug in CATEGORIES ? (
+                    <CategoryIcon
+                      category={category.slug as CategorySlug}
+                      className="size-9 text-signal"
+                    />
+                  ) : (
+                    <LayoutGrid className="size-9 text-signal" aria-hidden="true" />
+                  )}
+                  <span className="text-sm font-bold">{category.name}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </Shell>
+      </section>
+    );
+  }
+
   return (
     <section
       id="home-categories"
       dir="rtl"
       aria-labelledby="home-categories-title"
-      className="border-t border-hairline bg-obsidian py-14 md:py-20"
+      className="border-t border-hairline bg-obsidian py-12 md:py-16"
     >
       <Shell>
         <SectionHead
           index="01"
-          label="SHOP BY CATEGORY"
-          title={<span id="home-categories-title">از چیزی که می‌خوای شروع کن</span>}
-          lede="هر دسته یک صفحه مستقل با فیلتر، Sort، فیت، متریال و موجودی واقعی همان محصولات دارد."
+          label="دسته‌بندی محصولات"
+          title={<span id="home-categories-title">دنبال چی می‌گردی؟</span>}
+          lede="مستقیم وارد دسته دلخواهت شو و مدل‌ها، رنگ‌ها و سایزهای موجود را با هم مقایسه کن."
           action={
             <Link to="/shop" className="tech inline-flex min-h-11 items-center gap-2 text-signal">
               همه محصولات
@@ -28,17 +117,10 @@ export function CategoryGateway() {
           }
         />
 
-        <div className="mt-9 grid gap-3 md:grid-cols-6 md:grid-rows-2 lg:gap-4">
-          {HOME_CATEGORY_ORDER.map((slug, index) => {
+        <div className="mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4 [scrollbar-width:thin]">
+          {ACTIVE_HOME_CATEGORY_ORDER.map((slug) => {
             const category = CATEGORIES[slug];
             const count = productsByCategory(slug).length;
-            const placement =
-              index === 0
-                ? "md:col-span-3 md:row-span-2"
-                : index === 1
-                  ? "md:col-span-3"
-                  : "md:col-span-2";
-            const ratio = index === 0 ? "4/5" : index === 1 ? "16/9" : "4/3";
 
             return (
               <Link
@@ -46,52 +128,10 @@ export function CategoryGateway() {
                 to="/$category"
                 params={{ category: slug }}
                 aria-label={`مشاهده ${category.nameFaPlural} — ${fmtNum(count)} محصول`}
-                className={`group relative min-w-0 overflow-hidden border border-hairline bg-carbon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${placement}`}
+                className="group flex min-h-28 w-40 shrink-0 snap-start flex-col items-center justify-center gap-3 rounded-2xl border border-hairline bg-carbon p-4 text-center text-bone transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:w-48"
               >
-                <Frame
-                  src={categoryImage(slug)}
-                  alt={`نمای دسته ${category.nameFaPlural} LBB`}
-                  ratio={ratio}
-                  width={index === 0 ? 1000 : 900}
-                  height={index === 0 ? 1250 : 720}
-                  sizes={
-                    index === 0
-                      ? "(max-width: 767px) 100vw, 50vw"
-                      : "(max-width: 767px) 100vw, 33vw"
-                  }
-                  className="h-full min-h-[280px] w-full"
-                  imgClassName="opacity-80 transition-[transform,opacity] duration-500 group-hover:scale-[1.035] group-hover:opacity-100"
-                  zoom={false}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/15 to-transparent"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
-                    <div className="flex items-end justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <TechLabel tone="signal">0{index + 1}</TechLabel>
-                          <TechLabel tone="bone">{slug.toUpperCase()}</TechLabel>
-                        </div>
-                        <h3
-                          className={`mt-2 font-black text-bone ${index === 0 ? "text-display-2" : "text-display-3"}`}
-                        >
-                          {category.nameFaPlural}
-                        </h3>
-                        <p className="mt-2 line-clamp-2 max-w-[42ch] text-xs leading-6 text-metal">
-                          {category.heroTagline}
-                        </p>
-                      </div>
-                      <span className="shrink-0 border border-hairline-strong bg-obsidian/90 px-3 py-2 text-left backdrop-blur">
-                        <span className="num block text-sm font-black text-bone">
-                          {fmtNum(count)}
-                        </span>
-                        <span className="tech mt-1 block text-mute">PRODUCTS</span>
-                      </span>
-                    </div>
-                  </div>
-                </Frame>
+                <CategoryIcon category={slug} className="size-9 text-signal" />
+                <span className="text-sm font-bold">{category.nameFaPlural}</span>
               </Link>
             );
           })}

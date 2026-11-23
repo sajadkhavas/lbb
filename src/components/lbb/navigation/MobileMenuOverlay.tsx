@@ -1,21 +1,21 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowUpLeft, Instagram, X } from "lucide-react";
 import { useRef } from "react";
-import { CATEGORY_SLUGS, CATEGORIES } from "@/lib/categories";
-import {
-  BRAND_NAVIGATION,
-  EDITORIAL_NAVIGATION,
-  PERSONAL_NAVIGATION,
-  SERVICE_NAVIGATION,
-  isNavigationItemActive,
-} from "@/lib/navigation";
+import { PERSONAL_NAVIGATION } from "@/lib/navigation";
 import { useNavigationOverlay } from "@/lib/navigation-overlay";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { Logo } from "@/components/lbb/Logo";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
+import {
+  isMerchantNavigationItemActive,
+  MerchantNavigationLink,
+} from "@/components/lbb/navigation/MerchantNavigationLink";
+import { CatalogTaxonomyMenu } from "@/components/lbb/navigation/CatalogTaxonomyMenu";
 import { TechLabel } from "@/components/lbb/ui/primitives";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
 export function MobileMenuOverlay() {
+  const { navigation, brand } = useStorefrontControl();
   const { close, dismissForNavigation } = useNavigationOverlay();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -35,11 +35,11 @@ export function MobileMenuOverlay() {
           to="/"
           data-autofocus
           onClick={dismissForNavigation}
-          aria-label="LBB — خانه"
+          aria-label={`${brand.name} — خانه`}
           className="flex items-center gap-2"
         >
           <Logo size={34} />
-          <span className="font-display text-xl font-black text-signal">LBB</span>
+          <span className="font-display text-xl font-black text-signal">{brand.name}</span>
         </Link>
         <button
           type="button"
@@ -56,7 +56,7 @@ export function MobileMenuOverlay() {
           <section aria-labelledby="mobile-categories">
             <div className="flex items-end justify-between gap-4 border-b border-hairline pb-3">
               <div>
-                <TechLabel tone="signal">PRODUCT FIRST</TechLabel>
+                <TechLabel tone="signal">{brand.name} / CATALOG</TechLabel>
                 <h2 id="mobile-categories" className="mt-2 text-display-3 text-bone">
                   دسته‌های محصول
                 </h2>
@@ -70,31 +70,7 @@ export function MobileMenuOverlay() {
                 <ArrowUpLeft size={14} aria-hidden="true" />
               </Link>
             </div>
-
-            <ol className="mt-2">
-              {CATEGORY_SLUGS.map((slug, index) => {
-                const active = pathname === `/${slug}`;
-                return (
-                  <li key={slug}>
-                    <Link
-                      to="/$category"
-                      params={{ category: slug }}
-                      onClick={dismissForNavigation}
-                      aria-current={active ? "page" : undefined}
-                      className="group grid min-h-[72px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 border-b border-hairline-soft"
-                    >
-                      <span className="num text-xs text-mute">0{index + 1}</span>
-                      <span
-                        className={`text-2xl font-black transition-colors md:text-4xl ${active ? "text-signal" : "text-bone group-hover:text-signal"}`}
-                      >
-                        {CATEGORIES[slug].nameFa}
-                      </span>
-                      <span className="tech text-mute">{slug.toUpperCase()}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ol>
+            <CatalogTaxonomyMenu compact pathname={pathname} onNavigate={dismissForNavigation} />
           </section>
 
           <aside className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1">
@@ -103,26 +79,35 @@ export function MobileMenuOverlay() {
                 کالکشن و محتوا
               </h2>
               <ul className="mt-2">
-                {EDITORIAL_NAVIGATION.map((item) => (
-                  <li key={String(item.to)}>
-                    <NavigationLink
+                {navigation.editorial.map((item) => (
+                  <li key={`${item.href}-${item.label}`}>
+                    <MerchantNavigationLink
                       item={item}
-                      active={isNavigationItemActive(pathname, item)}
                       onNavigate={dismissForNavigation}
                       className="group flex min-h-14 items-center justify-between gap-4 border-b border-hairline-soft"
                     >
                       <span>
-                        <span className="block text-sm font-bold text-bone group-hover:text-signal">
+                        <span
+                          className={`block text-sm font-bold group-hover:text-signal ${
+                            isMerchantNavigationItemActive(pathname, item)
+                              ? "text-signal"
+                              : "text-bone"
+                          }`}
+                        >
                           {item.label}
                         </span>
-                        <span className="mt-1 block text-[11px] text-mute">{item.description}</span>
+                        {item.description ? (
+                          <span className="mt-1 block text-[11px] text-mute">
+                            {item.description}
+                          </span>
+                        ) : null}
                       </span>
                       <ArrowUpLeft
                         size={15}
                         aria-hidden="true"
                         className="text-mute group-hover:text-signal"
                       />
-                    </NavigationLink>
+                    </MerchantNavigationLink>
                   </li>
                 ))}
               </ul>
@@ -150,9 +135,9 @@ export function MobileMenuOverlay() {
                   راهنما
                 </h2>
                 <ul className="mt-3 space-y-2.5">
-                  {SERVICE_NAVIGATION.map((item) => (
-                    <li key={String(item.to)}>
-                      <NavigationLink
+                  {navigation.service.map((item) => (
+                    <li key={`${item.href}-${item.label}`}>
+                      <MerchantNavigationLink
                         item={item}
                         onNavigate={dismissForNavigation}
                         className="text-xs leading-6 text-metal transition-colors hover:text-bone"
@@ -168,9 +153,9 @@ export function MobileMenuOverlay() {
                 برند
               </h2>
               <ul className="flex flex-wrap gap-x-5 gap-y-2">
-                {BRAND_NAVIGATION.map((item) => (
-                  <li key={String(item.to)}>
-                    <NavigationLink
+                {navigation.brand.map((item) => (
+                  <li key={`${item.href}-${item.label}`}>
+                    <MerchantNavigationLink
                       item={item}
                       onNavigate={dismissForNavigation}
                       className="tech text-mute transition-colors hover:text-bone"
@@ -179,13 +164,13 @@ export function MobileMenuOverlay() {
                 ))}
               </ul>
               <a
-                href="https://www.instagram.com/lbbclo"
+                href={brand.instagramUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="mt-6 inline-flex min-h-11 items-center gap-2 border border-hairline px-4 text-xs text-metal transition-colors hover:border-signal hover:text-signal"
               >
                 <Instagram size={15} aria-hidden="true" />
-                @LBBCLO
+                {brand.instagramHandle.toUpperCase()}
               </a>
             </nav>
           </aside>

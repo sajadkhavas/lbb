@@ -1,0 +1,86 @@
+name: P3 Live Integration
+
+on:
+  push:
+    branches:
+      - phase/p3-live-integration-control-surface
+  pull_request:
+    branches:
+      - fix/lbb-local-boutique-homepage
+
+permissions:
+  contents: read
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+  VITE_LBB_BACKEND_MODE: prototype
+
+jobs:
+  frontend-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Format lint and type contract
+        run: |
+          npm run format:check
+          npm run lint
+          npm run typecheck
+      - name: Assert P3 live-control invariants
+        run: |
+          node <<'NODE'
+          const fs = require('fs')
+          const api = fs.readFileSync('src/lib/backend-api.ts', 'utf8')
+          const control = fs.readFileSync('src/lib/storefront-control.tsx', 'utf8')
+          const presentation = fs.readFileSync('src/lib/storefront-presentation.tsx', 'utf8')
+          const root = fs.readFileSync('src/routes/__root.tsx', 'utf8')
+          const home = fs.readFileSync('src/routes/index.tsx', 'utf8')
+          if (!api.includes('2026-09-06-p3-storefront-v1')) throw new Error('P3 contract version missing')
+          if (!control.includes('source: "prototype"')) throw new Error('Explicit prototype mode missing')
+          if (!control.includes('/api/v1/storefront/bootstrap')) throw new Error('Storefront bootstrap consumer missing')
+          if (!root.includes('loader: async () =>')) throw new Error('SSR root loader missing')
+          if (!root.includes('resolveStorefrontControl()')) throw new Error('SSR root control loader missing')
+          if (!root.includes('resolveStorefrontPresentation()')) throw new Error('SSR root presentation loader missing')
+          if (!home.includes('getProduct(slug)')) throw new Error('Live hero product consumer missing')
+          if (!home.includes('resolveLiveHeroProduct(control.home.heroProductSlug)')) throw new Error('Fail-safe live hero resolver missing')
+          if (!home.includes('resolveStorefrontHomeProducts()')) throw new Error('Backend-curated home products consumer missing')
+          if (!presentation.includes('/api/v1/storefront/home-products')) throw new Error('Backend-curated home products endpoint missing')
+          if (!home.includes('error instanceof BackendApiError')) throw new Error('BackendApiError guard missing')
+          if (!home.includes('error.status === 404')) throw new Error('Hero 404 guard missing')
+          if (!home.includes('error.code === "resource_not_found"')) throw new Error('Hero resource_not_found guard missing')
+          if (!home.includes('return null;')) throw new Error('Hero empty-state fallback missing')
+          NODE
+
+  full-quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*
+          npx playwright install --with-deps chromium
+      - name: Run complete frozen-baseline quality suite
+        run: npm run quality
+      - name: Upload browser report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,13 +1,91 @@
+import { useRef, useState } from "react";
+import { useIdleAutoplay } from "@/hooks/use-idle-autoplay";
 import { Link } from "@tanstack/react-router";
-import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
+import { ArrowDownLeft, ArrowUpLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
-import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/categories";
-import { HOME_CATEGORY_ORDER } from "@/lib/homepage";
-import { heroMain, productImage } from "@/lib/product-images";
-import { PRODUCT_COUNT, fmtNum, fmtToman, productBySlug } from "@/lib/products";
+import { CATEGORIES } from "@/lib/categories";
+import type { StorefrontCategoryDto } from "@/lib/final-technical-api";
+import { productImage } from "@/lib/product-images";
+import { fmtToman, productBySlug } from "@/lib/products";
+import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
-export function HeroNarrative() {
-  const heroProduct = productBySlug("lbb-classic-hoodie");
+type LiveHeroProduct = {
+  slug: string;
+  name: string;
+  priceToman: number | null;
+  image: string | null;
+};
+
+export function HeroNarrative({
+  heroProduct: liveHeroProduct,
+  liveCategories,
+  heroProducts,
+}: {
+  heroProducts?: LiveHeroProduct[];
+  heroProduct?: LiveHeroProduct | null;
+  liveCategories?: StorefrontCategoryDto[] | null;
+}) {
+  const { source, brand, copy, home, sectionCopy } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
+  const prototypeProduct = productBySlug(home.heroProductSlug);
+  const prototypeCategoryOrder = home.categoryOrder.filter(
+    (slug): slug is keyof typeof CATEGORIES => slug in CATEGORIES,
+  );
+
+  const initialProduct =
+    source === "live"
+      ? liveHeroProduct
+      : prototypeProduct
+        ? {
+            slug: prototypeProduct.slug,
+            name: prototypeProduct.name,
+            priceToman: prototypeProduct.price,
+            image: productImage(prototypeProduct.slug),
+          }
+        : null;
+  const items = heroProducts?.length ? heroProducts : initialProduct ? [initialProduct] : [];
+  const [selected, setSelected] = useState<string | null>(null);
+  const index = Math.max(
+    0,
+    items.findIndex((item) => item.slug === (selected ?? initialProduct?.slug)),
+  );
+  const heroProduct = items[index];
+  const move = (delta: number) => {
+    if (items.length > 1) setSelected(items[(index + delta + items.length) % items.length].slug);
+  };
+  const touchOrigin = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
+  const { ref: heroCarouselRef } = useIdleAutoplay(() => move(1), 7000, items.length > 1);
+  const heroImage =
+    source === "live"
+      ? (presentation.hero.imageUrl ?? initialProduct?.image ?? null)
+      : productImage(home.heroProductSlug);
+  const heroAlt =
+    source === "live" && presentation.hero.imageAlt
+      ? presentation.hero.imageAlt
+      : source === "prototype"
+        ? "تیشرت مشکی ال‌بی‌بی روی زمینه روشن"
+        : heroProduct
+          ? `${heroProduct.name} در ویترین ${brand.nameFa}`
+          : `ویترین ${brand.nameFa}`;
+
+  const heroImageClass =
+    presentation.hero.imageFit === "cover"
+      ? "absolute inset-0 h-full w-full object-cover"
+      : "absolute inset-0 h-full w-full object-contain p-8 sm:p-12 lg:p-16";
+
+  const liveOrder = new Map(home.categoryOrder.map((slug, index) => [slug, index]));
+  const liveQuickCategories = [...(liveCategories ?? [])]
+    .filter((category) => category.showInHeader === true || category.showOnHome === true)
+    .sort((left, right) => {
+      const a = liveOrder.get(left.slug) ?? Number.MAX_SAFE_INTEGER;
+      const b = liveOrder.get(right.slug) ?? Number.MAX_SAFE_INTEGER;
+      return a - b || left.name.localeCompare(right.name, "fa");
+    })
+    .slice(0, 8);
+  const liveHeroCopy = sectionCopy.hero;
 
   return (
     <section
@@ -25,90 +103,123 @@ export function HeroNarrative() {
         <div className="order-2 flex min-w-0 flex-col justify-between border-t border-hairline px-[var(--lbb-gutter)] py-10 lg:order-1 lg:border-l lg:border-t-0 lg:py-12 xl:py-16">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <TechLabel tone="signal">LBB / TEHRAN / DROP 001</TechLabel>
+              <TechLabel tone="signal">{copy.heroEyebrow}</TechLabel>
               <span aria-hidden="true" className="h-px w-10 bg-hairline" />
-              <TechLabel>STREETWEAR CATALOG</TechLabel>
+              <TechLabel>{brand.slogan}</TechLabel>
             </div>
 
-            <h1 id="home-hero-title" className="mt-7 max-w-[10ch] text-hero leading-[0.88]">
-              <span className="block text-bone">تهران را</span>
-              <span className="block text-signal">با فرم</span>
-              <span className="block text-metal">خودت بپوش.</span>
+            <h1
+              id="home-hero-title"
+              className="mt-7 max-w-[12ch] text-hero text-bone"
+              style={{
+                fontSize: "clamp(3rem, 5.7vw, 7.25rem)",
+                lineHeight: 1.25,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {copy.heroTitle}
             </h1>
 
-            <p className="mt-7 max-w-[58ch] text-lede">
-              هشت قطعه از اولین دراپ LBB؛ هودی اورسایز، شلوار بگی و کارگو، تیشرت سنگین، کتونی و
-              جوراب. مسیر خرید از دسته تا فیت و موجودی شفاف است.
-            </p>
+            <p className="mt-7 max-w-[58ch] text-lede">{copy.heroBody}</p>
 
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link to="/shop" className={CtaClasses("signal", "lg")}>
-                خرید DROP 001
+              <MerchantNavigationLink
+                item={{
+                  label: copy.primaryCta,
+                  latin: "PRIMARY CTA",
+                  href: presentation.hero.primaryCtaHref,
+                }}
+                className={CtaClasses("signal", "lg")}
+              >
+                {copy.primaryCta}
                 <ArrowUpLeft size={17} aria-hidden="true" />
-              </Link>
-              <Link
-                to="/$category"
-                params={{ category: "hoodies" }}
+              </MerchantNavigationLink>
+              <MerchantNavigationLink
+                item={{
+                  label: copy.secondaryCta,
+                  latin: "SECONDARY CTA",
+                  href: presentation.hero.secondaryCtaHref,
+                }}
                 className={CtaClasses("line", "lg")}
               >
-                دیدن هودی‌ها
-              </Link>
+                {copy.secondaryCta}
+              </MerchantNavigationLink>
             </div>
 
             <p className="mt-4 max-w-[55ch] text-xs leading-6 text-mute">
-              قیمت، سایزهای ناموجود و وضعیت موجودی هر قطعه مستقیماً در صفحه محصول نمایش داده می‌شود.
-              پرداخت و ارسال واقعی در این نسخه فعال نیست.
+              {source === "live"
+                ? liveHeroCopy.helperText
+                : "قیمت، رنگ، سایزهای موجود و تن‌خور هر محصول را قبل از انتخاب بررسی کن."}
             </p>
           </div>
 
-          <div className="mt-10 grid gap-6 border-t border-hairline pt-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-end">
-            <dl className="grid grid-cols-3 gap-5">
-              <div>
-                <dt className="tech text-mute">PIECES</dt>
-                <dd className="num mt-1 text-xl font-black text-bone">{fmtNum(PRODUCT_COUNT)}</dd>
-              </div>
-              <div>
-                <dt className="tech text-mute">CATEGORIES</dt>
-                <dd className="num mt-1 text-xl font-black text-bone">
-                  {fmtNum(CATEGORY_SLUGS.length)}
-                </dd>
-              </div>
-              <div>
-                <dt className="tech text-mute">DROP</dt>
-                <dd className="num mt-1 text-xl font-black text-bone">001</dd>
-              </div>
-            </dl>
-
+          <div className="mt-10 border-t border-hairline pt-6">
+            <p className="mb-4 text-xs font-bold text-metal">
+              {source === "live" ? liveHeroCopy.categoryPrompt : "دسته موردنظرت را سریع پیدا کن:"}
+            </p>
             <nav aria-label="دسترسی سریع به دسته‌های محصول" className="min-w-0">
               <ul className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {HOME_CATEGORY_ORDER.map((slug) => (
-                  <li key={slug} className="shrink-0 snap-start">
-                    <Link
-                      to="/$category"
-                      params={{ category: slug }}
-                      className="inline-flex min-h-11 items-center border border-hairline px-4 text-xs font-semibold text-bone transition-colors hover:border-signal hover:text-signal"
-                    >
-                      {CATEGORIES[slug].nameFaPlural}
-                    </Link>
-                  </li>
-                ))}
+                {source === "live"
+                  ? liveQuickCategories.map((category) => (
+                      <li key={category.publicId} className="shrink-0 snap-start">
+                        <Link
+                          to="/$category"
+                          params={{ category: category.slug }}
+                          className="inline-flex min-h-11 items-center gap-2 border border-hairline px-4 text-xs font-semibold text-bone transition-colors hover:border-signal hover:text-signal"
+                        >
+                          {category.icon ? (
+                            <img
+                              src={category.icon}
+                              alt=""
+                              width={20}
+                              height={20}
+                              className="h-5 w-5 object-contain"
+                            />
+                          ) : null}
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))
+                  : prototypeCategoryOrder.map((slug) => (
+                      <li key={slug} className="shrink-0 snap-start">
+                        <Link
+                          to="/$category"
+                          params={{ category: slug }}
+                          className="inline-flex min-h-11 items-center border border-hairline px-4 text-xs font-semibold text-bone transition-colors hover:border-signal hover:text-signal"
+                        >
+                          {CATEGORIES[slug].nameFaPlural}
+                        </Link>
+                      </li>
+                    ))}
               </ul>
             </nav>
+            {source === "live" && liveQuickCategories.length === 0 ? (
+              <p className="text-xs leading-6 text-mute">
+                دسته‌بندی‌های منتخب فروشگاه به‌زودی در این بخش قرار می‌گیرند.
+              </p>
+            ) : null}
           </div>
         </div>
 
-        <div className="relative order-1 min-h-[58svh] overflow-hidden bg-carbon lg:order-2 lg:min-h-full">
-          <img
-            src={heroMain}
-            alt="استایل شبانه LBB از دراپ ۰۰۱ در فضای شهری"
-            width={1200}
-            height={1500}
-            sizes="(max-width: 1023px) 100vw, 48vw"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
+        <div className="relative order-1 min-h-[58svh] overflow-hidden bg-[#f3f1ec] lg:order-2 lg:min-h-full">
+          {heroImage ? (
+            <img
+              src={heroImage}
+              alt={heroAlt}
+              width={1200}
+              height={1500}
+              sizes="(max-width: 1023px) 100vw, 48vw"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className={heroImageClass}
+              style={{ objectPosition: presentation.hero.imagePosition }}
+            />
+          ) : (
+            <div className="absolute inset-0 grid place-items-center p-8 text-center text-sm text-obsidian/60">
+              تصویر تازه این بخش به‌زودی اضافه می‌شود.
+            </div>
+          )}
           <span
             aria-hidden="true"
             className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/10 to-transparent lg:bg-gradient-to-r lg:from-obsidian/65 lg:via-transparent"
@@ -116,40 +227,96 @@ export function HeroNarrative() {
           <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-bone/30" />
 
           {heroProduct ? (
-            <Link
-              to="/product/$slug"
-              params={{ slug: heroProduct.slug }}
-              className="group absolute bottom-5 right-5 grid w-[min(360px,calc(100%-2.5rem))] grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 border border-hairline-strong bg-obsidian/95 p-2 text-bone shadow-overlay backdrop-blur md:bottom-8 md:right-8"
+            <div
+              ref={heroCarouselRef}
+              onTouchStart={(event) => {
+                const touch = event.touches[0];
+                touchOrigin.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+                swiped.current = false;
+              }}
+              onTouchCancel={() => {
+                touchOrigin.current = null;
+              }}
+              onTouchEnd={(event) => {
+                const start = touchOrigin.current;
+                const end = event.changedTouches[0];
+                touchOrigin.current = null;
+                if (!start || !end || items.length < 2) return;
+                const dx = end.clientX - start.x;
+                if (Math.abs(dx) < 40 || Math.abs(dx) < 1.25 * Math.abs(end.clientY - start.y))
+                  return;
+                swiped.current = true;
+                move(dx > 0 ? 1 : -1);
+              }}
+              onClickCapture={(event) => {
+                if (!swiped.current) return;
+                swiped.current = false;
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              className="absolute touch-pan-y bottom-5 right-5 w-[min(360px,calc(100%_-_2.5rem))] md:bottom-8 md:right-8"
             >
-              <img
-                src={productImage(heroProduct.slug)}
-                alt=""
-                width={64}
-                height={80}
-                loading="eager"
-                decoding="async"
-                className="h-20 w-16 object-cover"
-              />
-              <span className="min-w-0">
-                <TechLabel tone="signal">HERO PIECE</TechLabel>
-                <span className="mt-1 block truncate text-sm font-black">{heroProduct.name}</span>
-                <span className="num mt-1 block text-xs text-metal">
-                  {fmtToman(heroProduct.price)}
+              <Link
+                to="/product/$slug"
+                params={{ slug: heroProduct.slug }}
+                className="group grid w-full grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-hairline-strong bg-obsidian/95 p-2 text-bone shadow-overlay backdrop-blur [padding-inline:2.25rem]"
+              >
+                {heroProduct.image ? (
+                  <img
+                    src={heroProduct.image}
+                    alt=""
+                    width={64}
+                    height={80}
+                    loading="eager"
+                    decoding="async"
+                    className="h-20 w-16 rounded-xl object-cover"
+                  />
+                ) : (
+                  <span aria-hidden="true" className="h-20 w-16 rounded-xl bg-carbon-2" />
+                )}
+                <span className="min-w-0">
+                  <TechLabel tone="signal">HERO PIECE</TechLabel>
+                  <span className="mt-1 block truncate text-sm font-black">{heroProduct.name}</span>
+                  <span className="num mt-1 block text-xs text-metal">
+                    {heroProduct.priceToman === null
+                      ? "قیمت در صفحه محصول"
+                      : fmtToman(heroProduct.priceToman)}
+                  </span>
                 </span>
-              </span>
-              <ArrowUpLeft
-                size={18}
-                aria-hidden="true"
-                className="text-mute transition-colors group-hover:text-signal"
-              />
-            </Link>
+                <ArrowUpLeft
+                  size={18}
+                  aria-hidden="true"
+                  className="text-mute transition-colors group-hover:text-signal"
+                />
+              </Link>
+              {items.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => move(-1)}
+                    aria-label="محصول قبلی"
+                    className="absolute right-0 top-1/2 grid h-11 w-9 -translate-y-1/2 place-items-center text-bone/75 hover:text-signal"
+                  >
+                    <ChevronRight size={14} strokeWidth={1.4} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(1)}
+                    aria-label="محصول بعدی"
+                    className="absolute left-0 top-1/2 grid h-11 w-9 -translate-y-1/2 place-items-center text-bone/75 hover:text-signal"
+                  >
+                    <ChevronLeft size={14} strokeWidth={1.4} />
+                  </button>
+                </>
+              )}
+            </div>
           ) : null}
 
           <a
             href="#home-categories"
-            className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 border border-hairline-strong bg-obsidian/85 px-3 text-xs font-bold text-bone backdrop-blur transition-colors hover:border-signal hover:text-signal md:left-8 md:top-8"
+            className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline-strong bg-obsidian/85 px-3 text-xs font-bold text-bone backdrop-blur transition-colors hover:border-signal hover:text-signal md:left-8 md:top-8"
           >
-            مسیر خرید
+            {source === "live" ? liveHeroCopy.categoryAnchorLabel : "دیدن دسته‌بندی‌ها"}
             <ArrowDownLeft size={15} aria-hidden="true" />
           </a>
         </div>

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategoryRouteImport } from './routes/$category'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -34,6 +35,7 @@ import { Route as CollectionsIndexRouteImport } from './routes/collections.index
 import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
 import { Route as JournalIndexRouteImport } from './routes/journal.index'
 import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
+import { Route as PaymentResultRouteImport } from './routes/payment.result'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -54,6 +56,11 @@ const AboutRoute = AboutRouteImport.update({
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -161,6 +168,11 @@ const JournalSlugRoute = JournalSlugRouteImport.update({
   path: '/journal/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaymentResultRoute = PaymentResultRouteImport.update({
+  id: '/payment/result',
+  path: '/payment/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
@@ -172,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/$category': typeof CategoryRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/app': typeof AppRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -191,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/payment/result': typeof PaymentResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/collections/': typeof CollectionsIndexRoute
   '/journal/': typeof JournalIndexRoute
@@ -200,6 +214,7 @@ export interface FileRoutesByTo {
   '/$category': typeof CategoryRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/app': typeof AppRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -219,6 +234,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/payment/result': typeof PaymentResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/collections': typeof CollectionsIndexRoute
   '/journal': typeof JournalIndexRoute
@@ -229,6 +245,7 @@ export interface FileRoutesById {
   '/$category': typeof CategoryRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/app': typeof AppRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -248,6 +265,7 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/journal/$slug': typeof JournalSlugRoute
+  '/payment/result': typeof PaymentResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/collections/': typeof CollectionsIndexRoute
   '/journal/': typeof JournalIndexRoute
@@ -259,6 +277,7 @@ export interface FileRouteTypes {
     | '/$category'
     | '/about'
     | '/account'
+    | '/app'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -278,6 +297,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/collections/$slug'
     | '/journal/$slug'
+    | '/payment/result'
     | '/product/$slug'
     | '/collections/'
     | '/journal/'
@@ -287,6 +307,7 @@ export interface FileRouteTypes {
     | '/$category'
     | '/about'
     | '/account'
+    | '/app'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -306,6 +327,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/collections/$slug'
     | '/journal/$slug'
+    | '/payment/result'
     | '/product/$slug'
     | '/collections'
     | '/journal'
@@ -315,6 +337,7 @@ export interface FileRouteTypes {
     | '/$category'
     | '/about'
     | '/account'
+    | '/app'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -334,6 +357,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/collections/$slug'
     | '/journal/$slug'
+    | '/payment/result'
     | '/product/$slug'
     | '/collections/'
     | '/journal/'
@@ -344,6 +368,7 @@ export interface RootRouteChildren {
   CategoryRoute: typeof CategoryRoute
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  AppRoute: typeof AppRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
@@ -363,6 +388,7 @@ export interface RootRouteChildren {
   WishlistRoute: typeof WishlistRoute
   CollectionsSlugRoute: typeof CollectionsSlugRoute
   JournalSlugRoute: typeof JournalSlugRoute
+  PaymentResultRoute: typeof PaymentResultRoute
   ProductSlugRoute: typeof ProductSlugRoute
   CollectionsIndexRoute: typeof CollectionsIndexRoute
   JournalIndexRoute: typeof JournalIndexRoute
@@ -396,6 +422,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -545,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payment/result': {
+      id: '/payment/result'
+      path: '/payment/result'
+      fullPath: '/payment/result'
+      preLoaderRoute: typeof PaymentResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/product/$slug': {
       id: '/product/$slug'
       path: '/product/$slug'
@@ -560,6 +600,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoryRoute: CategoryRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  AppRoute: AppRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
@@ -579,6 +620,7 @@ const rootRouteChildren: RootRouteChildren = {
   WishlistRoute: WishlistRoute,
   CollectionsSlugRoute: CollectionsSlugRoute,
   JournalSlugRoute: JournalSlugRoute,
+  PaymentResultRoute: PaymentResultRoute,
   ProductSlugRoute: ProductSlugRoute,
   CollectionsIndexRoute: CollectionsIndexRoute,
   JournalIndexRoute: JournalIndexRoute,

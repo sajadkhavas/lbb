@@ -1,0 +1,93 @@
+import { StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
+import { fmtToman } from "@/lib/products";
+import type { DecisionVariant, ProductDecisionViewModel } from "@/lib/product-decision";
+
+export function ProductIdentity({
+  model,
+  variant,
+}: {
+  model: ProductDecisionViewModel;
+  variant?: DecisionVariant | null;
+}) {
+  const { identity } = model;
+  const pricing =
+    variant?.priceToman !== undefined
+      ? {
+          priceToman: variant.priceToman,
+          fromToman: null,
+          toToman: null,
+          originalPriceToman: variant.originalPriceToman ?? null,
+        }
+      : model.pricing;
+  const availability = variant?.availability ?? model.stock.availability;
+  const hasIdentity = Boolean(identity.name);
+  const effectivePrice = pricing.priceToman ?? pricing.fromToman ?? null;
+  const priceRange =
+    pricing.fromToman !== null &&
+    pricing.fromToman !== undefined &&
+    pricing.toToman !== null &&
+    pricing.toToman !== undefined &&
+    pricing.fromToman !== pricing.toToman;
+  const discount =
+    effectivePrice !== null &&
+    pricing.originalPriceToman !== null &&
+    pricing.originalPriceToman > effectivePrice
+      ? Math.round(
+          ((pricing.originalPriceToman - effectivePrice) / pricing.originalPriceToman) * 100,
+        )
+      : 0;
+
+  return (
+    <section aria-labelledby="pdp-product-title" data-testid="pdp-identity">
+      <TechLabel tone={hasIdentity ? "signal" : "metal"}>
+        {hasIdentity
+          ? [identity.categoryLabel, identity.latinName].filter(Boolean).join(" / ")
+          : "PRODUCT DATA PENDING"}
+      </TechLabel>
+      <h1
+        id="pdp-product-title"
+        className="mt-2 max-w-full break-words text-[clamp(1.75rem,8vw,2.5rem)] font-black leading-[1.35] tracking-[-0.025em] text-bone [overflow-wrap:anywhere] sm:text-[clamp(2rem,6vw,3rem)] lg:mt-3 lg:max-w-[12ch] lg:text-[clamp(2rem,3vw,3.35rem)] lg:leading-[1.15]"
+      >
+        {identity.name ?? "اطلاعات محصول در انتظار تأیید"}
+      </h1>
+      {identity.shortDescription ? (
+        <p className="mt-3 text-sm leading-7 text-metal lg:mt-4 lg:max-w-[48ch] lg:text-[15px] lg:leading-8">
+          {identity.shortDescription}
+        </p>
+      ) : (
+        <p className="mt-3 max-w-[52ch] text-sm leading-7 text-metal lg:mt-4 lg:leading-8">
+          این رکورد برای توسعه رابط حفظ شده است، اما هویت و مشخصات آن هنوز برای نمایش عمومی تأیید
+          نشده‌اند.
+        </p>
+      )}
+
+      <div className="mt-4 flex flex-wrap items-center gap-2 lg:mt-5" aria-label="وضعیت محصول">
+        {availability === "available" ? <StatusTag tone="success">موجود</StatusTag> : null}
+        {availability === "sold-out" ? <StatusTag tone="out">ناموجود</StatusTag> : null}
+        {availability === "unknown" ? (
+          <StatusTag tone="neutral">موجودی منتشر نشده</StatusTag>
+        ) : null}
+        {discount > 0 ? <StatusTag tone="bone">{discount}٪ تخفیف</StatusTag> : null}
+      </div>
+
+      {effectivePrice !== null ? (
+        <div className="mt-5 flex flex-wrap items-baseline gap-3 lg:mt-6" aria-label="قیمت محصول">
+          <span className="num text-2xl font-bold text-bone lg:text-[1.85rem]">
+            {priceRange && pricing.toToman
+              ? `${fmtToman(pricing.fromToman!)} تا ${fmtToman(pricing.toToman)}`
+              : fmtToman(effectivePrice)}
+          </span>
+          {pricing.originalPriceToman !== null ? (
+            <span className="num text-sm text-mute line-through">
+              {fmtToman(pricing.originalPriceToman)}
+            </span>
+          ) : null}
+        </div>
+      ) : (
+        <p className="mt-5 text-sm font-semibold text-metal lg:mt-6">
+          قیمت عمومی این محصول هنوز تأیید نشده است.
+        </p>
+      )}
+    </section>
+  );
+}

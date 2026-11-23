@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =========================================================================
-   LBB Design System 2.0 — Tehran After Dark / Editorial Utility
+   LBB Design System 2.0 — Mahestan After Dark / Editorial Utility
 
    Contract:
    1. Primitive values live here.
@@ -194,7 +194,7 @@
 
   --font-display: "Estedad Variable", "Vazirmatn", sans-serif;
   --font-body: "Estedad Variable", "Vazirmatn", sans-serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --font-mono: "Estedad Variable", "Vazirmatn", sans-serif;
 
   /* Raw precision: controls are crisp, media can be softer. */
   --radius: 0.5rem;
@@ -219,10 +219,14 @@
 }
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--lbb-nav-h) + 12px);
   background: var(--lbb-surface-canvas);
   scrollbar-color: var(--lbb-action-primary) var(--lbb-surface-subtle);
   scrollbar-width: thin;
   text-size-adjust: 100%;
+}
+[id] {
+  scroll-margin-top: calc(var(--lbb-nav-h) + 12px);
 }
 body {
   margin: 0;
@@ -385,7 +389,7 @@ img {
 }
 .font-mono,
 .num {
-  font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
   font-variant-numeric: tabular-nums;
 }
 .text-hero,
@@ -440,7 +444,7 @@ img {
   text-wrap: pretty;
 }
 .tech {
-  font-family: "JetBrains Mono Variable", ui-monospace, monospace;
+  font-family: "Estedad Variable", "Vazirmatn", sans-serif;
   font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0.075em;
@@ -449,8 +453,24 @@ img {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --lbb-gutter: 1rem;
+  }
+  .lbb-section,
+  .lbb-rhythm,
+  .lbb-section-major {
+    padding-block: 3.5rem;
+  }
   .text-hero {
-    line-height: 0.92;
+    font-size: clamp(2.75rem, 15vw, 4.65rem);
+    line-height: 0.94;
+  }
+  .text-display-2 {
+    font-size: clamp(2rem, 10vw, 3.25rem);
+    line-height: 1.05;
+  }
+  .text-display-3 {
+    font-size: clamp(1.55rem, 7.6vw, 2.4rem);
   }
   .tech {
     letter-spacing: 0.05em;
@@ -514,18 +534,30 @@ img {
 .product-card__media {
   overflow: hidden;
   border-radius: var(--radius-lg);
-  background: var(--lbb-surface-subtle);
+  background: #fff;
+}
+.product-card > .product-card__media {
+  border-radius: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
 }
 .product-card__media img {
-  filter: var(--lbb-image-grade);
-  transition:
-    opacity var(--dur-state) var(--ease-lbb-standard),
-    transform var(--dur-reveal) var(--ease-lbb);
+  filter: none;
+  transform: none;
+  transition: opacity var(--dur-state) var(--ease-lbb-standard);
 }
-@media (hover: hover) {
-  .product-card:hover .product-card__media img {
-    transform: scale(1.025);
-  }
+.category-tilt {
+  transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transform-style: preserve-3d;
+  transition:
+    transform 180ms var(--ease-lbb),
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.category-tilt:hover {
+  box-shadow: 0 30px 80px rgb(0 0 0 / 45%);
+}
+.category-tilt__content {
+  transform: translateZ(34px);
 }
 .skeleton-shimmer {
   position: relative;
@@ -598,6 +630,7 @@ img {
   .marquee-track,
   .skeleton-shimmer::after {
     animation: none !important;
+    animation-play-state: paused !important;
   }
 }
 
@@ -605,7 +638,7 @@ img {
    Safe-area and mobile chrome
    ========================================================================= */
 .pb-bottombar {
-  padding-bottom: calc(74px + env(safe-area-inset-bottom));
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
 }
 @media (min-width: 768px) {
   .pb-bottombar {

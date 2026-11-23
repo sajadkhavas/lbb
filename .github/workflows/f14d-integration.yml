@@ -1,0 +1,39 @@
+name: F14D Production Backend Integration
+
+on:
+  push:
+    branches:
+      - phase/f14d-production-backend-integration
+  pull_request:
+    branches:
+      - integration/wave2-reviewed
+
+permissions:
+  contents: read
+
+jobs:
+  live-contract-gates:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SITE_URL: https://lbb.example.test
+      VITE_LBB_BACKEND_MODE: live
+      VITE_LBB_API_BASE_URL: https://api.example.test
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build live mode
+        run: npm run build
+      - name: Typecheck
+        run: npm run typecheck
+      - name: F14D contract/source audit
+        run: node scripts/audit-f14d-integration.mjs
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high

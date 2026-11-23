@@ -2,25 +2,37 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Heart, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { toast } from "sonner";
-import { useQuickView } from "@/lib/quickview";
+import { BackendProductQuickView } from "@/components/lbb/BackendProductQuickView";
+import { isBackendQuickViewTarget, useQuickView } from "@/lib/quickview";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
-import { discountPercent, fmtToman, isSizeAvailable } from "@/lib/products";
+import { discountPercent, fmtToman, isSizeAvailable, type Product } from "@/lib/products";
 import { CATEGORIES } from "@/lib/categories";
 import { productGallery } from "@/lib/product-images";
 import { colorName } from "@/lib/color-names";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { CtaClasses, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
+import { Identifier } from "@/components/lbb/ui/Identifier";
 
 const MAX_QTY = 10;
 
 export function ProductQuickView() {
-  const { product, close, dismissForNavigation } = useQuickView();
+  const { product } = useQuickView();
+  if (!product) return null;
+  return isBackendQuickViewTarget(product) ? (
+    <BackendProductQuickView card={product} />
+  ) : (
+    <PrototypeProductQuickView product={product} />
+  );
+}
+
+function PrototypeProductQuickView({ product: p }: { product: Product }) {
+  const { close, dismissForNavigation } = useQuickView();
   const { add, openDrawer } = useCart();
   const { has, toggle } = useWishlist();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
-  useFocusTrap(Boolean(product), dialogRef, close);
+  useFocusTrap(true, dialogRef, close);
 
   const [color, setColor] = useState("");
   const [size, setSize] = useState("");
@@ -30,16 +42,13 @@ export function ProductQuickView() {
   const touchStart = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!product) return;
-    setColor(product.colors[0] ?? "");
+    setColor(p.colors[0] ?? "");
     setSize("");
     setQty(1);
     setImg(0);
     setSizeError(false);
-  }, [product]);
+  }, [p]);
 
-  if (!product) return null;
-  const p = product;
   const gallery = productGallery(p.slug).slice(0, 4);
   const liked = has(p.slug);
   const discount = discountPercent(p);
@@ -72,7 +81,7 @@ export function ProductQuickView() {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex max-h-[92svh] w-full flex-col overflow-hidden border-t border-hairline bg-obsidian shadow-2xl md:max-h-[86svh] md:max-w-4xl md:flex-row md:border"
+        className="relative z-10 flex max-h-[92svh] w-full flex-col overflow-y-auto overscroll-contain rounded-t-[28px] border-t border-hairline bg-obsidian shadow-2xl md:max-h-[86svh] md:max-w-4xl md:flex-row md:overflow-hidden md:rounded-2xl md:border"
         style={{ animation: "qv-up 0.35s cubic-bezier(0.22,1,0.36,1)" }}
       >
         <button
@@ -88,16 +97,39 @@ export function ProductQuickView() {
 
         <div className="shrink-0 md:w-[46%]">
           <div
-            className="relative aspect-[4/3] w-full overflow-hidden bg-carbon touch-pan-y md:aspect-[3/4] md:h-full"
-            onTouchStart={(event: React.TouchEvent<HTMLDivElement>) => {
+            className="relative aspect-[4/5] max-h-[56svh] w-full overflow-hidden bg-white touch-pan-y md:aspect-[3/4] md:max-h-none md:h-full md:bg-carbon"
+            tabIndex={gallery.length > 1 ? 0 : -1}
+            role="region"
+            aria-roledescription="carousel"
+            aria-label={`گالری نمای سریع ${p.name}`}
+            onKeyDown={(event) => {
+              if (gallery.length <= 1) return;
+              if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                setImage(img + 1);
+              } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                setImage(img - 1);
+              } else if (event.key === "Home") {
+                event.preventDefault();
+                setImg(0);
+              } else if (event.key === "End") {
+                event.preventDefault();
+                setImg(gallery.length - 1);
+              }
+            }}
+            onTouchStart={(event) => {
               touchStart.current = event.touches[0]?.clientX ?? null;
             }}
-            onTouchEnd={(event: React.TouchEvent<HTMLDivElement>) => {
+            onTouchCancel={() => {
+              touchStart.current = null;
+            }}
+            onTouchEnd={(event) => {
               if (touchStart.current === null) return;
               const end = event.changedTouches[0]?.clientX ?? touchStart.current;
               const delta = end - touchStart.current;
               touchStart.current = null;
-              if (Math.abs(delta) < 45) return;
+              if (Math.abs(delta) < 24) return;
               setImage(delta > 0 ? img - 1 : img + 1);
             }}
           >
@@ -108,7 +140,7 @@ export function ProductQuickView() {
               height={1200}
               loading="eager"
               decoding="async"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain md:object-cover"
             />
             <div className="pointer-events-none absolute end-3 top-3 flex flex-col items-end gap-1.5">
               {p.isNew ? <StatusTag tone="signal">جدید</StatusTag> : null}
@@ -143,7 +175,7 @@ export function ProductQuickView() {
                   onClick={() => setImg(index)}
                   aria-label={`نمایش تصویر ${index + 1}`}
                   aria-current={index === img ? "true" : undefined}
-                  className={`h-11 w-9 overflow-hidden border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
+                  className={`h-11 w-11 overflow-hidden border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${
                     index === img ? "border-signal" : "border-bone/40 opacity-70"
                   }`}
                 >
@@ -160,9 +192,12 @@ export function ProductQuickView() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5 md:p-7">
+        <div className="flex min-h-0 flex-1 flex-col p-5 pb-[calc(24px+env(safe-area-inset-bottom))] md:overflow-y-auto md:p-7">
           <TechLabel tone="signal">{CATEGORIES[p.category].nameFa}</TechLabel>
-          <h2 id={titleId} className="mt-1.5 text-display-3 leading-tight text-bone">
+          <h2
+            id={titleId}
+            className="mt-1.5 max-w-full break-words text-[clamp(1.35rem,6vw,2rem)] font-black leading-[1.45] text-bone [overflow-wrap:anywhere] md:text-display-3 md:leading-tight"
+          >
             {p.name}
           </h2>
           <p className="mt-2 text-xs leading-6 text-metal">{p.shortDescription}</p>
@@ -306,7 +341,7 @@ export function ProductQuickView() {
           </Link>
 
           <p className="mt-4 border-t border-hairline pt-4 text-[11px] text-mute">
-            کد کالا: <span className="num">{p.sku}</span> — جنس: {p.material}
+            کد کالا: <Identifier>{p.sku}</Identifier> — جنس: {p.material}
           </p>
         </div>
 

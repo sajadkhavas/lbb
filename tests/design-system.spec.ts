@@ -8,12 +8,14 @@ const viewports = [
 ];
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("lbb-announcement-dismissed", "1"));
-  await page.goto("/design-system", { waitUntil: "networkidle" });
+  await page.addInitScript(() => {
+    localStorage.setItem("lbb-announcement-seasonal-v2-dismissed", "1");
+  });
+  await page.goto("/design-system", { waitUntil: "domcontentloaded" });
 });
 
 test("reference route exposes the F11 token contract and stays noindex", async ({ page }) => {
-  await expect(page.getByRole("heading", { level: 1, name: "Tehran After Dark" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Karaj After Dark" })).toBeVisible();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   await expect(page.locator("[data-token]")).toHaveCount(12);
 
@@ -76,7 +78,7 @@ test("focus indicator and disabled/loading states are explicit", async ({ page }
 for (const viewport of viewports) {
   test(`reference page has no horizontal overflow at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "domcontentloaded" });
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpLeft, Clock3 } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
+import { ManagedPageHead, ManagedPageIntro } from "@/components/lbb/ManagedPageIntro";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { JOURNAL_ARTICLES } from "@/lib/journal";
@@ -16,21 +17,26 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
+import { resolveStorefrontJournal, type StorefrontJournalDto } from "@/lib/storefront-control";
+import { isLiveBackend } from "@/lib/backend-api";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 const TITLE = "ژورنال LBB | راهنمای استایل، پارچه و نگهداری";
 const DESC =
-  "ژورنال LBB: راهنماهای کاربردی درباره استایل اورسایز، ترکیب رنگ، شناخت پارچه و نگهداری از هودی، تیشرت، شلوار و کتونی.";
+  "ژورنال LBB: راهنماهای کاربردی درباره استایل، ترکیب رنگ، شناخت پارچه و نگهداری، همراه با مسیرهای مرتبط به کالکشن و دسته‌های فروشگاه.";
 
 const COVERS = { hero: heroMain, l1: lifestyle1, l2: lifestyle2 };
 
 export const Route = createFileRoute("/journal/")({
-  head: () => {
+  loader: () => resolveStorefrontJournal(),
+  head: ({ loaderData }) => {
+    const indexArticles = loaderData ?? JOURNAL_ARTICLES;
     const itemListLd = {
       "@context": "https://schema.org",
       "@type": "ItemList",
       name: "ژورنال LBB",
-      numberOfItems: JOURNAL_ARTICLES.length,
-      itemListElement: JOURNAL_ARTICLES.map((article, index) => ({
+      numberOfItems: indexArticles.length,
+      itemListElement: indexArticles.map((article, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: article.title,
@@ -39,7 +45,9 @@ export const Route = createFileRoute("/journal/")({
     };
 
     return {
-      meta: pageMeta({ title: TITLE, description: DESC, path: "/journal", image: heroMain }),
+      meta: isLiveBackend()
+        ? []
+        : pageMeta({ title: TITLE, description: DESC, path: "/journal", image: heroMain }),
       links: canonical("/journal"),
       scripts: [
         {
@@ -59,12 +67,99 @@ export const Route = createFileRoute("/journal/")({
 });
 
 function JournalIndexPage() {
+  const liveArticles = Route.useLoaderData();
+  return liveArticles ? (
+    <LiveJournalIndexPage articles={liveArticles} />
+  ) : (
+    <PrototypeJournalIndexPage />
+  );
+}
+
+function LiveJournalIndexPage({ articles }: { articles: StorefrontJournalDto[] }) {
+  const page = useStorefrontPresentation().pages.journal;
+  return (
+    <>
+      <ManagedPageHead presentation={page} path="/journal" />
+      <Navbar theme="light" />
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="journal"
+        data-storefront-source="live"
+      >
+        <Shell className="py-3">
+          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />
+        </Shell>
+        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
+          <ManagedPageIntro presentation={page} />
+        </Band>
+        <Band>
+          <Shell>
+            {articles.length === 0 ? (
+              <div className="rounded-2xl border border-hairline bg-carbon p-8 text-center text-metal">
+                هنوز مقاله‌ای منتشر نشده است.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {articles.map((article, index) => (
+                  <article
+                    key={article.publicId || article.slug}
+                    className="overflow-hidden rounded-2xl border border-hairline bg-carbon"
+                  >
+                    {article.coverUrl ? (
+                      <img
+                        src={article.coverUrl}
+                        alt=""
+                        width={960}
+                        height={640}
+                        loading={index < 2 ? "eager" : "lazy"}
+                        className="aspect-[3/2] w-full object-cover"
+                      />
+                    ) : null}
+                    <div className="p-6">
+                      <TechLabel tone="signal">{article.category ?? "JOURNAL"}</TechLabel>
+                      <h2 className="mt-3 text-display-3 text-bone">{article.title}</h2>
+                      {article.excerpt ? (
+                        <p className="mt-3 text-sm leading-8 text-metal">{article.excerpt}</p>
+                      ) : null}
+                      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                        {article.publishedAt ? (
+                          <time dateTime={article.publishedAt} className="text-xs text-mute">
+                            {new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(
+                              new Date(article.publishedAt),
+                            )}
+                          </time>
+                        ) : (
+                          <span />
+                        )}
+                        <Link
+                          to="/journal/$slug"
+                          params={{ slug: article.slug }}
+                          className={CtaClasses("line", "sm")}
+                        >
+                          خواندن مقاله <ArrowUpLeft size={15} aria-hidden="true" />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </Shell>
+        </Band>
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PrototypeJournalIndexPage() {
   const [featured, ...articles] = JOURNAL_ARTICLES;
 
   return (
     <>
       <Navbar theme="light" />
-      <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
+      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="journal">
         <Shell className="py-3">
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "ژورنال" }]} />
         </Shell>
@@ -73,11 +168,11 @@ function JournalIndexPage() {
           <Shell>
             <TechLabel tone="signal">LBB / EDITORIAL NOTES</TechLabel>
             <h1 className="mt-5 max-w-[15ch] text-display-1 text-bone">
-              ژورنال؛ راهنماهایی برای انتخاب و استفاده بهتر
+              ژورنال؛ بخوان، زمینه را بفهم، مسیر مرتبط را پیدا کن
             </h1>
             <p className="text-lede mt-5 max-w-[62ch]">
-              مقاله‌های کوتاه و کاربردی درباره فیت، رنگ، پارچه و نگهداری؛ بدون جایگزین کردن اطلاعات
-              دقیق صفحه هر محصول.
+              مقاله‌های کوتاه درباره فیت، رنگ، پارچه و نگهداری. هر مقاله ابتدا یک محتوای ادیتوریال
+              مستقل است و فقط در صورت ارتباط واقعی به کالکشن، دسته یا محصول عمومی وصل می‌شود.
             </p>
           </Shell>
         </Band>
@@ -128,10 +223,10 @@ function JournalIndexPage() {
         <Band>
           <Shell>
             <SectionHead
-              index="LATEST"
+              index="ALL STORIES"
               label="GUIDES & NOTES"
               title="همه مقاله‌ها"
-              lede="تاریخ، موضوع و زمان تقریبی مطالعه پیش از ورود به هر مقاله مشخص شده است."
+              lede="موضوع، تاریخ ثبت‌شده و زمان تقریبی مطالعه پیش از ورود به هر مقاله مشخص است."
             />
 
             <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -175,15 +270,24 @@ function JournalIndexPage() {
         <Band>
           <Shell className="grid gap-6 rounded-2xl border border-hairline bg-carbon p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">
             <div>
-              <TechLabel tone="signal">FROM READING TO STYLING</TechLabel>
-              <h2 className="mt-3 text-display-3 text-bone">ایده‌ها را در لوک‌بوک ببینید</h2>
+              <TechLabel tone="signal">CONTINUE DISCOVERY</TechLabel>
+              <h2 className="mt-3 text-display-3 text-bone">مطلب را به مسیر کشف بعدی وصل کن</h2>
               <p className="mt-3 max-w-[58ch] text-sm leading-7 text-metal">
-                بعد از خواندن راهنماها، ترکیب رنگ و فرم قطعه‌ها را در قاب‌های لوک‌بوک مقایسه کنید.
+                برای دیدن روایت‌های تصویری به لوک‌بوک برو، کالکشن‌ها را مرور کن یا مستقیماً سراغ
+                دسته‌های فروشگاه برو.
               </p>
             </div>
-            <Link to="/lookbook" className={CtaClasses("signal")}>
-              رفتن به لوک‌بوک
-            </Link>
+            <nav aria-label="مسیرهای بعدی ژورنال" className="flex flex-wrap gap-3 md:justify-end">
+              <Link to="/lookbook" className={CtaClasses("line")}>
+                لوک‌بوک
+              </Link>
+              <Link to="/collections" className={CtaClasses("line")}>
+                کالکشن‌ها
+              </Link>
+              <Link to="/shop" search={{}} className={CtaClasses("signal")}>
+                فروشگاه
+              </Link>
+            </nav>
           </Shell>
         </Band>
       </main>

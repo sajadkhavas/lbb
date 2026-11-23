@@ -16,6 +16,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
         },
       }}
       {...props}
+      style={{
+        ...props.style,
+        fontFamily: '"Estedad Variable", "Vazirmatn", sans-serif',
+      }}
     />
   );
 };

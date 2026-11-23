@@ -4,12 +4,16 @@ import { Heart, Menu, Search, ShoppingBag, UserRound, ChevronDown } from "lucide
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { Logo } from "@/components/lbb/Logo";
-import { EDITORIAL_NAVIGATION, SHOP_NAVIGATION, isNavigationItemActive } from "@/lib/navigation";
 import { useNavigationOverlay } from "@/lib/navigation-overlay";
-import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
+import {
+  isMerchantNavigationItemActive,
+  MerchantNavigationLink,
+} from "@/components/lbb/navigation/MerchantNavigationLink";
 import { MegaMenuOverlay } from "@/components/lbb/navigation/MegaMenuOverlay";
 import { MobileMenuOverlay } from "@/components/lbb/navigation/MobileMenuOverlay";
 import { SearchOverlay } from "@/components/lbb/navigation/SearchOverlay";
+import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -27,6 +31,8 @@ export function Navbar({
   theme?: "dark" | "light";
   offsetTop?: number;
 }) {
+  const { navigation, brand } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
   const [scrolled, setScrolled] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { active, open, dismissForNavigation } = useNavigationOverlay();
@@ -41,14 +47,14 @@ export function Navbar({
   }, []);
 
   const isLight = theme === "light";
-  const ink = isLight && !scrolled ? "text-obsidian" : "text-bone";
+  const ink = "text-bone";
   const barSkin = scrolled
     ? "border-b border-hairline bg-[var(--lbb-surface-glass)] shadow-raised backdrop-blur-xl"
     : isLight
-      ? "border-b border-transparent bg-transparent"
+      ? "border-b border-transparent bg-gradient-to-b from-obsidian/85 via-obsidian/55 to-transparent"
       : "border-b border-transparent bg-gradient-to-b from-obsidian/75 to-transparent";
   const iconClass = `relative grid tap-target place-items-center border border-transparent transition-colors ${ink} hover:border-hairline hover:text-signal`;
-  const shopActive = SHOP_NAVIGATION.some((item) => isNavigationItemActive(pathname, item));
+  const shopActive = navigation.shop.some((item) => isMerchantNavigationItemActive(pathname, item));
 
   const openCart = () => {
     dismissForNavigation();
@@ -64,17 +70,15 @@ export function Navbar({
         style={{ top: offsetTop }}
       >
         <div
-          className="lbb-shell grid items-center gap-3"
-          style={{
-            height: "var(--lbb-nav-h)",
-            gridTemplateColumns: "auto minmax(0,1fr) auto",
-          }}
+          className="lbb-shell flex items-center justify-between gap-3 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto]"
+          style={{ height: "var(--lbb-nav-h)" }}
         >
-          <Link to="/" aria-label="LBB — خانه" className="flex min-w-0 shrink-0 items-center gap-2">
-            <Logo size={34} />
-            <span className="font-display text-xl font-black leading-none tracking-[-0.05em] text-signal md:text-2xl">
-              LBB
-            </span>
+          <Link
+            to="/"
+            aria-label={`${brand.nameFa} — خانه`}
+            className="flex min-w-0 shrink-0 items-center gap-2"
+          >
+            <Logo size={52} square />
           </Link>
 
           <div className="hidden min-w-0 items-center justify-center lg:flex">
@@ -98,7 +102,7 @@ export function Navbar({
                       : `${ink} opacity-75 hover:opacity-100`
                   }`}
                 >
-                  فروشگاه
+                  {presentation.shell.shopMenuLabel}
                   <ChevronDown
                     size={13}
                     aria-hidden="true"
@@ -106,23 +110,24 @@ export function Navbar({
                   />
                 </button>
               </li>
-              {EDITORIAL_NAVIGATION.map((item) => (
-                <li key={String(item.to)}>
-                  <NavigationLink
-                    item={item}
-                    active={isNavigationItemActive(pathname, item)}
-                    className={`tech flex min-h-11 items-center px-4 transition-colors ${
-                      isNavigationItemActive(pathname, item)
-                        ? "text-signal"
-                        : `${ink} opacity-75 hover:opacity-100`
-                    }`}
-                  />
-                </li>
-              ))}
+              {navigation.editorial.map((item) => {
+                const current = isMerchantNavigationItemActive(pathname, item);
+                return (
+                  <li key={`${item.href}-${item.label}`}>
+                    <MerchantNavigationLink
+                      item={item}
+                      onNavigate={dismissForNavigation}
+                      className={`tech flex min-h-11 items-center px-4 transition-colors ${
+                        current ? "text-signal" : `${ink} opacity-75 hover:opacity-100`
+                      }`}
+                    />
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
-          <div className="flex shrink-0 items-center gap-0.5">
+          <div className="flex shrink-0 items-center gap-0.5 [&_svg]:block [&_svg]:shrink-0">
             <button
               type="button"
               aria-label="جست‌وجو"
@@ -170,7 +175,7 @@ export function Navbar({
               aria-haspopup="dialog"
               aria-expanded={active === "menu"}
               onClick={() => open("menu")}
-              className={`${iconClass} ms-1`}
+              className={`${iconClass} ms-0.5 lg:hidden`}
             >
               <Menu size={20} strokeWidth={1.6} aria-hidden="true" />
             </button>

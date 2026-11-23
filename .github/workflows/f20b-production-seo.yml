@@ -1,0 +1,43 @@
+name: F20B Production SEO Integration
+
+on:
+  push:
+    branches:
+      - phase/f20b-production-seo-integration
+  pull_request:
+    branches:
+      - integration/wave3-reviewed
+
+permissions:
+  contents: read
+
+jobs:
+  seo-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      VITE_SITE_URL: https://lbb.example.test
+      VITE_LBB_BACKEND_MODE: prototype
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Format
+        run: npm run format:check
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Typecheck
+        run: npm run typecheck
+      - name: F20-B source audit
+        run: npm run audit:f20b
+      - name: SEO contract regressions
+        run: npm run test:seo
+      - name: F20-B helper regressions
+        run: npm run test:f20b

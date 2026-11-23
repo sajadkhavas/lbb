@@ -1,130 +1,144 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { DemoNotice, Shell } from "@/components/lbb/ui/primitives";
-import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import {
+  CtaClasses,
+  Shell,
+  StatePanel,
+  StatusTag,
+  TechLabel,
+} from "@/components/lbb/ui/primitives";
+import { contentParagraphs, resolveOptionalStorefrontPage } from "@/lib/content-page";
+import { pageMeta, canonical, breadcrumbLd, ROBOTS } from "@/lib/site";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
-const TITLE = "حریم خصوصی نسخه نمایشی | LBB";
-const DESC =
-  "توضیح داده‌های ذخیره‌شده در مرورگر نسخه نمایشی LBB؛ اطلاعات Checkout به سرور ارسال یا ذخیره نمی‌شوند.";
+const TITLE = "حریم خصوصی | LBB";
+const DESC = "سیاست حریم خصوصی LBB و نحوه حفاظت از اطلاعات کاربران.";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESC, path: "/privacy" }),
-    links: canonical("/privacy"),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify(
-          breadcrumbLd([
-            { name: "خانه", path: "/" },
-            { name: "حریم خصوصی", path: "/privacy" },
-          ]),
-        ),
-      },
-    ],
-  }),
+  loader: () => resolveOptionalStorefrontPage("privacy"),
+  head: ({ loaderData }) => {
+    const page = loaderData;
+    const title = page?.metaTitle || (page ? `${page.title} | LBB` : TITLE);
+    const description = page?.metaDescription || page?.excerpt || DESC;
+    const breadcrumbName = page?.title || "حریم خصوصی";
+    return {
+      meta: pageMeta({
+        title,
+        description,
+        path: "/privacy",
+        robots: page ? undefined : ROBOTS.NOINDEX_FOLLOW,
+      }),
+      links: canonical("/privacy"),
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: breadcrumbName, path: "/privacy" },
+            ]),
+          ),
+        },
+      ],
+    };
+  },
   component: PrivacyPage,
 });
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function ManagedPrivacy({ content }: { content: string | null }) {
+  const paragraphs = contentParagraphs(content);
   return (
-    <section className="mb-9">
-      <h2 className="mb-3 text-xl font-bold text-bone">{title}</h2>
-      <div className="text-sm leading-8 text-metal">{children}</div>
+    <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+      <TechLabel tone="signal">سیاست حریم خصوصی</TechLabel>
+      <div className="mt-5 space-y-4 text-sm leading-8 text-metal">
+        {paragraphs.length > 0 ? (
+          paragraphs.map((paragraph, index) => (
+            <p key={`${index}-${paragraph.slice(0, 28)}`}>{paragraph}</p>
+          ))
+        ) : (
+          <p>این صفحه از پنل منتشر شده است، اما هنوز متن تفصیلی برای آن ثبت نشده است.</p>
+        )}
+      </div>
     </section>
   );
 }
 
 function PrivacyPage() {
+  const page = Route.useLoaderData();
+  const { source, contact, runtime } = useStorefrontControl();
+  const publishedFromAdmin = Boolean(page);
+
   return (
     <>
       <Navbar />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-28 pt-16">
+      <main
+        dir="rtl"
+        className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-16"
+        data-storefront-source={source}
+      >
         <div className="hairline-b">
           <Shell className="py-3">
-            <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "حریم خصوصی" }]} />
+            <Breadcrumb
+              items={[{ label: "خانه", href: "/" }, { label: page?.title || "حریم خصوصی" }]}
+            />
           </Shell>
         </div>
 
-        <header className="mx-auto max-w-[820px] px-4 py-10 md:px-8">
-          <p className="tech text-signal">CURRENT DATA PRACTICES</p>
-          <h1 className="mt-3 text-display-2 text-bone">حریم خصوصی</h1>
-          <p className="mt-3 text-sm leading-7 text-metal">
-            این صفحه رفتار فعلی فرانت‌اند نمایشی را توضیح می‌دهد؛ نه سامانه فروش یا حساب کاربری
-            آینده.
+        <header className="mx-auto max-w-[860px] px-4 py-10 md:px-8 md:py-14">
+          <TechLabel tone="signal">حریم خصوصی</TechLabel>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h1 className="text-display-2 text-bone">{page?.title || "حریم خصوصی"}</h1>
+            <StatusTag tone={publishedFromAdmin ? "success" : "warning"}>
+              {publishedFromAdmin ? "منتشرشده از پنل" : "سیاست نهایی منتشر نشده"}
+            </StatusTag>
+          </div>
+          <p className="mt-4 max-w-[68ch] text-sm leading-8 text-metal">
+            {page?.excerpt ||
+              "جزئیات مربوط به پردازش و نگهداری اطلاعات مطابق سیاست رسمی فروشگاه اعلام می‌شود."}
           </p>
         </header>
 
-        <div className="mx-auto max-w-[820px] px-4 pb-16 md:px-8">
-          <DemoNotice className="mb-10 rounded-xl">
-            این نسخه به بک‌اند سفارش، درگاه پرداخت، CRM، خبرنامه یا سامانه پشتیبانی متصل نیست. نام،
-            شماره تلفن، آدرس و کد پستی واردشده در Checkout از مرورگر ارسال یا در Storage ذخیره
-            نمی‌شوند.
-          </DemoNotice>
+        <div className="mx-auto max-w-[860px] px-4 pb-16 md:px-8">
+          {page ? (
+            <ManagedPrivacy content={page.content} />
+          ) : (
+            <StatePanel title="سیاست نهایی پردازش داده هنوز از پنل منتشر نشده است" tone="warning">
+              نسخه رسمی سیاست حریم خصوصی پس از تأیید فروشگاه در این صفحه نمایش داده می‌شود.
+            </StatePanel>
+          )}
 
-          <Section title="داده‌های ذخیره‌شده در Local Storage">
-            <p className="mb-3">
-              برای ادامه تجربه در همان مرورگر، داده‌های زیر ممکن است روی دستگاه شما ذخیره شوند:
-            </p>
-            <ul className="list-inside list-disc space-y-2">
-              <li>اقلام سبد خرید شامل شناسه محصول، نام، قیمت نمایشی، رنگ، سایز و تعداد</li>
-              <li>فهرست علاقه‌مندی‌ها</li>
-              <li>جست‌وجوهای اخیر و برخی انتخاب‌های رابط مانند بستن نوار اعلان</li>
-            </ul>
-            <p className="mt-3">
-              این داده‌ها به حساب کاربری متصل نیستند و با پاک‌کردن Storage مرورگر حذف می‌شوند.
-            </p>
-          </Section>
+          <section className="mt-8 grid gap-4 md:grid-cols-2" aria-label="وضعیت عمومی سرویس‌ها">
+            <div className="rounded-2xl border border-hairline bg-carbon p-5">
+              <p className="tech text-signal">راه‌های ارتباطی</p>
+              <h2 className="mt-2 text-lg font-bold text-bone">راه ارتباط عمومی</h2>
+              <p className="mt-3 text-sm leading-7 text-metal">
+                {contact.email || contact.phone || contact.instagramHandle}
+              </p>
+              <Link to="/contact" className={`${CtaClasses("line")} mt-4`}>
+                مشاهده راه‌های ارتباطی
+              </Link>
+            </div>
+            <div className="rounded-2xl border border-hairline bg-carbon p-5">
+              <p className="tech text-signal">خدمات فروشگاه</p>
+              <h2 className="mt-2 text-lg font-bold text-bone">وضعیت سرویس‌های تجاری</h2>
+              <p className="mt-3 text-sm leading-7 text-metal">
+                ثبت سفارش: {runtime.checkoutEnabled ? "فعال" : "غیرفعال"} — پرداخت:{" "}
+                {runtime.payment.enabled ? "فعال" : "غیرفعال"}
+              </p>
+            </div>
+          </section>
 
-          <Section title="داده‌های Session Storage">
-            <p>
-              پس از ساخت پیش‌نمایش سفارش، فقط کد شش‌رقمی، تعداد کالا، جمع کالا، هزینه ارسال نمایشی،
-              جمع نهایی و زمان ایجاد در همان تب ذخیره می‌شوند. نام، تلفن، آدرس و کد پستی در این
-              خلاصه وجود ندارند و داده با بسته‌شدن تب از بین می‌رود.
-            </p>
-          </Section>
-
-          <Section title="اطلاعات Checkout">
-            <p>
-              فیلدهای Checkout برای آزمایش اعتبارسنجی فرم هستند. مقدار آن‌ها فقط در حافظه موقت React
-              همان صفحه قرار دارد و با Refresh یا خروج از صفحه پاک می‌شود. هیچ API برای ارسال این
-              اطلاعات فراخوانی نمی‌شود.
-            </p>
-          </Section>
-
-          <Section title="پرداخت و اطلاعات بانکی">
-            <p>
-              پرداخت فعال نیست و سایت هیچ اطلاعات بانکی دریافت نمی‌کند. در نتیجه شماره کارت، رمز،
-              CVV2، تاریخ انقضا یا نتیجه تراکنش در این نسخه پردازش یا ذخیره نمی‌شود.
-            </p>
-          </Section>
-
-          <Section title="کوکی، تحلیل و تبلیغات">
-            <p>
-              در پیاده‌سازی فعلی ابزار تحلیل ترافیک، تبلیغات رفتاری یا Consent Platform متصل نشده
-              است. Service Worker و فایل‌های فنی سایت ممکن است برای عملکرد و کش آفلاین استفاده شوند،
-              اما به‌تنهایی پروفایل تبلیغاتی کاربر ایجاد نمی‌کنند.
-            </p>
-          </Section>
-
-          <Section title="لینک‌های بیرونی">
-            <p>
-              بازکردن صفحه Instagram شما را از این سایت خارج می‌کند و پردازش داده در آن سرویس تابع
-              سیاست حریم خصوصی همان پلتفرم است. LBB کنترل مستقیمی بر Storage یا داده‌های آن سرویس
-              ندارد.
-            </p>
-          </Section>
-
-          <Section title="پس از راه‌اندازی بک‌اند">
-            <p>
-              پیش از فعال‌شدن حساب کاربری، سفارش، پرداخت، خبرنامه یا تحلیل، این صفحه باید با فهرست
-              دقیق داده‌ها، هدف پردازش، مدت نگهداری، ارائه‌دهندگان خدمت و روش درخواست حذف یا اصلاح
-              به‌روزرسانی شود.
-            </p>
-          </Section>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/terms" className={CtaClasses("line")}>
+              شرایط استفاده
+            </Link>
+            <Link to="/contact" className={CtaClasses("signal")}>
+              تماس و پشتیبانی
+            </Link>
+          </div>
         </div>
       </main>
       <Footer />

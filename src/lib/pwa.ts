@@ -21,21 +21,35 @@ function isRefusedContext(): boolean {
   return false;
 }
 
-async function unregisterAppWorker() {
+async function unregisterAppWorker(): Promise<void> {
   if (!("serviceWorker" in navigator)) return;
   const registrations = await navigator.serviceWorker.getRegistrations();
   await Promise.allSettled(
     registrations
-      .filter((registration) =>
-        (registration.active?.scriptURL ?? registration.installing?.scriptURL ?? "").endsWith(
-          SW_URL,
-        ),
-      )
+      .filter((registration) => {
+        const scriptUrl =
+          registration.active?.scriptURL ??
+          registration.installing?.scriptURL ??
+          registration.waiting?.scriptURL ??
+          "";
+        return scriptUrl.endsWith(SW_URL);
+      })
       .map((registration) => registration.unregister()),
   );
 }
 
-export async function registerPwa() {
+function announceUpdate(registration: ServiceWorkerRegistration): void {
+  if (!registration.waiting) return;
+  window.dispatchEvent(
+    new CustomEvent("lbb:pwa-update", {
+      detail: async () => {
+        registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+      },
+    }),
+  );
+}
+
+export async function registerPwa(): Promise<void> {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
   if (isRefusedContext()) {
     await unregisterAppWorker();
@@ -43,7 +57,22 @@ export async function registerPwa() {
   }
 
   try {
-    await navigator.serviceWorker.register(SW_URL, { scope: "/", updateViaCache: "none" });
+    const registration = await navigator.serviceWorker.register(SW_URL, {
+      scope: "/",
+      updateViaCache: "none",
+    });
+    announceUpdate(registration);
+    registration.addEventListener("updatefound", () => {
+      const installing = registration.installing;
+      if (!installing) return;
+      installing.addEventListener("statechange", () => {
+        if (installing.state === "installed" && navigator.serviceWorker.controller) {
+          announceUpdate(registration);
+        }
+      });
+    });
+    // Never reload behind the shopper's back. The update banner above is the
+    // explicit hand-off; the next normal navigation receives the new worker.
   } catch {
     // Offline support is progressive enhancement and must never break the app.
   }

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { PackageSearch } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstack/react-router";
+import { PackageSearch, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
@@ -25,71 +25,238 @@ import {
   createFacetCounts,
 } from "@/lib/catalog-discovery";
 import { productsByCategory } from "@/lib/products";
+import { evaluateProductEvidence } from "@/lib/product-evidence";
+import { backendCanonicalPath } from "@/lib/seo-live";
 import { absAsset, absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
 import {
   applyFilters,
   hasSearchModifiers,
   isCanonicalSearch,
+  normalizeBackendFilters,
   normalizeFilters,
+  parseBackendFilterSearch,
+  parseBackendFilters,
   parseFilterSearch,
   parseFilters,
+  serializeBackendFilters,
   serializeFilters,
   stableSearchString,
+  type FilterScope,
   type Filters,
 } from "@/lib/product-filter";
+import {
+  BackendApiError,
+  backendErrorMessage,
+  getCatalogFacets,
+  getCategory,
+  isLiveBackend,
+  listCategories,
+  listProducts,
+  type CategoryDto,
+  type FacetsDto,
+} from "@/lib/backend-api";
+import {
+  BACKEND_SUPPORTED_SORTS,
+  backendCard,
+  backendCatalogQuery,
+  backendFacetVisuals,
+  normalizeCatalogFilters,
+  type BackendCatalogCard,
+} from "@/lib/backend-storefront";
 
 const PAGE_SIZE = 12;
+const BACKEND_PAGE_SIZE = 48;
+
+type LiveLoader = {
+  mode: "live";
+  category: CategoryDto | null;
+  categoryDirectory?: CategoryDto[];
+  items: BackendCatalogCard[];
+  facets: FacetsDto | null;
+  filters: Filters;
+  total: number;
+  totalPages: number;
+  error: string | null;
+};
+
+type PrototypeLoader = {
+  mode: "prototype";
+  cat: (typeof CATEGORIES)[keyof typeof CATEGORIES];
+  items: ReturnType<typeof productsByCategory>;
+};
+
+type CategoryLoader = LiveLoader | PrototypeLoader;
 
 export const Route = createFileRoute("/$category")({
-  beforeLoad: ({ params }) => {
-    if (!isValidCategory(params.category)) throw notFound();
+  beforeLoad: ({ params, search }) => {
+    if (params.category === "shloar") {
+      throw redirect({ to: "/$category", params: { category: "pants" }, search, statusCode: 301 });
+    }
+    if (!isLiveBackend() && !isValidCategory(params.category)) throw notFound();
   },
-  validateSearch: (search: Record<string, unknown>) => parseFilterSearch(search),
-  loader: ({ params }) => {
-    const cat = CATEGORIES[params.category as keyof typeof CATEGORIES];
-    return { cat, items: productsByCategory(cat.slug) };
+  validateSearch: (search: Record<string, unknown>) =>
+    isLiveBackend() ? parseBackendFilterSearch(search) : parseFilterSearch(search),
+  loaderDeps: ({ search }) => ({ search }),
+  loader: async ({ params, deps }): Promise<CategoryLoader> => {
+    if (!isLiveBackend()) {
+      const cat = CATEGORIES[params.category as keyof typeof CATEGORIES];
+      return { mode: "prototype", cat, items: productsByCategory(cat.slug) };
+    }
+
+    try {
+      const [categoryResponse, facetsResponse, directoryResponse] = await Promise.all([
+        getCategory(params.category),
+        getCatalogFacets(),
+        listCategories().catch(() => null),
+      ]);
+      const category = categoryResponse.data;
+      const facets = facetsResponse.data;
+      const visuals = backendFacetVisuals(facets);
+      const scope: FilterScope = {
+        categories: false,
+        colors: visuals.colors,
+        sizes: visuals.sizes,
+        priceCeil: Math.max(1, visuals.priceCeil),
+      };
+      const filters = normalizeCatalogFilters(
+        parseBackendFilters(deps.search as unknown as Record<string, unknown>),
+        facets,
+        scope,
+      );
+      try {
+        const productsResponse = await listProducts({
+          ...backendCatalogQuery(filters, facets),
+          category: category.slug,
+          page: 1,
+          per_page: BACKEND_PAGE_SIZE,
+        });
+        return {
+          mode: "live",
+          category,
+          categoryDirectory: directoryResponse?.data,
+          items: productsResponse.data.map(backendCard),
+          facets,
+          filters,
+          total: productsResponse.meta.pagination?.total ?? productsResponse.data.length,
+          totalPages: productsResponse.meta.pagination?.totalPages ?? 1,
+          error: null,
+        };
+      } catch (error) {
+        return {
+          mode: "live",
+          category,
+          categoryDirectory: directoryResponse?.data,
+          items: [],
+          facets,
+          filters,
+          total: 0,
+          totalPages: 0,
+          error: backendErrorMessage(error),
+        };
+      }
+    } catch (error) {
+      if (error instanceof BackendApiError && error.status === 404) throw notFound();
+      return {
+        mode: "live",
+        category: null,
+        items: [],
+        facets: null,
+        filters: parseBackendFilters(deps.search as unknown as Record<string, unknown>),
+        total: 0,
+        totalPages: 0,
+        error: backendErrorMessage(error),
+      };
+    }
   },
   head: ({ loaderData, match }) => {
-    if (!loaderData)
+    if (!loaderData) {
       return { meta: [{ title: "پیدا نشد" }, { name: "robots", content: "noindex" }] };
-    const { cat, items } = loaderData;
-    const filters = parseFilters(match.search as unknown as Record<string, unknown>);
-    const collectionLd = {
-      "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      name: cat.h1,
-      description: cat.metaDesc,
-      url: absUrl(`/${cat.slug}`),
-    };
-    const itemListLd = {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      name: cat.h1,
-      numberOfItems: items.length,
-      itemListElement: items.slice(0, 20).map((product, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        url: absUrl(`/product/${product.slug}`),
-        name: product.name,
-      })),
-    };
-    const faqLd = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: cat.faqs.map((faq: { q: string; a: string }) => ({
-        "@type": "Question",
-        name: faq.q,
-        acceptedAnswer: { "@type": "Answer", text: faq.a },
-      })),
-    };
+    }
 
+    if (loaderData.mode === "live") {
+      const category = loaderData.category;
+      if (!category) {
+        return {
+          meta: pageMeta({
+            title: "این دسته‌بندی فعلاً در دسترس نیست | LBB",
+            description:
+              "نمایش محصولات این دسته‌بندی موقتاً امکان‌پذیر نیست. لطفاً کمی بعد دوباره تلاش کنید.",
+            path: "/shop",
+            robots: "noindex, nofollow",
+          }),
+        };
+      }
+      const filters = parseBackendFilters(match.search as unknown as Record<string, unknown>);
+      const path = backendCanonicalPath(category.seo, `/${category.slug}`);
+      const title = category.seo.metaTitle?.trim() || `${category.name} | LBB`;
+      const description =
+        category.seo.metaDescription?.trim() ||
+        category.description ||
+        `محصولات ${category.name} در LBB`;
+      const scripts = [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: "فروشگاه", path: "/shop" },
+              { name: category.name, path },
+            ]),
+          ),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: category.name,
+            description,
+            url: absUrl(path),
+          }),
+        },
+        ...(loaderData.items.length > 0
+          ? [
+              {
+                type: "application/ld+json",
+                children: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "ItemList",
+                  name: category.name,
+                  numberOfItems: loaderData.items.length,
+                  itemListElement: loaderData.items.map((product, index) => ({
+                    "@type": "ListItem",
+                    position: index + 1,
+                    url: absUrl(`/product/${product.slug}`),
+                    name: product.name,
+                  })),
+                }),
+              },
+            ]
+          : []),
+      ];
+      return {
+        meta: pageMeta({
+          title: title.slice(0, 70),
+          description: description.slice(0, 170),
+          path,
+          image: category.image || undefined,
+          robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined,
+        }),
+        links: canonical(path),
+        scripts,
+      };
+    }
+
+    const { cat, items } = loaderData;
+    const publishedItems = items.filter((product) => evaluateProductEvidence(product).publishable);
+    const filters = parseFilters(match.search as unknown as Record<string, unknown>);
     return {
       meta: pageMeta({
         title: cat.metaTitle,
         description: cat.metaDesc,
         path: `/${cat.slug}`,
         image: absAsset(categoryImage(cat.slug)),
-        noindex: hasSearchModifiers(filters),
+        robots: hasSearchModifiers(filters) ? "noindex, follow" : undefined,
       }),
       links: canonical(`/${cat.slug}`),
       scripts: [
@@ -103,9 +270,21 @@ export const Route = createFileRoute("/$category")({
             ]),
           ),
         },
-        { type: "application/ld+json", children: JSON.stringify(collectionLd) },
-        { type: "application/ld+json", children: JSON.stringify(itemListLd) },
-        { type: "application/ld+json", children: JSON.stringify(faqLd) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: cat.h1,
+            numberOfItems: publishedItems.length,
+            itemListElement: publishedItems.slice(0, 20).map((product, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: absUrl(`/product/${product.slug}`),
+              name: product.name,
+            })),
+          }),
+        },
       ],
     };
   },
@@ -113,7 +292,355 @@ export const Route = createFileRoute("/$category")({
 });
 
 function CategoryPage() {
-  const { cat, items } = Route.useLoaderData();
+  const loader = Route.useLoaderData();
+  return loader.mode === "live" ? (
+    <LiveCategory loader={loader} />
+  ) : (
+    <PrototypeCategory loader={loader} />
+  );
+}
+
+function LiveCategory({ loader }: { loader: LiveLoader }) {
+  const navigate = useNavigate({ from: "/$category" });
+  const [isPending, startTransition] = useTransition();
+  const [items, setItems] = useState(loader.items);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
+  const category = loader.category;
+  const facets = loader.facets;
+  const visuals = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
+  const scope: FilterScope = useMemo(() => {
+    const options = facets ? backendFacetVisuals(facets) : { colors: [], sizes: [], priceCeil: 1 };
+    return {
+      categories: false,
+      colors: options.colors,
+      sizes: options.sizes,
+      priceCeil: Math.max(1, options.priceCeil),
+    };
+  }, [facets]);
+  const appliedFilters = useMemo(
+    () => normalizeBackendFilters(loader.filters, scope),
+    [loader.filters, scope],
+  );
+  const [optimisticFilters, setOptimisticFilters] = useState(appliedFilters);
+  const filters = normalizeBackendFilters(optimisticFilters, scope);
+  const serialized = useMemo(
+    () => serializeBackendFilters(appliedFilters, scope),
+    [appliedFilters, scope],
+  );
+  const searchKey = stableSearchString(serialized);
+  const currentKey = `${category?.slug ?? ""}?${searchKey}`;
+  const requestKey = useRef(currentKey);
+
+  const getPreviewCount = useCallback(
+    async (candidate: Filters) => {
+      if (!facets || !category) return 0;
+      const response = await listProducts({
+        ...backendCatalogQuery(candidate, facets),
+        category: category.slug,
+        page: 1,
+        per_page: 1,
+      });
+      return response.meta.pagination?.total ?? response.data.length;
+    },
+    [facets, category],
+  );
+
+  useEffect(() => {
+    requestKey.current = currentKey;
+    setOptimisticFilters(appliedFilters);
+    setItems(loader.items);
+    setPage(1);
+    setLoadingMore(false);
+    setLoadMoreError(null);
+  }, [loader.items, currentKey, appliedFilters]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !facets || requestKey.current !== currentKey) return;
+    if (!isCanonicalSearch(window.location.search, serialized)) {
+      navigate({ search: serialized, replace: true, resetScroll: false });
+    }
+  }, [facets, navigate, searchKey, currentKey, serialized]);
+
+  if (!category) {
+    return (
+      <CategoryChrome
+        categoryName="دسته‌بندی"
+        categorySlug="unavailable"
+        description="داده تأییدشده در دسترس نیست."
+      >
+        <EmptyState
+          icon={<RefreshCcw size={40} aria-hidden="true" />}
+          title="دسته‌بندی قابل تأیید نیست"
+          body={loader.error ?? "اطلاعات این دسته فعلاً در دسترس نیست."}
+          action={
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className={CtaClasses("signal")}
+            >
+              تلاش دوباره
+            </button>
+          }
+        />
+      </CategoryChrome>
+    );
+  }
+
+  const setFilters = (next: Filters) => {
+    const normalized = normalizeBackendFilters(next, scope);
+    setOptimisticFilters(normalized);
+    requestKey.current = `${category.slug}?${stableSearchString(serializeBackendFilters(normalized, scope))}`;
+    startTransition(() =>
+      navigate({
+        search: serializeBackendFilters(normalized, scope),
+        replace: false,
+        resetScroll: false,
+      }),
+    );
+  };
+  const renderFilters = (candidate: Filters, onChange: (next: Filters) => void) => (
+    <ProductFilters
+      filters={candidate}
+      onChange={onChange}
+      colors={visuals.colors}
+      sizes={visuals.sizes}
+      priceCeil={Math.max(1, visuals.priceCeil)}
+      showSale={false}
+      colorLabels={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+      )}
+      colorSwatches={Object.fromEntries(
+        (facets?.colors ?? []).map((color) => [color.slug, color.hex]),
+      )}
+    />
+  );
+
+  const loadMore = async () => {
+    if (!facets || loadingMore || page >= loader.totalPages || requestKey.current !== currentKey)
+      return;
+    setLoadingMore(true);
+    setLoadMoreError(null);
+    try {
+      const nextPage = page + 1;
+      const response = await listProducts({
+        ...backendCatalogQuery(filters, facets),
+        category: category.slug,
+        page: nextPage,
+        per_page: BACKEND_PAGE_SIZE,
+      });
+      if (requestKey.current !== currentKey) return;
+      setItems((current) => {
+        const seen = new Set(current.map((product) => product.id));
+        return [
+          ...current,
+          ...response.data.map(backendCard).filter((product) => !seen.has(product.id)),
+        ];
+      });
+      setPage(nextPage);
+    } catch (error) {
+      if (requestKey.current === currentKey) setLoadMoreError(backendErrorMessage(error));
+    } finally {
+      if (requestKey.current === currentKey) setLoadingMore(false);
+    }
+  };
+
+  return (
+    <CategoryChrome
+      categoryName={category.name}
+      categorySlug={category.slug}
+      description={category.description || "محصولات منتشرشدهٔ این دسته را ببینید."}
+      image={category.image}
+      siblingCategories={(loader.categoryDirectory ?? [])
+        .filter((item) => item.slug !== category.slug)
+        .slice(0, 4)}
+    >
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[250px_1fr]">
+        <aside className="hidden lg:block" aria-label="فیلتر محصولات">
+          <div className="sticky top-[calc(var(--lbb-nav-h)+24px)] max-h-[calc(100dvh-var(--lbb-nav-h)-40px)] overflow-y-auto overscroll-contain pe-3">
+            {facets ? renderFilters(filters, setFilters) : null}
+          </div>
+        </aside>
+        <section aria-labelledby="category-grid-title">
+          <h2 id="category-grid-title" className="sr-only">
+            محصولات دسته {category.name}
+          </h2>
+          {facets ? (
+            <ProductGridControls
+              filters={filters}
+              onChange={setFilters}
+              resultCount={loader.total}
+              filterSlot={renderFilters}
+              getResultCount={() => loader.total}
+              getPreviewCount={getPreviewCount}
+              lockedCategory
+              supportedSorts={BACKEND_SUPPORTED_SORTS}
+              colorLabels={Object.fromEntries(
+                (facets?.colors ?? []).map((color) => [color.slug, color.name]),
+              )}
+            />
+          ) : null}
+          {loader.error ? (
+            <EmptyState
+              className="mt-6"
+              icon={<RefreshCcw size={40} aria-hidden="true" />}
+              title="کاتالوگ این دسته در دسترس نیست"
+              body={loader.error}
+            />
+          ) : isPending ? (
+            <div className="mt-6" aria-busy="true">
+              <GridSkeleton count={8} />
+            </div>
+          ) : loader.total === 0 ? (
+            <EmptyState
+              className="mt-6"
+              icon={<PackageSearch size={40} aria-hidden="true" />}
+              title={`محصولی از ${category.name} با این فیلترها پیدا نشد`}
+              body="فیلترها را تغییر دهید یا همه محصولات این دسته را ببینید."
+              action={
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFilters({ ...filters, colors: [], sizes: [], max: 0, instock: false })
+                  }
+                  className={CtaClasses("signal")}
+                >
+                  پاک کردن فیلترها
+                </button>
+              }
+            />
+          ) : (
+            <>
+              <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3">
+                {items.map((product, index) => (
+                  <ProductCard key={product.id} p={product} priority={index < 2} />
+                ))}
+              </div>
+              {page < loader.totalPages ? (
+                <div className="mt-10 flex flex-col items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className={CtaClasses("line")}
+                  >
+                    {loadingMore ? "در حال دریافت…" : "نمایش قطعه‌های بیشتر"}
+                  </button>
+                  {loadMoreError ? (
+                    <p role="alert" className="text-xs text-signal">
+                      {loadMoreError}
+                    </p>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="tech mt-10 text-center text-mute">همه نتایج نمایش داده شدند</p>
+              )}
+            </>
+          )}
+        </section>
+      </div>
+    </CategoryChrome>
+  );
+}
+
+function CategoryChrome({
+  categoryName,
+  categorySlug,
+  description,
+  image,
+  siblingCategories = [],
+  children,
+}: {
+  categoryName: string;
+  categorySlug: string;
+  description: string;
+  image?: string | null;
+  siblingCategories?: readonly CategoryDto[];
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <Navbar theme="dark" />
+      <main
+        dir="rtl"
+        className="min-h-screen bg-obsidian pb-bottombar pt-[var(--lbb-nav-h)] md:pb-0"
+      >
+        <Shell className="border-b border-hairline py-4">
+          <Breadcrumb
+            items={[
+              { label: "خانه", to: "/" },
+              { label: "فروشگاه", to: "/shop" },
+              { label: categoryName },
+            ]}
+          />
+        </Shell>
+        <section className="border-b border-hairline">
+          <Shell
+            className={`grid grid-cols-1 gap-7 py-8 ${image ? "md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]" : ""} md:items-center md:py-12`}
+          >
+            {image ? (
+              <div className="overflow-hidden rounded-2xl border border-hairline bg-carbon">
+                <img
+                  src={image}
+                  alt={categoryName}
+                  width={720}
+                  height={540}
+                  loading="eager"
+                  fetchPriority="high"
+                  className="aspect-[4/3] h-full w-full object-cover"
+                />
+              </div>
+            ) : null}
+            <div>
+              <TechLabel tone="signal">CATEGORY / {categorySlug.toUpperCase()}</TechLabel>
+              <h1 className="text-display-2 mt-3 text-bone">{categoryName}</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-metal">{description}</p>
+              <p className="tech mt-4 text-signal">قیمت و موجودی به‌روز محصولات</p>
+            </div>
+          </Shell>
+        </section>
+        <Band hairline={false} className="!py-10 md:!py-14">
+          <Shell>{children}</Shell>
+        </Band>
+        {siblingCategories.length > 0 ? (
+          <Band label="دسته‌بندی‌های مشابه">
+            <Shell>
+              <h2 className="mb-3 text-lg font-bold text-bone">دسته‌بندی‌های مشابه</h2>
+              <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto p-1">
+                {siblingCategories.map((category) => (
+                  <Link
+                    key={category.publicId}
+                    to="/$category"
+                    params={{ category: category.slug }}
+                    className="flex min-h-32 w-36 shrink-0 snap-start flex-col items-center justify-center gap-3 rounded-2xl border border-hairline bg-carbon p-4 text-sm font-bold text-bone transition md:min-h-36 md:w-[calc((100%_-_3.75rem)/6)] hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  >
+                    {category.image ? (
+                      <img
+                        src={category.image}
+                        alt=""
+                        loading="lazy"
+                        width={56}
+                        height={56}
+                        className="size-12 object-contain md:size-14"
+                      />
+                    ) : null}
+                    <span className="px-3 text-center">{category.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </Shell>
+          </Band>
+        ) : null}
+      </main>
+      <Footer theme="dark" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PrototypeCategory({ loader }: { loader: PrototypeLoader }) {
+  const { cat, items } = loader;
   const routeFilters = Route.useSearch();
   const navigate = useNavigate({ from: "/$category" });
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -132,13 +659,15 @@ function CategoryPage() {
     if (typeof window === "undefined") return;
     const expected = serializeFilters(filters);
     if (!isCanonicalSearch(window.location.search, expected)) {
-      navigate({ search: expected, replace: true });
+      navigate({ search: expected, replace: true, resetScroll: false });
     }
   }, [filters, navigate]);
 
   const setFilters = (nextFilters: Filters) => {
     const normalized = normalizeFilters(nextFilters, scope);
-    startTransition(() => navigate({ search: serializeFilters(normalized), replace: false }));
+    startTransition(() =>
+      navigate({ search: serializeFilters(normalized), replace: false, resetScroll: false }),
+    );
   };
 
   const filtered = useMemo(() => applyFilters(items, filters), [items, filters]);
@@ -178,7 +707,7 @@ function CategoryPage() {
             <div className="overflow-hidden rounded-2xl border border-hairline bg-carbon">
               <img
                 src={categoryImage(cat.slug)}
-                alt={`مدل در حال پوشیدن ${cat.nameFaPlural} استریت‌ویر LBB`}
+                alt={`نمای دسته ${cat.nameFaPlural} ال‌بی‌بی`}
                 width={720}
                 height={540}
                 loading="eager"
@@ -283,9 +812,15 @@ function CategoryPage() {
         <Band label="CATEGORY GUIDE">
           <Shell className="max-w-[900px]">
             <h2 className="text-display-3 text-bone">
-              {cat.nameFaPlural} استریت‌ویر LBB چه ویژگی‌هایی دارن؟
+              {`برای انتخاب ${cat.nameFa} در LBB به چه چیزهایی توجه کنیم؟`}
             </h2>
             <p className="mt-4 text-sm leading-8 text-metal">{cat.seoText}</p>
+            <Link
+              to="/size-guide"
+              className="tech mt-5 inline-flex min-h-11 items-center text-signal underline-offset-4 hover:underline"
+            >
+              راهنمای انتخاب اندازه
+            </Link>
             <div className="mt-8 divide-y divide-hairline border-t border-hairline">
               {cat.faqs.map((faq: { q: string; a: string }) => (
                 <details key={faq.q} className="group py-4">

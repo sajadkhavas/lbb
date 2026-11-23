@@ -2,19 +2,34 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 const templates = [
-  "/",
-  "/shop",
-  "/hoodies",
-  "/product/lbb-classic-hoodie",
-  "/cart",
-  "/collections",
-  "/collections/drop-01-shabgard",
-  "/journal",
-  "/journal/materials-101-parche-shenasi",
-  "/contact",
-  "/design-system",
-  "/account",
-];
+  ["home", "/"],
+  ["shop", "/shop"],
+  ["category", "/hoodies"],
+  ["search", "/search?q=هودی"],
+  ["product", "/product/lbb-classic-hoodie"],
+  ["cart", "/cart"],
+  ["checkout-preview", "/checkout"],
+  ["account", "/account"],
+  ["collections", "/collections"],
+  ["collection-detail", "/collections/drop-01-shabgard"],
+  ["lookbook", "/lookbook"],
+  ["journal", "/journal"],
+  ["journal-detail", "/journal/materials-101-parche-shenasi"],
+  ["about", "/about"],
+  ["faq", "/faq"],
+  ["shipping-returns", "/shipping-returns"],
+  ["terms", "/terms"],
+  ["privacy", "/privacy"],
+  ["contact", "/contact"],
+  ["wishlist", "/wishlist"],
+  ["size-guide", "/size-guide"],
+  ["track-order", "/track-order"],
+  ["order-confirmation", "/order-confirmation"],
+  ["404", "/f19-route-does-not-exist"],
+  ["invalid-product", "/product/f19-invalid-product"],
+  ["invalid-collection", "/collections/f19-invalid-collection"],
+  ["invalid-journal", "/journal/f19-invalid-journal"],
+] as const;
 
 async function expectNoBlockingAxe(page: Page) {
   const results = await new AxeBuilder({ page })
@@ -33,18 +48,16 @@ async function expectNoBlockingAxe(page: Page) {
   ).toEqual([]);
 }
 
-for (const route of templates) {
-  test(`${route} has no serious or critical Axe violations`, async ({ page }) => {
-    await page.goto(route, { waitUntil: "networkidle" });
+for (const [label, route] of templates) {
+  test(`${label}: ${route} has no serious or critical Axe violations`, async ({ page }) => {
+    await page.goto(route, { waitUntil: "domcontentloaded" });
     await expectNoBlockingAxe(page);
   });
 }
 
-test("desktop mega menu, mobile menu and search preserve focus and Axe quality", async ({
-  page,
-}) => {
+test("navigation overlays preserve focus and Axe quality", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const shopTrigger = page.getByRole("button", { name: "فروشگاه" });
   await shopTrigger.click();
@@ -68,11 +81,61 @@ test("desktop mega menu, mobile menu and search preserve focus and Axe quality",
   await expect(search).toBeHidden();
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "منوی اصلی" }).click();
+  const menuTrigger = page.getByRole("button", { name: "منوی اصلی" });
+  await menuTrigger.click();
   const menu = page.getByRole("dialog", { name: "منوی اصلی" });
   await expect(menu).toBeVisible();
-  await expect(menu.getByRole("heading", { name: "دسته‌های محصول" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "LBB — خانه" })).toBeFocused();
   await expectNoBlockingAxe(page);
   await page.keyboard.press("Escape");
   await expect(menu).toBeHidden();
+  await expect(menuTrigger).toBeFocused();
+});
+
+test("catalogue and product dialogs have blocking Axe coverage", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/shop", { waitUntil: "domcontentloaded" });
+
+  const filterTrigger = page.getByRole("button", { name: /فیلترها/ }).first();
+  await filterTrigger.click();
+  const filters = page.getByRole("dialog", { name: /فیلتر محصولات/ });
+  await expect(filters).toBeVisible();
+  await expectNoBlockingAxe(page);
+  await page.keyboard.press("Escape");
+  await expect(filters).toBeHidden();
+  await expect(filterTrigger).toBeFocused();
+
+  const quickViewTrigger = page.getByRole("button", { name: /انتخاب سایز و خرید/ }).first();
+  await quickViewTrigger.click();
+  const quickView = page.getByRole("dialog");
+  await expect(quickView).toBeVisible();
+  await expectNoBlockingAxe(page);
+  await page.keyboard.press("Escape");
+  await expect(quickView).toBeHidden();
+  await expect(quickViewTrigger).toBeFocused();
+
+  await page.goto("/product/lbb-classic-hoodie", { waitUntil: "domcontentloaded" });
+  const sizeGuideTrigger = page.getByRole("button", { name: "راهنمای اندازه" });
+  if ((await sizeGuideTrigger.count()) > 0) {
+    await sizeGuideTrigger.click();
+    const sizeGuide = page.getByRole("dialog");
+    await expect(sizeGuide).toBeVisible();
+    await expectNoBlockingAxe(page);
+    await page.keyboard.press("Escape");
+    await expect(sizeGuide).toBeHidden();
+    await expect(sizeGuideTrigger).toBeFocused();
+  } else {
+    await expect(page.getByText("مشخصات محصول هنوز منتشر نشده است")).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expectNoBlockingAxe(page);
+  }
+});
+
+test("lookbook lightbox has blocking Axe coverage", async ({ page }) => {
+  await page.goto("/lookbook", { waitUntil: "domcontentloaded" });
+  const opener = page.locator('button[aria-haspopup="dialog"]').first();
+  await opener.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expectNoBlockingAxe(page);
 });

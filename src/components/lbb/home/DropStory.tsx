@@ -1,37 +1,65 @@
+import { CompactCollectionStory } from "./CompactCollectionStory";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpLeft } from "lucide-react";
 import { CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
-import { collectionBySlug } from "@/lib/collections";
-import { lifestyle2, productImage } from "@/lib/product-images";
-import { fmtToman, productBySlug } from "@/lib/products";
+import type { CollectionDto } from "@/lib/backend-api";
+import type { BackendCatalogCard } from "@/lib/backend-storefront";
+import { getCollectionEditorialViewBySlug } from "@/lib/editorial-commerce";
+import { productImage } from "@/lib/product-images";
+import { useStorefrontControl } from "@/lib/storefront-control";
 
-export function DropStory() {
-  const collection = collectionBySlug("drop-01-shabgard");
-  if (!collection) return null;
+type ManagedCollectionDto = CollectionDto & { coverImage?: string | null };
 
-  const pieces = collection.productSlugs
-    .map((slug) => productBySlug(slug))
-    .filter((product): product is NonNullable<typeof product> => Boolean(product))
-    .slice(0, 3);
+export type LiveFeaturedStory = {
+  collection: CollectionDto;
+  products: BackendCatalogCard[];
+};
+
+export function DropStory({ liveStory }: { liveStory?: LiveFeaturedStory | null }) {
+  const { source, featuredStory } = useStorefrontControl();
+
+  if (source === "live") {
+    if (!featuredStory.enabled || !liveStory) return null;
+
+    const { collection, products } = liveStory;
+    const collectionCover = (collection as ManagedCollectionDto).coverImage ?? null;
+    const heroImage =
+      collectionCover ?? products.find((product) => product.primaryImage)?.primaryImage ?? null;
+
+    return (
+      <CompactCollectionStory
+        collection={collection}
+        products={products}
+        heroImage={heroImage}
+        eyebrow={featuredStory.eyebrow}
+        cta={featuredStory.collectionCta}
+      />
+    );
+  }
+
+  const view = getCollectionEditorialViewBySlug("capsule-denim");
+  if (!view) return null;
+  const { collection } = view;
 
   return (
     <section
       dir="rtl"
       aria-labelledby="drop-story-title"
       className="relative overflow-hidden border-t border-hairline bg-carbon"
+      data-f17-editorial="home-drop-story"
     >
       <div aria-hidden="true" className="absolute inset-0 grid-marks opacity-35" />
-      <Shell className="relative grid gap-0 py-14 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)]">
-        <div className="relative min-h-[520px] overflow-hidden border border-hairline bg-obsidian lg:min-h-[760px]">
+      <Shell className="relative grid gap-0 py-12 md:py-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)]">
+        <div className="relative min-h-[440px] overflow-hidden border border-hairline bg-obsidian lg:min-h-[600px]">
           <img
-            src={lifestyle2}
-            alt="استایل شبگرد LBB با پالت تیره و نور قرمز"
+            src={productImage("denim-baggy-jean")}
+            alt={`روایت تصویری ${collection.nameFa}`}
             width={1200}
             height={1500}
             loading="lazy"
             decoding="async"
             sizes="(max-width: 1023px) 100vw, 52vw"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full bg-white object-contain p-6 md:p-10"
           />
           <span
             aria-hidden="true"
@@ -42,16 +70,14 @@ export function DropStory() {
             <p className="mt-3 max-w-[38ch] text-sm leading-7 text-bone">{collection.tagline}</p>
           </div>
         </div>
-
-        <div className="flex flex-col border border-t-0 border-hairline bg-obsidian p-5 md:p-8 lg:border-r-0 lg:border-t lg:p-10">
+        <div className="flex flex-col justify-center border border-t-0 border-hairline bg-obsidian p-5 md:p-8 lg:border-r-0 lg:border-t lg:p-10">
           <div>
-            <TechLabel tone="signal">03 / DROP NARRATIVE</TechLabel>
+            <TechLabel tone="signal">استایل پیشنهادی ال‌بی‌بی</TechLabel>
             <h2 id="drop-story-title" className="mt-4 text-display-2 text-bone">
               {collection.nameFa}
             </h2>
             <p className="mt-5 text-sm leading-8 text-metal">{collection.description}</p>
           </div>
-
           <ol className="mt-8 border-y border-hairline">
             {collection.storyPoints.map((point, index) => (
               <li
@@ -63,67 +89,60 @@ export function DropStory() {
               </li>
             ))}
           </ol>
-
-          <div className="mt-8">
-            <TechLabel>PIECES IN THIS STORY</TechLabel>
-            <ul className="mt-3 space-y-2">
-              {pieces.map((product) => (
-                <li key={product.slug}>
-                  <Link
-                    to="/product/$slug"
-                    params={{ slug: product.slug }}
-                    className="group grid min-h-[78px] grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 border border-hairline bg-carbon p-2 transition-colors hover:border-signal"
-                  >
-                    <img
-                      src={productImage(product.slug)}
-                      alt=""
-                      width={56}
-                      height={70}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-[70px] w-14 object-cover"
-                    />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-black text-bone">
-                        {product.name}
+          {view.publicProducts.length > 0 ? (
+            <div className="mt-8">
+              <TechLabel>PUBLIC PIECES IN THIS STORY</TechLabel>
+              <ul className="mt-3 space-y-2">
+                {view.publicProducts.slice(0, 3).map((reference) => (
+                  <li key={reference.slug}>
+                    <Link
+                      to="/product/$slug"
+                      params={{ slug: reference.slug }}
+                      className="group grid min-h-[78px] grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 border border-hairline bg-carbon p-2 transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    >
+                      <img
+                        src={reference.image}
+                        alt=""
+                        width={56}
+                        height={70}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-[70px] w-14 object-cover"
+                      />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-black text-bone">
+                          {reference.product.name}
+                        </span>
+                        <span className="mt-1 block text-xs leading-6 text-metal">
+                          دیدن رنگ، سایز و جزئیات محصول
+                        </span>
                       </span>
-                      <span className="num mt-1 block text-xs text-metal">
-                        {fmtToman(product.price)}
-                      </span>
-                    </span>
-                    <ArrowUpLeft
-                      size={16}
-                      aria-hidden="true"
-                      className="text-mute transition-colors group-hover:text-signal"
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
+                      <ArrowUpLeft
+                        size={16}
+                        aria-hidden="true"
+                        className="text-mute transition-colors group-hover:text-signal"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/collections/$slug"
               params={{ slug: collection.slug }}
               className={CtaClasses("signal")}
             >
-              مشاهده کالکشن شبگرد
+              دیدن کالکشن {collection.nameFa}
             </Link>
             <Link to="/lookbook" className={CtaClasses("line")}>
-              دیدن لوک‌بوک
+              ایده‌های بیشتر برای استایل
             </Link>
           </div>
-
-          <aside className="mt-auto border-t border-hairline pt-7">
-            <div className="grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
-              <TechLabel tone="signal">DROP 002</TechLabel>
-              <p className="text-xs leading-6 text-mute">
-                دراپ بعدی هنوز در حال توسعه است و تاریخ انتشار تاییدشده ندارد؛ اطلاع‌رسانی فقط از
-                کانال رسمی انجام می‌شود.
-              </p>
-            </div>
-          </aside>
+          <p className="mt-7 border-t border-hairline pt-6 text-xs leading-6 text-mute">
+            برای دیدن موجودی و سایزهای هر قطعه وارد صفحه همان محصول شو.
+          </p>
         </div>
       </Shell>
     </section>

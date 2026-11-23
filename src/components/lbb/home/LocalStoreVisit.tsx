@@ -1,0 +1,191 @@
+import { Link } from "@tanstack/react-router";
+import { ArrowUpLeft, Instagram, MapPin, MessageCircle } from "lucide-react";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
+import { CtaClasses, Shell, TechLabel } from "@/components/lbb/ui/primitives";
+import { BRAND } from "@/lib/brand";
+import { lifestyle2 } from "@/lib/product-images";
+import { useStorefrontControl } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
+
+export function LocalStoreVisit() {
+  const { source, brand, contact, localStore } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
+
+  if (source === "live") {
+    if (!localStore.enabled) return null;
+    const imageUrl = localStore.imageUrl;
+    const location = contact.addressLine || contact.locationLabel;
+    const instagramHref = presentation.localStoreLinks.instagram ?? contact.instagramUrl;
+
+    return (
+      <section
+        dir="rtl"
+        aria-labelledby="local-store-title"
+        className="border-t border-hairline bg-carbon py-12 md:py-16"
+      >
+        <Shell className="grid !px-0 overflow-hidden rounded-3xl border border-hairline bg-obsidian shadow-overlay lg:grid-cols-2">
+          <div className="relative min-h-[400px] overflow-hidden bg-carbon-2 lg:min-h-[clamp(500px,50vw,840px)]">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={`فروشگاه حضوری ${brand.nameFa}`}
+                width={1200}
+                height={1600}
+                loading="lazy"
+                decoding="async"
+                sizes="(max-width: 1023px) 100vw, 50vw"
+                className="absolute inset-0 w-full object-cover object-top"
+                style={{ height: "100%" }}
+              />
+            ) : (
+              <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm leading-7 text-metal">
+                تصویر فروشگاه به‌زودی در این بخش نمایش داده می‌شود.
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col justify-center p-6 md:p-9 lg:p-11">
+            <TechLabel tone="signal">{localStore.eyebrow}</TechLabel>
+            <h2 id="local-store-title" className="mt-5 text-display-2 text-bone">
+              {localStore.title}
+            </h2>
+            <p className="mt-5 max-w-[52ch] text-sm leading-8 text-metal">{localStore.body}</p>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <div className="flex items-start gap-3 rounded-2xl border border-hairline bg-carbon p-4">
+                <MapPin size={20} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
+                <div>
+                  <p className="text-sm font-black text-bone">{localStore.addressTitle}</p>
+                  <p className="mt-1 text-xs leading-6 text-metal">{location}</p>
+                </div>
+              </div>
+              <MerchantNavigationLink
+                item={{
+                  label: localStore.instagramTitle,
+                  latin: "INSTAGRAM",
+                  href: instagramHref,
+                }}
+                className="flex items-start gap-3 rounded-2xl border border-hairline bg-carbon p-4 transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              >
+                <Instagram size={20} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
+                <div>
+                  <p className="text-sm font-black text-bone">{localStore.instagramTitle}</p>
+                  <p className="mt-1 text-xs leading-6 text-metal">{contact.instagramHandle}</p>
+                </div>
+              </MerchantNavigationLink>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <MerchantNavigationLink
+                item={{
+                  label: localStore.contactCta,
+                  latin: "CONTACT",
+                  href: presentation.localStoreLinks.contact,
+                }}
+                className={CtaClasses("signal", "lg")}
+              >
+                {localStore.contactCta}
+                <MapPin size={17} aria-hidden="true" />
+              </MerchantNavigationLink>
+              <MerchantNavigationLink
+                item={{ label: localStore.instagramCta, latin: "INSTAGRAM", href: instagramHref }}
+                className={CtaClasses("line", "lg")}
+              >
+                {localStore.instagramCta}
+                <MessageCircle size={17} aria-hidden="true" />
+              </MerchantNavigationLink>
+            </div>
+
+            <MerchantNavigationLink
+              item={{
+                label: localStore.shopCta,
+                latin: "SHOP",
+                href: presentation.localStoreLinks.shop,
+              }}
+              className="mt-8 inline-flex min-h-11 items-center gap-2 self-start text-xs font-black text-signal"
+            >
+              {localStore.shopCta}
+              <ArrowUpLeft size={16} aria-hidden="true" />
+            </MerchantNavigationLink>
+          </div>
+        </Shell>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      dir="rtl"
+      aria-labelledby="local-store-title"
+      className="border-t border-hairline bg-carbon py-12 md:py-16"
+    >
+      <Shell className="grid overflow-hidden rounded-3xl border border-hairline bg-obsidian shadow-overlay lg:grid-cols-2">
+        <div className="relative self-start overflow-hidden">
+          <img
+            src={lifestyle2}
+            alt="استایل پوشاک خیابانی ال‌بی‌بی"
+            width={1200}
+            height={1500}
+            loading="lazy"
+            decoding="async"
+            sizes="(max-width: 1023px) 100vw, 50vw"
+            className="block h-auto w-full"
+          />
+        </div>
+        <div className="flex flex-col justify-center p-6 md:p-9 lg:p-11">
+          <TechLabel tone="signal">فروشگاه حضوری ال‌بی‌بی</TechLabel>
+          <h2 id="local-store-title" className="mt-5 text-display-2 text-bone">
+            آنلاین ببین، در مهستان از نزدیک انتخاب کن.
+          </h2>
+          <p className="mt-5 max-w-[52ch] text-sm leading-8 text-metal">
+            مدل‌ها را در سایت مقایسه کن و اگر دوست داشتی برای دیدن رنگ، جنس و تن‌خور از نزدیک به
+            فروشگاه ال‌بی‌بی در پاساژ مهستان کرج سر بزن.
+          </p>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <div className="flex items-start gap-3 rounded-2xl border border-hairline bg-carbon p-4">
+              <MapPin size={20} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
+              <div>
+                <p className="text-sm font-black text-bone">آدرس فروشگاه</p>
+                <p className="mt-1 text-xs leading-6 text-metal">{BRAND.physicalLocationShort}</p>
+              </div>
+            </div>
+            <a
+              href={BRAND.instagramUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-start gap-3 rounded-2xl border border-hairline bg-carbon p-4 transition-colors hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            >
+              <Instagram size={20} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
+              <div>
+                <p className="text-sm font-black text-bone">مدل‌های تازه در اینستاگرام</p>
+                <p className="mt-1 text-xs leading-6 text-metal">{BRAND.instagramHandle}</p>
+              </div>
+            </a>
+          </div>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/contact" className={CtaClasses("signal", "lg")}>
+              اطلاعات تماس و مراجعه
+              <MapPin size={17} aria-hidden="true" />
+            </Link>
+            <a
+              href={BRAND.instagramUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={CtaClasses("line", "lg")}
+            >
+              پیام در اینستاگرام
+              <MessageCircle size={17} aria-hidden="true" />
+            </a>
+          </div>
+          <Link
+            to="/shop"
+            className="mt-8 inline-flex min-h-11 items-center gap-2 self-start text-xs font-black text-signal"
+          >
+            قبل از مراجعه محصولات را ببین
+            <ArrowUpLeft size={16} aria-hidden="true" />
+          </Link>
+        </div>
+      </Shell>
+    </section>
+  );
+}

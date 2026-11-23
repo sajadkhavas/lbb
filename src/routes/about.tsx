@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpLeft, BookOpenText, Grid2X2, ScanSearch } from "lucide-react";
+import { ArrowUpLeft, BookOpenText, Grid2X2, MapPin, ScanSearch } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
+import { BRAND, BRAND_COPY } from "@/lib/brand";
 import { COLLECTIONS } from "@/lib/collections";
 import { JOURNAL_ARTICLES } from "@/lib/journal";
 import { products } from "@/lib/products";
@@ -17,49 +18,175 @@ import {
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { pageMeta, canonical, breadcrumbLd } from "@/lib/site";
+import {
+  resolveStorefrontControl,
+  resolveStorefrontPage,
+  type StorefrontControl,
+  type StorefrontPageDto,
+} from "@/lib/storefront-control";
 
-const TITLE = "درباره LBB | ساختار فروشگاه و رویکرد محتوایی";
+const TITLE = "درباره LBB | از رگال تا فروشگاه";
 const DESC =
-  "درباره تجربه LBB بخوانید؛ فروشگاهی با کاتالوگ متمرکز، اطلاعات روشن محصول، کالکشن‌های ادیتوریال و راهنماهای کاربردی استایل و نگهداری.";
+  "داستان LBB؛ برند پوشاک خیابانی و استریت‌ویر در کرج، از شروع مسیر در سال ۱۴۰۰ تا فروشگاه حضوری و فروش آنلاین.";
 
 const PRINCIPLES = [
   {
     icon: ScanSearch,
-    title: "اطلاعات قبل از تصمیم",
-    body: "نام، فیت، جنس، رنگ، سایز، موجودی و نگهداری باید در صفحه محصول قابل‌بررسی باشد؛ نه پنهان در متن‌های تبلیغاتی.",
+    title: "اطلاعات پیش از انتخاب",
+    body: "نام، تن‌خور، جنس، رنگ، اندازه، موجودی و روش نگهداری باید در صفحهٔ محصول روشن و قابل‌بررسی باشد.",
   },
   {
     icon: Grid2X2,
     title: "کاتالوگ متمرکز",
-    body: "دسته‌ها و کالکشن‌ها برای پیدا کردن مسیر مناسب‌اند، اما هر مسیر در نهایت به همان محصولات واقعی فروشگاه می‌رسد.",
+    body: "دسته‌ها و کالکشن‌ها مسیر پیدا کردن محصول را ساده می‌کنند و هر مسیر به اطلاعات همان قطعه می‌رسد.",
   },
   {
     icon: BookOpenText,
-    title: "محتوای قابل‌استفاده",
-    body: "لوک‌بوک و ژورنال برای مقایسه فرم، رنگ، پارچه و روش نگهداری ساخته شده‌اند؛ بدون ادعای جایگزینی تجربه واقعی محصول.",
+    title: "محتوای کاربردی",
+    body: "لوک‌بوک و ژورنال برای مقایسهٔ فرم، رنگ، پارچه و روش نگهداری ساخته می‌شوند؛ نه برای جایگزین‌کردن اطلاعات محصول.",
   },
 ];
 
+function contentParagraphs(content: string | null) {
+  if (!content) return [];
+  return content
+    .replace(/<br\s*\/?>(?=.)/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .split(/\n+/)
+    .map((part) => part.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESC, path: "/about", image: lifestyle1 }),
-    links: canonical("/about"),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify(
-          breadcrumbLd([
-            { name: "خانه", path: "/" },
-            { name: "درباره LBB", path: "/about" },
-          ]),
-        ),
-      },
-    ],
-  }),
+  loader: async () => {
+    const [control, page] = await Promise.all([
+      resolveStorefrontControl(),
+      resolveStorefrontPage("about"),
+    ]);
+    return { control, page };
+  },
+  head: ({ loaderData }) => {
+    const control = loaderData?.control;
+    const page = loaderData?.page;
+    const isLive = control?.source === "live" && page;
+    const title = isLive ? page.metaTitle || `${page.title} | LBB` : TITLE;
+    const description = isLive
+      ? page.metaDescription || page.excerpt || control.brand.shortIntroduction
+      : DESC;
+    const breadcrumbName = isLive ? page.title : "درباره LBB";
+
+    return {
+      meta: pageMeta({
+        title,
+        description,
+        path: "/about",
+        image: isLive ? undefined : lifestyle1,
+      }),
+      links: canonical("/about"),
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbLd([
+              { name: "خانه", path: "/" },
+              { name: breadcrumbName, path: "/about" },
+            ]),
+          ),
+        },
+      ],
+    };
+  },
   component: AboutPage,
 });
 
 function AboutPage() {
+  const { control, page } = Route.useLoaderData();
+  if (control.source === "live" && page) {
+    return <LiveAboutPage control={control} page={page} />;
+  }
+  return <PrototypeAboutPage />;
+}
+
+function LiveAboutPage({ control, page }: { control: StorefrontControl; page: StorefrontPageDto }) {
+  const paragraphs = contentParagraphs(page.content);
+
+  return (
+    <>
+      <Navbar theme="light" />
+      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-storefront-source="live">
+        <Shell className="py-3">
+          <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: page.title }]} />
+        </Shell>
+
+        <Band hairline={false} className="pb-10 pt-8 md:pb-14 md:pt-12">
+          <Shell className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+            <div>
+              <TechLabel tone="signal">ABOUT / {control.brand.name}</TechLabel>
+              <h1 className="mt-5 max-w-[14ch] text-display-1 text-bone">{page.title}</h1>
+              <p className="text-lede mt-5 max-w-[58ch]">
+                {page.excerpt || control.brand.shortIntroduction}
+              </p>
+              <p className="mt-5 flex items-start gap-2 text-sm leading-7 text-bone">
+                <MapPin size={17} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
+                <span>{control.copy.storeLocationLabel}</span>
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to="/shop" search={{}} className={CtaClasses("signal")}>
+                  {control.copy.primaryCta}
+                </Link>
+                <Link to="/contact" hash="store-location" className={CtaClasses("line")}>
+                  {control.copy.secondaryCta}
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+              <TechLabel tone="signal">{control.brand.storyTitle}</TechLabel>
+              <div className="mt-5 space-y-4">
+                {(paragraphs.length > 0 ? paragraphs : [control.brand.descriptor]).map(
+                  (paragraph, index) => (
+                    <p
+                      key={`${index}-${paragraph.slice(0, 24)}`}
+                      className="text-sm leading-8 text-metal"
+                    >
+                      {paragraph}
+                    </p>
+                  ),
+                )}
+              </div>
+            </div>
+          </Shell>
+        </Band>
+
+        <Band>
+          <Shell className="grid gap-6 lg:grid-cols-2">
+            <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+              <TechLabel tone="signal">BRAND IDENTITY</TechLabel>
+              <h2 className="mt-4 text-display-3 text-bone">{control.brand.slogan}</h2>
+              <p className="mt-4 text-sm leading-8 text-metal">{control.brand.descriptor}</p>
+            </section>
+            <section className="rounded-2xl border border-hairline bg-carbon p-6 md:p-8">
+              <TechLabel tone="signal">PHYSICAL / ONLINE</TechLabel>
+              <h2 className="mt-4 text-display-3 text-bone">
+                {control.brand.physicalLocationShort}
+              </h2>
+              <p className="mt-4 text-sm leading-8 text-metal">{control.brand.shortIntroduction}</p>
+              <Link to="/contact" className={`${CtaClasses("line")} mt-6`}>
+                اطلاعات تماس و فروشگاه
+              </Link>
+            </section>
+          </Shell>
+        </Band>
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PrototypeAboutPage() {
   const categoryCount = new Set(products.map((product) => product.category)).size;
 
   return (
@@ -73,18 +200,25 @@ function AboutPage() {
         <Band hairline={false} className="pb-10 pt-8 md:pb-14 md:pt-12">
           <Shell className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div>
-              <TechLabel tone="signal">ABOUT / LBB</TechLabel>
-              <h1 className="mt-5 max-w-[14ch] text-display-1 text-bone">
-                یک تجربه متمرکز برای دیدن، مقایسه و انتخاب
-              </h1>
-              <p className="text-lede mt-5 max-w-[58ch]">
-                LBB محصولات را در یک زبان بصری واحد نمایش می‌دهد و مسیر انتخاب را با کالکشن، لوک‌بوک
-                و مقاله‌های راهنما کامل می‌کند.
-              </p>
+              <TechLabel tone="signal">ABOUT / FROM RACK TO STORE</TechLabel>
+              <h1 className="mt-5 max-w-[14ch] text-display-1 text-bone">از رگال تا فروشگاه</h1>
+              <p className="text-lede mt-5 max-w-[58ch]">{BRAND.slogan}</p>
               <p className="mt-6 max-w-[62ch] text-sm leading-8 text-metal">
-                این صفحه درباره ساختار همین تجربه است. درباره اندازه تیم، محل تولید، حجم فروش یا
-                شعبه فیزیکی ادعایی مطرح نمی‌شود؛ اطلاعاتی که برای تصمیم خرید اهمیت دارد باید از داده
-                واقعی محصول و مراحل سفارش بیاید.
+                LBB در سال ۱۴۰۰ و پس از سال‌ها فعالیت در حوزه پوشاک، با هدف شکل‌دادن به یک برند شخصی
+                و متفاوت آغاز شد.
+              </p>
+              <p className="mt-4 max-w-[62ch] text-sm leading-8 text-metal">
+                مسیر ما از تولید تا عرضه محصولات منتخب خارجی ادامه پیدا کرد و امروز با مجموعه‌ای
+                محدود، خاص و انتخاب‌شده در کنار شما هستیم؛ هم در فروشگاه حضوری LBB و هم از طریق
+                فروشگاه آنلاین LBB.
+              </p>
+              <p className="mt-4 max-w-[62ch] text-sm leading-8 text-metal">
+                پوشاک خیابانی، استریت‌ویر، استایل و آیتم‌های وارداتی بخش اصلی هویت انتخاب‌های LBB
+                هستند.
+              </p>
+              <p className="mt-4 flex items-start gap-2 text-sm leading-7 text-bone">
+                <MapPin size={17} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
+                <span>{BRAND_COPY.storeLocationLabel}</span>
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/shop" search={{}} className={CtaClasses("signal")}>
@@ -98,7 +232,7 @@ function AboutPage() {
 
             <Frame
               src={lifestyle1}
-              alt="دو استایل اورسایز LBB در فضای خیابانی شبانه"
+              alt="دو استایل اورسایز LBB در فضای شهری شبانه"
               ratio="4/5"
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
@@ -118,8 +252,8 @@ function AboutPage() {
             <SectionHead
               index="01"
               label="WORKING PRINCIPLES"
-              title="سه اصل برای یک تجربه منسجم"
-              lede="این اصول درباره نحوه نمایش محتوا و محصول‌اند و ادعایی درباره فرایندهای خارج از سایت ایجاد نمی‌کنند."
+              title="سه اصل برای انتخاب روشن"
+              lede="اطلاعات محصول باید پیش از توصیف تبلیغاتی در دسترس باشد و هر ادعا به دادهٔ واقعی تکیه کند."
             />
             <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
               {PRINCIPLES.map(({ icon: Icon, title, body }) => (
@@ -138,11 +272,11 @@ function AboutPage() {
         <Band>
           <Shell className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
             <div>
-              <TechLabel tone="signal">CURRENT CONTENT MAP</TechLabel>
-              <h2 className="mt-4 text-display-2 text-bone">آنچه اکنون در LBB پیدا می‌کنید</h2>
+              <TechLabel tone="signal">CONTENT MAP</TechLabel>
+              <h2 className="mt-4 text-display-2 text-bone">آنچه در LBB پیدا می‌کنید</h2>
               <p className="mt-4 text-sm leading-8 text-metal">
-                عددها مستقیماً از داده فعلی سایت خوانده می‌شوند و با اضافه یا حذف شدن محتوا تغییر
-                می‌کنند.
+                عددها مستقیماً از دادهٔ کاتالوگ و محتوای سایت خوانده می‌شوند و با تغییر محتوا به‌روز
+                می‌مانند.
               </p>
             </div>
 
@@ -169,29 +303,29 @@ function AboutPage() {
             <SectionHead
               index="02"
               label="A CLEAR PATH"
-              title="از کشف تا صفحه محصول"
-              lede="هر بخش نقش مشخصی دارد؛ کاربر نباید برای اطلاعات پایه بین چند صفحه سرگردان شود."
+              title="از کشف تا صفحهٔ محصول"
+              lede="هر بخش نقش مشخصی دارد؛ برای اطلاعات پایه نباید میان چند صفحه سرگردان شوید."
             />
             <ol className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
               {[
                 {
                   index: "01",
                   title: "کشف",
-                  body: "از فروشگاه، دسته‌ها یا کالکشن‌ها برای محدود کردن انتخاب استفاده کنید.",
+                  body: "از فروشگاه، دسته‌ها یا کالکشن‌ها برای محدودکردن انتخاب استفاده کنید.",
                   to: "/collections" as const,
                   action: "مرور کالکشن‌ها",
                 },
                 {
                   index: "02",
                   title: "مقایسه",
-                  body: "در لوک‌بوک، فرم و رنگ قطعه‌ها را کنار هم ببینید و در ژورنال درباره کاربردشان بخوانید.",
+                  body: "در لوک‌بوک فرم و رنگ قطعه‌ها را کنار هم ببینید و در ژورنال دربارهٔ کاربردشان بخوانید.",
                   to: "/lookbook" as const,
                   action: "دیدن لوک‌بوک",
                 },
                 {
                   index: "03",
                   title: "بررسی نهایی",
-                  body: "برای قیمت، موجودی، سایز، جنس و نگهداری به صفحه همان محصول برگردید.",
+                  body: "برای قیمت، موجودی، اندازه، جنس و نگهداری به صفحهٔ همان محصول بروید.",
                   to: "/shop" as const,
                   action: "رفتن به فروشگاه",
                 },
@@ -220,13 +354,13 @@ function AboutPage() {
           <Shell className="grid gap-6 rounded-2xl border border-hairline bg-carbon p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">
             <div>
               <TechLabel tone="signal">NEED A QUICK ANSWER?</TechLabel>
-              <h2 className="mt-3 text-display-3 text-bone">سوال‌های رایج را یک‌جا ببینید</h2>
+              <h2 className="mt-3 text-display-3 text-bone">پاسخ پرسش‌های رایج را یک‌جا ببینید</h2>
               <p className="mt-3 max-w-[58ch] text-sm leading-7 text-metal">
-                FAQ درباره موجودی، سایز، کالکشن، لوک‌بوک و اطلاعات مرحله سفارش توضیح می‌دهد.
+                بخش پرسش‌های رایج دربارهٔ موجودی، اندازه، کالکشن، لوک‌بوک و مراحل خرید توضیح می‌دهد.
               </p>
             </div>
             <Link to="/faq" className={CtaClasses("signal")}>
-              سوالات متداول
+              پرسش‌های رایج
             </Link>
           </Shell>
         </Band>

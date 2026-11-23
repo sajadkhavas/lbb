@@ -111,8 +111,17 @@ if (!homepageHero) {
     failures.push("Homepage LCP image must retain explicit intrinsic dimensions.");
   }
 }
-if (!/rel:\s*"preload"[\s\S]*as:\s*"image"[\s\S]*href:\s*heroMain/.test(homepageRoute)) {
-  failures.push("Homepage route must preload the hero LCP image.");
+
+const dynamicHeroPreloadRequirements = [
+  "const heroImage =",
+  "loaderData.heroProduct?.image",
+  "productImage(control.home.heroProductSlug)",
+  '{ rel: "preload", as: "image", href: heroImage }',
+];
+for (const required of dynamicHeroPreloadRequirements) {
+  if (!homepageRoute.includes(required)) {
+    failures.push(`Homepage dynamic LCP preload contract is missing: ${required}`);
+  }
 }
 
 const discoveryModule = await readFile(

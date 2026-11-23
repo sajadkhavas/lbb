@@ -1,4 +1,4 @@
-import { useCallback, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import {
   Select,
@@ -26,7 +26,11 @@ type Props = {
   resultCount: number;
   filterSlot: (filters: Filters, onChange: (filters: Filters) => void) => ReactNode;
   getResultCount: (filters: Filters) => number;
+  getPreviewCount?: (filters: Filters) => Promise<number>;
   lockedCategory?: boolean;
+  supportedSorts?: readonly SortKey[];
+  categoryLabels?: Record<string, string>;
+  colorLabels?: Readonly<Record<string, string>>;
 };
 
 export function ProductGridControls({
@@ -35,20 +39,59 @@ export function ProductGridControls({
   resultCount,
   filterSlot,
   getResultCount,
+  getPreviewCount,
   lockedCategory,
+  supportedSorts,
+  categoryLabels,
+  colorLabels,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [draftFilters, setDraftFilters] = useState(filters);
+  const [preview, setPreview] = useState<{ count: number | null; loading: boolean }>({
+    count: resultCount,
+    loading: false,
+  });
   const sheetRef = useRef<HTMLDivElement>(null);
   const sheetId = useId();
   const close = useCallback(() => setOpen(false), []);
   useFocusTrap(open, sheetRef, close);
   const count = activeCount(filters);
   const draftCount = activeCount(draftFilters);
-  const draftResultCount = getResultCount(draftFilters);
+  const draftResultCount = getPreviewCount ? preview.count : getResultCount(draftFilters);
+  const draftKey = JSON.stringify(draftFilters);
+  const appliedKey = JSON.stringify(filters);
+
+  useEffect(() => {
+    if (!open || !getPreviewCount) return;
+    if (draftKey === appliedKey) {
+      setPreview({ count: resultCount, loading: false });
+      return;
+    }
+    let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      void getPreviewCount(draftFilters)
+        .then((count) => {
+          if (!cancelled) setPreview({ count, loading: false });
+        })
+        .catch(() => {
+          if (!cancelled) setPreview({ count: null, loading: false });
+        });
+    }, 300);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
+  }, [open, getPreviewCount, draftKey, appliedKey, resultCount]);
+
+  const updateDraft = (next: Filters) => {
+    setDraftFilters(next);
+    if (getPreviewCount) setPreview({ count: null, loading: true });
+  };
+  const sortKeys = supportedSorts ?? (Object.keys(SORT_LABELS) as SortKey[]);
 
   const openFilters = () => {
     setDraftFilters(filters);
+    setPreview({ count: resultCount, loading: false });
     setOpen(true);
   };
 
@@ -58,7 +101,7 @@ export function ProductGridControls({
   };
 
   const resetDraft = () => {
-    setDraftFilters({ ...EMPTY_FILTERS, sort: draftFilters.sort });
+    updateDraft({ ...EMPTY_FILTERS, sort: draftFilters.sort });
   };
 
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
@@ -66,7 +109,10 @@ export function ProductGridControls({
     filters.cats.forEach((category) =>
       chips.push({
         key: `cat-${category}`,
-        label: CATEGORIES[category as keyof typeof CATEGORIES]?.nameFa ?? category,
+        label:
+          categoryLabels?.[category] ??
+          CATEGORIES[category as keyof typeof CATEGORIES]?.nameFa ??
+          category,
         onRemove: () =>
           onChange({ ...filters, cats: filters.cats.filter((item) => item !== category) }),
       }),
@@ -75,7 +121,7 @@ export function ProductGridControls({
   filters.colors.forEach((color) =>
     chips.push({
       key: `color-${color}`,
-      label: colorName(color),
+      label: colorLabels?.[color] || colorName(color) || color,
       onRemove: () =>
         onChange({ ...filters, colors: filters.colors.filter((item) => item !== color) }),
     }),
@@ -135,7 +181,7 @@ export function ProductGridControls({
           </button>
 
           <Select
-            value={filters.sort}
+            value={sortKeys.includes(filters.sort) ? filters.sort : "newest"}
             onValueChange={(value: string) => onChange({ ...filters, sort: value as SortKey })}
           >
             <SelectTrigger
@@ -145,7 +191,7 @@ export function ProductGridControls({
               <SelectValue />
             </SelectTrigger>
             <SelectContent dir="rtl">
-              {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+              {sortKeys.map((key) => (
                 <SelectItem key={key} value={key} className="text-xs">
                   {key === "best" ? "منتخب LBB" : SORT_LABELS[key]}
                 </SelectItem>
@@ -163,7 +209,7 @@ export function ProductGridControls({
               type="button"
               onClick={chip.onRemove}
               aria-label={`حذف فیلتر ${chip.label}`}
-              className="flex min-h-10 items-center gap-1.5 border border-hairline px-3 py-1.5 text-xs text-metal transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              className="flex min-h-11 items-center gap-1.5 border border-hairline px-3 py-1.5 text-xs text-metal transition-colors hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
             >
               {chip.label}
               <X size={12} aria-hidden="true" />
@@ -172,7 +218,7 @@ export function ProductGridControls({
           <button
             type="button"
             onClick={() => onChange({ ...EMPTY_FILTERS, sort: filters.sort })}
-            className="min-h-10 tech text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            className="min-h-11 inline-flex items-center tech text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
           >
             پاک کردن همه
           </button>
@@ -217,27 +263,34 @@ export function ProductGridControls({
 
             <div className="mt-4 flex items-center justify-between gap-3">
               <p className="tech text-metal">
-                {draftResultCount.toLocaleString("fa-IR")} نتیجه پیش‌نمایش
+                {preview.loading && getPreviewCount
+                  ? "در حال شمارش محصولات…"
+                  : draftResultCount === null
+                    ? "تعداد نتایج فعلاً در دسترس نیست"
+                    : `${draftResultCount.toLocaleString("fa-IR")} نتیجه پیش‌نمایش`}
               </p>
               {draftCount > 0 ? (
                 <button
                   type="button"
                   onClick={resetDraft}
-                  className="min-h-10 text-xs text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                  className="min-h-11 inline-flex items-center text-xs text-signal underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                 >
                   پاک کردن فیلترها
                 </button>
               ) : null}
             </div>
 
-            <div className="mt-5">{filterSlot(draftFilters, setDraftFilters)}</div>
+            <div className="mt-5">{filterSlot(draftFilters, updateDraft)}</div>
             <div className="sticky bottom-0 mt-6 border-t border-hairline bg-obsidian pt-4">
               <button
                 type="button"
                 onClick={applyDraft}
                 className={`${CtaClasses("signal")} w-full`}
               >
-                اعمال فیلترها · {draftResultCount.toLocaleString("fa-IR")} نتیجه
+                اعمال فیلترها
+                {draftResultCount !== null && !preview.loading
+                  ? ` · ${draftResultCount.toLocaleString("fa-IR")} نتیجه`
+                  : null}
               </button>
             </div>
           </div>

@@ -1,0 +1,64 @@
+name: F8-B PWA and Push validation
+
+on:
+  push:
+    branches:
+      - integration/final-pwa-reviewed
+  pull_request:
+    paths:
+      - "public/manifest.webmanifest"
+      - "public/offline.html"
+      - "public/push-sw.js"
+      - "public/sw.js"
+      - "src/lib/pwa.ts"
+      - "src/lib/push-notifications.ts"
+      - "src/components/lbb/PwaExperience.tsx"
+      - "src/routes/app.tsx"
+      - "src/routes/__root.tsx"
+
+permissions:
+  contents: read
+
+env:
+  VITE_SITE_URL: https://lbb.example.test
+  VITE_LBB_BACKEND_MODE: prototype
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Validate manifest and truth-safe worker contract
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from "node:fs";
+          const manifest = JSON.parse(fs.readFileSync("public/manifest.webmanifest", "utf8"));
+          for (const key of ["id", "name", "short_name", "start_url", "scope", "display", "icons"]) {
+            if (!manifest[key]) throw new Error(`manifest missing ${key}`);
+          }
+          const worker = fs.readFileSync("public/sw.js", "utf8");
+          const pushWorker = fs.readFileSync("public/push-sw.js", "utf8");
+          if (!worker.includes('importScripts("/push-sw.js")')) throw new Error("push worker import missing");
+          if (!worker.includes("SENSITIVE_PATH")) throw new Error("sensitive route cache guard missing");
+          if (!worker.includes("OFFLINE_URL")) throw new Error("offline fallback missing");
+          if (!pushWorker.includes('addEventListener("push"')) throw new Error("push listener missing");
+          if (!pushWorker.includes("candidate.origin === self.location.origin")) throw new Error("notification URL guard missing");
+          const pushClient = fs.readFileSync("src/lib/push-notifications.ts", "utf8");
+          if (!pushClient.includes('credentials: "include"')) throw new Error("authenticated persistence missing");
+          if (!pushClient.includes("Notification.requestPermission()")) throw new Error("permission flow missing");
+          EOF
+      - run: npx prettier --check public/offline.html public/push-sw.js public/sw.js src/lib/pwa.ts src/lib/push-notifications.ts src/components/lbb/PwaExperience.tsx src/routes/app.tsx src/routes/__root.tsx
+      - run: npm run build
+      - run: npm run typecheck
+      - name: Validate production artifacts
+        run: |
+          test -f .output/public/sw.js
+          grep -q "push-sw.js" .output/public/sw.js
+          test -f .output/public/push-sw.js
+          test -f .output/public/offline.html

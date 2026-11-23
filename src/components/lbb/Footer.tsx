@@ -1,119 +1,194 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowUpLeft, Instagram } from "lucide-react";
-import {
-  BRAND_NAVIGATION,
-  EDITORIAL_NAVIGATION,
-  PERSONAL_NAVIGATION,
-  SERVICE_NAVIGATION,
-  SHOP_NAVIGATION,
-} from "@/lib/navigation";
+import { useId, useState } from "react";
+import { ChevronDown, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
+import { PERSONAL_NAVIGATION, type NavigationItem } from "@/lib/navigation";
 import { NavigationLink } from "@/components/lbb/navigation/NavigationLink";
+import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { Logo } from "@/components/lbb/Logo";
-import { TechLabel } from "@/components/lbb/ui/primitives";
+import { TrustMarks } from "@/components/lbb/TrustMarks";
+import { PushOptIn } from "@/components/lbb/PushOptIn";
+import { useStorefrontControl, type MerchantNavigationItem } from "@/lib/storefront-control";
+import { useStorefrontPresentation } from "@/lib/storefront-presentation";
 
-function FooterList({ title, items }: { title: string; items: typeof SHOP_NAVIGATION }) {
-  const id = `footer-${title.replace(/\s+/g, "-")}`;
+function FooterSection({ title, children }: { title: string; children: React.ReactNode }) {
+  const reactId = useId();
+  const id = `footer-${reactId.replace(/:/g, "")}`;
+  const [open, setOpen] = useState(false);
   return (
-    <nav aria-labelledby={id}>
-      <h2 id={id} className="tech text-bone">
-        {title}
-      </h2>
-      <ul className="mt-4 space-y-2.5">
-        {items.map((item) => (
-          <li key={`${String(item.to)}-${item.label}`}>
-            <NavigationLink
-              item={item}
-              className="text-sm leading-7 text-metal transition-colors hover:text-signal"
+    <nav aria-labelledby={`${id}-title`} className="border-b border-hairline md:border-0">
+      <h2 id={`${id}-title`} className="md:mb-4">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={id}
+          onClick={() => setOpen((current) => !current)}
+          className="flex min-h-14 w-full items-center justify-between text-right md:pointer-events-none md:min-h-0"
+        >
+          <span className="tech text-bone">{title}</span>
+          <span className="grid size-9 place-items-center rounded-xl border border-hairline bg-carbon-2 text-metal md:hidden">
+            <ChevronDown
+              size={16}
+              aria-hidden="true"
+              className={`transition-transform duration-300 ${open ? "rotate-180 text-signal" : ""}`}
             />
-          </li>
-        ))}
+          </span>
+        </button>
+      </h2>
+      <ul
+        id={id}
+        className={`${open ? "grid grid-rows-[1fr] pb-5" : "hidden"} space-y-2.5 md:block md:pb-0`}
+      >
+        {children}
       </ul>
     </nav>
   );
 }
 
+function MerchantFooterList({ title, items }: { title: string; items: MerchantNavigationItem[] }) {
+  return (
+    <FooterSection title={title}>
+      {items.map((item) => (
+        <li key={`${item.href}-${item.label}`}>
+          <MerchantNavigationLink
+            item={item}
+            className="inline-flex min-h-10 items-center text-sm leading-7 text-metal transition-colors hover:text-signal"
+          />
+        </li>
+      ))}
+    </FooterSection>
+  );
+}
+
+function PersonalFooterList({ title, items }: { title: string; items: NavigationItem[] }) {
+  return (
+    <FooterSection title={title}>
+      {items.map((item) => (
+        <li key={`${String(item.to)}-${item.label}`}>
+          <NavigationLink
+            item={item}
+            className="inline-flex min-h-10 items-center text-sm leading-7 text-metal transition-colors hover:text-signal"
+          />
+        </li>
+      ))}
+    </FooterSection>
+  );
+}
+
 /** Global dark footer. The theme prop remains for compatibility with existing routes. */
 export function Footer(_props: { theme?: "dark" | "light" } = {}) {
+  const { source, brand, copy, contact, navigation } = useStorefrontControl();
+  const presentation = useStorefrontPresentation();
+  const whatsappHref = `https://wa.me/98${contact.whatsapp.replace(/\D/g, "").replace(/^0/, "")}`;
+  const phoneHref = `tel:+98${contact.phone.replace(/\D/g, "").replace(/^0/, "")}`;
+  const isPrototype = source === "prototype";
+  const currentYear = new Intl.NumberFormat("fa-IR", { useGrouping: false }).format(
+    new Date().getFullYear(),
+  );
+
   return (
-    <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
-      <div className="lbb-shell py-12 md:py-16">
-        <div className="grid gap-8 border-b border-hairline pb-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:items-end">
-          <div>
-            <TechLabel tone="signal">LBB / GLOBAL INDEX</TechLabel>
-            <p className="mt-3 max-w-[16ch] text-display-2 text-bone">پیدا کن. بفهم. انتخاب کن.</p>
-            <p className="mt-4 max-w-[54ch] text-sm leading-8 text-metal">
-              Navigation در LBB برای رسیدن سریع به محصول ساخته شده است؛ روایت ادیتوریال مسیر را غنی
-              می‌کند، اما جای اطلاعات تصمیم‌ساز را نمی‌گیرد.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Link
-              to="/shop"
-              className="group flex min-h-14 items-center justify-between bg-signal px-5 text-sm font-black text-obsidian"
-            >
-              مشاهده فروشگاه
-              <ArrowUpLeft size={18} aria-hidden="true" />
-            </Link>
-            <Link
-              to="/account"
-              className="group flex min-h-14 items-center justify-between border border-hairline px-5 text-sm font-black text-bone transition-colors hover:border-signal"
-            >
-              مرکز حساب
-              <ArrowUpLeft
-                size={18}
-                aria-hidden="true"
-                className="text-mute group-hover:text-signal"
+    <div className="pb-bottombar md:pb-0">
+      <footer dir="rtl" className="border-t border-hairline bg-obsidian">
+        <div className="lbb-shell py-10 md:py-12">
+          <div className="grid gap-0 pb-8 md:gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
+            <div className="min-w-0 border-b border-hairline pb-8 sm:col-span-2 lg:col-span-1 lg:border-0 lg:pb-0">
+              <Logo size={80} withWordmark />
+              <p className="mt-4 max-w-xs text-sm leading-7 text-metal">{brand.descriptor}</p>
+              <p className="mt-4 flex items-start gap-2 text-sm leading-7 text-metal">
+                <MapPin size={16} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
+                <span>{copy.storeLocationLabel || contact.locationLabel}</span>
+              </p>
+              {!isPrototype ? (
+                <div className="mt-4 grid gap-1 text-sm text-metal">
+                  <a
+                    href={phoneHref}
+                    className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
+                  >
+                    <Phone size={15} aria-hidden="true" />
+                    <span dir="ltr">{contact.phone}</span>
+                  </a>
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
+                  >
+                    <MessageCircle size={15} aria-hidden="true" />
+                    <span dir="ltr">{contact.whatsapp}</span>
+                  </a>
+                </div>
+              ) : null}
+              <a
+                href={brand.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${isPrototype ? "mt-6" : "mt-4"} inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal`}
+              >
+                <Instagram size={16} aria-hidden="true" />
+                <span className="tech">{brand.instagramHandle.toUpperCase()}</span>
+              </a>
+              <TrustMarks />
+              <PushOptIn />
+            </div>
+
+            <MerchantFooterList
+              title={presentation.shell.footerGroups.shop}
+              items={navigation.shop}
+            />
+            <MerchantFooterList
+              title={presentation.shell.footerGroups.editorial}
+              items={navigation.editorial}
+            />
+            <MerchantFooterList
+              title={presentation.shell.footerGroups.service}
+              items={navigation.service}
+            />
+            <div className="grid sm:col-span-2 lg:col-span-1 lg:grid-cols-1 lg:gap-6">
+              <PersonalFooterList
+                title={presentation.shell.footerGroups.personal}
+                items={PERSONAL_NAVIGATION}
               />
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid gap-10 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
-          <div className="min-w-0">
-            <Logo size={48} withWordmark />
-            <p className="mt-4 max-w-xs text-sm leading-7 text-metal">
-              زبان بصری استریت‌ویر ایرانی با تمرکز بر وضوح محصول، تایپوگرافی فارسی و تجربه RTL.
-            </p>
-            <a
-              href="https://www.instagram.com/lbbclo"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-6 inline-flex min-h-11 items-center gap-2 border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal"
-            >
-              <Instagram size={16} aria-hidden="true" />
-              <span className="tech">@LBBCLO</span>
-            </a>
+              <MerchantFooterList
+                title={presentation.shell.footerGroups.brand}
+                items={navigation.brand}
+              />
+            </div>
           </div>
 
-          <FooterList title="خرید" items={SHOP_NAVIGATION} />
-          <FooterList title="کالکشن و محتوا" items={EDITORIAL_NAVIGATION} />
-          <FooterList title="پشتیبانی" items={SERVICE_NAVIGATION} />
-          <div className="grid grid-cols-2 gap-6 sm:col-span-2 lg:col-span-1 lg:grid-cols-1">
-            <FooterList title="شخصی" items={PERSONAL_NAVIGATION} />
-            <FooterList title="برند" items={BRAND_NAVIGATION} />
+          <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="tech">
+                {isPrototype
+                  ? `© ${currentYear} ال‌بی‌بی — کرج / مهستان`
+                  : `© ${currentYear} ${brand.nameFa} — ${contact.locationLabel}`}
+              </p>
+              <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
+            </div>
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              {presentation.shell.utilityLinks.map((item) => (
+                <MerchantNavigationLink
+                  key={`${item.href}-${item.label}`}
+                  item={{ label: item.label, latin: item.label, href: item.href }}
+                  className="text-xs transition-colors hover:text-bone"
+                />
+              ))}
+            </div>
           </div>
         </div>
-
-        <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
-          <div>
-            <p className="tech">© 2026 LBB — FRONTEND EXPERIENCE</p>
-            <p className="mt-2 text-[11px] leading-6">
-              این نسخه نمایشی است؛ پرداخت، ثبت سفارش و ارسال واقعی فعال نیست.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
-            <Link to="/terms" className="text-xs transition-colors hover:text-bone">
-              قوانین
-            </Link>
-            <Link to="/privacy" className="text-xs transition-colors hover:text-bone">
-              حریم خصوصی
-            </Link>
-            <Link to="/contact" className="text-xs transition-colors hover:text-bone">
-              تماس
-            </Link>
-          </div>
-        </div>
+      </footer>
+      <div
+        dir="rtl"
+        data-shinethree-credit
+        className="flex min-h-11 items-center justify-center gap-3 border-t border-[#4b2868] bg-[#160e21] px-3 py-2 text-xs text-[#e1c9f8]"
+      >
+        <span>طراحی و توسعه</span>
+        <img
+          src="/brand/shinethree.webp"
+          alt="ShineThree"
+          width={99}
+          height={32}
+          loading="lazy"
+          className="w-[99px] object-contain"
+        />
       </div>
-    </footer>
+    </div>
   );
 }

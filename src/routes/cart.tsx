@@ -1,17 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
+import { CartProductImage } from "@/components/lbb/CartProductImage";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
-import { DemoNotice, Shell, EmptyState, CtaClasses } from "@/components/lbb/ui/primitives";
+import { Shell, EmptyState, CtaClasses, StatePanel } from "@/components/lbb/ui/primitives";
 import { useCart } from "@/lib/cart";
-import { FREE_SHIPPING_THRESHOLD, shippingFeeFor } from "@/lib/commerce";
+import { STORE_SETTINGS, getPublicShippingMethods } from "@/lib/store-settings";
 import { fmtToman } from "@/lib/products";
 import { pageMeta, canonical } from "@/lib/site";
 
 const TITLE = "سبد خرید | LBB";
-const DESC = "مرور و ویرایش سبد خرید محلی در نسخه نمایشی فروشگاه LBB.";
+const DESC = "مرور و ویرایش اقلام سبد خرید LBB پیش از تکمیل سفارش.";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -21,16 +22,41 @@ export const Route = createFileRoute("/cart")({
   component: CartPage,
 });
 
+function ShippingReadiness() {
+  const methods = getPublicShippingMethods();
+  const state = STORE_SETTINGS.shipping.verification;
+
+  if (methods.length > 0) {
+    return (
+      <StatePanel title="روش‌های ارسال در دسترس هستند" tone="success">
+        <p>روش‌های فعال: {methods.map((method) => method.title).join("، ")}</p>
+        <p className="mt-1">
+          هزینه و زمان تحویل نهایی بر اساس مقصد و روش انتخابی در مرحله تکمیل سفارش مشخص می‌شود.
+        </p>
+      </StatePanel>
+    );
+  }
+
+  return (
+    <StatePanel
+      title={
+        state === "pending" ? "تنظیمات ارسال در حال بررسی است" : "روش ارسال فعلاً در دسترس نیست"
+      }
+      tone={state === "pending" ? "warning" : "info"}
+    >
+      جزئیات ارسال پس از فعال‌شدن روش‌های قابل استفاده نمایش داده می‌شود.
+    </StatePanel>
+  );
+}
+
 function CartPage() {
   const { lines, remove, setQty, subtotal, hydrated } = useCart();
   const count = lines.reduce((sum, line) => sum + line.qty, 0);
-  const shipping = shippingFeeFor(subtotal);
-  const total = subtotal + shipping;
 
   return (
     <>
       <Navbar />
-      <main dir="rtl" className="min-h-screen bg-obsidian pb-28 pt-24">
+      <main dir="rtl" className="min-h-screen overflow-x-clip bg-obsidian pb-28 pt-24">
         <Shell>
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "سبد خرید" }]} />
           <h1 className="mt-4 text-display-2 text-bone">سبد خرید</h1>
@@ -52,16 +78,17 @@ function CartPage() {
               }
             />
           ) : (
-            <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-[65%_35%]">
-              <div className="flex flex-col gap-3">
+            <div className="mt-6 grid min-w-0 grid-cols-1 gap-8 md:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.8fr)]">
+              <div className="min-w-0 space-y-3">
                 {lines.map((line, index) => (
                   <div
                     key={`${line.slug}-${line.color ?? ""}-${line.size ?? ""}`}
-                    className="flex items-center gap-4 rounded-2xl border border-hairline bg-carbon p-3"
+                    className="flex min-w-0 items-center gap-4 rounded-2xl border border-hairline bg-carbon p-3"
                   >
-                    <div className="tech grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-carbon-2 text-xs font-black text-signal/50">
-                      LBB
-                    </div>
+                    <CartProductImage
+                      line={line}
+                      className="h-16 w-16 shrink-0 rounded-xl object-cover"
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-bone">{line.name}</p>
                       <p className="text-xs text-metal">
@@ -106,7 +133,7 @@ function CartPage() {
                       <button
                         type="button"
                         onClick={() => remove(index)}
-                        className="mt-2 tap-target text-mute hover:text-signal"
+                        className="mt-2 tap-target text-mute hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                         aria-label={`حذف ${line.name}`}
                       >
                         <X size={16} aria-hidden="true" />
@@ -116,29 +143,23 @@ function CartPage() {
                 ))}
               </div>
 
-              <aside className="h-max rounded-2xl border border-hairline bg-carbon p-6">
-                <h2 className="text-lg font-bold text-bone">خلاصه نمایشی</h2>
-                <div className="mt-4 space-y-2 text-sm">
-                  <Row label="جمع کالاها" value={fmtToman(subtotal)} />
-                  <Row
-                    label="هزینه ارسال نمایشی"
-                    value={shipping === 0 ? "رایگان" : fmtToman(shipping)}
-                  />
-                  <div className="my-3 h-px bg-hairline" />
-                  <Row label="جمع نمایشی" value={fmtToman(total)} bold />
+              <aside className="h-max min-w-0 rounded-2xl border border-hairline bg-carbon p-6">
+                <h2 className="text-lg font-bold text-bone">خلاصه سبد</h2>
+                <div className="mt-4 text-sm">
+                  <Row label="جمع کالاها" value={fmtToman(subtotal)} bold />
                 </div>
-                {subtotal < FREE_SHIPPING_THRESHOLD ? (
-                  <p className="mt-3 text-xs leading-6 text-metal">
-                    برای محاسبه ارسال رایگان نمایشی، مبلغ سبد باید به{" "}
-                    {fmtToman(FREE_SHIPPING_THRESHOLD)} برسد.
-                  </p>
-                ) : null}
-                <DemoNotice className="mt-4 rounded-xl text-xs">
-                  این سبد فقط در مرورگر ذخیره می‌شود و ورود به مرحله بعد هیچ پرداخت یا سفارش واقعی
-                  ایجاد نمی‌کند.
-                </DemoNotice>
-                <Link to="/checkout" className={`mt-4 flex w-full ${CtaClasses("signal")}`}>
-                  ساخت پیش‌نمایش سفارش
+                <div className="mt-5">
+                  <ShippingReadiness />
+                </div>
+                <p className="mt-4 text-xs leading-6 text-metal">
+                  قیمت، موجودی و مبلغ نهایی سفارش در مرحله بعد دوباره بررسی می‌شود تا آخرین اطلاعات
+                  نمایش داده شود.
+                </p>
+                <Link to="/checkout" className={`mt-5 flex w-full ${CtaClasses("signal")}`}>
+                  ادامه و تکمیل سفارش
+                </Link>
+                <Link to="/shipping-returns" className={`mt-2 flex w-full ${CtaClasses("line")}`}>
+                  ارسال و مرجوعی
                 </Link>
               </aside>
             </div>

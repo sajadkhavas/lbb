@@ -1,41 +1,100 @@
+import { JournalContent } from "@/lib/journal-content";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { ArrowUpLeft, BookOpenText, Clock3 } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
+import { EditorialCommerceBridge } from "@/components/lbb/editorial/EditorialCommerceBridge";
 import { journalBySlug, JOURNAL_ARTICLES, type JournalArticle } from "@/lib/journal";
+import { getJournalCommerceView } from "@/lib/editorial-commerce";
 import { heroMain, lifestyle1, lifestyle2 } from "@/lib/product-images";
 import {
   Band,
   CtaClasses,
+  EmptyState,
   Frame,
   SectionHead,
   Shell,
   TechLabel,
 } from "@/components/lbb/ui/primitives";
 import { absAsset, absUrl, breadcrumbLd, canonical, pageMeta } from "@/lib/site";
+import { BackendApiError } from "@/lib/backend-api";
+import { resolveStorefrontJournalPost, type StorefrontJournalDto } from "@/lib/storefront-control";
 
 const COVERS = { hero: heroMain, l1: lifestyle1, l2: lifestyle2 };
+type ManagedJournalDto = StorefrontJournalDto & {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+};
 
 export const Route = createFileRoute("/journal/$slug")({
-  loader: ({ params }): { article: JournalArticle; related: JournalArticle[] } => {
+  loader: async ({ params }) => {
+    try {
+      const liveArticle = await resolveStorefrontJournalPost(params.slug);
+      if (liveArticle) return { source: "live" as const, article: liveArticle };
+    } catch (error) {
+      if (error instanceof BackendApiError && error.status === 404) {
+        throw notFound({ routeId: "/journal/$slug" });
+      }
+      throw error;
+    }
+
     const article = journalBySlug(params.slug);
     if (!article) throw notFound({ routeId: "/journal/$slug" });
-
     const related = JOURNAL_ARTICLES.filter((candidate) => candidate.slug !== article.slug)
       .sort(
         (left, right) =>
           Number(right.category === article.category) - Number(left.category === article.category),
       )
       .slice(0, 2);
-
-    return { article, related };
+    return { source: "prototype" as const, article, related };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
         meta: [{ title: "مقاله پیدا نشد" }, { name: "robots", content: "noindex, nofollow" }],
+      };
+    }
+
+    if (loaderData.source === "live") {
+      const article = loaderData.article as ManagedJournalDto;
+      const title = article.metaTitle?.trim() || `${article.title} | ژورنال LBB`;
+      const description = article.metaDescription?.trim() || article.excerpt || article.title;
+      const path = `/journal/${article.slug}`;
+      const articleLd = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: article.title,
+        description,
+        image: article.coverUrl ?? undefined,
+        datePublished: article.publishedAt ?? undefined,
+        articleSection: article.category ?? undefined,
+        inLanguage: "fa-IR",
+        mainEntityOfPage: absUrl(path),
+      };
+      return {
+        meta: pageMeta({
+          title,
+          description,
+          path,
+          image: article.coverUrl ?? undefined,
+          type: "article",
+        }),
+        links: canonical(path),
+        scripts: [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify(
+              breadcrumbLd([
+                { name: "خانه", path: "/" },
+                { name: "ژورنال", path: "/journal" },
+                { name: article.title, path },
+              ]),
+            ),
+          },
+          { type: "application/ld+json", children: JSON.stringify(articleLd) },
+        ],
       };
     }
 
@@ -87,7 +146,10 @@ function JournalNotFound() {
   return (
     <>
       <Navbar theme="light" />
-      <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="journal-not-found"
+      >
         <Shell className="py-3">
           <Breadcrumb
             items={[
@@ -99,18 +161,17 @@ function JournalNotFound() {
         </Shell>
         <Band hairline={false}>
           <Shell>
-            <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-carbon px-6 py-20 text-center">
-              <span className="text-mute">
-                <BookOpenText aria-hidden="true" size={34} />
-              </span>
-              <h1 className="text-display-3 text-bone">این مقاله پیدا نشد</h1>
-              <p className="max-w-[42ch] text-sm leading-7 text-metal">
-                آدرس مقاله معتبر نیست یا این مطلب دیگر در فهرست ژورنال قرار ندارد.
-              </p>
-              <Link to="/journal" className={CtaClasses("signal")}>
-                بازگشت به ژورنال
-              </Link>
-            </div>
+            <h1 className="sr-only">این مقاله پیدا نشد</h1>
+            <EmptyState
+              icon={<BookOpenText aria-hidden="true" size={34} />}
+              title="این مقاله پیدا نشد"
+              body="آدرس مقاله معتبر نیست یا این مطلب در فهرست عمومی ژورنال قرار ندارد."
+              action={
+                <Link to="/journal" className={CtaClasses("signal")}>
+                  بازگشت به ژورنال
+                </Link>
+              }
+            />
           </Shell>
         </Band>
       </main>
@@ -121,13 +182,86 @@ function JournalNotFound() {
 }
 
 function JournalDetailPage() {
-  const { article, related }: { article: JournalArticle; related: JournalArticle[] } =
-    Route.useLoaderData();
+  const data = Route.useLoaderData();
+  return data.source === "live" ? (
+    <LiveJournalDetailPage article={data.article} />
+  ) : (
+    <PrototypeJournalDetailPage article={data.article} related={data.related} />
+  );
+}
+
+function LiveJournalDetailPage({ article }: { article: StorefrontJournalDto }) {
+  return (
+    <>
+      <Navbar theme="light" />
+      <main
+        className="min-h-screen bg-obsidian pb-bottombar pt-16"
+        data-f17-route="journal-detail"
+        data-storefront-source="live"
+      >
+        <Shell className="py-3">
+          <Breadcrumb
+            items={[
+              { label: "خانه", href: "/" },
+              { label: "ژورنال", href: "/journal" },
+              { label: article.title },
+            ]}
+          />
+        </Shell>
+        <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
+          <Shell className="max-w-[980px]">
+            <TechLabel tone="signal">{article.category ?? "JOURNAL"}</TechLabel>
+            <h1 className="mt-5 max-w-[18ch] text-display-1 text-bone">{article.title}</h1>
+            {article.excerpt ? (
+              <p className="text-lede mt-5 max-w-[62ch]">{article.excerpt}</p>
+            ) : null}
+            {article.publishedAt ? (
+              <time dateTime={article.publishedAt} className="mt-6 block text-xs text-mute">
+                {new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(
+                  new Date(article.publishedAt),
+                )}
+              </time>
+            ) : null}
+          </Shell>
+        </Band>
+        {article.coverUrl ? (
+          <Band>
+            <Shell className="max-w-[1180px]">
+              <img
+                src={article.coverUrl}
+                alt=""
+                width={1600}
+                height={900}
+                className="aspect-[16/9] w-full rounded-2xl border border-hairline object-cover"
+              />
+            </Shell>
+          </Band>
+        ) : null}
+        <Band>
+          <Shell className="max-w-[760px]">
+            <JournalContent content={article.content} />
+          </Shell>
+        </Band>
+      </main>
+      <Footer theme="light" />
+      <MobileBottomBar />
+    </>
+  );
+}
+
+function PrototypeJournalDetailPage({
+  article,
+  related,
+}: {
+  article: JournalArticle;
+  related: JournalArticle[];
+}) {
+  const commerce = getJournalCommerceView(article);
 
   return (
     <>
       <Navbar theme="light" />
-      <main className="min-h-screen bg-obsidian pb-bottombar pt-16">
+      <main className="min-h-screen bg-obsidian pb-bottombar pt-16" data-f17-route="journal-detail">
         <Shell className="py-3">
           <Breadcrumb
             items={[
@@ -209,6 +343,19 @@ function JournalDetailPage() {
                 </section>
               ))}
             </article>
+          </Shell>
+        </Band>
+
+        <Band label="مسیرهای مرتبط با مقاله">
+          <Shell>
+            <EditorialCommerceBridge
+              title="اگر این موضوع به انتخاب بعدی شما کمک می‌کند"
+              lede="ارتباط‌های فروش فقط در همان زمینه‌ای نشان داده می‌شوند که با موضوع مقاله هم‌راستا باشد؛ خود مقاله به آگهی محصول تبدیل نمی‌شود."
+              publicProducts={commerce.publicProducts}
+              referencedProductCount={commerce.productReferences.length}
+              collections={commerce.collections}
+              categories={commerce.categories}
+            />
           </Shell>
         </Band>
 

@@ -5,6 +5,7 @@ const host = "127.0.0.1";
 const port = 4287;
 const origin = `http://${host}:${port}`;
 const productionOrigin = process.env.VITE_SITE_URL;
+const smokeCompatibilityDate = process.env.CLOUDFLARE_SMOKE_COMPATIBILITY_DATE ?? "2026-08-06";
 
 if (!productionOrigin) {
   throw new Error("VITE_SITE_URL is required for the production smoke test.");
@@ -19,6 +20,10 @@ const server = spawn(
     "dev",
     "--config",
     ".output/server/wrangler.json",
+    // The generated Nitro date can be one day ahead of the bundled local workerd runtime.
+    // Pin only the local smoke runtime; deployment/build metadata remains untouched.
+    "--compatibility-date",
+    smokeCompatibilityDate,
     "--ip",
     host,
     "--port",

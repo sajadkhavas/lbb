@@ -20,7 +20,7 @@ export const COLOR_TOKENS: DesignToken[] = [
 ];
 
 export const TYPE_TOKENS = [
-  { name: "Hero", className: "text-hero", sample: "تهران بعد از تاریکی" },
+  { name: "Hero", className: "text-hero", sample: "مهستان بعد از تاریکی" },
   { name: "Display 1", className: "text-display-1", sample: "فرم تازه خیابان" },
   { name: "Display 2", className: "text-display-2", sample: "کالکشن شب‌گرد" },
   { name: "Display 3", className: "text-display-3", sample: "جزئیات محصول" },
@@ -63,4 +63,4 @@ export const MOTION_TOKENS: DesignToken[] = [
 ];
 
 export const DESIGN_SYSTEM_VERSION = "2.0.0";
-export const EXPERIENCE_NORTH_STAR = "Tehran After Dark — Editorial Utility";
+export const EXPERIENCE_NORTH_STAR = "Mahestan After Dark — Editorial Utility";

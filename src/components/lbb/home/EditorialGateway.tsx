@@ -44,13 +44,14 @@ export function EditorialGateway() {
       dir="rtl"
       aria-labelledby="editorial-gateway-title"
       className="border-t border-hairline bg-obsidian py-14 md:py-20"
+      data-f17-editorial="home-gateway"
     >
       <Shell>
         <SectionHead
           index="06"
           label="EDITORIAL PATHS"
-          title={<span id="editorial-gateway-title">محصول را در زمینه واقعی ببین</span>}
-          lede="کالکشن، لوک‌بوک و ژورنال برای توضیح فرم، ترکیب و نگهداری‌اند؛ نه جایگزین اطلاعات محصول."
+          title={<span id="editorial-gateway-title">داستان را ببین و مسیر مرتبط را ادامه بده</span>}
+          lede="کالکشن، لوک‌بوک و ژورنال برای توضیح فرم، ترکیب و نگهداری‌اند؛ لینک مستقیم محصول فقط وقتی نمایش داده می‌شود که داده همان محصول برای انتشار عمومی آماده باشد."
           action={
             <Link
               to="/journal"
@@ -70,8 +71,8 @@ export function EditorialGateway() {
           >
             <CardBody
               eyebrow="DROP STORY"
-              title="شبگرد؛ یک ست تیره برای حرکت شبانه"
-              description="هودی، کارگو، کتونی و جزئیات قرمز در یک مسیر خرید هماهنگ."
+              title="شبگرد؛ روایت یک پالت تیره"
+              description="رنگ، فرم و لایه‌سازی را در یک روایت ادیتوریال ببین و از آن‌جا به مسیرهای مرتبط ادامه بده."
             />
           </Link>
 
@@ -81,8 +82,8 @@ export function EditorialGateway() {
           >
             <CardBody
               eyebrow="LOOKBOOK"
-              title="فرم‌ها را قبل از انتخاب ببین"
-              description="سیلوئت اورسایز، بگی و لایه‌سازی در فضای شهری و نور شب."
+              title="فرم‌ها را در قاب‌های مختلف ببین"
+              description="سیلوئت، حجم و لایه‌سازی را مقایسه کن؛ هر قاب فقط به مقصدی وصل می‌شود که داده معتبر داشته باشد."
             />
           </Link>
 
@@ -94,7 +95,7 @@ export function EditorialGateway() {
             <CardBody
               eyebrow="FIT GUIDE"
               title="چطور هودی اورسایز را متعادل ست کنیم؟"
-              description="راهنمای عملی برای حجم، قد لباس، فرم پایین‌تنه و رنگ شاخص."
+              description="راهنمای عملی برای حجم، قد لباس، فرم پایین‌تنه و رنگ شاخص، همراه با مسیرهای مرتبط برای ادامه کشف."
             />
           </Link>
         </div>
