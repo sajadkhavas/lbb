@@ -5,7 +5,8 @@ import {
   LBB_CONTRACT_VERSION,
   listCategories,
 } from "@/lib/backend-api";
-import { ensureBackendCsrf } from "@/lib/backend-session";
+import { asciiDigits } from "@/lib/customer-fields";
+import { ensureBackendCsrf, resetBackendCsrf } from "@/lib/backend-session";
 
 export type StorefrontCategoryDto = CategoryDto & {
   parentPublicId?: string | null;
@@ -150,13 +151,23 @@ export async function submitContactInquiry(input: ContactInquiryInput) {
 }
 
 export async function trackPublicOrder(input: { orderNumber: string; mobile: string }) {
-  return requestFinal<PublicOrderTracking>("/api/v1/orders/track", {
+  const request = () => requestFinal<PublicOrderTracking>("/api/v1/orders/track", {
     method: "POST",
     body: JSON.stringify({
-      orderNumber: input.orderNumber.trim(),
-      mobile: input.mobile.trim(),
+      orderNumber: asciiDigits(input.orderNumber).replace(/[‐‑‒–—−]/g, "-").replace(/\s/g, "").toUpperCase(),
+      mobile: asciiDigits(input.mobile).trim(),
     }),
   });
+
+  await ensureBackendCsrf();
+  try {
+    return await request();
+  } catch (error) {
+    if (!(error instanceof BackendApiError) || error.status !== 419) throw error;
+    resetBackendCsrf();
+    await ensureBackendCsrf();
+    return request();
+  }
 }
 
 export async function getAccountStorefrontState() {

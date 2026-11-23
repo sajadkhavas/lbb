@@ -41,6 +41,7 @@ function mergeCart(local: CartLine[], remote: AccountCartStateItem[]) {
     }
     byVariant.set(line.variantId, {
       ...existing,
+      imageUrl: line.imageUrl,
       qty: Math.min(20, Math.max(existing.qty, line.qty)),
     });
   }
@@ -114,7 +115,13 @@ export function AccountStorefrontSync() {
 
         applyingRemote.current = true;
         replaceLocalWishlist(canonical.wishlistSlugs);
-        replaceLocalCart(canonical.cartItems.map(remoteCartLine));
+        const images = new Map(mergedCart.map((line) => [line.variantId, line.imageUrl]));
+        replaceLocalCart(
+          canonical.cartItems.map((item) => ({
+            ...remoteCartLine(item),
+            imageUrl: images.get(item.variantId),
+          })),
+        );
         queueMicrotask(() => {
           applyingRemote.current = false;
         });

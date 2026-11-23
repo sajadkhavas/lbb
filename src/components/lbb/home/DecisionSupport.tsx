@@ -45,7 +45,7 @@ function DecisionCard({
 }
 
 const CARD_CLASS =
-  "group flex min-h-[220px] flex-col justify-between rounded-2xl border border-hairline-ink bg-bone p-5 shadow-[0_16px_45px_rgba(0,0,0,0.08)] transition-[transform,background-color,box-shadow] hover:-translate-y-1 hover:bg-steam hover:shadow-[0_22px_60px_rgba(0,0,0,0.13)]";
+  "group flex min-h-[220px] w-[min(76vw,18rem)] shrink-0 snap-start flex-col justify-between md:w-auto rounded-2xl border border-hairline-ink bg-bone p-5 shadow-[0_16px_45px_rgba(0,0,0,0.08)] transition-[transform,background-color,box-shadow] hover:-translate-y-1 hover:bg-steam hover:shadow-[0_22px_60px_rgba(0,0,0,0.13)]";
 
 export function DecisionSupport() {
   const { source, decisionSupport } = useStorefrontControl();
@@ -96,7 +96,7 @@ export function DecisionSupport() {
               </ul>
             </div>
             {links.length > 0 ? (
-              <nav aria-label="راهنماهای تصمیم خرید" className="grid gap-3 md:grid-cols-3">
+              <nav aria-label="راهنماهای تصمیم خرید" className="flex snap-x gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:gap-3 md:overflow-visible md:pb-0">
                 {links.map((item, index) => (
                   <a
                     key={`${item.href}-${item.label}`}
@@ -160,7 +160,7 @@ export function DecisionSupport() {
               ))}
             </ul>
           </div>
-          <nav aria-label="راهنماهای تصمیم خرید" className="grid gap-3 md:grid-cols-3">
+          <nav aria-label="راهنماهای تصمیم خرید" className="flex snap-x gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:gap-3 md:overflow-visible md:pb-0">
             {HOME_DECISION_LINKS.map((item, index) =>
               item.kind === "journal" ? (
                 <Link

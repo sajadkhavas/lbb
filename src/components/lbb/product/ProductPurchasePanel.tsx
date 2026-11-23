@@ -5,6 +5,7 @@ import { CtaClasses, StatePanel } from "@/components/lbb/ui/primitives";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import {
+  mediaForColor,
   canAddSelection,
   mediaForSelection,
   sizeAvailabilityForColor,
@@ -112,6 +113,7 @@ export function ProductPurchasePanel({
     add({
       slug: model.slug,
       name,
+      imageUrl: mediaForColor(model, colorId)[0]?.src ?? model.media[0]?.src,
       price: selectedPrice,
       variantId: backendVariant ? selectedVariant.id : undefined,
       source: backendVariant ? "backend" : "prototype",

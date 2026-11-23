@@ -10,6 +10,7 @@ import {
 export type CartLine = {
   slug: string;
   name: string;
+  imageUrl?: string;
   /** Last displayed unit price. In live mode this is never the checkout authority. */
   price: number;
   variantId?: string;
@@ -62,6 +63,7 @@ function isLineShape(value: unknown): value is CartLine {
     line.slug.length > 0 &&
     typeof line.name === "string" &&
     line.name.length > 0 &&
+    (line.imageUrl === undefined || typeof line.imageUrl === "string") &&
     typeof line.price === "number" &&
     Number.isFinite(line.price) &&
     line.price > 0 &&

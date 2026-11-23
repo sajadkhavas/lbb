@@ -1,3 +1,4 @@
+import { HomeProductCarousel } from "./HomeProductCarousel";
 import { Link } from "@tanstack/react-router";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
@@ -48,13 +49,7 @@ export function ProductMoments({ liveProducts }: { liveProducts?: BackendCatalog
               می‌شوند.
             </StatePanel>
           ) : (
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
-              {items.map((product, index) => (
-                <div key={product.id} className="min-w-0">
-                  <ProductCard p={product} priority={index === 0} />
-                </div>
-              ))}
-            </div>
+            <HomeProductCarousel items={items} />
           )}
         </Shell>
       </section>

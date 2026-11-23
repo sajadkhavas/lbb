@@ -52,7 +52,23 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      const path = new URL(request.url).pathname;
+      if (
+        /^\/(?:admin|account|checkout|cart|wishlist|track-order|payment|order-confirmation)(?:\/|$)/.test(
+          path,
+        )
+      ) {
+        const headers = new Headers(normalized.headers);
+        headers.set("X-Robots-Tag", "noindex, nofollow");
+        headers.set("Cache-Control", "private, no-store");
+        return new Response(normalized.body, {
+          status: normalized.status,
+          statusText: normalized.statusText,
+          headers,
+        });
+      }
+      return normalized;
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

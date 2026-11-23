@@ -1,5 +1,7 @@
+import { useRef, useState } from "react";
+import { useIdleAutoplay } from "@/hooks/use-idle-autoplay";
 import { Link } from "@tanstack/react-router";
-import { ArrowDownLeft, ArrowUpLeft } from "lucide-react";
+import { ArrowDownLeft, ArrowUpLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { MerchantNavigationLink } from "@/components/lbb/navigation/MerchantNavigationLink";
 import { CtaClasses, TechLabel } from "@/components/lbb/ui/primitives";
 import { CATEGORIES } from "@/lib/categories";
@@ -19,7 +21,9 @@ type LiveHeroProduct = {
 export function HeroNarrative({
   heroProduct: liveHeroProduct,
   liveCategories,
+  heroProducts,
 }: {
+  heroProducts?: LiveHeroProduct[];
   heroProduct?: LiveHeroProduct | null;
   liveCategories?: StorefrontCategoryDto[] | null;
 }) {
@@ -30,7 +34,7 @@ export function HeroNarrative({
     (slug): slug is keyof typeof CATEGORIES => slug in CATEGORIES,
   );
 
-  const heroProduct =
+  const initialProduct =
     source === "live"
       ? liveHeroProduct
       : prototypeProduct
@@ -41,9 +45,22 @@ export function HeroNarrative({
             image: productImage(prototypeProduct.slug),
           }
         : null;
+  const items = heroProducts?.length ? heroProducts : initialProduct ? [initialProduct] : [];
+  const [selected, setSelected] = useState<string | null>(null);
+  const index = Math.max(
+    0,
+    items.findIndex((item) => item.slug === (selected ?? initialProduct?.slug)),
+  );
+  const heroProduct = items[index];
+  const move = (delta: number) => {
+    if (items.length > 1) setSelected(items[(index + delta + items.length) % items.length].slug);
+  };
+  const touchOrigin = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
+  const { ref: heroCarouselRef } = useIdleAutoplay(() => move(1), 7000, items.length > 1);
   const heroImage =
     source === "live"
-      ? (presentation.hero.imageUrl ?? heroProduct?.image ?? null)
+      ? (presentation.hero.imageUrl ?? initialProduct?.image ?? null)
       : productImage(home.heroProductSlug);
   const heroAlt =
     source === "live" && presentation.hero.imageAlt
@@ -210,39 +227,89 @@ export function HeroNarrative({
           <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-bone/30" />
 
           {heroProduct ? (
-            <Link
-              to="/product/$slug"
-              params={{ slug: heroProduct.slug }}
-              className="group absolute bottom-5 right-5 grid w-[min(360px,calc(100%-2.5rem))] grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-hairline-strong bg-obsidian/95 p-2 text-bone shadow-overlay backdrop-blur md:bottom-8 md:right-8"
+            <div
+              ref={heroCarouselRef}
+              onTouchStart={(event) => {
+                const touch = event.touches[0];
+                touchOrigin.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+                swiped.current = false;
+              }}
+              onTouchCancel={() => {
+                touchOrigin.current = null;
+              }}
+              onTouchEnd={(event) => {
+                const start = touchOrigin.current;
+                const end = event.changedTouches[0];
+                touchOrigin.current = null;
+                if (!start || !end || items.length < 2) return;
+                const dx = end.clientX - start.x;
+                if (Math.abs(dx) < 40 || Math.abs(dx) < 1.25 * Math.abs(end.clientY - start.y))
+                  return;
+                swiped.current = true;
+                move(dx > 0 ? 1 : -1);
+              }}
+              onClickCapture={(event) => {
+                if (!swiped.current) return;
+                swiped.current = false;
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              className="absolute touch-pan-y bottom-5 right-5 w-[min(360px,calc(100%_-_2.5rem))] md:bottom-8 md:right-8"
             >
-              {heroProduct.image ? (
-                <img
-                  src={heroProduct.image}
-                  alt=""
-                  width={64}
-                  height={80}
-                  loading="eager"
-                  decoding="async"
-                  className="h-20 w-16 rounded-xl object-cover"
-                />
-              ) : (
-                <span aria-hidden="true" className="h-20 w-16 rounded-xl bg-carbon-2" />
-              )}
-              <span className="min-w-0">
-                <TechLabel tone="signal">HERO PIECE</TechLabel>
-                <span className="mt-1 block truncate text-sm font-black">{heroProduct.name}</span>
-                <span className="num mt-1 block text-xs text-metal">
-                  {heroProduct.priceToman === null
-                    ? "قیمت در صفحه محصول"
-                    : fmtToman(heroProduct.priceToman)}
+              <Link
+                to="/product/$slug"
+                params={{ slug: heroProduct.slug }}
+                className="group grid w-full grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-hairline-strong bg-obsidian/95 p-2 text-bone shadow-overlay backdrop-blur [padding-inline:2.25rem]"
+              >
+                {heroProduct.image ? (
+                  <img
+                    src={heroProduct.image}
+                    alt=""
+                    width={64}
+                    height={80}
+                    loading="eager"
+                    decoding="async"
+                    className="h-20 w-16 rounded-xl object-cover"
+                  />
+                ) : (
+                  <span aria-hidden="true" className="h-20 w-16 rounded-xl bg-carbon-2" />
+                )}
+                <span className="min-w-0">
+                  <TechLabel tone="signal">HERO PIECE</TechLabel>
+                  <span className="mt-1 block truncate text-sm font-black">{heroProduct.name}</span>
+                  <span className="num mt-1 block text-xs text-metal">
+                    {heroProduct.priceToman === null
+                      ? "قیمت در صفحه محصول"
+                      : fmtToman(heroProduct.priceToman)}
+                  </span>
                 </span>
-              </span>
-              <ArrowUpLeft
-                size={18}
-                aria-hidden="true"
-                className="text-mute transition-colors group-hover:text-signal"
-              />
-            </Link>
+                <ArrowUpLeft
+                  size={18}
+                  aria-hidden="true"
+                  className="text-mute transition-colors group-hover:text-signal"
+                />
+              </Link>
+              {items.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => move(-1)}
+                    aria-label="محصول قبلی"
+                    className="absolute right-0 top-1/2 grid h-11 w-9 -translate-y-1/2 place-items-center text-bone/75 hover:text-signal"
+                  >
+                    <ChevronRight size={14} strokeWidth={1.4} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(1)}
+                    aria-label="محصول بعدی"
+                    className="absolute left-0 top-1/2 grid h-11 w-9 -translate-y-1/2 place-items-center text-bone/75 hover:text-signal"
+                  >
+                    <ChevronLeft size={14} strokeWidth={1.4} />
+                  </button>
+                </>
+              )}
+            </div>
           ) : null}
 
           <a

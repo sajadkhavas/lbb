@@ -7,11 +7,10 @@ import {
   LayoutGrid,
   MessageCircle,
   Search,
-  ShoppingBag,
+  UserRound,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { useNavigationOverlay } from "@/lib/navigation-overlay";
 
@@ -100,19 +99,13 @@ function FloatingActions() {
 
 export function MobileBottomBar() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const { active, open, dismissForNavigation } = useNavigationOverlay();
-  const { count, openDrawer } = useCart();
+  const { active, open } = useNavigationOverlay();
   const { count: wishlistCount } = useWishlist();
 
   const shopActive =
     pathname === "/shop" || /^\/(hoodies|pants|tshirts|shoes|socks)$/.test(pathname);
   const itemClass = (activeItem: boolean) =>
     `${ITEM} ${activeItem ? "text-signal" : "text-metal hover:text-bone"}`;
-
-  const openCart = () => {
-    dismissForNavigation();
-    openDrawer();
-  };
 
   return (
     <>
@@ -172,19 +165,14 @@ export function MobileBottomBar() {
           <span className="text-[10px] font-semibold">علاقه‌مندی</span>
         </Link>
 
-        <button
-          type="button"
-          onClick={openCart}
-          aria-label={`باز کردن سبد خرید (${count.toLocaleString("fa-IR")})`}
-          aria-haspopup="dialog"
-          className={itemClass(false)}
+        <Link
+          to="/account"
+          className={itemClass(pathname === "/account")}
+          aria-current={pathname === "/account" ? "page" : undefined}
         >
-          <span className="relative" aria-hidden="true">
-            <ShoppingBag size={20} strokeWidth={1.5} />
-            <Badge count={count} />
-          </span>
-          <span className="text-[10px] font-semibold">سبد</span>
-        </button>
+          <UserRound size={20} strokeWidth={1.5} aria-hidden="true" />
+          <span className="text-[10px] font-semibold">حساب کاربری</span>
+        </Link>
       </nav>
     </>
   );

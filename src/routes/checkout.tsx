@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { hasFullName, normalizePostalCode, POSTAL_CODE_ERROR, validPostalCode } from "@/lib/customer-fields";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Loader2, LockKeyhole, ReceiptText } from "lucide-react";
+import { Loader2, LockKeyhole } from "lucide-react";
 import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Navbar } from "@/components/lbb/Navbar";
@@ -55,11 +56,12 @@ function Checkout() {
   return isLiveBackend() ? <LiveCheckout /> : <PrototypeCheckout />;
 }
 
-type RecipientFieldKey = "name" | "province" | "city" | "address";
+type RecipientFieldKey = "name" | "province" | "city" | "address" | "postal";
 type RecipientErrors = Partial<Record<RecipientFieldKey, string>>;
 
 function LiveCheckout() {
-  const { lines, clear, hydrated } = useCart();
+  const { lines, clear, hydrated, subtotal } = useCart();
+  const checkoutRunning = useRef(false);
   const [customer, setCustomer] = useState<CustomerDto | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
@@ -101,12 +103,13 @@ function LiveCheckout() {
 
   const validateRecipient = () => {
     const next: RecipientErrors = {};
-    if (fullName.trim().length < 2) next.name = "نام و نام خانوادگی را کامل وارد کنید.";
+    if (!hasFullName(fullName)) next.name = "نام و نام خانوادگی را کامل وارد کنید.";
     if (needsAddress && !province.trim()) next.province = "استان را وارد کنید.";
     if (needsAddress && !city.trim()) next.city = "شهر را وارد کنید.";
     if (needsAddress && !address.trim()) next.address = "نشانی کامل را وارد کنید.";
+    if (needsAddress && !validPostalCode(postalCode)) next.postal = POSTAL_CODE_ERROR;
     setFieldErrors(next);
-    const first = (["name", "province", "city", "address"] as RecipientFieldKey[]).find(
+    const first = (["name", "province", "city", "address", "postal"] as RecipientFieldKey[]).find(
       (field) => next[field],
     );
     if (first) {
@@ -237,88 +240,111 @@ function LiveCheckout() {
     setActionError(null);
   }, [fullName, province, city, address, postalCode, notes, deliveryMethod, lines]);
 
-  const requestQuote = async (event: FormEvent<HTMLFormElement>) => {
+  const redirectToPayment = async (orderId: string, key: string) => {
+    setBusy("payment");
+    const response = await initiatePayment(orderId, key);
+    const url = response.data.payment.redirectUrl;
+    if (typeof url !== "string" || !url.startsWith("https://")) {
+      throw new Error("payment_redirect_missing");
+    }
+    window.location.assign(url);
+  };
+
+  const paymentMessage = (error: unknown) => {
+    const message = backendErrorMessage(error);
+    if (/amount must be at least/i.test(message)) {
+      return "مبلغ سفارش کمتر از حداقل مبلغ درگاه است. برای اصلاح سفارش به حساب کاربری بروید.";
+    }
+    return error instanceof Error && error.message === "payment_redirect_missing"
+      ? "درگاه آماده نشد. وضعیت سفارش را در حساب کاربری بررسی کنید."
+      : message;
+  };
+
+  const checkout = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!customer || !cartCompatible || !deliveryMethod) return;
-    if (!validateRecipient()) return;
+    if (
+      checkoutRunning.current ||
+      !customer ||
+      !cartCompatible ||
+      !deliveryMethod ||
+      !validateRecipient()
+    )
+      return;
+    checkoutRunning.current = true;
     setBusy("quote");
     setActionError(null);
     try {
       await ensureBackendCsrf();
-      const response = await createCheckoutQuote({
-        customer: {
-          fullName: fullName.trim(),
-          mobile: customer.mobile,
-          province: needsAddress ? province.trim() : null,
-          city: needsAddress ? city.trim() : null,
-          address: needsAddress ? address.trim() : null,
-          postalCode: postalCode.trim() || null,
-          notes: notes.trim() || null,
-        },
-        deliveryMethod,
-        items: backendItems,
-      });
-      getOrCreateCheckoutCommitKey(response.data.quoteId, () => createIdempotencyKey("checkout"));
-      setQuote(response.data);
-    } catch (error) {
-      setQuote(null);
-      setActionError(backendErrorMessage(error));
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const commit = async () => {
-    if (!quote) return;
-    setBusy("commit");
-    setActionError(null);
-    try {
-      await ensureBackendCsrf();
-      const idempotencyKey = getOrCreateCheckoutCommitKey(quote.quoteId, () =>
+      let currentQuote = quote;
+      if (!currentQuote || Date.parse(currentQuote.expiresAt) <= Date.now()) {
+        const quoted = await createCheckoutQuote({
+          customer: {
+            fullName: fullName.trim(),
+            mobile: customer.mobile,
+            province: needsAddress ? province.trim() : null,
+            city: needsAddress ? city.trim() : null,
+            address: needsAddress ? address.trim() : null,
+            postalCode: needsAddress ? normalizePostalCode(postalCode) : null,
+            notes: notes.trim() || null,
+          },
+          deliveryMethod,
+          items: backendItems,
+        });
+        currentQuote = quoted.data;
+        setQuote(currentQuote);
+        if (currentQuote.totals.grandTotal.amount !== subtotal) {
+          return;
+        }
+      }
+      if (currentQuote.totals.grandTotal.amount < 1500) {
+        setActionError("حداقل مبلغ پرداخت آنلاین ۱٬۵۰۰ تومان است. مبلغ سبد را افزایش دهید.");
+        return;
+      }
+      setBusy("commit");
+      const idempotencyKey = getOrCreateCheckoutCommitKey(currentQuote.quoteId, () =>
         createIdempotencyKey("checkout"),
       );
-      const response = await commitCheckout(quote.quoteId, idempotencyKey);
+      const response = await commitCheckout(currentQuote.quoteId, idempotencyKey);
       const pending = persistPendingCheckout({
         orderId: response.data.order.id,
         orderNumber: response.data.order.number,
         paymentAvailable: response.data.payment.available,
         paymentIdempotencyKey: createIdempotencyKey("payment"),
       });
-      clearCheckoutCommitKey(quote.quoteId);
+      clearCheckoutCommitKey(currentQuote.quoteId);
       setContinuity(pending);
       setOrderResult(response.data);
       clear();
+      if (response.data.payment.available) {
+        await redirectToPayment(pending.orderId, pending.paymentIdempotencyKey);
+      }
     } catch (error) {
-      setActionError(backendErrorMessage(error));
+      setActionError(paymentMessage(error));
     } finally {
+      checkoutRunning.current = false;
       setBusy(null);
     }
   };
 
   const startPayment = async () => {
-    if (!orderResult?.payment.available) return;
+    if (!orderResult?.payment.available || checkoutRunning.current) return;
+    checkoutRunning.current = true;
     setBusy("payment");
     setActionError(null);
     try {
       await ensureBackendCsrf();
       const persisted =
         continuity?.orderId === orderResult.order.id ? continuity : readPendingCheckout();
-      const paymentIdempotencyKey =
+      await redirectToPayment(
+        orderResult.order.id,
         persisted?.orderId === orderResult.order.id
           ? persisted.paymentIdempotencyKey
-          : createIdempotencyKey("payment");
-      const response = await initiatePayment(orderResult.order.id, paymentIdempotencyKey);
-      const redirectUrl = response.data.payment.redirectUrl;
-      if (typeof redirectUrl !== "string" || !redirectUrl.startsWith("https://")) {
-        throw new Error("payment_redirect_missing");
-      }
-      window.location.assign(redirectUrl);
-    } catch (error) {
-      setActionError(
-        error instanceof Error && error.message === "payment_redirect_missing"
-          ? "امکان اتصال به درگاه پرداخت فراهم نشد؛ دوباره تلاش کنید."
-          : backendErrorMessage(error),
+          : createIdempotencyKey("payment"),
       );
+    } catch (error) {
+      setActionError(paymentMessage(error));
+    } finally {
+      checkoutRunning.current = false;
       setBusy(null);
     }
   };
@@ -379,235 +405,237 @@ function LiveCheckout() {
           onPayment={startPayment}
         />
       ) : (
-        <form onSubmit={requestQuote} noValidate className="mt-8 space-y-6">
-          {!cartCompatible ? (
-            <StatePanel title="یکی از اقلام سبد نیاز به انتخاب دوباره دارد" tone="warning">
-              آن کالا را از سبد حذف کنید و دوباره رنگ و سایز موردنظر را از صفحه محصول انتخاب کنید.
-            </StatePanel>
-          ) : null}
+        <form onSubmit={checkout} noValidate className="mt-8">
+          <fieldset disabled={busy !== null} className="min-w-0 space-y-6">
+            {!cartCompatible ? (
+              <StatePanel title="یکی از اقلام سبد نیاز به انتخاب دوباره دارد" tone="warning">
+                آن کالا را از سبد حذف کنید و دوباره رنگ و سایز موردنظر را از صفحه محصول انتخاب کنید.
+              </StatePanel>
+            ) : null}
 
-          <section
-            className="border border-hairline bg-carbon p-5"
-            aria-labelledby="checkout-items"
-          >
-            <h2 id="checkout-items" className="text-base font-bold text-bone">
-              اقلام انتخاب‌شده
-            </h2>
-            <div className="mt-4 space-y-3 text-sm">
-              {lines.map((line) => (
-                <div
-                  key={line.variantId ?? `${line.slug}-${line.size}`}
-                  className="flex items-start justify-between gap-4 border-t border-hairline pt-3 first:border-0 first:pt-0"
-                >
-                  <div className="min-w-0">
-                    <p className="font-semibold text-bone">{line.name}</p>
-                    <p className="mt-1 text-xs text-metal">
-                      {line.colorLabel ?? line.color ?? "رنگ"} ·{" "}
-                      {line.sizeLabel ?? line.size ?? "سایز"} · {line.qty.toLocaleString("fa-IR")}{" "}
-                      عدد
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-xs text-mute">
-                    قیمت نهایی در مرحله بعد بررسی می‌شود
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section
-            className="border border-hairline bg-carbon p-5"
-            aria-labelledby="recipient-title"
-          >
-            <h2 id="recipient-title" className="text-lg font-bold text-bone">
-              اطلاعات تحویل
-            </h2>
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <Field
-                id="co-name"
-                label="نام و نام خانوادگی"
-                value={fullName}
-                onChange={(value) => {
-                  setFullName(value);
-                  clearFieldError("name");
-                }}
-                autoComplete="name"
-                required
-                error={fieldErrors.name}
-              />
-              <Field
-                id="co-phone"
-                label="شماره موبایل تأییدشده"
-                value={customer.mobile}
-                readOnly
-                autoComplete="tel"
-                dir="ltr"
-              />
-              <Field
-                id="co-province"
-                label="استان"
-                value={province}
-                onChange={(value) => {
-                  setProvince(value);
-                  clearFieldError("province");
-                }}
-                autoComplete="address-level1"
-                required={needsAddress}
-                error={fieldErrors.province}
-              />
-              <Field
-                id="co-city"
-                label="شهر"
-                value={city}
-                onChange={(value) => {
-                  setCity(value);
-                  clearFieldError("city");
-                }}
-                autoComplete="address-level2"
-                required={needsAddress}
-                error={fieldErrors.city}
-              />
-              {needsAddress ? (
-                <div className="md:col-span-2">
-                  <Field
-                    id="co-address"
-                    label="نشانی"
-                    value={address}
-                    onChange={(value) => {
-                      setAddress(value);
-                      clearFieldError("address");
-                    }}
-                    autoComplete="street-address"
-                    required
-                    error={fieldErrors.address}
-                  />
-                </div>
-              ) : null}
-              <Field
-                id="co-postal"
-                label="کدپستی (اختیاری)"
-                value={postalCode}
-                onChange={setPostalCode}
-                autoComplete="postal-code"
-                inputMode="numeric"
-              />
-              <Field
-                id="co-notes"
-                label="یادداشت سفارش (اختیاری)"
-                value={notes}
-                onChange={setNotes}
-              />
-            </div>
-          </section>
-
-          <section
-            className="border border-hairline bg-carbon p-5"
-            aria-labelledby="delivery-title"
-          >
-            <h2 id="delivery-title" className="text-lg font-bold text-bone">
-              روش تحویل
-            </h2>
-            {deliveryLoading ? (
-              <p className="mt-4 flex items-center gap-2 text-sm text-metal">
-                <Loader2 size={15} className="animate-spin" aria-hidden="true" />
-                در حال دریافت روش‌های ارسال…
-              </p>
-            ) : deliveryError ? (
-              <div className="mt-4">
-                <StatePanel title="روش ارسال قابل دریافت نیست" tone="warning">
-                  {deliveryError}
-                </StatePanel>
-              </div>
-            ) : enabledMethods.length === 0 ? (
-              <div className="mt-4">
-                <StatePanel title="روش تحویل فعالی وجود ندارد" tone="warning">
-                  در حال حاضر امکان ادامه سفارش با مقصد انتخاب‌شده وجود ندارد.
-                </StatePanel>
-              </div>
-            ) : (
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                {enabledMethods.map((method) => (
-                  <label
-                    key={method.method}
-                    className={`cursor-pointer border p-4 ${deliveryMethod === method.method ? "border-signal" : "border-hairline"}`}
+            <section
+              className="border border-hairline bg-carbon p-5"
+              aria-labelledby="checkout-items"
+            >
+              <h2 id="checkout-items" className="text-base font-bold text-bone">
+                اقلام انتخاب‌شده
+              </h2>
+              <div className="mt-4 space-y-3 text-sm">
+                {lines.map((line) => (
+                  <div
+                    key={line.variantId ?? `${line.slug}-${line.size}`}
+                    className="flex items-start justify-between gap-4 border-t border-hairline pt-3 first:border-0 first:pt-0"
                   >
-                    <input
-                      type="radio"
-                      name="deliveryMethod"
-                      value={method.method}
-                      checked={deliveryMethod === method.method}
-                      onChange={() => setDeliveryMethod(method.method)}
-                      className="me-2"
-                    />
-                    <span className="font-semibold text-bone">{method.label}</span>
-                    <span className="mt-2 block text-xs leading-6 text-metal">
-                      {method.coverage.label}
-                      {method.eta.label ? ` · ${method.eta.label}` : ""}
+                    <div className="min-w-0">
+                      <p className="font-semibold text-bone">{line.name}</p>
+                      <p className="mt-1 text-xs text-metal">
+                        {line.colorLabel ?? line.color ?? "رنگ"} ·{" "}
+                        {line.sizeLabel ?? line.size ?? "سایز"} · {line.qty.toLocaleString("fa-IR")}{" "}
+                        عدد
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-xs text-mute">
+                      {fmtToman(line.price * line.qty)}
                     </span>
-                    {method.paymentMode === "freight_collect" ? (
-                      <span className="mt-1 block text-xs font-semibold leading-6 text-signal">
-                        پس‌کرایه — هزینه حمل داخل مبلغ پرداخت آنلاین نیست.
-                      </span>
-                    ) : null}
-                    {method.feeNotice ? (
-                      <span className="mt-1 block text-xs leading-6 text-mute">
-                        {method.feeNotice}
-                      </span>
-                    ) : null}
-                  </label>
+                  </div>
                 ))}
               </div>
+            </section>
+
+            <section
+              className="border border-hairline bg-carbon p-5"
+              aria-labelledby="recipient-title"
+            >
+              <h2 id="recipient-title" className="text-lg font-bold text-bone">
+                اطلاعات تحویل
+              </h2>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <Field
+                  id="co-name"
+                  label="نام و نام خانوادگی"
+                  value={fullName}
+                  onChange={(value) => {
+                    setFullName(value);
+                    clearFieldError("name");
+                  }}
+                  autoComplete="name"
+                  required
+                  error={fieldErrors.name}
+                />
+                <Field
+                  id="co-phone"
+                  label="شماره موبایل تأییدشده"
+                  value={customer.mobile}
+                  readOnly
+                  autoComplete="tel"
+                  dir="ltr"
+                />
+                <Field
+                  id="co-province"
+                  label="استان"
+                  value={province}
+                  onChange={(value) => {
+                    setProvince(value);
+                    clearFieldError("province");
+                  }}
+                  autoComplete="address-level1"
+                  required={needsAddress}
+                  error={fieldErrors.province}
+                />
+                <Field
+                  id="co-city"
+                  label="شهر"
+                  value={city}
+                  onChange={(value) => {
+                    setCity(value);
+                    clearFieldError("city");
+                  }}
+                  autoComplete="address-level2"
+                  required={needsAddress}
+                  error={fieldErrors.city}
+                />
+                {needsAddress ? (
+                  <div className="md:col-span-2">
+                    <Field
+                      id="co-address"
+                      label="نشانی"
+                      value={address}
+                      onChange={(value) => {
+                        setAddress(value);
+                        clearFieldError("address");
+                      }}
+                      autoComplete="street-address"
+                      required
+                      error={fieldErrors.address}
+                    />
+                  </div>
+                ) : null}
+                {needsAddress && (
+                  <Field
+                    id="co-postal"
+                    label="کد پستی ۱۰ رقمی"
+                    value={postalCode}
+                    onChange={(value) => {
+                      setPostalCode(value);
+                      clearFieldError("postal");
+                    }}
+                    autoComplete="postal-code"
+                    inputMode="numeric"
+                    dir="ltr"
+                    required
+                    error={fieldErrors.postal}
+                  />
+                )}
+                <Field
+                  id="co-notes"
+                  label="یادداشت سفارش (اختیاری)"
+                  value={notes}
+                  onChange={setNotes}
+                />
+              </div>
+            </section>
+
+            <section
+              className="border border-hairline bg-carbon p-5"
+              aria-labelledby="delivery-title"
+            >
+              <h2 id="delivery-title" className="text-lg font-bold text-bone">
+                روش تحویل
+              </h2>
+              {deliveryLoading ? (
+                <p className="mt-4 flex items-center gap-2 text-sm text-metal">
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+                  در حال دریافت روش‌های ارسال…
+                </p>
+              ) : deliveryError ? (
+                <div className="mt-4">
+                  <StatePanel title="روش ارسال قابل دریافت نیست" tone="warning">
+                    {deliveryError}
+                  </StatePanel>
+                </div>
+              ) : enabledMethods.length === 0 ? (
+                <div className="mt-4">
+                  <StatePanel title="روش تحویل فعالی وجود ندارد" tone="warning">
+                    در حال حاضر امکان ادامه سفارش با مقصد انتخاب‌شده وجود ندارد.
+                  </StatePanel>
+                </div>
+              ) : (
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {enabledMethods.map((method) => (
+                    <label
+                      key={method.method}
+                      className={`cursor-pointer border p-4 ${deliveryMethod === method.method ? "border-signal" : "border-hairline"}`}
+                    >
+                      <input
+                        type="radio"
+                        name="deliveryMethod"
+                        value={method.method}
+                        checked={deliveryMethod === method.method}
+                        onChange={() => setDeliveryMethod(method.method)}
+                        className="me-2"
+                      />
+                      <span className="font-semibold text-bone">{method.label}</span>
+                      <span className="mt-2 block text-xs leading-6 text-metal">
+                        {method.coverage.label}
+                        {method.eta.label ? ` · ${method.eta.label}` : ""}
+                      </span>
+                      {method.paymentMode === "freight_collect" ? (
+                        <span className="mt-1 block text-xs font-semibold leading-6 text-signal">
+                          پس‌کرایه — هزینه حمل داخل مبلغ پرداخت آنلاین نیست.
+                        </span>
+                      ) : null}
+                      {method.feeNotice ? (
+                        <span className="mt-1 block text-xs leading-6 text-mute">
+                          {method.feeNotice}
+                        </span>
+                      ) : null}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {quote ? (
+              <ServerQuote quote={quote} method={selectedMethod} />
+            ) : (
+              <div className="border border-hairline bg-carbon p-4 text-sm">
+                <Row label="جمع کالاها" value={fmtToman(subtotal)} />
+                <p className="mt-2 text-xs leading-6 text-metal">
+                  مبلغ نهایی پیش از پرداخت بررسی می‌شود. کرایهٔ ارسال پس‌کرایه است.
+                </p>
+              </div>
             )}
-          </section>
 
-          {quote ? (
-            <ServerQuote quote={quote} method={selectedMethod} />
-          ) : (
-            <StatePanel title="جمع نهایی هنوز محاسبه نشده است" tone="info">
-              قیمت و موجودی با دکمه «محاسبه مبلغ نهایی» دوباره بررسی می‌شوند؛ کرایه روش‌های فعال
-              فروشگاه پس‌کرایه است و به مبلغ پرداخت آنلاین اضافه نمی‌شود.
-            </StatePanel>
-          )}
+            {actionError ? (
+              <StatePanel title="عملیات تکمیل نشد" tone="warning">
+                {actionError}
+              </StatePanel>
+            ) : null}
 
-          {actionError ? (
-            <StatePanel title="عملیات تکمیل نشد" tone="warning">
-              {actionError}
-            </StatePanel>
-          ) : null}
-
-          <div className="flex flex-wrap gap-3">
-            {!quote ? (
+            <div className="flex flex-wrap gap-3">
               <button
                 type="submit"
                 disabled={busy !== null || !cartCompatible || !selectedMethod}
-                className={`${CtaClasses("signal")} disabled:opacity-50`}
+                className={`${CtaClasses("signal")} w-full sm:w-auto disabled:opacity-50`}
               >
-                {busy === "quote" ? (
-                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <ReceiptText size={16} aria-hidden="true" />
-                )}
-                محاسبه مبلغ نهایی
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={commit}
-                disabled={busy !== null}
-                className={`${CtaClasses("signal")} disabled:opacity-50`}
-              >
-                {busy === "commit" ? (
+                {busy ? (
                   <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                 ) : (
                   <LockKeyhole size={16} aria-hidden="true" />
                 )}
-                ثبت سفارش
+                {busy === "payment"
+                  ? "اتصال به درگاه…"
+                  : busy
+                    ? "بررسی سفارش…"
+                    : quote
+                      ? "تأیید مبلغ و پرداخت"
+                      : "ثبت سفارش و پرداخت"}
               </button>
-            )}
-            <Link to="/cart" className={CtaClasses("line")}>
-              بازگشت به سبد
-            </Link>
-          </div>
+              <Link to="/cart" className={CtaClasses("line")}>
+                بازگشت به سبد
+              </Link>
+            </div>
+          </fieldset>
         </form>
       )}
     </CheckoutChrome>
@@ -678,14 +706,15 @@ function OrderCreated({
         <p>مبلغ ثبت‌شده: {fmtToman(result.order.totals.grandTotal.amount)}</p>
         <p className="mt-1">وضعیت پرداخت: {result.order.paymentStatusLabel}</p>
       </StatePanel>
-      {result.payment.available ? (
-        <StatePanel title="درگاه پرداخت آماده است" tone="info">
-          برای تکمیل خرید، پرداخت را در درگاه بانکی انجام دهید و تا بازگشت به فروشگاه صبر کنید.
-        </StatePanel>
-      ) : (
-        <StatePanel title="درگاه پرداخت در دسترس نیست" tone="warning">
-          سفارش ثبت شده اما هنوز پرداخت نشده است. کمی بعد دوباره تلاش کنید.
-        </StatePanel>
+      {busy === "payment" && (
+        <p role="status" className="text-sm text-metal">
+          در حال انتقال به درگاه…
+        </p>
+      )}
+      {!result.payment.available && (
+        <p className="text-sm text-metal">
+          سفارش ثبت شده است. وضعیت پرداخت را در حساب کاربری ببینید.
+        </p>
       )}
       {error ? (
         <StatePanel title="پرداخت شروع نشد" tone="warning">

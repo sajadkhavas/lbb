@@ -34,12 +34,9 @@ import { CtaClasses, StatusTag, TechLabel } from "@/components/lbb/ui/primitives
 const MAX_QTY = 10;
 
 function fallbackMedia(card: BackendCatalogCard): DecisionMedia[] {
-  const urls =
-    card.previewImages.length > 0
-      ? card.previewImages
-      : card.primaryImage
-        ? [card.primaryImage]
-        : [];
+  const urls = [...new Set([card.primaryImage, ...card.previewImages])].filter(
+    (url): url is string => Boolean(url),
+  );
   return urls.map((src, index) => ({
     id: `${card.id}:preview:${index}`,
     src,
@@ -89,10 +86,21 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
     if (model.media.length === 0) return fallbackMedia(card);
 
     const selected = mediaForColor(model, colorId);
-    return [...selected, ...model.media].filter(
-      (media, index, all) => all.findIndex((candidate) => candidate.id === media.id) === index,
+    const detail = productQuery.data;
+    const primary = detail?.primaryImage;
+    const first =
+      model.media.find((item) => item.src === primary) ??
+      model.media.find((item) =>
+        detail?.media.some((media) => media.publicId === item.id && media.role === "primary"),
+      );
+    return [
+      ...(first ? [first] : fallbackMedia(card).slice(0, 1)),
+      ...selected,
+      ...model.media,
+    ].filter(
+      (media, index, all) => all.findIndex((candidate) => candidate.src === media.src) === index,
     );
-  }, [card, colorId, model]);
+  }, [card, colorId, model, productQuery.data]);
 
   useEffect(() => {
     setImg(0);
@@ -136,6 +144,7 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
     add({
       slug: model.slug,
       name,
+      imageUrl: gallery[0]?.src,
       price: selectedPrice,
       variantId: selectedVariant.id,
       source: "backend",
@@ -197,10 +206,10 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
               if (gallery.length <= 1) return;
               if (event.key === "ArrowLeft") {
                 event.preventDefault();
-                setImage(img + 1);
+                setImage(img - 1);
               } else if (event.key === "ArrowRight") {
                 event.preventDefault();
-                setImage(img - 1);
+                setImage(img + 1);
               } else if (event.key === "Home") {
                 event.preventDefault();
                 setImg(0);
@@ -253,19 +262,22 @@ export function BackendProductQuickView({ card }: { card: BackendCatalogCard }) 
                   type="button"
                   onClick={() => setImage(img - 1)}
                   aria-label="تصویر قبلی"
-                  className="tap-target absolute start-2 top-1/2 hidden -translate-y-1/2 place-items-center rounded-xl bg-obsidian/70 text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:grid"
+                  className="tap-target absolute left-2 top-1/2 hidden -translate-y-1/2 place-items-center rounded-xl bg-obsidian/70 text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:grid"
                 >
-                  <ChevronRight size={18} aria-hidden="true" />
+                  <ChevronLeft size={18} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setImage(img + 1)}
                   aria-label="تصویر بعدی"
-                  className="tap-target absolute end-2 top-1/2 hidden -translate-y-1/2 place-items-center rounded-xl bg-obsidian/70 text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:grid"
+                  className="tap-target absolute right-2 top-1/2 hidden -translate-y-1/2 place-items-center rounded-xl bg-obsidian/70 text-bone focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal md:grid"
                 >
-                  <ChevronLeft size={18} aria-hidden="true" />
+                  <ChevronRight size={18} aria-hidden="true" />
                 </button>
-                <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5 md:bottom-4">
+                <div
+                  dir="ltr"
+                  className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5 md:bottom-4"
+                >
                   {gallery.map((item, index) => (
                     <button
                       key={item.id}

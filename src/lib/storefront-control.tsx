@@ -81,6 +81,7 @@ export type BrandIntroControl = {
 
 export type HomePresentation = {
   heroProductSlug: string;
+  heroProductSlugs?: string[];
   categoryOrder: string[];
   sections: string[];
 };

@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { resolveStorefrontJournal, type StorefrontJournalDto } from "@/lib/storefront-control";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useState, type ReactNode } from "react";
 import { AnnouncementBar, ANNOUNCEMENT_HEIGHT } from "@/components/lbb/AnnouncementBar";
 import { Footer } from "@/components/lbb/Footer";
@@ -14,7 +15,7 @@ import { LocalStoreVisit } from "@/components/lbb/home/LocalStoreVisit";
 import { ProductMoments } from "@/components/lbb/home/ProductMoments";
 import { TickerStrip } from "@/components/lbb/home/TickerStrip";
 import { TrustStrip } from "@/components/lbb/home/TrustStrip";
-import { BackendApiError, getCollection, getProduct } from "@/lib/backend-api";
+import { BackendApiError, getCollection, getProduct, listProducts } from "@/lib/backend-api";
 import { backendCard, type BackendCatalogCard } from "@/lib/backend-storefront";
 import { listStorefrontCategories, type StorefrontCategoryDto } from "@/lib/final-technical-api";
 import { productImage } from "@/lib/product-images";
@@ -26,7 +27,6 @@ import {
   type StorefrontLookDto,
 } from "@/lib/storefront-control";
 import {
-  resolveStorefrontHomeProducts,
   resolveStorefrontPresentation,
   type StorefrontPresentation,
 } from "@/lib/storefront-presentation";
@@ -39,35 +39,23 @@ type LiveHeroProduct = {
 };
 
 type HomeLoaderData = {
+  journal?: StorefrontJournalDto[];
   control: Awaited<ReturnType<typeof resolveStorefrontControl>>;
   presentation: StorefrontPresentation;
   heroProduct: LiveHeroProduct | null;
+  heroProducts?: LiveHeroProduct[];
   categories: StorefrontCategoryDto[] | null;
   products: BackendCatalogCard[] | null;
   lookbook: StorefrontLookDto[] | null;
   featuredStory: LiveFeaturedStory | null;
 };
 
-async function resolveLiveHeroProduct(slug: string): Promise<LiveHeroProduct | null> {
-  if (!slug.trim()) return null;
-  try {
-    const response = await getProduct(slug);
-    return {
-      slug: response.data.slug,
-      name: response.data.name,
-      priceToman: response.data.price.from?.amount ?? null,
-      image: response.data.primaryImage,
-    };
-  } catch (error) {
-    if (
-      error instanceof BackendApiError &&
-      error.status === 404 &&
-      error.code === "resource_not_found"
-    ) {
-      return null;
-    }
-
-    throw error;
+async function loadHomeCatalog() {
+  const products = [];
+  for (let page = 1; ; page++) {
+    const result = await listProducts({ page, per_page: 24, sort: "newest" });
+    products.push(...result.data);
+    if (!result.meta.pagination?.hasMore) return products.map(backendCard);
   }
 }
 
@@ -100,39 +88,66 @@ async function resolveLiveFeaturedStory(
 
 export const Route = createFileRoute("/")({
   loader: async (): Promise<HomeLoaderData> => {
-    const [control, presentation] = await Promise.all([
-      resolveStorefrontControl(),
-      resolveStorefrontPresentation(),
-    ]);
-    if (control.source !== "live") {
+    const loadHome = async (): Promise<HomeLoaderData> => {
+      const [control, presentation] = await Promise.all([
+        resolveStorefrontControl(),
+        resolveStorefrontPresentation(),
+      ]);
+      if (control.source !== "live") {
+        return {
+          control,
+          presentation,
+          heroProduct: null,
+          categories: null,
+          products: null,
+          lookbook: null,
+          featuredStory: null,
+        };
+      }
+
+      const [categories, catalog, lookbook, featuredStory] = await Promise.all([
+        listStorefrontCategories(),
+        loadHomeCatalog(),
+        resolveStorefrontLookbook(),
+        resolveLiveFeaturedStory(control),
+
+      ]);
+
+      const selected = Array.isArray(control.home.heroProductSlugs)
+        ? control.home.heroProductSlugs
+        : [];
+      const heroProducts = (
+        selected.length
+          ? selected.flatMap((slug) => catalog.filter((item) => item.slug === slug))
+          : catalog
+      ).map((item) => ({
+        slug: item.slug,
+        name: item.name,
+        image: item.primaryImage,
+        priceToman: item.priceFromToman,
+      }));
+      const heroProduct =
+        heroProducts.find((item) => item.slug === control.home.heroProductSlug) ??
+        heroProducts[0] ??
+        null;
+
       return {
         control,
         presentation,
-        heroProduct: null,
-        categories: null,
-        products: null,
-        lookbook: null,
-        featuredStory: null,
+        heroProduct,
+        categories,
+        heroProducts,
+        products: catalog,
+        lookbook: lookbook ?? [],
+        featuredStory,
+
       };
-    }
-
-    const [heroProduct, categories, curatedProducts, lookbook, featuredStory] = await Promise.all([
-      resolveLiveHeroProduct(control.home.heroProductSlug),
-      listStorefrontCategories(),
-      resolveStorefrontHomeProducts(),
-      resolveStorefrontLookbook(),
-      resolveLiveFeaturedStory(control),
-    ]);
-
-    return {
-      control,
-      presentation,
-      heroProduct,
-      categories,
-      products: curatedProducts.map(backendCard),
-      lookbook: lookbook ?? [],
-      featuredStory,
     };
+    const [home, articles] = await Promise.all([
+      loadHome(),
+      resolveStorefrontJournal().catch(() => []),
+    ]);
+    return { ...home, journal: home.control.source === "live" ? (articles ?? []).slice(0, 3) : [] };
   },
   head: ({ loaderData }) => {
     const control = loaderData?.control;
@@ -195,8 +210,18 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { control, presentation, heroProduct, categories, products, lookbook, featuredStory } =
-    Route.useLoaderData();
+  const {
+    control,
+    presentation,
+    heroProduct,
+    heroProducts,
+    categories,
+    products,
+    lookbook,
+    featuredStory,
+
+    journal,
+  } = Route.useLoaderData();
   const [barVisible, setBarVisible] = useState(false);
   const handleBarVisibility = useCallback((visible: boolean) => setBarVisible(visible), []);
   const offsetTop = barVisible ? ANNOUNCEMENT_HEIGHT : 0;
@@ -226,11 +251,39 @@ function Home() {
         data-storefront-source={control.source}
       >
         {presentation.hero.enabled ? (
-          <HeroNarrative heroProduct={heroProduct} liveCategories={categories} />
+          <HeroNarrative
+            heroProduct={heroProduct}
+            heroProducts={heroProducts}
+            liveCategories={categories}
+          />
         ) : null}
-        {control.home.sections.map((key) => (
+        {(control.home.sections.includes("instagram")
+          ? control.home.sections
+          : [...control.home.sections, "instagram"]
+        ).map((key) => (
           <div key={key}>{sections[key] ?? null}</div>
         ))}
+        {journal?.length ? (
+          <section dir="rtl" aria-labelledby="home-journal-title" data-home-journal className="border-t border-hairline py-10 md:py-14">
+            <div className="lbb-shell">
+              <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 id="home-journal-title" className="text-display-3">از ژورنال LBB</h2>
+                <Link to="/journal" className="text-sm font-bold text-signal">همه مقاله‌ها</Link>
+              </header>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {journal.map((article) => (
+                  <Link key={article.slug} to="/journal/$slug" params={{ slug: article.slug }} className="group overflow-hidden rounded-2xl border border-hairline bg-carbon">
+                    {article.coverUrl && <img src={article.coverUrl} alt="" loading="lazy" decoding="async" className="aspect-[16/9] w-full object-cover" />}
+                    <div className="p-4">
+                      <h3 className="text-lg font-bold group-hover:text-signal">{article.title}</h3>
+                      {article.excerpt && <p className="mt-2 line-clamp-2 text-sm leading-7 text-metal">{article.excerpt}</p>}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
       </main>
       <Footer theme="dark" />
       <MobileBottomBar />

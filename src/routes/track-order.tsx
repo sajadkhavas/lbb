@@ -6,7 +6,7 @@ import { Footer } from "@/components/lbb/Footer";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { CtaClasses, Shell, StatePanel } from "@/components/lbb/ui/primitives";
-import { backendErrorMessage, isLiveBackend } from "@/lib/backend-api";
+import { BackendApiError, isLiveBackend } from "@/lib/backend-api";
 import { trackPublicOrder, type PublicOrderTracking } from "@/lib/final-technical-api";
 import { canonical, pageMeta } from "@/lib/site";
 
@@ -49,6 +49,8 @@ function faDate(value: string | null) {
 }
 
 export const Route = createFileRoute("/track-order")({
+  validateSearch: (search: Record<string, unknown>): { order?: string } =>
+    typeof search.order === "string" && search.order.length <= 64 ? { order: search.order } : {},
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESC, path: "/track-order", noindex: true }),
     links: canonical("/track-order"),
@@ -57,7 +59,8 @@ export const Route = createFileRoute("/track-order")({
 });
 
 function TrackOrderPage() {
-  const [orderNumber, setOrderNumber] = useState("");
+  const { order } = Route.useSearch();
+  const [orderNumber, setOrderNumber] = useState(order ?? "");
   const [mobile, setMobile] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +68,7 @@ function TrackOrderPage() {
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!orderNumber.trim() || !mobile.trim() || !isLiveBackend()) return;
+    if (busy || !orderNumber.trim() || !mobile.trim() || !isLiveBackend()) return;
     setBusy(true);
     setError(null);
     setResult(null);
@@ -73,7 +76,14 @@ function TrackOrderPage() {
       const response = await trackPublicOrder({ orderNumber, mobile });
       setResult(response.data);
     } catch (cause) {
-      setError(backendErrorMessage(cause));
+      const status = cause instanceof BackendApiError ? cause.status : undefined;
+      setError(status === 404
+        ? "شماره سفارش و موبایل ثبت‌شده در سفارش را دوباره بررسی کنید."
+        : status === 422
+          ? "شماره موبایل و شماره سفارش را بررسی کنید."
+          : status === 429
+            ? "تعداد تلاش‌ها زیاد است. یک دقیقه دیگر دوباره امتحان کنید."
+            : "پیگیری موقتاً در دسترس نیست. دوباره تلاش کنید یا سفارش را در حساب کاربری ببینید.");
     } finally {
       setBusy(false);
     }
@@ -95,8 +105,7 @@ function TrackOrderPage() {
           </span>
           <h1 className="mt-5 text-display-2 text-bone">پیگیری وضعیت سفارش</h1>
           <p className="mt-4 max-w-[62ch] text-sm leading-8 text-metal">
-            شماره سفارش و همان شماره موبایلی که هنگام ثبت سفارش وارد شده را بنویس. برای حفظ حریم
-            خصوصی، این صفحه اطلاعات گیرنده، آدرس یا اقلام سفارش را نمایش نمی‌دهد.
+            شماره سفارش روی فاکتور و موبایل ثبت‌شده در سفارش را وارد کنید.
           </p>
 
           {isLiveBackend() ? (
@@ -152,7 +161,7 @@ function TrackOrderPage() {
           )}
 
           {error ? (
-            <StatePanel className="mt-5" title="سفارش پیدا نشد یا پیگیری انجام نشد" tone="warning">
+            <StatePanel className="mt-5" title="پیگیری سفارش انجام نشد" tone="warning">
               {error}
             </StatePanel>
           ) : null}

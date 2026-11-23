@@ -6,7 +6,6 @@ import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { ProductCard } from "@/components/lbb/ProductCard";
 import { EditorialCommerceBridge } from "@/components/lbb/editorial/EditorialCommerceBridge";
-import { ShopTheLook, type LookProduct } from "@/components/lbb/editorial/ShopTheLook";
 import { collectionBySlug, type Collection } from "@/lib/collections";
 import { CATEGORIES } from "@/lib/categories";
 import { getCollectionEditorialView } from "@/lib/editorial-commerce";
@@ -31,24 +30,9 @@ import {
 import { pageMeta, canonical, breadcrumbLd, absUrl } from "@/lib/site";
 import { backendCanonicalPath } from "@/lib/seo-live";
 
-const COLLECTION_LOOK_SPOTS = [
-  { slug: "dupu-boxy-distressed-tshirt-charcoal", x: 53, y: 32 },
-  { slug: "shloar-gyn-prynty-acne-studios", x: 51, y: 68 },
-];
-
-function collectionLookProducts(products: ProductSummaryDto[]): LookProduct[] {
-  return COLLECTION_LOOK_SPOTS.flatMap((spot) => {
-    const product = products.find(({ slug }) => slug === spot.slug);
-    if (!product) return [];
-    return [
-      {
-        ...spot,
-        name: product.name,
-        image: product.primaryImage,
-        priceToman: product.price.from?.amount ?? null,
-      },
-    ];
-  });
+function collectionSummary(collection: CollectionDto): string {
+  const text = (collection.seo.metaDescription || collection.description || "").trim();
+  return text.length > 190 ? text.slice(0, 190).replace(/\s+\S*$/, "") + "…" : text;
 }
 
 type LiveLoader = {
@@ -117,8 +101,8 @@ export const Route = createFileRoute("/collections/$slug")({
       const title = collection.seo.metaTitle || `${collection.name} | LBB`;
       const description =
         collection.seo.metaDescription ||
-        collection.description ||
-        "کالکشن منتشرشده LBB و محصولات مرتبط آن.";
+        collectionSummary(collection) ||
+        `محصولات کالکشن ${collection.name} در فروشگاه LBB.`;
       const collectionLd = {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
@@ -297,8 +281,10 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
     );
   }
 
-  const image = collection.seo.primaryImage;
-  const lookProducts = collectionLookProducts(loader.products);
+  const image =
+    (collection as CollectionDto & { coverImage?: string }).coverImage ||
+    collection.seo.primaryImage;
+  const summary = collectionSummary(collection);
   const categories = Array.from(
     new Map(
       loader.products.map((product) => [
@@ -310,55 +296,53 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
 
   return (
     <PageChrome breadcrumbLabel={collection.name}>
-      <Band hairline={false} className="pb-10 pt-8 md:pb-14 md:pt-12">
-        <Shell className="grid items-stretch gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-          <div className="flex flex-col justify-center">
-            <TechLabel tone="signal">PUBLISHED COLLECTION</TechLabel>
-            <h1 className="mt-5 text-display-1 text-bone">{collection.name}</h1>
-            <p className="mt-5 max-w-[64ch] text-sm leading-8 text-metal">
-              {collection.description || "توضیح عمومی برای این کالکشن منتشر نشده است."}
-            </p>
-            <div className="mt-7 flex flex-wrap gap-2">
-              {collection.isFeatured ? <StatusTag tone="signal">FEATURED</StatusTag> : null}
-              <StatusTag tone="neutral">
-                {loader.products.length.toLocaleString("fa-IR")} محصول منتشرشده
-              </StatusTag>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#collection-products" className={CtaClasses("signal")}>
-                مشاهده محصولات
+      <Shell className="pb-6 pt-2 md:pb-10">
+        <header
+          dir="rtl"
+          data-collection-detail-redesign
+          className={`grid overflow-hidden rounded-2xl border border-hairline bg-carbon ${image ? "md:grid-cols-[minmax(0,1fr)_clamp(300px,34vw,430px)]" : ""}`}
+        >
+          <div className="flex min-w-0 flex-col justify-center p-5 md:p-9 lg:p-12">
+            <h1 className="text-2xl font-black leading-snug text-bone sm:text-3xl lg:text-5xl">
+              {collection.name}
+            </h1>
+            {summary && <p className="mt-3 max-w-prose text-sm leading-7 text-metal">{summary}</p>}
+            {loader.products.length > 0 && (
+              <a href="#collection-products" className={`mt-4 self-start ${CtaClasses("signal")}`}>
+                دیدن {loader.products.length.toLocaleString("fa-IR")} محصول
               </a>
-              <Link to="/collections" className={CtaClasses("line")}>
-                همه کالکشن‌ها
-              </Link>
-            </div>
+            )}
           </div>
-
-          {image ? (
-            <Frame
-              src={image}
-              alt={`تصویر کالکشن ${collection.name}`}
-              ratio="4/5"
-              priority
-              sizes="(max-width: 1024px) 100vw, 46vw"
-              className="rounded-2xl border border-hairline"
-              width={1200}
-              height={1500}
-            />
-          ) : (
-            <div className="grid min-h-80 place-items-center rounded-2xl border border-hairline bg-carbon px-8 text-center text-sm leading-7 text-mute">
-              تصویر عمومی تأییدشده‌ای برای این کالکشن منتشر نشده است.
+          {image && (
+            <div className="relative aspect-[4/5] w-full self-center overflow-hidden bg-carbon">
+              <img
+                src={image}
+                alt={`پوشش و استایل کالکشن ${collection.name}`}
+                width={900}
+                height={1200}
+                fetchPriority="high"
+                decoding="async"
+                className="absolute inset-0 w-full object-cover object-center"
+                style={{ height: "100%" }}
+              />
             </div>
           )}
-        </Shell>
-      </Band>
+        </header>
+      </Shell>
 
-      {lookProducts.length === COLLECTION_LOOK_SPOTS.length ? (
-        <ShopTheLook products={lookProducts} />
-      ) : null}
-
-      <Band id="collection-products" label={`محصولات ${collection.name}`}>
+      <section
+        id="collection-products"
+        dir="rtl"
+        aria-labelledby="collection-products-title"
+        className="scroll-mt-24 border-t border-hairline py-6 md:py-10"
+      >
         <Shell>
+          <h2
+            id="collection-products-title"
+            className="mb-4 text-xl font-black text-bone md:mb-6 md:text-3xl"
+          >
+            محصولات این کالکشن
+          </h2>
           {loader.products.length === 0 ? (
             <EmptyState
               icon={<Layers3 aria-hidden="true" size={32} />}
@@ -372,7 +356,9 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
             />
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+              <div
+                className={`grid grid-cols-2 gap-2 sm:gap-4 ${loader.products.length <= 2 ? "mx-auto max-w-3xl" : "md:grid-cols-3 lg:grid-cols-4"}`}
+              >
                 {loader.products.map((product, index) => (
                   <ProductCard
                     key={product.publicId}
@@ -398,7 +384,31 @@ function LiveCollectionDetail({ loader }: { loader: LiveLoader }) {
             </>
           )}
         </Shell>
-      </Band>
+      </section>
+      {collection.description && collection.description.trim() !== summary && (
+        <section
+          dir="rtl"
+          aria-labelledby="collection-about"
+          className="border-t border-hairline py-8 md:py-12"
+        >
+          <Shell>
+            <div className="max-w-3xl rounded-2xl border border-hairline bg-carbon p-5 md:p-8">
+              <h2 id="collection-about" className="text-xl font-black text-bone">
+                دربارهٔ این کالکشن
+              </h2>
+              {collection.description
+                .trim()
+                .split(/\n+/)
+                .filter(Boolean)
+                .map((paragraph, index) => (
+                  <p key={index} className="mt-3 text-sm leading-8 text-metal">
+                    {paragraph}
+                  </p>
+                ))}
+            </div>
+          </Shell>
+        </section>
+      )}
     </PageChrome>
   );
 }

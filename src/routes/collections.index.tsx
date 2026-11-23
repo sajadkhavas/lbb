@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpLeft, RefreshCcw } from "lucide-react";
 import { Navbar } from "@/components/lbb/Navbar";
 import { Footer } from "@/components/lbb/Footer";
-import { ManagedPageHead, ManagedPageIntro } from "@/components/lbb/ManagedPageIntro";
+import { ManagedPageHead } from "@/components/lbb/ManagedPageIntro";
 import { MobileBottomBar } from "@/components/lbb/MobileBottomBar";
 import { Breadcrumb } from "@/components/lbb/Breadcrumb";
 import { COLLECTIONS } from "@/lib/collections";
@@ -100,11 +100,26 @@ function LiveCollections({
   return (
     <Chrome>
       <ManagedPageHead presentation={page} path="/collections" />
-      <Band hairline={false} className="pb-8 pt-8 md:pb-12 md:pt-12">
-        <ManagedPageIntro presentation={page} />
-      </Band>
-      <Band>
-        <Shell>
+      <Shell className="pb-16">
+        <header
+          dir="rtl"
+          className="border-b border-hairline pb-5 pt-3 md:flex md:items-end md:justify-between md:gap-6 md:pb-7"
+        >
+          <div>
+            <h1 className="text-3xl font-black leading-tight text-bone sm:text-5xl">
+              {page.title}
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-metal">{page.lede}</p>
+          </div>
+          <Link
+            to="/shop"
+            search={{}}
+            className="mt-3 inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-signal"
+          >
+            همه محصولات <ArrowUpLeft size={16} aria-hidden="true" />
+          </Link>
+        </header>
+        <div dir="rtl" className="mt-5 md:mt-8" data-collections-redesign>
           {error ? (
             <EmptyState
               icon={<RefreshCcw size={40} aria-hidden="true" />}
@@ -126,43 +141,62 @@ function LiveCollections({
               body="کالکشن‌های تازه LBB به‌زودی در این بخش قرار می‌گیرند."
             />
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {collections.map((collection) => {
+            <div className="grid gap-5 md:grid-cols-2">
+              {collections.map((collection, index) => {
                 const managed = collection as ManagedCollection;
+                const cover = managed.coverImage || collection.seo.primaryImage;
+                const lead = index === 0;
+                const summary = (
+                  collection.seo.metaDescription ||
+                  collection.description ||
+                  ""
+                ).trim();
                 return (
                   <Link
                     key={collection.publicId}
                     to="/collections/$slug"
                     params={{ slug: collection.slug }}
-                    className="group flex min-h-64 flex-col overflow-hidden rounded-2xl border border-hairline bg-carbon transition hover:-translate-y-1 hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    className={`group grid overflow-hidden rounded-2xl border border-hairline bg-carbon hover:border-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal ${lead ? "md:col-span-2 md:grid-cols-[clamp(300px,34vw,430px)_minmax(0,1fr)]" : ""}`}
                   >
-                    {managed.coverImage ? (
-                      <img
-                        src={managed.coverImage}
-                        alt={`تصویر کالکشن ${collection.name}`}
-                        width={900}
-                        height={600}
-                        loading="lazy"
-                        className="aspect-[3/2] w-full object-cover"
-                      />
-                    ) : null}
-                    <div className="flex flex-1 flex-col justify-between p-6">
-                      <div>
-                        <TechLabel tone="signal">
-                          {collection.isFeatured ? "FEATURED COLLECTION" : "COLLECTION"}
-                        </TechLabel>
-                        <h2 className="mt-4 text-display-3 text-bone">{collection.name}</h2>
-                        <p className="mt-3 text-sm leading-7 text-metal">
-                          {collection.description || "توضیح عمومی برای این کالکشن منتشر نشده است."}
-                        </p>
-                        {typeof collection.productCount === "number" ? (
-                          <StatusTag tone="neutral" className="mt-5">
-                            {collection.productCount.toLocaleString("fa-IR")} محصول منتشرشده
-                          </StatusTag>
-                        ) : null}
+                    {cover ? (
+                      <div
+                        className="relative aspect-[4/5] w-full self-center overflow-hidden bg-carbon"
+                      >
+                        <img
+                          src={cover}
+                          alt={`ویترین کالکشن ${collection.name}`}
+                          width={900}
+                          height={1200}
+                          loading={lead ? "eager" : "lazy"}
+                          fetchPriority={lead ? "high" : "auto"}
+                          decoding="async"
+                          className="absolute inset-0 w-full object-cover object-center"
+                          style={{ height: "100%" }}
+                        />
                       </div>
-                      <span className="tech mt-8 inline-flex items-center gap-2 text-bone group-hover:text-signal">
-                        مشاهده کالکشن <ArrowUpLeft size={15} aria-hidden="true" />
+                    ) : null}
+                    <div
+                      className={`flex min-w-0 flex-col justify-center p-5 sm:p-8 ${lead ? "lg:p-12" : ""} ${!cover && lead ? "md:col-span-2" : ""}`}
+                    >
+                      {typeof collection.productCount === "number" && (
+                        <span className="mb-3 text-xs text-metal">
+                          {collection.productCount.toLocaleString("fa-IR")} محصول
+                        </span>
+                      )}
+                      <h2
+                        className={`text-xl font-black leading-snug text-bone ${lead ? "md:text-4xl" : "md:text-2xl"}`}
+                      >
+                        {collection.name}
+                      </h2>
+                      {summary && (
+                        <p className="mt-3 line-clamp-3 max-w-prose text-sm leading-7 text-metal">
+                          {summary.length > 220
+                            ? summary.slice(0, 220).replace(/\s+\S*$/, "") + "…"
+                            : summary}
+                        </p>
+                      )}
+                      <span className="mt-5 inline-flex min-h-11 items-center gap-2 self-start rounded-lg bg-signal px-4 text-sm font-bold text-black">
+                        دیدن کالکشن <ArrowUpLeft size={16} aria-hidden="true" />
                       </span>
                     </div>
                   </Link>
@@ -170,8 +204,8 @@ function LiveCollections({
               })}
             </div>
           )}
-        </Shell>
-      </Band>
+        </div>
+      </Shell>
     </Chrome>
   );
 }

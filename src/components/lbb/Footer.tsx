@@ -85,94 +85,110 @@ export function Footer(_props: { theme?: "dark" | "light" } = {}) {
   );
 
   return (
-    <footer dir="rtl" className="border-t border-hairline bg-obsidian pb-bottombar md:pb-0">
-      <div className="lbb-shell py-10 md:py-12">
-        <div className="grid gap-0 pb-8 md:gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
-          <div className="min-w-0 border-b border-hairline pb-8 sm:col-span-2 lg:col-span-1 lg:border-0 lg:pb-0">
-            <Logo size={80} withWordmark />
-            <p className="mt-4 max-w-xs text-sm leading-7 text-metal">{brand.descriptor}</p>
-            <p className="mt-4 flex items-start gap-2 text-sm leading-7 text-metal">
-              <MapPin size={16} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
-              <span>{copy.storeLocationLabel || contact.locationLabel}</span>
-            </p>
-            {!isPrototype ? (
-              <div className="mt-4 grid gap-1 text-sm text-metal">
-                <a
-                  href={phoneHref}
-                  className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
-                >
-                  <Phone size={15} aria-hidden="true" />
-                  <span dir="ltr">{contact.phone}</span>
-                </a>
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
-                >
-                  <MessageCircle size={15} aria-hidden="true" />
-                  <span dir="ltr">{contact.whatsapp}</span>
-                </a>
-              </div>
-            ) : null}
-            <a
-              href={brand.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${isPrototype ? "mt-6" : "mt-4"} inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal`}
-            >
-              <Instagram size={16} aria-hidden="true" />
-              <span className="tech">{brand.instagramHandle.toUpperCase()}</span>
-            </a>
-            <TrustMarks />
-            <PushOptIn />
-          </div>
+    <div className="pb-bottombar md:pb-0">
+      <footer dir="rtl" className="border-t border-hairline bg-obsidian">
+        <div className="lbb-shell py-10 md:py-12">
+          <div className="grid gap-0 pb-8 md:gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))]">
+            <div className="min-w-0 border-b border-hairline pb-8 sm:col-span-2 lg:col-span-1 lg:border-0 lg:pb-0">
+              <Logo size={80} withWordmark />
+              <p className="mt-4 max-w-xs text-sm leading-7 text-metal">{brand.descriptor}</p>
+              <p className="mt-4 flex items-start gap-2 text-sm leading-7 text-metal">
+                <MapPin size={16} className="mt-1 shrink-0 text-signal" aria-hidden="true" />
+                <span>{copy.storeLocationLabel || contact.locationLabel}</span>
+              </p>
+              {!isPrototype ? (
+                <div className="mt-4 grid gap-1 text-sm text-metal">
+                  <a
+                    href={phoneHref}
+                    className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
+                  >
+                    <Phone size={15} aria-hidden="true" />
+                    <span dir="ltr">{contact.phone}</span>
+                  </a>
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-9 items-center gap-2 hover:text-signal"
+                  >
+                    <MessageCircle size={15} aria-hidden="true" />
+                    <span dir="ltr">{contact.whatsapp}</span>
+                  </a>
+                </div>
+              ) : null}
+              <a
+                href={brand.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${isPrototype ? "mt-6" : "mt-4"} inline-flex min-h-11 items-center gap-2 rounded-xl border border-hairline px-4 text-metal transition-colors hover:border-signal hover:text-signal`}
+              >
+                <Instagram size={16} aria-hidden="true" />
+                <span className="tech">{brand.instagramHandle.toUpperCase()}</span>
+              </a>
+              <TrustMarks />
+              <PushOptIn />
+            </div>
 
-          <MerchantFooterList
-            title={presentation.shell.footerGroups.shop}
-            items={navigation.shop}
-          />
-          <MerchantFooterList
-            title={presentation.shell.footerGroups.editorial}
-            items={navigation.editorial}
-          />
-          <MerchantFooterList
-            title={presentation.shell.footerGroups.service}
-            items={navigation.service}
-          />
-          <div className="grid sm:col-span-2 lg:col-span-1 lg:grid-cols-1 lg:gap-6">
-            <PersonalFooterList
-              title={presentation.shell.footerGroups.personal}
-              items={PERSONAL_NAVIGATION}
+            <MerchantFooterList
+              title={presentation.shell.footerGroups.shop}
+              items={navigation.shop}
             />
             <MerchantFooterList
-              title={presentation.shell.footerGroups.brand}
-              items={navigation.brand}
+              title={presentation.shell.footerGroups.editorial}
+              items={navigation.editorial}
             />
-          </div>
-        </div>
-
-        <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
-          <div>
-            <p className="tech">
-              {isPrototype
-                ? `© ${currentYear} ال‌بی‌بی — کرج / مهستان`
-                : `© ${currentYear} ${brand.nameFa} — ${contact.locationLabel}`}
-            </p>
-            <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
-            <p className="mt-2 text-[11px] leading-6">طراحی شده توسط مجموعه shinethree</p>
-          </div>
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
-            {presentation.shell.utilityLinks.map((item) => (
-              <MerchantNavigationLink
-                key={`${item.href}-${item.label}`}
-                item={{ label: item.label, latin: item.label, href: item.href }}
-                className="text-xs transition-colors hover:text-bone"
+            <MerchantFooterList
+              title={presentation.shell.footerGroups.service}
+              items={navigation.service}
+            />
+            <div className="grid sm:col-span-2 lg:col-span-1 lg:grid-cols-1 lg:gap-6">
+              <PersonalFooterList
+                title={presentation.shell.footerGroups.personal}
+                items={PERSONAL_NAVIGATION}
               />
-            ))}
+              <MerchantFooterList
+                title={presentation.shell.footerGroups.brand}
+                items={navigation.brand}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 border-t border-hairline pt-6 text-mute md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="tech">
+                {isPrototype
+                  ? `© ${currentYear} ال‌بی‌بی — کرج / مهستان`
+                  : `© ${currentYear} ${brand.nameFa} — ${contact.locationLabel}`}
+              </p>
+              <p className="mt-2 text-[11px] leading-6">{brand.shortIntroduction}</p>
+            </div>
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              {presentation.shell.utilityLinks.map((item) => (
+                <MerchantNavigationLink
+                  key={`${item.href}-${item.label}`}
+                  item={{ label: item.label, latin: item.label, href: item.href }}
+                  className="text-xs transition-colors hover:text-bone"
+                />
+              ))}
+            </div>
           </div>
         </div>
+      </footer>
+      <div
+        dir="rtl"
+        data-shinethree-credit
+        className="flex min-h-11 items-center justify-center gap-3 border-t border-[#4b2868] bg-[#160e21] px-3 py-2 text-xs text-[#e1c9f8]"
+      >
+        <span>طراحی و توسعه</span>
+        <img
+          src="/brand/shinethree.webp"
+          alt="ShineThree"
+          width={99}
+          height={32}
+          loading="lazy"
+          className="w-[99px] object-contain"
+        />
       </div>
-    </footer>
+    </div>
   );
 }

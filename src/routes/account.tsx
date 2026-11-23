@@ -1,3 +1,4 @@
+import { OrderInvoiceButton } from "@/components/lbb/OrderInvoiceButton";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -28,6 +29,7 @@ import {
   StatePanel,
   Surface,
 } from "@/components/lbb/ui/primitives";
+import { hasFullName, normalizePostalCode, POSTAL_CODE_ERROR, validPostalCode } from "@/lib/customer-fields";
 import {
   createCustomerAddress,
   deleteCustomerAddress,
@@ -216,12 +218,16 @@ function LiveAccount() {
 
   const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!hasFullName(fullName)) {
+      setActionError("نام و نام خانوادگی را کامل وارد کنید.");
+      return;
+    }
     setProfileSaving(true);
     setActionError(null);
     try {
       await ensureBackendCsrf();
       const response = await updateCustomerProfile({
-        fullName: fullName.trim() || null,
+        fullName: fullName.trim(),
         email: email.trim() || null,
         marketingConsent,
       });
@@ -237,6 +243,10 @@ function LiveAccount() {
   const saveAddress = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!addressDraft) return;
+    if (!validPostalCode(addressDraft.postalCode ?? "")) {
+      setActionError(POSTAL_CODE_ERROR);
+      return;
+    }
     setAddressSaving(true);
     setActionError(null);
     try {
@@ -248,7 +258,7 @@ function LiveAccount() {
         province: addressDraft.province.trim(),
         city: addressDraft.city.trim(),
         address: addressDraft.address.trim(),
-        postalCode: addressDraft.postalCode?.trim() || null,
+        postalCode: normalizePostalCode(addressDraft.postalCode ?? ""),
         isDefault: Boolean(addressDraft.isDefault),
       };
       if (addressDraft.id) {
@@ -363,6 +373,7 @@ function LiveAccount() {
                   <input
                     value={fullName}
                     onChange={(event) => setFullName(event.target.value)}
+                    required
                     autoComplete="name"
                     className={inputClass}
                   />
@@ -499,7 +510,9 @@ function LiveAccount() {
                     }
                   />
                   <AddressInput
-                    label="کد پستی"
+                    label="کد پستی ۱۰ رقمی"
+                    required
+                    postal
                     value={addressDraft.postalCode ?? ""}
                     dir="ltr"
                     onChange={(value) =>
@@ -681,6 +694,44 @@ function LiveAccount() {
                         </p>
                       </div>
                     </div>
+                    {order.items?.length > 0 && (
+                      <ul className="mt-4 grid gap-3 border-t border-hairline pt-4 md:grid-cols-2">
+                        {order.items.map((item, index) => (
+                          <li key={item.id ?? index} className="flex min-w-0 items-center gap-3">
+                            <div className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-carbon-2 text-xs text-signal/50">
+                              <span aria-hidden="true">LBB</span>
+                              {item.imageUrl && (
+                                <img
+                                  src={item.imageUrl}
+                                  alt=""
+                                  loading="lazy"
+                                  className="absolute inset-0 h-full w-full object-cover"
+                                  onError={(event) => {
+                                    event.currentTarget.hidden = true;
+                                  }}
+                                />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-bone">
+                                {item.productName || "محصول سفارش"}
+                              </p>
+                              <p className="mt-1 text-xs text-metal">
+                                {[
+                                  item.color ?? item.colorName,
+                                  item.size ?? item.sizeName,
+                                  item.quantity != null
+                                    ? `تعداد: ${item.quantity.toLocaleString("fa-IR")}`
+                                    : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     <div className="mt-4 grid gap-2 border-t border-hairline pt-4 text-xs text-metal md:grid-cols-2">
                       <p>روش ارسال: {order.delivery.methodLabel}</p>
                       <p>تحویل‌گیرنده: {order.recipient.fullName}</p>
@@ -688,6 +739,12 @@ function LiveAccount() {
                       {order.fulfillment.trackingCode ? (
                         <p>کد پیگیری: {order.fulfillment.trackingCode}</p>
                       ) : null}
+                    </div>
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <OrderInvoiceButton order={order} />
+                      <Link to="/track-order" search={{ order: order.number }} className={CtaClasses("line")}>
+                        پیگیری این سفارش
+                      </Link>
                     </div>
                     {order.canCancel ? (
                       <button
@@ -715,11 +772,15 @@ function AddressInput({
   value,
   onChange,
   dir,
+  required,
+  postal,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   dir?: "ltr" | "rtl";
+  required?: boolean;
+  postal?: boolean;
 }) {
   return (
     <label className="grid gap-2 text-xs font-semibold text-metal">
@@ -728,6 +789,9 @@ function AddressInput({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         dir={dir}
+        required={required}
+        inputMode={postal ? "numeric" : undefined}
+        autoComplete={postal ? "postal-code" : undefined}
         className={`${inputClass} ${dir === "ltr" ? "text-left" : ""}`}
       />
     </label>

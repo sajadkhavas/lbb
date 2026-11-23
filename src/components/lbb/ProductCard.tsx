@@ -1,6 +1,8 @@
-import { useRef, useState, type PointerEvent, type TouchEvent } from "react";
+import { DecodedCardImage } from "./DecodedCardImage";
+import { useIdleAutoplay } from "@/hooks/use-idle-autoplay";
+import { useEffect, useRef, useState, type PointerEvent, type TouchEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { fmtToman, discountPercent, isSizeAvailable, type Product } from "@/lib/products";
 import { CATEGORIES } from "@/lib/categories";
@@ -13,7 +15,7 @@ import { isLiveBackend } from "@/lib/backend-api";
 import { colorName } from "@/lib/color-names";
 import { isUsableMannequinProfile } from "@/lib/style-mannequin";
 import { StyleMannequin } from "@/components/lbb/product/StyleMannequin";
-import { Frame, StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
+import { StatusTag, TechLabel } from "@/components/lbb/ui/primitives";
 
 export type ProductCardModel = Product | BackendCatalogCard;
 
@@ -21,7 +23,15 @@ function isBackendCard(product: ProductCardModel): product is BackendCatalogCard
   return "source" in product && product.source === "backend";
 }
 
-export function ProductCard({ p, priority = false }: { p: ProductCardModel; priority?: boolean }) {
+export function ProductCard({
+  p,
+  priority = false,
+  autoplay = false,
+}: {
+  p: ProductCardModel;
+  priority?: boolean;
+  autoplay?: boolean;
+}) {
   const backend = isBackendCard(p);
   const [showMannequin, setShowMannequin] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -38,6 +48,18 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         ? [p.primaryImage]
         : []
     : [productImage(p.slug)].filter((value): value is string => Boolean(value));
+  const { ref: autoplayRef, visible } = useIdleAutoplay<HTMLElement>(
+    () => setPreviewIndex((index) => (index + 1) % previewImages.length),
+    4000,
+    autoplay && !showMannequin && previewImages.length > 1,
+  );
+  const nextImage = previewImages[(previewIndex + 1) % previewImages.length];
+  useEffect(() => {
+    if (!autoplay || !visible || previewImages.length < 2 || !nextImage) return;
+    const image = new Image();
+    image.decoding = "async";
+    image.src = nextImage;
+  }, [autoplay, visible, nextImage, previewImages.length]);
   const primaryImage = previewImages[previewIndex] ?? previewImages[0] ?? null;
   const mannequin = backend && isUsableMannequinProfile(p.mannequin) ? p.mannequin : null;
   const name = p.name;
@@ -87,7 +109,13 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
   };
 
   const selectPreviewFromPointer = (event: PointerEvent<HTMLDivElement>) => {
-    if (!backend || showMannequin || previewImages.length < 2 || event.pointerType === "touch")
+    if (
+      autoplay ||
+      !backend ||
+      showMannequin ||
+      previewImages.length < 2 ||
+      event.pointerType === "touch"
+    )
       return;
     const bounds = event.currentTarget.getBoundingClientRect();
     if (bounds.width <= 0) return;
@@ -141,7 +169,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
         className="relative touch-pan-y"
         onPointerMove={selectPreviewFromPointer}
         onPointerLeave={(event) => {
-          if (event.pointerType === "mouse") setPreviewIndex(0);
+          if (!autoplay && event.pointerType === "mouse") setPreviewIndex(0);
         }}
         onTouchStart={startSwipe}
         onTouchMove={moveSwipe}
@@ -160,20 +188,11 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
           event.stopPropagation();
         }}
       >
-        <Frame
-          src={primaryImage}
-          alt={name}
-          ratio="4/5"
-          width={1024}
-          height={1280}
-          priority={priority && previewIndex === 0}
-          zoom={false}
-          className="product-card__media bg-white"
-          imgClassName="object-cover"
-        >
+        <div className="product-card__media relative aspect-[4/5] overflow-hidden bg-carbon">
+          <DecodedCardImage src={primaryImage} alt={name} priority={priority} />
           {overlay}
-        </Frame>
-        {backend && previewImages.length > 1 && previewIndex === 0 ? (
+        </div>
+        {!autoplay && backend && previewImages.length > 1 && previewIndex === 0 ? (
           <img
             src={previewImages[1]}
             alt=""
@@ -184,6 +203,33 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
             decoding="async"
             className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
           />
+        ) : null}
+        {autoplay && previewImages.length > 1 ? (
+          <div className="pointer-events-none absolute inset-x-1 top-1/2 z-30 flex -translate-y-1/2 justify-between">
+            {[-1, 1].map((direction) => (
+              <button
+                key={direction}
+                type="button"
+                aria-label={direction === -1 ? "عکس قبلی" : "عکس بعدی"}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setPreviewIndex(
+                    (index) => (index + direction + previewImages.length) % previewImages.length,
+                  );
+                }}
+                className="pointer-events-auto grid h-11 w-11 place-items-center rounded-full text-white drop-shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+              >
+                <span className="rounded-full bg-black/30 p-1">
+                  {direction === -1 ? (
+                    <ChevronRight size={16} strokeWidth={1.5} />
+                  ) : (
+                    <ChevronLeft size={16} strokeWidth={1.5} />
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
         ) : null}
         {backend && previewImages.length > 1 ? (
           <div
@@ -212,6 +258,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardModel; prio
 
   return (
     <article
+      ref={autoplayRef}
       dir="rtl"
       className="product-card group relative flex min-w-0 flex-col overflow-hidden rounded-[26px] border border-white/10 bg-[#111113] shadow-[0_14px_42px_rgba(0,0,0,0.3)] transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-signal/55 hover:shadow-[0_24px_60px_rgba(0,0,0,0.46)]"
     >

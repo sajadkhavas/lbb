@@ -50,6 +50,7 @@ import {
   getCatalogFacets,
   getCategory,
   isLiveBackend,
+  listCategories,
   listProducts,
   type CategoryDto,
   type FacetsDto,
@@ -69,6 +70,7 @@ const BACKEND_PAGE_SIZE = 48;
 type LiveLoader = {
   mode: "live";
   category: CategoryDto | null;
+  categoryDirectory?: CategoryDto[];
   items: BackendCatalogCard[];
   facets: FacetsDto | null;
   filters: Filters;
@@ -102,9 +104,10 @@ export const Route = createFileRoute("/$category")({
     }
 
     try {
-      const [categoryResponse, facetsResponse] = await Promise.all([
+      const [categoryResponse, facetsResponse, directoryResponse] = await Promise.all([
         getCategory(params.category),
         getCatalogFacets(),
+        listCategories().catch(() => null),
       ]);
       const category = categoryResponse.data;
       const facets = facetsResponse.data;
@@ -130,6 +133,7 @@ export const Route = createFileRoute("/$category")({
         return {
           mode: "live",
           category,
+          categoryDirectory: directoryResponse?.data,
           items: productsResponse.data.map(backendCard),
           facets,
           filters,
@@ -141,6 +145,7 @@ export const Route = createFileRoute("/$category")({
         return {
           mode: "live",
           category,
+          categoryDirectory: directoryResponse?.data,
           items: [],
           facets,
           filters,
@@ -447,7 +452,7 @@ function LiveCategory({ loader }: { loader: LiveLoader }) {
       categorySlug={category.slug}
       description={category.description || "محصولات منتشرشدهٔ این دسته را ببینید."}
       image={category.image}
-      siblingCategories={facets?.categories
+      siblingCategories={(loader.categoryDirectory ?? [])
         .filter((item) => item.slug !== category.slug)
         .slice(0, 4)}
     >
@@ -599,25 +604,27 @@ function CategoryChrome({
           <Shell>{children}</Shell>
         </Band>
         {siblingCategories.length > 0 ? (
-          <Band label="MORE CATEGORIES">
+          <Band label="دسته‌بندی‌های مشابه">
             <Shell>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <h2 className="mb-3 text-lg font-bold text-bone">دسته‌بندی‌های مشابه</h2>
+              <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto p-1">
                 {siblingCategories.map((category) => (
                   <Link
                     key={category.publicId}
                     to="/$category"
                     params={{ category: category.slug }}
-                    className="relative isolate grid min-h-28 overflow-hidden place-items-center rounded-xl border border-hairline bg-carbon text-sm font-semibold text-bone transition hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                    className="flex min-h-32 w-36 shrink-0 snap-start flex-col items-center justify-center gap-3 rounded-2xl border border-hairline bg-carbon p-4 text-sm font-bold text-bone transition md:min-h-36 md:w-[calc((100%_-_3.75rem)/6)] hover:border-signal hover:text-signal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal"
                   >
                     {category.image ? (
                       <img
                         src={category.image}
                         alt=""
                         loading="lazy"
-                        className="absolute inset-0 -z-20 h-full w-full object-cover"
+                        width={56}
+                        height={56}
+                        className="size-12 object-contain md:size-14"
                       />
                     ) : null}
-                    <span className="absolute inset-0 -z-10 bg-obsidian/65" aria-hidden="true" />
                     <span className="px-3 text-center">{category.name}</span>
                   </Link>
                 ))}

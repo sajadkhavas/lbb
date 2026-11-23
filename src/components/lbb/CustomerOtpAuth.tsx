@@ -1,3 +1,5 @@
+import { updateCustomerProfile } from "@/lib/account-api";
+import { hasFullName } from "@/lib/customer-fields";
 import { useState, type FormEvent } from "react";
 import { CheckCircle2, KeyRound, Loader2, Smartphone } from "lucide-react";
 import { backendErrorMessage, requestOtp, verifyOtp, type CustomerDto } from "@/lib/backend-api";
@@ -16,6 +18,8 @@ export function CustomerOtpAuth({
   title = "ورود با شماره موبایل",
   description = "برای ادامه، شماره موبایل خود را وارد کنید تا کد یک‌بارمصرف برایتان ارسال شود.",
 }: Props) {
+  const [profile, setProfile] = useState<CustomerDto | null>(null);
+  const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");
   const [challengeId, setChallengeId] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -54,6 +58,30 @@ export function CustomerOtpAuth({
         challengeId,
         code: code.trim(),
       });
+      if (!hasFullName(response.data.user.fullName ?? "")) {
+        setProfile(response.data.user);
+        setFullName(response.data.user.fullName ?? "");
+        return;
+      }
+      notifyCustomerAuthenticated();
+      onAuthenticated(response.data.user);
+    } catch (cause) {
+      setError(backendErrorMessage(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const completeProfile = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (busy || !hasFullName(fullName)) {
+      setError("نام و نام خانوادگی را کامل وارد کنید.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await updateCustomerProfile({ fullName: fullName.trim() });
       notifyCustomerAuthenticated();
       onAuthenticated(response.data.user);
     } catch (cause) {
@@ -78,13 +106,31 @@ export function CustomerOtpAuth({
         </div>
         <div>
           <h2 id="customer-auth-title" className="text-xl font-semibold text-bone">
-            {title}
+            {profile ? "تکمیل ثبت‌نام" : title}
           </h2>
-          <p className="mt-2 text-sm leading-7 text-metal">{description}</p>
+          <p className="mt-2 text-sm leading-7 text-metal">{profile ? "نام و نام خانوادگی را برای تکمیل حساب وارد کنید." : description}</p>
         </div>
       </div>
 
-      {!challengeId ? (
+      {profile ? (
+        <form onSubmit={completeProfile} className="mt-6 grid gap-3">
+          <label htmlFor="customer-name" className="text-xs font-semibold text-metal">
+            نام و نام خانوادگی
+          </label>
+          <input
+            id="customer-name"
+            required
+            autoComplete="name"
+            maxLength={120}
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
+            className="min-h-12 border border-hairline bg-obsidian px-4 text-sm text-bone focus-visible:ring-2 focus-visible:ring-signal"
+          />
+          <button type="submit" disabled={busy} className={CtaClasses("signal")}>
+            {busy ? "در حال ذخیره…" : "ثبت و ادامه"}
+          </button>
+        </form>
+      ) : !challengeId ? (
         <form onSubmit={requestCode} className="mt-6 grid gap-3">
           <label htmlFor="customer-mobile" className="text-xs font-semibold text-metal">
             شماره موبایل

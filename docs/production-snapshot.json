@@ -1,0 +1,16 @@
+{
+  "snapshot_date": "2026-11-23",
+  "branch": "production/iran-20261123",
+  "component": "frontend",
+  "source_archive_sha256": "d8eb159f959736ec5de12d4cf13bca33735c678683044dc227ffef8701f51ec2",
+  "runtime_release": "journal-6shBr8Mo",
+  "validation": {
+    "source_hashes_verified": true,
+    "fresh_build": "passed (Node 24.22.3, node-server preset)",
+    "server_runtime_tests": "passed per migration outputs; not rerun by this checkout",
+    "typecheck": "passed",
+    "autoplay_tests": "passed 3000ms/5500ms",
+    "php_syntax": "not applicable",
+    "laravel_runtime_suite": "not applicable"
+  }
+}
