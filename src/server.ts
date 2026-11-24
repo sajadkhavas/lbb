@@ -1,6 +1,6 @@
 import "./lib/error-capture";
 
-import { installBackendSsrFetchCredential } from "./lib/backend-ssr-fetch";
+import { installBackendSsrFetchCredential, withBackendSsrRequest } from "./lib/backend-ssr-fetch";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
@@ -51,7 +51,7 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const response = await withBackendSsrRequest(async () => handler.fetch(request, env, ctx));
       const normalized = await normalizeCatastrophicSsrResponse(response);
       const path = new URL(request.url).pathname;
       if (
